@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classement Saisonnier — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="barriere.css" />
+  <link rel="stylesheet" href="leaderboard.css" />
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="index.html" class="back">← Retour au menu</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Challenge <em>Saisonnier</em></div>
+    <div class="hdr-season">Saison 2025 / 2026 · 1er nov → 31 oct</div>
+  </div>
+
+  <div class="fs-banner" id="fs-banner">
+    <div class="fs-banner-text">
+      <strong>📁 Connecter le dossier de données</strong>
+      Les données seront sauvegardées dans <code>barriere_data.json</code> dans ton dossier <code>Tournois Barrière/</code>.
+    </div>
+    <button class="btn-connect" onclick="connectFolder()">Choisir le dossier</button>
+  </div>
+  <div class="fs-status" id="fs-status" style="display:none">
+    <div class="fs-status-left">
+      <div class="fs-dot"></div>
+      <span>Données sauvegardées dans </span>
+      <span class="fs-filename" id="fs-filename">barriere_data.json</span>
+    </div>
+    <button class="btn-ghost" onclick="connectFolder()">Changer de dossier</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('classement')">🏆 Classement</button>
+    <button class="tab" onclick="showTab('saisir')">＋ Saisir</button>
+    <button class="tab" onclick="showTab('historique')">📋 Historique</button>
+    <button class="tab" onclick="showTab('ranking')">💰 Ranking</button>
+    <button class="tab" onclick="showTab('config')">⚙ Tournois</button>
+  </div>
+
+  <!-- CLASSEMENT -->
+  <div id="tab-classement" class="card card-ranking">
+    <div class="search-row" style="margin-bottom:0">
+      <input type="text" id="search-player" placeholder="Rechercher un joueur…" oninput="renderClassement()" />
+      <button class="btn btn-ghost" onclick="printClassement()">🖨 Imprimer</button>
+    </div>
+    <div id="classement-content"></div>
+    <div id="classement-empty" class="empty" style="display:none">
+      <div class="empty-icon">🏆</div>Aucun résultat enregistré.
+    </div>
+  </div>
+
+  <!-- SAISIR -->
+  <div id="tab-saisir" class="card" style="display:none">
+    <div class="sec">Saisir les résultats d'un tournoi</div>
+    <div id="alert-success" class="alert-success" style="display:none"></div>
+    <div id="alert-warn"    class="alert-warn"    style="display:none"></div>
+    <div id="alert-dup"     class="alert-dup"     style="display:none"></div>
+
+    <div class="form-grid form-grid-3" style="margin-bottom:14px">
+      <div class="fg">
+        <div class="fl">Date</div>
+        <input type="date" id="inp-date" onchange="checkDuplicate()" />
+      </div>
+      <div class="fg">
+        <div class="fl">Type de tournoi</div>
+        <select id="inp-tournoi" onchange="onTournoiChange()">
+          <option value="">— Choisir —</option>
+        </select>
+      </div>
+      <div class="fg">
+        <div class="fl">Nombre d'entrées</div>
+        <input type="number" id="inp-entrees" min="1" placeholder="ex: 77" oninput="updateCagnotte()" />
+        <div class="fsub">Joueurs + rebuys · cagnotte = × 2 €</div>
+      </div>
+    </div>
+
+    <div class="cagnotte-box" id="cagnotte-box" style="display:none">
+      <div>
+        <div class="cagnotte-label">Cagnotte de saison (ce tournoi)</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Entrées × 2 € — s'ajoute au total saison</div>
+      </div>
+      <div class="cagnotte-value" id="cagnotte-value">— €</div>
+    </div>
+
+    <div id="placement-placeholder" class="saisir-placeholder">
+      <div class="icon">🃏</div>
+      Sélectionne un tournoi pour afficher les places à renseigner
+    </div>
+    <div id="placement-section" style="display:none">
+      <div class="placement-header">
+        <span>Place</span><span>Joueur</span><span style="text-align:center">Points</span>
+      </div>
+      <div class="placement-rows" id="placement-rows"></div>
+      <button class="btn-add-place" id="btn-add-place" onclick="addExtraPlace()">
+        ＋ Ajouter une place supplémentaire
+      </button>
+      <button class="btn-validate" onclick="validateTournament()">✓ Valider les résultats du tournoi</button>
+    </div>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div id="tab-historique" class="card" style="display:none">
+    <div class="sec">Historique des résultats</div>
+    <div class="search-row">
+      <input type="text" id="search-hist" placeholder="Rechercher joueur ou tournoi…" oninput="renderHistorique()" />
+      <select id="filter-tournoi-hist" onchange="renderHistorique()">
+        <option value="">Tous les tournois</option>
+      </select>
+    </div>
+    <table class="hist-table">
+      <thead><tr><th>Date</th><th>Tournoi</th><th>Joueur</th><th>Place</th><th>Pts</th><th></th></tr></thead>
+      <tbody id="hist-body"></tbody>
+    </table>
+    <div id="hist-empty" class="empty" style="display:none">
+      <div class="empty-icon">📋</div>Aucun résultat trouvé.
+    </div>
+    <div class="div"></div>
+    <div class="sec">Sessions enregistrées</div>
+    <div id="sessions-list"></div>
+  </div>
+
+  <!-- RANKING -->
+  <div id="tab-ranking" class="card" style="display:none">
+    <div class="sec">Document ranking — Cagnotte de saison</div>
+    <div class="ranking-doc-wrapper">
+      <div class="ranking-doc" id="ranking-doc-screen"></div>
+    </div>
+    <button class="btn-print-ranking" onclick="printRanking()">🖨 Imprimer le document ranking</button>
+  </div>
+
+  <!-- CONFIG TOURNOIS -->
+  <div id="tab-config" class="card" style="display:none">
+    <div class="sec">Configuration des tournois</div>
+
+    <div class="alert-config-success" id="alert-config-success"></div>
+
+    <div class="config-header">
+      <div style="font-size:13px;color:var(--text-dim)">
+        Barèmes de points et buy-ins. Modifie ou crée des tournois selon tes besoins.
+      </div>
+      <button class="btn-new-tournament" onclick="openTournamentForm()">＋ Nouveau tournoi</button>
+    </div>
+
+    <div class="tournament-form" id="tournament-form" style="display:none">
+      <div class="form-title" id="form-title">Nouveau tournoi</div>
+      <input type="hidden" id="form-edit-id" value="" />
+
+      <div class="form-row-3">
+        <div class="fg" style="grid-column:1/3">
+          <div class="fl">Nom du tournoi</div>
+          <input type="text" id="form-name" placeholder="ex: Friday High Stack" />
+        </div>
+        <div class="fg">
+          <div class="fl">Jour / type</div>
+          <input type="text" id="form-day" placeholder="ex: Vendredi" />
+        </div>
+      </div>
+      <div class="form-row-3" style="grid-template-columns:1fr 2fr">
+        <div class="fg">
+          <div class="fl">Buy-in (€)</div>
+          <input type="number" id="form-buyin" min="1" placeholder="150" style="padding-left:12px" />
+        </div>
+      </div>
+
+      <div class="div" style="margin:14px 0 12px"></div>
+
+      <div class="points-editor-label">
+        Barème de points
+        <span id="points-count-label">0 places payées</span>
+      </div>
+      <div class="points-grid" id="points-grid"></div>
+      <div class="points-actions">
+        <button class="btn-pts-add" onclick="addPointsSlot()">＋ Ajouter une place</button>
+        <button class="btn-pts-rem" onclick="removePointsSlot()">− Retirer la dernière</button>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeTournamentForm()">Annuler</button>
+        <button class="btn-save" onclick="saveTournamentForm()">✓ Enregistrer</button>
+      </div>
+    </div>
+
+    <div class="tournament-list" id="tournament-list"></div>
+    <div class="config-empty" id="config-empty" style="display:none">
+      Aucun tournoi configuré. Crée ton premier tournoi ci-dessus.
+    </div>
+  </div>
+</div>
+
+<div class="ranking-print-page" id="ranking-print-page"></div>
+
+<div class="overlay" id="modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal').style.display='none'">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<datalist id="players-dl"></datalist>
+
+<script src="barriere.js"></script>
+<script src="leaderboard.js"></script>
+</body>
+</html>

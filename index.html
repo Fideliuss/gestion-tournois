@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outils Tournois — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="barriere.css" />
+  <style>
+    .app { padding: 64px 20px 80px; }
+    .hdr { margin-bottom: 56px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%; max-width: 800px;
+    }
+    @media(max-width:560px){ .grid { grid-template-columns: 1fr; } }
+
+    /* ── Tool card ── */
+    .tool-card {
+      display: block; text-decoration: none;
+      background: var(--bg-card);
+      border: 1px solid rgba(196,160,74,.15);
+      border-radius: 3px; padding: 28px 28px 24px;
+      position: relative; overflow: hidden;
+      transition: border-color .2s, background .2s, transform .15s;
+      cursor: pointer;
+    }
+    .tool-card::before, .tool-card::after {
+      content: ''; position: absolute;
+      width: 10px; height: 10px;
+      border-color: var(--gold); border-style: solid; opacity: .3;
+      transition: opacity .2s;
+    }
+    .tool-card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+    .tool-card::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+    .tool-card:hover {
+      border-color: rgba(196,160,74,.35);
+      background: rgba(28,24,16,.95);
+      transform: translateY(-2px);
+    }
+    .tool-card:hover::before, .tool-card:hover::after { opacity: .6; }
+    .tool-card.soon { opacity: .45; cursor: not-allowed; pointer-events: none; }
+    .tool-card.soon:hover { transform: none; }
+
+    body.light .tool-card { background: rgba(255,252,244,.97); border-color: rgba(138,104,32,.2); box-shadow: 0 2px 16px rgba(0,0,0,.06); }
+    body.light .tool-card:hover { background: #fff; border-color: rgba(138,104,32,.4); }
+
+    .tool-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+    .tool-name {
+      font-family: var(--f-display); font-size: 22px; font-weight: 600;
+      color: var(--cream); margin-bottom: 4px; line-height: 1.1;
+    }
+    .tool-name em { font-style: italic; color: var(--gold); }
+    .tool-desc {
+      font-size: 12px; font-weight: 300; color: var(--text-dim);
+      line-height: 1.55; margin-bottom: 16px;
+    }
+    .tool-tag {
+      display: inline-block;
+      font-size: 9px; font-weight: 500;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold-dim); background: var(--gold-bg);
+      border: 1px solid rgba(196,160,74,.18);
+      border-radius: 2px; padding: 3px 8px;
+    }
+
+    .footer {
+      margin-top: 48px; text-align: center;
+      font-size: 10px; letter-spacing: .15em; color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Outils <em>Tournois</em></div>
+    <div class="hdr-sub">Tableau de bord — Gestion des tournois de poker</div>
+  </div>
+
+  <div class="grid">
+    <a href="prize-pool.html" class="tool-card">
+      <span class="tool-icon">🎯</span>
+      <div class="tool-name">Prize Pool <em>Calculator</em></div>
+      <div class="tool-desc">
+        Calcule automatiquement la répartition des gains selon le nombre de joueurs et la structure du buy-in. Progression super-géométrique, dernier payé 2× sa mise.
+      </div>
+      <span class="tool-tag">Disponible</span>
+    </a>
+
+    <a href="leaderboard.html" class="tool-card">
+      <span class="tool-icon">🏆</span>
+      <div class="tool-name">Challenge <em>Saisonnier</em></div>
+      <div class="tool-desc">
+        Classement général de la saison 2025/2026. Saisie des résultats par tournoi, calcul automatique des points, historique complet. Données sauvegardées localement.
+      </div>
+      <span class="tool-tag">Disponible</span>
+    </a>
+
+    <div class="tool-card soon">
+      <span class="tool-icon">🃏</span>
+      <div class="tool-name">Fiche <em>Tournoi</em></div>
+      <div class="tool-desc">
+        Récapitulatif imprimable d'un tournoi : joueurs inscrits, prize pool, structure des blindes, horaires.
+      </div>
+      <span class="tool-tag">Bientôt</span>
+    </div>
+
+    <div class="tool-card soon">
+      <span class="tool-icon">📊</span>
+      <div class="tool-name">Stats <em>Joueurs</em></div>
+      <div class="tool-desc">
+        Statistiques avancées par joueur sur la saison : ITM rate, meilleur résultat, tournois préférés, évolution du rang.
+      </div>
+      <span class="tool-tag">Bientôt</span>
+    </div>
+  </div>
+
+  <div class="footer">Casino Barrière Bordeaux · Outils internes tournois</div>
+</div>
+
+<script src="barriere.js"></script>
+</body>
+</html>
