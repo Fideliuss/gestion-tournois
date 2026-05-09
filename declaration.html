@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Déclaration PN — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="barriere.css"/>
+  <link rel="stylesheet" href="declaration.css"/>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="index.html" class="back">← Retour</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Déclaration <em>PN</em></div>
+    <div class="hdr-sub">Calendrier mensuel — Service Course et Jeux</div>
+  </div>
+
+  <!-- ── Sélection de la période ── -->
+  <div class="card" style="max-width:1100px">
+    <div class="sec">Période</div>
+    <div class="period-row">
+      <div class="fg">
+        <label class="fl">Mois</label>
+        <select id="sel-month"></select>
+      </div>
+      <div class="fg">
+        <label class="fl">Année</label>
+        <input type="number" id="inp-year" min="2020" max="2099" style="width:100px"/>
+      </div>
+      <button class="btn btn-gold" onclick="renderAll()">Générer</button>
+    </div>
+  </div>
+
+  <!-- ── Configuration des tournois par jour ── -->
+  <div class="card" id="config-card" style="max-width:1100px">
+    <div class="sec">Configuration des tournois</div>
+    <div style="overflow-x:auto">
+      <table class="cfg-tbl" id="cfg-table"></table>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-ghost" onclick="resetConfig()">Réinitialiser</button>
+      <button class="btn btn-gold" onclick="saveAndRender()">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- ── Encadrement ── -->
+  <div class="card" id="staff-card" style="max-width:1100px">
+    <div class="sec">Encadrement</div>
+    <div class="staff-grid" id="staff-grid"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-gold" onclick="saveStaffAndRender()">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- ── Barre d'outils impression ── -->
+  <div class="toolbar">
+    <button class="btn btn-gold" onclick="window.print()">🖨 Imprimer / Exporter PDF</button>
+    <span style="font-size:10px;color:var(--text-muted);letter-spacing:.08em">
+      Imprime le formulaire de déclaration + les annexes prize pool
+    </span>
+  </div>
+
+  <!-- ── Formulaire déclaration ── -->
+  <div class="decl-wrap">
+    <div id="decl-output"></div>
+  </div>
+
+  <!-- ── Annexes prize pool ── -->
+  <div class="sec" id="annexes-label" style="width:100%;max-width:1100px;margin-bottom:16px">
+    Annexes — Prize Pool
+  </div>
+  <div class="annexes-grid" id="annexes-output"></div>
+
+  <div class="footer" style="width:100%;max-width:1100px">
+    Casino Barrière Bordeaux · Déclaration mensuelle — Service Course et Jeux de la Police Nationale
+  </div>
+</div>
+
+<script src="barriere.js"></script>
+<script src="declaration.js"></script>
+</body>
+</html>
