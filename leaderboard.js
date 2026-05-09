@@ -186,6 +186,10 @@ async function refreshPlayersDl() {
 
 let currentPlaceCount = 0;
 
+// ── Pagination historique ──
+const HIST_PAGE_SIZE = 25;
+let histPage = 1;
+
 async function buildPlacementRows() {
   const tid        =document.getElementById('inp-tournoi').value;
   const placeholder=document.getElementById('placement-placeholder');
@@ -239,6 +243,15 @@ async function validateTournament() {
   warnEl.style.display='none'; succEl.style.display='none';
 
   if (!date||!tid) { warnEl.innerHTML='⚠ Sélectionne une date et un type de tournoi.'; warnEl.style.display='flex'; return; }
+
+  // Blocage doublon
+  const allSessions=await getSessions();
+  const dup=allSessions.find(s=>s.date===date&&s.tournamentId===tid);
+  if (dup) {
+    warnEl.innerHTML=`⛔ <strong>Doublon bloqué</strong> — ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats). Supprime la session existante dans l'Historique avant de re-saisir.`;
+    warnEl.style.display='flex';
+    return;
+  }
 
   const tournaments=await getTournaments();
   const t=tournaments.find(t=>t.id===tid);
@@ -515,7 +528,9 @@ async function renderClassement() {
 // ══════════════════════════════════════════════════════
 //  HISTORIQUE
 // ══════════════════════════════════════════════════════
-async function renderHistorique() {
+async function renderHistorique(resetPage=false) {
+  if (resetPage) histPage = 1;
+
   const results=(await getResults()).slice().reverse();
   const search=(document.getElementById('search-hist')?.value||'').toLowerCase();
   const filterT=document.getElementById('filter-tournoi-hist')?.value||'';
@@ -523,11 +538,20 @@ async function renderHistorique() {
   if(search)  filtered=filtered.filter(r=>r.player.toLowerCase().includes(search)||getTNameSync(r.tournamentId).toLowerCase().includes(search));
   if(filterT) filtered=filtered.filter(r=>r.tournamentId===filterT);
 
-  const tbody=document.getElementById('hist-body'),empty=document.getElementById('hist-empty');
-  if(filtered.length===0) { tbody.innerHTML=''; empty.style.display='block'; }
-  else {
+  const totalPages = Math.max(1, Math.ceil(filtered.length / HIST_PAGE_SIZE));
+  if (histPage > totalPages) histPage = totalPages;
+  const pageStart = (histPage - 1) * HIST_PAGE_SIZE;
+  const paginated  = filtered.slice(pageStart, pageStart + HIST_PAGE_SIZE);
+
+  const tbody      = document.getElementById('hist-body');
+  const empty      = document.getElementById('hist-empty');
+  const pagination = document.getElementById('hist-pagination');
+
+  if (filtered.length===0) {
+    tbody.innerHTML=''; empty.style.display='block'; pagination.style.display='none';
+  } else {
     empty.style.display='none';
-    tbody.innerHTML=filtered.map(r=>{
+    tbody.innerHTML=paginated.map(r=>{
       const pc=r.place===1?'p1':r.place<=3?'p3':'';
       const extraBadge=r.extra?`<span style="font-size:9px;color:var(--text-muted);letter-spacing:.08em;margin-left:4px">+extra</span>`:'';
       return `<tr>
@@ -539,6 +563,17 @@ async function renderHistorique() {
         <td><button class="btn-red" onclick="deleteResult(${r.id})">✕</button></td>
       </tr>`;
     }).join('');
+
+    if (totalPages > 1) {
+      pagination.style.display='flex';
+      pagination.innerHTML=`
+        <button onclick="histGoTo(${histPage-1})" ${histPage===1?'disabled':''}>← Préc.</button>
+        <span>Page <strong>${histPage}</strong> / ${totalPages} &nbsp;·&nbsp; ${filtered.length} résultat${filtered.length>1?'s':''}</span>
+        <button onclick="histGoTo(${histPage+1})" ${histPage===totalPages?'disabled':''}>Suiv. →</button>
+      `;
+    } else {
+      pagination.style.display='none';
+    }
   }
 
   const sessions=(await getSessions()).slice().reverse();
@@ -557,6 +592,8 @@ async function renderHistorique() {
         </div>
       </div>`).join('');
 }
+
+async function histGoTo(page) { histPage=page; await renderHistorique(); }
 
 async function deleteResult(id) {
   if(!confirm('Supprimer ce résultat ?')) return;

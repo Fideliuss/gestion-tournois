@@ -339,6 +339,24 @@
     .rank-entry-sm .re-pts  { font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--text-muted); flex-shrink: 0; }
     body.light .rank-entry:hover, body.light .rank-entry-sm:hover { background: rgba(138,104,32,.04); }
 
+    /* ── Pagination historique ── */
+    .hist-pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0 4px; gap: 12px;
+      font-size: 12px; color: var(--text-dim);
+      border-top: 1px solid rgba(196,160,74,.08);
+    }
+    .hist-pagination button {
+      background: rgba(196,160,74,.08); border: 1px solid rgba(196,160,74,.18);
+      border-radius: 3px; padding: 6px 14px;
+      font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--gold-dim); cursor: pointer; transition: all .15s;
+    }
+    .hist-pagination button:hover:not(:disabled) { background: rgba(196,160,74,.18); color: var(--gold); border-color: rgba(196,160,74,.4); }
+    .hist-pagination button:disabled { opacity: .3; cursor: not-allowed; }
+    body.light .hist-pagination button { background: rgba(138,104,32,.07); border-color: rgba(138,104,32,.18); }
+    body.light .hist-pagination button:hover:not(:disabled) { background: rgba(138,104,32,.16); }
+
     .loading { text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px; }
 
     @media print {
