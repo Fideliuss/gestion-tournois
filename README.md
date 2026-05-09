@@ -26,6 +26,24 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Fiche joueur détaillée (points, meilleur résultat, historique)
 - Données sauvegardées localement en JSON via File System API
 
+### 📋 Déclaration mensuelle PN
+Formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
+
+- Tableau généré automatiquement depuis une configuration par jour de semaine
+- Gestion des exceptions ponctuelles (annulation, modification d'un tournoi)
+- Tournois ad-hoc pour les événements exceptionnels
+- Annexes Prize Pool éditables avec répartition configurable
+- Impression A4 paysage optimisée (tableau + annexes en 1 page)
+
+### ✉ Courriers PN *(accessible depuis Déclaration PN)*
+Génération des 3 courriers officiels d'accompagnement à envoyer chaque mois.
+
+- **Ministre de l'Intérieur** — Service Central des Courses et Jeux, Paris
+- **SIPJ 33** — Section des Courses & Jeux, Bordeaux
+- **Préfecture de la Gironde** — Bordeaux
+- Mise en page A4 portrait, police serif, style administratif français, 1 page
+- Export PDF natif via l'impression navigateur
+
 ---
 
 ## Utilisation
@@ -45,17 +63,26 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 ## Structure des fichiers
 
 ```
-├── index.html          — Page d'accueil (hub)
+├── index.html          — Page d'accueil (hub — 3 outils)
 │
-├── prize-pool.html     — Prize Pool Calculator (HTML)
-├── prize-pool.css      — Styles du calculateur
-├── prize-pool.js       — Logique React du calculateur
+├── prize-pool.html     — Prize Pool Calculator
+├── prize-pool.css
+├── prize-pool.js       — Logique React
 │
-├── leaderboard.html    — Challenge Saisonnier (HTML)
-├── leaderboard.css     — Styles du leaderboard
-├── leaderboard.js      — Logique JS du leaderboard
+├── leaderboard.html    — Challenge Saisonnier
+├── leaderboard.css
+├── leaderboard.js
 │
-├── barriere.css        — Styles partagés (thème, composants communs)
+├── declaration.html    — Déclaration mensuelle PN
+├── declaration.css
+├── declaration.js
+│
+├── courriers.html      — Générateur de courriers PN (accès via declaration.html)
+├── courriers.css
+├── courriers.js
+│
+├── casino-barriere-bordeaux-logo.png  — Logo utilisé dans les courriers
+├── barriere.css        — Styles partagés
 └── barriere.js         — Scripts partagés (thème jour/nuit)
 ```
 
