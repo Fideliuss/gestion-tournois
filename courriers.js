@@ -279,8 +279,7 @@ function generateLetterHtml(tpl, rows, month, year) {
 
   <!-- Pied de page -->
   <div class="letter-footer">
-    Rue Cardinal Richaud&ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; F&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;18 &ndash; 33300 BORDEAUX<br>
-    www.casino-bordeaux.com<br>
+    Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
     Casino Barrière Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
     Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
   </div>
