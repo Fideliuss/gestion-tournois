@@ -8,7 +8,7 @@
 ## Projet
 
 Outil interne web pour la gestion des tournois de poker du Casino Barrière Bordeaux.
-Deux outils disponibles, zéro serveur, zéro build — s'ouvre directement dans Chrome/Edge.
+Trois outils disponibles, zéro serveur, zéro build — s'ouvre directement dans Chrome/Edge.
 
 **Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (privé)
 **Développeur :** Fideliuss
@@ -29,6 +29,10 @@ leaderboard.js    Logique JS du leaderboard (~400 lignes)
 prize-pool.html   Prize Pool Calculator — HTML pur
 prize-pool.css    Styles du calculateur
 prize-pool.js     Logique React du calculateur
+
+declaration.html  Déclaration mensuelle PN — HTML pur
+declaration.css   Styles de la déclaration
+declaration.js    Logique JS de la déclaration (~450 lignes)
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés.
@@ -82,6 +86,16 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Progression super-géométrique, dernier payé = 2× buy-in
 - 12% des joueurs payés (ajustable manuellement)
 - Impression du tableau
+
+### Déclaration mensuelle PN
+- Tableau mensuel généré automatiquement depuis une config par jour de semaine (lun–dim)
+- Impression A4 paysage : seuls tableau + annexes visibles, tient sur 1 page
+- Annexes Prize Pool indépendantes et éditables (joueurs, cave, répartition % à 10 places)
+- Tournois ad-hoc : ajout d'un tournoi exceptionnel pour le mois en cours, trié chronologiquement
+- Gestion ponctuelle : annuler ou modifier un tournoi sur un jour précis (restaurable)
+- Encadrement (directeurs + arbitres) configurable
+- Persistance localStorage (`decl_cfg`, `decl_staff`, `decl_annexes`, `decl_adhoc_Y_M`, `decl_exc_Y_M`)
+- Toggle rachats : si désactivé, "RE ENTRY" disparaît du titre du tournoi
 
 ### Challenge Saisonnier (Leaderboard)
 - Classement en temps réel avec podium visuel (top 3 + colonnes 4-30 + 31-150+)
