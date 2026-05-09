@@ -151,10 +151,14 @@
 
 /* ── Nom et titre du signataire ── */
 .letter-signature {
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
   padding-right: 16mm;
   line-height: 1.55;
   color: #000;
+}
+.letter-signature-inner {
+  text-align: left;
 }
 
 /* ── Autres destinataires ── */

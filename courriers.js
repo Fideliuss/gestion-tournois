@@ -265,8 +265,10 @@ function generateLetterHtml(tpl, rows, month, year) {
   <!-- Espace signature manuscrite + nom -->
   <div class="letter-signature-space"></div>
   <div class="letter-signature">
-    ${esc(tpl.sigName)}<br>
-    Directeur Responsable
+    <div class="letter-signature-inner">
+      ${esc(tpl.sigName)}<br>
+      Directeur Responsable
+    </div>
   </div>
 
   <!-- Autres destinataires -->
