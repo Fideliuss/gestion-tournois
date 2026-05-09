@@ -57,7 +57,7 @@
   color: #111;
   width: 210mm;
   height: 297mm;
-  padding: 18mm 22mm 0 24mm;
+  padding: 18mm 22mm 10mm 24mm;
 
   /* Garamond → Book Antiqua → Times New Roman (disponible partout) */
   font-family: 'Garamond', 'EB Garamond', 'Book Antiqua', 'Palatino Linotype', 'Times New Roman', serif;
@@ -73,8 +73,8 @@
 
 /* ── En-tête : logo gauche / destinataire+date droite ── */
 .letter-header {
-  display: grid;
-  grid-template-columns: 34% 66%;
+  display: flex;
+  justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 10mm;
 }
@@ -87,7 +87,9 @@
 .letter-header-right {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   padding-top: 22mm;
+  text-align: right;
 }
 
 .letter-recipient {
@@ -184,7 +186,7 @@
 }
 
 /* ── Espaceur flexible ── */
-.letter-spacer { flex: 1; max-height: 12mm; }
+.letter-spacer { flex: 1; max-height: 4mm; }
 
 /* ── Pied de page ── */
 .letter-footer {
@@ -212,7 +214,7 @@
     margin: 0;
     width: 210mm;
     height: 297mm;
-    padding: 18mm 22mm 0 24mm;
+    padding: 18mm 22mm 10mm 24mm;
     overflow: hidden;
   }
 
