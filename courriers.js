@@ -240,20 +240,20 @@ function generateLetterHtml(tpl, rows, month, year) {
     </div>
     <div class="letter-header-right">
       <div class="letter-recipient">${recipientHtml}</div>
-      <div class="letter-date">Bordeaux, Le ${esc(dateStr)}</div>
+      <div class="letter-date">Bordeaux, le ${esc(dateStr)}</div>
     </div>
   </div>
 
   <!-- Objet -->
   <div class="letter-objet">
-    <span class="letter-objet-lbl">Objet&nbsp;:</span> Tournoi de Texas Holdem Poker du mois de ${esc(moisStr)}.
+    <span class="letter-objet-lbl">Objet&nbsp;:</span> Tournois de Texas Holdem Poker du mois de ${esc(moisStr)}.
   </div>
 
   ${salutHtml}
 
   <!-- Corps -->
   <div class="letter-body">
-    <p>J'ai l'honneur de vous informer que le Casino Barrière de Bordeaux organisera des Tournois Multi-tables de Texas Hold'em Poker au cours du mois de ${esc(moisStr)}, comme suit&nbsp;:</p>
+    <p>J'ai l'honneur de vous informer que le Casino Barrière Bordeaux organisera des Tournois Multi-tables de Texas Hold'em Poker au cours du mois de ${esc(moisStr)}, comme suit&nbsp;:</p>
 
     <ul class="letter-days">${daysHtml}</ul>
 
@@ -265,8 +265,10 @@ function generateLetterHtml(tpl, rows, month, year) {
   <!-- Espace signature manuscrite + nom -->
   <div class="letter-signature-space"></div>
   <div class="letter-signature">
-    ${esc(tpl.sigName)}<br>
-    Directeur Responsable
+    <div class="letter-signature-inner">
+      ${esc(tpl.sigName)}<br>
+      Directeur Responsable
+    </div>
   </div>
 
   <!-- Autres destinataires -->
