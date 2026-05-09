@@ -84,15 +84,15 @@
 .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%; max-width: 1100px; margin-bottom: 20px; }
 
 /* ── Zone déclaration ── */
-.decl-wrap { width: 100%; max-width: 1100px; overflow-x: auto; margin-bottom: 28px; }
+.decl-wrap { width: 100%; max-width: none; overflow-x: auto; margin-bottom: 28px; }
 
 .decl-form {
   border-collapse: collapse;
-  width: 100%;
-  min-width: 860px;
+  width: max-content;
+  min-width: 1000px;
   font-size: 11px;
   font-family: var(--f-ui);
-  table-layout: fixed;
+  margin: 0 auto;
 }
 
 .decl-casino {
@@ -125,7 +125,7 @@
 }
 
 .drow td          { text-align: center; font-size: 10px; }
-.drow .titre-cell { text-align: left; font-weight: 500; color: var(--cream); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drow .titre-cell { text-align: left; font-weight: 500; color: var(--cream); font-size: 11px; white-space: nowrap; }
 
 /* Ligne ad-hoc : légèrement dorée */
 .adhoc-row td { background: rgba(196,160,74,.07); }
@@ -181,6 +181,66 @@ body.light .annexe-card { background: rgba(255,252,244,.97); border-color: rgba(
 
 .annexe-legal { margin-top: 12px; font-size: 8px; color: var(--text-muted); font-style: italic; line-height: 1.5; }
 
+/* ── Éditeur d'annexes ── */
+.annexe-editor-list { display: flex; flex-direction: column; gap: 16px; }
+
+.annexe-editor-item {
+  border: 1px solid rgba(196,160,74,.18);
+  border-radius: 3px;
+  padding: 16px 18px;
+  background: rgba(196,160,74,.03);
+  position: relative;
+}
+.annexe-editor-item:hover { border-color: rgba(196,160,74,.3); }
+
+.annexe-editor-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.annexe-editor-header .fg { margin: 0; }
+.annexe-editor-header .fg input { font-size: 12px; }
+
+.annexe-editor-dist {
+  margin-top: 12px;
+}
+.annexe-editor-dist-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 8px;
+}
+.annexe-dist-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.annexe-dist-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.annexe-dist-slot label { font-size: 8px; color: var(--text-muted); letter-spacing: .05em; }
+.annexe-dist-slot input {
+  width: 46px;
+  font-size: 11px;
+  text-align: center;
+  padding: 4px 4px;
+}
+.dist-total {
+  font-size: 10px;
+  font-family: var(--f-num);
+  margin-left: 8px;
+}
+.dist-total.ok  { color: #6dcc8e; }
+.dist-total.err { color: #e07a68; }
+
 /* ══════════════════════════════════════════════════════
    IMPRESSION — A4 Paysage
 ══════════════════════════════════════════════════════ */
@@ -193,17 +253,19 @@ body.light .annexe-card { background: rgba(255,252,244,.97); border-color: rgba(
   /* Forcer les couleurs */
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  /* Masquer toute l'interface */
+  /* Masquer toute l'interface — ne garder que tableau + annexes */
   .theme-toggle,
   .back,
+  #period-card,
   #config-card,
   #staff-card,
   #adhoc-card,
+  #annexes-editor-card,
+  #exc-card,
   .toolbar,
-  #annexes-label { display: none !important; }
-
-  /* Masquer aussi le header — le tableau commence directement */
-  .hdr { display: none !important; }
+  #annexes-label,
+  .hdr,
+  .footer { display: none !important; }
 
   body { background: #fff; color: #000; }
   .app {
@@ -220,6 +282,7 @@ body.light .annexe-card { background: rgba(255,252,244,.97); border-color: rgba(
     font-size: 6.5pt;
     min-width: unset;
     width: 100%;
+    table-layout: fixed;
     page-break-inside: avoid;
   }
 
