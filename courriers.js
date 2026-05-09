@@ -89,8 +89,8 @@ const TEMPLATES = {
     sigName:          'Stéphane Garcia',
     autresTitreItalique: false,
     autresItems: [
-      '- Préfecture de la Gironde',
-      '- Ministère de l\'Intérieur – S/C du service Central des Courses et Jeux de la Direction Centrale de la Police',
+      'Préfecture de la Gironde',
+      'Ministère de l\'Intérieur – S/C du service Central des Courses et Jeux de la Direction Centrale de la Police',
     ],
   },
 
@@ -134,8 +134,8 @@ const TEMPLATES = {
     sigName:          'Stéphane GARCIA',
     autresTitreItalique: false,
     autresItems: [
-      '- Préfecture de la Gironde',
-      '- Ministère de l\'Intérieur – S/C du service Central des Courses et Jeux de la Direction Centrale de la Police Judiciaire',
+      'Préfecture de la Gironde',
+      'Ministère de l\'Intérieur – S/C du service Central des Courses et Jeux de la Direction Centrale de la Police Judiciaire',
     ],
   },
 
