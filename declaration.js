@@ -360,7 +360,7 @@ function renderDeclaration() {
 
   const dataHtml = rows.length
     ? rows.map((r,i) => `
-        <tr class="drow${r.adhoc ? ' adhoc-row' : ''}">
+        <tr class="drow">
           <td class="titre-cell">${r.titre}</td>
           <td>${r.cave} €</td><td>${r.joueurs}</td><td>ESPÈCES</td><td>MULTI-TABLES</td><td>1</td>
           <td>${r.rachats ? 'OUI' : 'NON'}</td><td>Level 8</td>

@@ -127,9 +127,6 @@
 .drow td          { text-align: center; font-size: 10px; }
 .drow .titre-cell { text-align: left; font-weight: 500; color: var(--cream); font-size: 11px; white-space: nowrap; }
 
-/* Ligne ad-hoc : légèrement dorée */
-.adhoc-row td { background: rgba(196,160,74,.07); }
-.adhoc-row .titre-cell { color: var(--gold); }
 
 .staff-col { font-size: 9px; text-align: left; color: var(--text-dim); line-height: 1.65; vertical-align: top; padding: 8px 10px; }
 .enc-hdr   { font-size: 8px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 3px; }
@@ -314,10 +311,6 @@ body.light .annexe-card { background: rgba(255,252,244,.97); border-color: rgba(
   /* Lignes de données */
   .drow td          { font-size: 6pt; text-align: center; }
   .drow .titre-cell { color: #000; text-align: left; font-size: 6.5pt; font-weight: 600; white-space: normal; overflow: visible; }
-
-  /* Ad-hoc en impression */
-  .adhoc-row td         { background: #faf6ec !important; }
-  .adhoc-row .titre-cell { color: #5a4010; font-style: italic; }
 
   /* Encadrement compact */
   .staff-col { font-size: 5.5pt; color: #444; line-height: 1.4; padding: 4px 5px; }
