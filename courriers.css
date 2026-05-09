@@ -87,6 +87,7 @@
 .letter-header-right {
   display: flex;
   flex-direction: column;
+  padding-top: 22mm;
 }
 
 .letter-recipient {
@@ -127,7 +128,7 @@
 }
 
 .letter-days {
-  margin: 0 0 5mm 6mm;
+  margin: 0 0 5mm 0;
   padding: 0;
   list-style: none;
 }
@@ -188,11 +189,11 @@
 /* ── Pied de page ── */
 .letter-footer {
   text-align: center;
-  font-size: 7pt;
+  font-size: 6.5pt;
   color: #444;
   border-top: 0.75pt solid #888;
-  padding: 2.5mm 0 7mm;
-  line-height: 1.6;
+  padding: 2mm 0 3mm;
+  line-height: 1.45;
   letter-spacing: .01em;
 }
 
