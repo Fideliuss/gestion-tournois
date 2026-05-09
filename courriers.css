@@ -74,7 +74,7 @@
 /* ── En-tête : logo gauche / destinataire+date droite ── */
 .letter-header {
   display: grid;
-  grid-template-columns: 44% 56%;
+  grid-template-columns: 34% 66%;
   align-items: flex-start;
   margin-bottom: 10mm;
 }
@@ -184,7 +184,7 @@
 }
 
 /* ── Espaceur flexible ── */
-.letter-spacer { flex: 1; }
+.letter-spacer { flex: 1; max-height: 12mm; }
 
 /* ── Pied de page ── */
 .letter-footer {
