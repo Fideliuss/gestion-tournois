@@ -27,28 +27,28 @@
   <!-- Paramètres -->
   <div class="card" style="max-width:1000px;width:100%">
     <div class="sec">Paramètres</div>
-    <div class="period-row" style="flex-wrap:wrap;gap:16px">
+    <div class="period-row">
 
       <div class="fg">
         <label class="fl">Mois déclaré</label>
         <select id="sel-month" onchange="renderAll()"></select>
       </div>
 
-      <div class="fg">
+      <div class="fg" style="max-width:110px">
         <label class="fl">Année</label>
-        <input type="number" id="inp-year" min="2020" max="2099" style="width:100px" onchange="renderAll()"/>
+        <input type="number" id="inp-year" min="2020" max="2099" onchange="renderAll()"/>
       </div>
 
-      <div class="fg">
+      <div class="fg fg-date">
         <label class="fl">Date du courrier</label>
         <div style="display:flex;gap:6px;align-items:center">
-          <input type="number" id="inp-date-d" min="1" max="31" style="width:52px" onchange="renderAll()"/>
-          <select id="inp-date-m" onchange="renderAll()"></select>
-          <input type="number" id="inp-date-y" min="2020" max="2099" style="width:88px" onchange="renderAll()"/>
+          <input type="number" id="inp-date-d" min="1" max="31" style="width:60px;flex-shrink:0" onchange="renderAll()"/>
+          <select id="inp-date-m" onchange="renderAll()" style="flex:1"></select>
+          <input type="number" id="inp-date-y" min="2020" max="2099" style="width:88px;flex-shrink:0" onchange="renderAll()"/>
         </div>
       </div>
 
-      <button class="btn btn-gold" onclick="renderAll()" style="align-self:flex-end">Générer</button>
+      <button class="btn btn-gold" onclick="renderAll()">Générer</button>
     </div>
   </div>
 
@@ -62,6 +62,26 @@
     <div class="print-bar">
       <button class="btn btn-gold" onclick="printCurrent()">🖨&nbsp; Imprimer / Exporter PDF</button>
       <span class="print-hint">Dans la boîte de dialogue, choisissez « Enregistrer en PDF » et vérifiez que les marges sont sur « Aucune ».</span>
+    </div>
+  </div>
+
+  <!-- Config destinataires (accordéon) -->
+  <div class="tpl-accordion" style="max-width:1000px;width:100%">
+    <button class="tpl-accordion-toggle" onclick="toggleTplAccordion()" id="tpl-accordion-btn">
+      <span>⚙ Modifier les destinataires &amp; signatures</span>
+      <span class="tpl-accordion-chevron" id="tpl-accordion-chevron">›</span>
+    </button>
+    <div class="tpl-accordion-body" id="tpl-accordion-body">
+      <div class="tabs-bar" style="margin-bottom:20px">
+        <button class="tab-btn tpl-tab active" data-tpl="ministre"   onclick="showTplTab('ministre')">Ministre de l'Intérieur</button>
+        <button class="tab-btn tpl-tab"        data-tpl="sipj"       onclick="showTplTab('sipj')">SIPJ 33</button>
+        <button class="tab-btn tpl-tab"        data-tpl="prefecture" onclick="showTplTab('prefecture')">Préfecture de la Gironde</button>
+      </div>
+      <div id="tpl-editor"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-ghost" onclick="resetTemplates()">Réinitialiser</button>
+        <button class="btn btn-gold" onclick="saveTplAndRender()">Enregistrer</button>
+      </div>
     </div>
   </div>
 

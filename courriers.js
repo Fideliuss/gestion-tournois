@@ -70,7 +70,7 @@ function buildDayLines(rows, month) {
 /* ═══════════════════════════════════════
    TEMPLATES DES 3 COURRIERS
 ═══════════════════════════════════════ */
-const TEMPLATES = {
+const TEMPLATES_DEFAULT = {
 
   ministre: {
     id:    'ministre',
@@ -142,7 +142,107 @@ const TEMPLATES = {
 };
 
 /* ── État ── */
-let currentTab = 'ministre';
+let currentTab    = 'ministre';
+let currentTplTab = 'ministre';
+let templates;
+
+/* ── Persistance des templates ── */
+function loadTemplates() {
+  try {
+    const s = localStorage.getItem('courriers_tpl');
+    const overrides = s ? JSON.parse(s) : {};
+    templates = deepClone(TEMPLATES_DEFAULT);
+    ['ministre', 'sipj', 'prefecture'].forEach(id => {
+      if (overrides[id]) Object.assign(templates[id], overrides[id]);
+    });
+  } catch {
+    templates = deepClone(TEMPLATES_DEFAULT);
+  }
+}
+
+function saveTemplates() {
+  const data = {};
+  ['ministre', 'sipj', 'prefecture'].forEach(id => {
+    const t = templates[id];
+    data[id] = {
+      recipient:      t.recipient,
+      salutation:     t.salutation,
+      closingFormula: t.closingFormula,
+      sigName:        t.sigName,
+      autresItems:    t.autresItems,
+    };
+  });
+  localStorage.setItem('courriers_tpl', JSON.stringify(data));
+}
+
+/* ── Éditeur de templates ── */
+function showTplTab(tplId) {
+  currentTplTab = tplId;
+  document.querySelectorAll('.tpl-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.tpl === tplId)
+  );
+  renderTplEditor(tplId);
+}
+
+function renderTplEditor(tplId) {
+  const t = templates[tplId];
+  document.getElementById('tpl-editor').innerHTML = `
+    <div class="tpl-form">
+      <div class="fg">
+        <label class="fl">Destinataire (1 ligne par entrée)</label>
+        <textarea id="tpl-recipient" rows="7">${esc(t.recipient.join('\n'))}</textarea>
+      </div>
+      <div class="tpl-col-right">
+        <div class="fg">
+          <label class="fl">Appel (laisser vide si aucun)</label>
+          <input type="text" id="tpl-salutation" value="${esc(t.salutation || '')}"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Formule de politesse</label>
+          <textarea id="tpl-formula" rows="3">${esc(t.closingFormula)}</textarea>
+        </div>
+        <div class="fg">
+          <label class="fl">Nom du signataire</label>
+          <input type="text" id="tpl-signame" value="${esc(t.sigName)}"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Autres destinataires (1 par ligne)</label>
+          <textarea id="tpl-autres" rows="3">${esc(t.autresItems.join('\n'))}</textarea>
+        </div>
+      </div>
+    </div>`;
+}
+
+function saveTplAndRender() {
+  const t = templates[currentTplTab];
+  const recipientEl  = document.getElementById('tpl-recipient');
+  const salutationEl = document.getElementById('tpl-salutation');
+  const formulaEl    = document.getElementById('tpl-formula');
+  const signameEl    = document.getElementById('tpl-signame');
+  const autresEl     = document.getElementById('tpl-autres');
+  if (recipientEl)  t.recipient      = recipientEl.value.split('\n').filter(l => l.trim());
+  if (salutationEl) t.salutation     = salutationEl.value.trim() || null;
+  if (formulaEl)    t.closingFormula = formulaEl.value.trim();
+  if (signameEl)    t.sigName        = signameEl.value.trim();
+  if (autresEl)     t.autresItems    = autresEl.value.split('\n').filter(l => l.trim());
+  saveTemplates();
+  renderAll();
+}
+
+function toggleTplAccordion() {
+  const btn  = document.getElementById('tpl-accordion-btn');
+  const body = document.getElementById('tpl-accordion-body');
+  const open = body.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
+function resetTemplates() {
+  if (!confirm('Réinitialiser les destinataires par défaut ?')) return;
+  localStorage.removeItem('courriers_tpl');
+  loadTemplates();
+  renderTplEditor(currentTplTab);
+  renderAll();
+}
 
 /* ── Helpers UI ── */
 function getMonth() { return +document.getElementById('sel-month').value; }
@@ -190,6 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('inp-date-d').value = now.getDate();
   document.getElementById('inp-date-y').value = now.getFullYear();
 
+  loadTemplates();
+  renderTplEditor('ministre');
   renderAll();
 });
 
@@ -207,7 +309,7 @@ function renderAll() {
   const year  = getYear();
   const rows  = buildRows(month, year);
   document.getElementById('letter-output').innerHTML =
-    generateLetterHtml(TEMPLATES[currentTab], rows, month, year);
+    generateLetterHtml(templates[currentTab], rows, month, year);
 }
 
 /* ── Génération HTML de la lettre ── */

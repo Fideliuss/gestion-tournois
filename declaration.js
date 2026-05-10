@@ -74,6 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
 });
 
+/* ── Onglets config ── */
+function showDeclTab(name) {
+  document.querySelectorAll('.decl-tab').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes(`'${name}'`)));
+  document.querySelectorAll('.decl-tab-panel').forEach(p => p.style.display = p.id === `dtab-${name}` ? '' : 'none');
+}
+
 /* ── Helpers ── */
 function getMonth() { return +document.getElementById('sel-month').value; }
 function getYear()  { return +document.getElementById('inp-year').value; }
