@@ -113,10 +113,13 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Génération des 3 courriers officiels d'accompagnement mensuel : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde
 - Lit la même config localStorage que la Déclaration DTPJ — aucune saisie supplémentaire
 - Mise en page A4 portrait stricte (1 page), police Garamond/Times New Roman, style administratif français
-- Sélecteur de date du courrier en format français (JJ / mois / AAAA) via 3 champs séparés
-- Destinataires et signatures éditables dans l'app (accordéon), persistés dans `localStorage('courriers_tpl')`
+- Paramètres en deux sections séparées : "Mois déclaré" et "Date du courrier"
+- Date courrier auto-calculée à J-21 du début du mois déclaré, avec hint "Date limite de déclaration"
+- Triangle des destinataires corrigé : chaque courrier liste les 2 autres destinataires (Ministre→SIPJ+Préfecture, SIPJ→Ministre+Préfecture, Préfecture→Ministre+SIPJ)
+- Destinataires et signatures éditables dans l'app (accordéon discret), persistés dans `localStorage('courriers_tpl')`
 - Export PDF via `window.print()` + CSS `@media print` (marges à 0, fond blanc)
 - **Accessible uniquement depuis declaration.html** (bouton "✉ Courriers") — non listé dans le hub
+- Après un reset du localStorage (`courriers_tpl`), les valeurs par défaut sont rechargées depuis `TEMPLATES_DEFAULT`
 
 ### Challenge Saisonnier (Leaderboard)
 - Classement en temps réel avec podium visuel (top 3 + colonnes 4-30 + 31-150+)
@@ -160,7 +163,8 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Tester avec Chrome ou Edge (File System Access API non disponible ailleurs)
 - `barriere_data.json` n'est pas dans le repo — les données restent locales
 - `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html` (bouton "✉ Courriers")
-- Les destinataires des courriers sont éditables dans l'app (accordéon) et persistés dans `localStorage('courriers_tpl')`
+- Les destinataires des courriers sont éditables dans l'app (accordéon discret) et persistés dans `localStorage('courriers_tpl')`
+- Si les valeurs par défaut des courriers changent (ex : triangle destinataires), l'utilisateur doit cliquer "Réinitialiser" dans l'accordéon pour purger le localStorage et recharger les nouvelles valeurs
 - Transitions de page (fade in/out) gérées dans `shared/barriere.js` — classe `is-leaving` sur `<body>`
 - Lien `.back` est `position:fixed` top-left sur toutes les pages
 - La déclaration extras sera dans `declaration/` quand elle sera implémentée, avec une entrée dans `admin.html`
