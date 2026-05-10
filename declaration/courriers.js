@@ -245,6 +245,25 @@ function resetTemplates() {
 function getMonth() { return +document.getElementById('sel-month').value; }
 function getYear()  { return +document.getElementById('inp-year').value; }
 
+function computeDeadline(month, year) {
+  const d = new Date(year, month - 1, 1 - 21);
+  return { d: d.getDate(), m: d.getMonth() + 1, y: d.getFullYear() };
+}
+
+function onPeriodChange() {
+  const month = getMonth();
+  const year  = getYear();
+  if (!month || !year) return;
+  const dl = computeDeadline(month, year);
+  document.getElementById('inp-date-d').value = dl.d;
+  document.getElementById('inp-date-m').value = dl.m;
+  document.getElementById('inp-date-y').value = dl.y;
+  const label = `${String(dl.d).padStart(2, '0')} ${MOIS_LETTRE[dl.m - 1]} ${dl.y}`;
+  const hint = document.getElementById('deadline-hint');
+  if (hint) hint.textContent = `Date limite · ${label}`;
+  renderAll();
+}
+
 function formatLetterDate() {
   const d = +document.getElementById('inp-date-d').value;
   const m = +document.getElementById('inp-date-m').value;
@@ -275,21 +294,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('inp-year').value = now.getFullYear();
 
-  // Date du courrier — 3 champs séparés
+  // Peuple le select mois de la date courrier
   const selDateM = document.getElementById('inp-date-m');
   MOIS_LETTRE.forEach((m, i) => {
     const o = document.createElement('option');
     o.value = i + 1;
     o.textContent = m;
-    if (i === now.getMonth()) o.selected = true;
     selDateM.appendChild(o);
   });
-  document.getElementById('inp-date-d').value = now.getDate();
-  document.getElementById('inp-date-y').value = now.getFullYear();
 
   loadTemplates();
   renderTplEditor('ministre');
-  renderAll();
+  onPeriodChange(); // auto-remplit date courrier + hint + renderAll
 });
 
 /* ── Gestion des onglets ── */
