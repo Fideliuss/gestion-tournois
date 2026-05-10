@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Outils Tournois — Casino Barrière Bordeaux</title>
+  <title>Gestion Administrative — Casino Barrière Bordeaux</title>
   <link rel="stylesheet" href="barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
@@ -11,11 +11,10 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
-      width: 100%; max-width: 1100px;
+      width: 100%; max-width: 720px;
     }
-    @media(max-width:860px){ .grid { grid-template-columns: repeat(2, 1fr); } }
     @media(max-width:560px){ .grid { grid-template-columns: 1fr; } }
 
     /* ── Tool card ── */
@@ -79,40 +78,32 @@
 </button>
 
 <div class="app">
+  <a href="index.html" class="back">← Retour au menu</a>
+
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
-    <div class="hdr-title">Outils <em>Tournois</em></div>
-    <div class="hdr-sub">Tableau de bord — Gestion des tournois de poker</div>
+    <div class="hdr-title">Gestion <em>Administrative</em></div>
+    <div class="hdr-sub">Déclarations mensuelles — Service Course et Jeux de la Police Nationale</div>
   </div>
 
   <div class="grid">
-    <a href="prize-pool.html" class="tool-card">
-      <span class="tool-icon">🎯</span>
-      <div class="tool-name">Prize Pool <em>Calculator</em></div>
+    <a href="declaration.html" class="tool-card">
+      <span class="tool-icon">📋</span>
+      <div class="tool-name">Déclaration <em>Tournois DTPJ</em></div>
       <div class="tool-desc">
-        Calcule automatiquement la répartition des gains selon le nombre de joueurs et la structure du buy-in. Progression super-géométrique, dernier payé 2× sa mise.
+        Formulaire mensuel de déclaration des tournois. Calendrier automatique, annexes prize pool, gestion ponctuelle et courriers d'accompagnement.
       </div>
       <span class="tool-tag">Disponible</span>
     </a>
 
-    <a href="leaderboard.html" class="tool-card">
-      <span class="tool-icon">🏆</span>
-      <div class="tool-name">Challenge <em>Saisonnier</em></div>
+    <div class="tool-card soon">
+      <span class="tool-icon">👥</span>
+      <div class="tool-name">Déclaration <em>Extras</em></div>
       <div class="tool-desc">
-        Classement général de la saison 2025/2026. Saisie des résultats par tournoi, calcul automatique des points, historique complet. Données sauvegardées localement.
+        Déclaration mensuelle des employés extras intervenant sur les tournois de poker.
       </div>
-      <span class="tool-tag">Disponible</span>
-    </a>
-
-    <a href="admin.html" class="tool-card">
-      <span class="tool-icon">📁</span>
-      <div class="tool-name">Gestion <em>Administrative</em></div>
-      <div class="tool-desc">
-        Déclarations mensuelles au service Course et Jeux de la Police Nationale : tournois DTPJ et employés extras.
-      </div>
-      <span class="tool-tag">Disponible</span>
-    </a>
-
+      <span class="tool-tag">Bientôt</span>
+    </div>
   </div>
 
   <div class="footer">Casino Barrière Bordeaux · Outils internes tournois</div>
