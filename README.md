@@ -44,6 +44,9 @@ Génération des 3 courriers officiels d'accompagnement à envoyer chaque mois.
 - **Ministre de l'Intérieur** — Service Central des Courses et Jeux, Paris
 - **SIPJ 33** — Section des Courses & Jeux, Bordeaux
 - **Préfecture de la Gironde** — Bordeaux
+- Triangle des destinataires respecté : chaque courrier mentionne les 2 autres en copie
+- Date du courrier auto-calculée à J-21 du début du mois déclaré
+- Destinataires et signatures éditables directement dans l'app
 - Mise en page A4 portrait, police serif, style administratif français, 1 page
 - Export PDF natif via l'impression navigateur
 

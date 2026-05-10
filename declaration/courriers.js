@@ -86,11 +86,10 @@ const TEMPLATES_DEFAULT = {
     salutation: 'Monsieur le Ministre,',
     closingParagraph: 'À cet effet, vous trouverez ci-joints les conditions d\'organisation, conformément à l\'Article 57-5 et suivants de l\'Arrêté du 14 mai 2007, tenant compte des modifications introduites par l\'Arrêté rectificatif du 24 décembre 2008, ainsi que du décret n°2009-937 du 29 juillet 2009, ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Ministre, à l\'assurance de ma haute considération.',
-    sigName:          'Stéphane Garcia',
-    autresTitreItalique: false,
+    sigName:          'Stéphane GARCIA',
     autresItems: [
+      'SIPJ 33 / Section des Courses & Jeux',
       'Préfecture de la Gironde',
-      'Ministère de l\'Intérieur – S/C du service Central des Courses et Jeux de la Direction Centrale de la Police',
     ],
   },
 
@@ -102,7 +101,7 @@ const TEMPLATES_DEFAULT = {
       'Commissaire divisionnaire de police',
       'Chef du service interdépartemental de la',
       'police judiciaire de la Gironde',
-      'SIPJ 33 / Section des Courses & jeux',
+      'SIPJ 33 / Section des Courses & Jeux',
       '23, rue François de Sourdis',
       'BP 933',
       '33062 BORDEAUX CEDEX',
@@ -111,10 +110,9 @@ const TEMPLATES_DEFAULT = {
     closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Commissaire Divisionnaire, à l\'assurance de ma haute considération.',
     sigName:          'Stéphane GARCIA',
-    autresTitreItalique: true,
     autresItems: [
+      'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
       'Préfecture de la Gironde',
-      'Ministère de l\'Intérieur – S/C du service Central des Courses et Jeux de la Direction Centrale de la Police Judiciaire',
     ],
   },
 
@@ -132,10 +130,9 @@ const TEMPLATES_DEFAULT = {
     closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Madame, à l\'assurance de ma haute considération.',
     sigName:          'Stéphane GARCIA',
-    autresTitreItalique: false,
     autresItems: [
-      'Préfecture de la Gironde',
-      'Ministère de l\'Intérieur – S/C du service Central des Courses et Jeux de la Direction Centrale de la Police Judiciaire',
+      'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
+      'SIPJ 33 / Section des Courses & Jeux',
     ],
   },
 
@@ -248,6 +245,25 @@ function resetTemplates() {
 function getMonth() { return +document.getElementById('sel-month').value; }
 function getYear()  { return +document.getElementById('inp-year').value; }
 
+function computeDeadline(month, year) {
+  const d = new Date(year, month - 1, 1 - 21);
+  return { d: d.getDate(), m: d.getMonth() + 1, y: d.getFullYear() };
+}
+
+function onPeriodChange() {
+  const month = getMonth();
+  const year  = getYear();
+  if (!month || !year) return;
+  const dl = computeDeadline(month, year);
+  document.getElementById('inp-date-d').value = dl.d;
+  document.getElementById('inp-date-m').value = dl.m;
+  document.getElementById('inp-date-y').value = dl.y;
+  const label = `${String(dl.d).padStart(2, '0')} ${MOIS_LETTRE[dl.m - 1]} ${dl.y}`;
+  const hint = document.getElementById('deadline-hint');
+  if (hint) hint.textContent = `Date limite de déclaration · ${label}`;
+  renderAll();
+}
+
 function formatLetterDate() {
   const d = +document.getElementById('inp-date-d').value;
   const m = +document.getElementById('inp-date-m').value;
@@ -278,21 +294,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('inp-year').value = now.getFullYear();
 
-  // Date du courrier — 3 champs séparés
+  // Peuple le select mois de la date courrier
   const selDateM = document.getElementById('inp-date-m');
   MOIS_LETTRE.forEach((m, i) => {
     const o = document.createElement('option');
     o.value = i + 1;
     o.textContent = m;
-    if (i === now.getMonth()) o.selected = true;
     selDateM.appendChild(o);
   });
-  document.getElementById('inp-date-d').value = now.getDate();
-  document.getElementById('inp-date-y').value = now.getFullYear();
 
   loadTemplates();
   renderTplEditor('ministre');
-  renderAll();
+  onPeriodChange(); // auto-remplit date courrier + hint + renderAll
 });
 
 /* ── Gestion des onglets ── */
@@ -327,10 +340,6 @@ function generateLetterHtml(tpl, rows, month, year) {
     : '';
 
   const recipientHtml = tpl.recipient.map(esc).join('<br>');
-
-  const autresTitreClass = tpl.autresTitreItalique
-    ? 'letter-autres-title italic-underline'
-    : 'letter-autres-title';
 
   return `
 <div class="letter">
@@ -375,7 +384,7 @@ function generateLetterHtml(tpl, rows, month, year) {
 
   <!-- Autres destinataires -->
   <div class="letter-autres">
-    <div class="${autresTitreClass}">Autres Destinataires&nbsp;:</div>
+    <div class="letter-autres-title">Autres Destinataires&nbsp;:</div>
     <ul>${tpl.autresItems.map(item => `<li>${esc(item)}</li>`).join('')}</ul>
   </div>
 
