@@ -111,7 +111,7 @@ const TEMPLATES_DEFAULT = {
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Commissaire Divisionnaire, à l\'assurance de ma haute considération.',
     sigName:          'Stéphane GARCIA',
     autresItems: [
-      'Ministre de l\'Intérieur',
+      'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
       'Préfecture de la Gironde',
     ],
   },
@@ -131,7 +131,7 @@ const TEMPLATES_DEFAULT = {
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Madame, à l\'assurance de ma haute considération.',
     sigName:          'Stéphane GARCIA',
     autresItems: [
-      'Ministre de l\'Intérieur',
+      'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
       'SIPJ 33 / Section des Courses & Jeux',
     ],
   },
