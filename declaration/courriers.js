@@ -260,7 +260,7 @@ function onPeriodChange() {
   document.getElementById('inp-date-y').value = dl.y;
   const label = `${String(dl.d).padStart(2, '0')} ${MOIS_LETTRE[dl.m - 1]} ${dl.y}`;
   const hint = document.getElementById('deadline-hint');
-  if (hint) hint.textContent = `Date limite · ${label}`;
+  if (hint) hint.textContent = `Date limite de déclaration · ${label}`;
   renderAll();
 }
 

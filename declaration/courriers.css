@@ -64,10 +64,10 @@ body.light .tabs-bar { background: rgba(200,185,150,.25); border-color: rgba(138
 
 /* ── Hint date limite ── */
 .deadline-hint {
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: .08em;
-  padding-bottom: 11px;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: .06em;
+  margin-top: 7px;
   white-space: nowrap;
 }
 

@@ -42,7 +42,7 @@
     <div class="div"></div>
 
     <div class="sec">Date du courrier</div>
-    <div class="period-row" style="align-items:flex-end">
+    <div class="period-row">
       <div class="fg fg-date">
         <label class="fl">Date</label>
         <div style="display:flex;gap:6px;align-items:center">
@@ -50,8 +50,8 @@
           <select id="inp-date-m" onchange="renderAll()" style="flex:1"></select>
           <input type="number" id="inp-date-y" min="2020" max="2099" style="width:88px;flex-shrink:0" onchange="renderAll()"/>
         </div>
+        <div class="deadline-hint" id="deadline-hint"></div>
       </div>
-      <span class="deadline-hint" id="deadline-hint"></span>
     </div>
   </div>
 
