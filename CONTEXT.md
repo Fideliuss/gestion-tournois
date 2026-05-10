@@ -67,12 +67,21 @@ develop    Branche de travail active. Point de départ pour toute nouvelle featu
 feature/x  Une branche par fonctionnalité, créée depuis develop.
 ```
 
-**Flux standard :**
+**Flux standard (feature → develop) :**
 1. `git checkout develop`
 2. `git checkout -b feature/nom-feature`
 3. Travail + commits
-4. Merge dans `develop`
-5. Quand version validée → merge `develop` dans `main` + tag `vX.Y.Z`
+4. Push de la branche : `git push -u origin feature/nom-feature`
+5. **Ouvrir une PR** `feature/nom-feature → develop` sur GitHub
+6. Relecture + merge de la PR (pas de merge local direct)
+
+**Flux release (develop → main) :**
+1. Push de `develop` à jour : `git push origin develop`
+2. **Ouvrir une PR** `develop → main` sur GitHub — **obligatoire, sans exception**
+3. Vérifier que `CONTEXT.md` et `README.md` sont à jour avant de merger
+4. Merger la PR, puis taguer : `git tag vX.Y.Z main && git push origin vX.Y.Z`
+
+> **Règle absolue :** aucun `git push` direct sur `main`. Tout passe par une PR GitHub.
 
 ---
 
