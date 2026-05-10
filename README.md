@@ -29,7 +29,7 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 ### 🗂 Gestion Administrative *(sous-hub)*
 Regroupe les outils de déclaration mensuelle au Service Course et Jeux de la Police Nationale.
 
-### 📋 Déclaration Tournois DTPJ
+### 📋 Déclaration DTPJ
 Formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
 
 - Tableau généré automatiquement depuis une configuration par jour de semaine
@@ -38,7 +38,7 @@ Formulaire mensuel de déclaration des tournois au Service Course et Jeux de la 
 - Annexes Prize Pool éditables avec répartition configurable
 - Impression A4 paysage optimisée (tableau + annexes en 1 page)
 
-### ✉ Courriers PN *(accessible depuis Déclaration PN)*
+### ✉ Courriers mensuels *(accessible depuis Déclaration DTPJ)*
 Génération des 3 courriers officiels d'accompagnement à envoyer chaque mois.
 
 - **Ministre de l'Intérieur** — Service Central des Courses et Jeux, Paris

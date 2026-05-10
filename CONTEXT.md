@@ -86,6 +86,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 4 | leaderboard.js | IDs `Date.now()` — remplacé par compteur `nextId()` |
 | 5 | leaderboard.js | `showDirectoryPicker` — erreurs surfacées à l'utilisateur au lieu d'être avalées |
 | 6 | barriere.css | Bouton thème jour/nuit masqué à l'impression (`@media print`) |
+| 7 | declaration.css | Fond beige en mode jour à l'impression — `body` et `.app` passés en `!important` dans `@media print` |
 
 ---
 
@@ -97,23 +98,25 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - 12% des joueurs payés (ajustable manuellement)
 - Impression du tableau
 
-### Déclaration mensuelle PN
+### Déclaration DTPJ
 - Tableau mensuel généré automatiquement depuis une config par jour de semaine (lun–dim)
 - Impression A4 paysage : seuls tableau + annexes visibles, tient sur 1 page
 - Annexes Prize Pool indépendantes et éditables (joueurs, cave, répartition % à 10 places)
 - Tournois ad-hoc : ajout d'un tournoi exceptionnel pour le mois en cours, trié chronologiquement
 - Gestion ponctuelle : annuler ou modifier un tournoi sur un jour précis (restaurable)
 - Encadrement (directeurs + arbitres) configurable
+- Sections de config regroupées en 4 onglets : Tournois / Encadrement / Annexes / Ponctuel
 - Persistance localStorage (`decl_cfg`, `decl_staff`, `decl_annexes`, `decl_adhoc_Y_M`, `decl_exc_Y_M`)
 - Toggle rachats : si désactivé, "RE ENTRY" disparaît du titre du tournoi
 
-### Générateur de courriers PN
+### Courriers mensuels
 - Génération des 3 courriers officiels d'accompagnement mensuel : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde
-- Lit la même config localStorage que la Déclaration PN — aucune saisie supplémentaire
+- Lit la même config localStorage que la Déclaration DTPJ — aucune saisie supplémentaire
 - Mise en page A4 portrait stricte (1 page), police Garamond/Times New Roman, style administratif français
 - Sélecteur de date du courrier en format français (JJ / mois / AAAA) via 3 champs séparés
+- Destinataires et signatures éditables dans l'app (accordéon), persistés dans `localStorage('courriers_tpl')`
 - Export PDF via `window.print()` + CSS `@media print` (marges à 0, fond blanc)
-- **Accessible uniquement depuis declaration.html** (bouton "✉ Courriers PN") — non listé dans le hub
+- **Accessible uniquement depuis declaration.html** (bouton "✉ Courriers") — non listé dans le hub
 
 ### Challenge Saisonnier (Leaderboard)
 - Classement en temps réel avec podium visuel (top 3 + colonnes 4-30 + 31-150+)
@@ -156,7 +159,9 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - On travaille toujours sur `develop`, jamais sur `main` directement
 - Tester avec Chrome ou Edge (File System Access API non disponible ailleurs)
 - `barriere_data.json` n'est pas dans le repo — les données restent locales
-- `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html`
+- `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html` (bouton "✉ Courriers")
 - Les destinataires des courriers sont éditables dans l'app (accordéon) et persistés dans `localStorage('courriers_tpl')`
+- Transitions de page (fade in/out) gérées dans `shared/barriere.js` — classe `is-leaving` sur `<body>`
+- Lien `.back` est `position:fixed` top-left sur toutes les pages
 - La déclaration extras sera dans `declaration/` quand elle sera implémentée, avec une entrée dans `admin.html`
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
