@@ -27,28 +27,28 @@
   <!-- Paramètres -->
   <div class="card" style="max-width:1000px;width:100%">
     <div class="sec">Paramètres</div>
-    <div class="period-row" style="flex-wrap:wrap;gap:16px">
+    <div class="period-row">
 
       <div class="fg">
         <label class="fl">Mois déclaré</label>
         <select id="sel-month" onchange="renderAll()"></select>
       </div>
 
-      <div class="fg">
+      <div class="fg" style="max-width:110px">
         <label class="fl">Année</label>
-        <input type="number" id="inp-year" min="2020" max="2099" style="width:100px" onchange="renderAll()"/>
+        <input type="number" id="inp-year" min="2020" max="2099" onchange="renderAll()"/>
       </div>
 
-      <div class="fg">
+      <div class="fg fg-date">
         <label class="fl">Date du courrier</label>
         <div style="display:flex;gap:6px;align-items:center">
-          <input type="number" id="inp-date-d" min="1" max="31" style="width:52px" onchange="renderAll()"/>
-          <select id="inp-date-m" onchange="renderAll()"></select>
-          <input type="number" id="inp-date-y" min="2020" max="2099" style="width:88px" onchange="renderAll()"/>
+          <input type="number" id="inp-date-d" min="1" max="31" style="width:60px;flex-shrink:0" onchange="renderAll()"/>
+          <select id="inp-date-m" onchange="renderAll()" style="flex:1"></select>
+          <input type="number" id="inp-date-y" min="2020" max="2099" style="width:88px;flex-shrink:0" onchange="renderAll()"/>
         </div>
       </div>
 
-      <button class="btn btn-gold" onclick="renderAll()" style="align-self:flex-end">Générer</button>
+      <button class="btn btn-gold" onclick="renderAll()">Générer</button>
     </div>
   </div>
 
