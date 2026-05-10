@@ -27,7 +27,7 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Données sauvegardées localement en JSON via File System API
 
 ### 🗂 Gestion Administrative *(sous-hub)*
-Regroupe les outils de déclaration mensuelle au Service Course et Jeux de la Police Nationale.
+Regroupe les outils de déclaration mensuelle au Service Course et Jeux de la Police Judiciaire.
 
 ### 📋 Déclaration DTPJ
 Formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
