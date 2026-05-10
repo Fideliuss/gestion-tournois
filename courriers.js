@@ -229,6 +229,13 @@ function saveTplAndRender() {
   renderAll();
 }
 
+function toggleTplAccordion() {
+  const btn  = document.getElementById('tpl-accordion-btn');
+  const body = document.getElementById('tpl-accordion-body');
+  const open = body.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
 function resetTemplates() {
   if (!confirm('Réinitialiser les destinataires par défaut ?')) return;
   localStorage.removeItem('courriers_tpl');

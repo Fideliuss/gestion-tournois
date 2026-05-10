@@ -65,18 +65,23 @@
     </div>
   </div>
 
-  <!-- Config destinataires -->
-  <div class="card" style="max-width:1000px;width:100%;margin-top:8px">
-    <div class="sec">Destinataires &amp; Signatures</div>
-    <div class="tabs-bar" style="margin-bottom:20px">
-      <button class="tab-btn tpl-tab active" data-tpl="ministre"   onclick="showTplTab('ministre')">Ministre de l'Intérieur</button>
-      <button class="tab-btn tpl-tab"        data-tpl="sipj"       onclick="showTplTab('sipj')">SIPJ 33</button>
-      <button class="tab-btn tpl-tab"        data-tpl="prefecture" onclick="showTplTab('prefecture')">Préfecture de la Gironde</button>
-    </div>
-    <div id="tpl-editor"></div>
-    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn-ghost" onclick="resetTemplates()">Réinitialiser</button>
-      <button class="btn btn-gold" onclick="saveTplAndRender()">Enregistrer</button>
+  <!-- Config destinataires (accordéon) -->
+  <div class="tpl-accordion" style="max-width:1000px;width:100%">
+    <button class="tpl-accordion-toggle" onclick="toggleTplAccordion()" id="tpl-accordion-btn">
+      <span>⚙ Modifier les destinataires &amp; signatures</span>
+      <span class="tpl-accordion-chevron" id="tpl-accordion-chevron">›</span>
+    </button>
+    <div class="tpl-accordion-body" id="tpl-accordion-body">
+      <div class="tabs-bar" style="margin-bottom:20px">
+        <button class="tab-btn tpl-tab active" data-tpl="ministre"   onclick="showTplTab('ministre')">Ministre de l'Intérieur</button>
+        <button class="tab-btn tpl-tab"        data-tpl="sipj"       onclick="showTplTab('sipj')">SIPJ 33</button>
+        <button class="tab-btn tpl-tab"        data-tpl="prefecture" onclick="showTplTab('prefecture')">Préfecture de la Gironde</button>
+      </div>
+      <div id="tpl-editor"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-ghost" onclick="resetTemplates()">Réinitialiser</button>
+        <button class="btn btn-gold" onclick="saveTplAndRender()">Enregistrer</button>
+      </div>
     </div>
   </div>
 
