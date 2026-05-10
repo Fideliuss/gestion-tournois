@@ -80,6 +80,25 @@
 .adhoc-meta  { font-size: 10px; color: var(--text-dim); }
 .adhoc-empty { color: var(--text-muted); font-size: 12px; font-style: italic; }
 
+/* ── Onglets de configuration ── */
+.decl-tabs {
+  display: flex; gap: 4px; margin-bottom: 20px;
+  background: rgba(10,9,7,.6); border: 1px solid rgba(196,160,74,.12);
+  border-radius: 4px; padding: 4px;
+  width: 100%; max-width: 1100px; flex-wrap: wrap;
+}
+.decl-tab {
+  flex: 1; min-width: 100px; padding: 9px 8px;
+  font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--text-dim); background: none; border: none; border-radius: 3px;
+  cursor: pointer; transition: all .18s; text-align: center;
+}
+.decl-tab.active { background: rgba(196,160,74,.15); color: var(--gold); border: 1px solid rgba(196,160,74,.25); }
+.decl-tab:hover:not(.active) { color: var(--text); background: rgba(196,160,74,.06); }
+body.light .decl-tabs { background: rgba(200,185,150,.25); border-color: rgba(138,104,32,.15); }
+
+.decl-tab-panel .card { margin: 0; }
+
 /* ── Barre d'outils ── */
 .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%; max-width: 1100px; margin-bottom: 20px; }
 
@@ -254,20 +273,17 @@ body.light .annexe-card { background: rgba(255,252,244,.97); border-color: rgba(
   .theme-toggle,
   .back,
   #period-card,
-  #config-card,
-  #staff-card,
-  #adhoc-card,
-  #annexes-editor-card,
-  #exc-card,
+  .decl-tabs,
+  .decl-tab-panel,
   .toolbar,
   #annexes-label,
   .hdr,
   .footer { display: none !important; }
 
-  body { background: #fff; color: #000; }
+  body { background: #fff !important; color: #000; }
   .app {
     padding: 0;
-    background: none;
+    background: none !important;
     min-height: unset;
     align-items: flex-start;
   }

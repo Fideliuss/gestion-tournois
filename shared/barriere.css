@@ -43,6 +43,12 @@ body.light {
   --red-dim:    rgba(192,57,43,.18);
 }
 
+/* ── Transitions de page ── */
+@keyframes pg-in  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pg-out { to   { opacity: 0; transform: translateY(-8px); } }
+body             { animation: pg-in .22s ease-out both; }
+body.is-leaving  { animation: pg-out .18s ease-in both; }
+
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -141,13 +147,15 @@ body.light .card {
 /* ── Séparateur ── */
 .div { height: 1px; background: linear-gradient(90deg, transparent, rgba(196,160,74,.16), transparent); margin: 22px 0; }
 
-/* ── Lien retour ← ── */
+/* ── Lien retour ← (fixé en haut à gauche) ── */
 .back {
-  align-self: flex-start; margin-bottom: 20px;
-  font-size: 12px; color: var(--gold-dim); text-decoration: none;
-  letter-spacing: .1em; display: flex; align-items: center; gap: 6px; transition: color .18s;
+  position: fixed; top: 16px; left: 16px; z-index: 50;
+  font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold-dim); text-decoration: none;
+  display: flex; align-items: center; gap: 6px; transition: color .18s;
 }
 .back:hover { color: var(--gold); }
+@media print { .back { display: none !important; } }
 
 /* ── État vide ── */
 .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }

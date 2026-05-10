@@ -26,7 +26,10 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Fiche joueur détaillée (points, meilleur résultat, historique)
 - Données sauvegardées localement en JSON via File System API
 
-### 📋 Déclaration mensuelle PN
+### 🗂 Gestion Administrative *(sous-hub)*
+Regroupe les outils de déclaration mensuelle au Service Course et Jeux de la Police Judiciaire.
+
+### 📋 Déclaration DTPJ
 Formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
 
 - Tableau généré automatiquement depuis une configuration par jour de semaine
@@ -35,12 +38,15 @@ Formulaire mensuel de déclaration des tournois au Service Course et Jeux de la 
 - Annexes Prize Pool éditables avec répartition configurable
 - Impression A4 paysage optimisée (tableau + annexes en 1 page)
 
-### ✉ Courriers PN *(accessible depuis Déclaration PN)*
+### ✉ Courriers mensuels *(accessible depuis Déclaration DTPJ)*
 Génération des 3 courriers officiels d'accompagnement à envoyer chaque mois.
 
 - **Ministre de l'Intérieur** — Service Central des Courses et Jeux, Paris
 - **SIPJ 33** — Section des Courses & Jeux, Bordeaux
 - **Préfecture de la Gironde** — Bordeaux
+- Triangle des destinataires respecté : chaque courrier mentionne les 2 autres en copie
+- Date du courrier auto-calculée à J-21 du début du mois déclaré
+- Destinataires et signatures éditables directement dans l'app
 - Mise en page A4 portrait, police serif, style administratif français, 1 page
 - Export PDF natif via l'impression navigateur
 
@@ -53,7 +59,7 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 > **Important :** la sauvegarde des données du Challenge Saisonnier utilise l'API File System Access, disponible uniquement sur Chrome et Edge. Les autres navigateurs ne sont pas supportés pour cette fonctionnalité.
 
 ### Première utilisation — Challenge Saisonnier
-1. Ouvrir `leaderboard.html`
+1. Ouvrir `leaderboard/leaderboard.html`
 2. Cliquer sur **Choisir le dossier** et sélectionner un dossier sur ton ordinateur
 3. Le fichier `barriere_data.json` sera créé automatiquement dans ce dossier
 4. Les données sont restaurées automatiquement à chaque réouverture
@@ -63,27 +69,31 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 ## Structure des fichiers
 
 ```
-├── index.html          — Page d'accueil (hub — 3 outils)
+├── index.html              — Hub principal
+├── admin.html              — Sous-hub Gestion Administrative
 │
-├── prize-pool.html     — Prize Pool Calculator
-├── prize-pool.css
-├── prize-pool.js       — Logique React
+├── shared/
+│   ├── barriere.css        — Styles partagés (thème, composants)
+│   ├── barriere.js         — Scripts partagés (thème jour/nuit)
+│   └── logo.png            — Logo Casino Barrière Bordeaux
 │
-├── leaderboard.html    — Challenge Saisonnier
-├── leaderboard.css
-├── leaderboard.js
+├── leaderboard/
+│   ├── leaderboard.html    — Challenge Saisonnier
+│   ├── leaderboard.css
+│   └── leaderboard.js
 │
-├── declaration.html    — Déclaration mensuelle PN
-├── declaration.css
-├── declaration.js
+├── prize-pool/
+│   ├── prize-pool.html     — Prize Pool Calculator
+│   ├── prize-pool.css
+│   └── prize-pool.js       — Logique React
 │
-├── courriers.html      — Générateur de courriers PN (accès via declaration.html)
-├── courriers.css
-├── courriers.js
-│
-├── casino-barriere-bordeaux-logo.png  — Logo utilisé dans les courriers
-├── barriere.css        — Styles partagés
-└── barriere.js         — Scripts partagés (thème jour/nuit)
+└── declaration/
+    ├── declaration.html    — Déclaration Tournois DTPJ
+    ├── declaration.css
+    ├── declaration.js
+    ├── courriers.html      — Courriers PN (accès via declaration.html)
+    ├── courriers.css
+    └── courriers.js
 ```
 
 ---
