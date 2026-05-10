@@ -280,10 +280,10 @@ body.light .annexe-card { background: rgba(255,252,244,.97); border-color: rgba(
   .hdr,
   .footer { display: none !important; }
 
-  body { background: #fff; color: #000; }
+  body { background: #fff !important; color: #000; }
   .app {
     padding: 0;
-    background: none;
+    background: none !important;
     min-height: unset;
     align-items: flex-start;
   }
