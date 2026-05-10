@@ -159,6 +159,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 
 ## À savoir pour la prochaine session
 
+- **Toujours mettre à jour `CONTEXT.md` et `README.md` avant de créer une PR et de merger** — sans attendre que l'utilisateur le demande
 - On travaille toujours sur `develop`, jamais sur `main` directement
 - Tester avec Chrome ou Edge (File System Access API non disponible ailleurs)
 - `barriere_data.json` n'est pas dans le repo — les données restent locales
