@@ -18,27 +18,31 @@ Quatre outils disponibles, zéro serveur, zéro build — s'ouvre directement da
 ## Architecture
 
 ```
-index.html        Hub d'accueil
-barriere.css      Styles partagés (thème, composants communs)
-barriere.js       Scripts partagés (toggle jour/nuit)
+index.html          Hub principal
+admin.html          Sous-hub Gestion Administrative
 
-leaderboard.html  Challenge Saisonnier — HTML pur
-leaderboard.css   Styles du leaderboard
-leaderboard.js    Logique JS du leaderboard (~400 lignes)
+shared/
+  barriere.css      Styles partagés (thème, composants communs)
+  barriere.js       Scripts partagés (toggle jour/nuit)
+  logo.png          Logo officiel utilisé dans les courriers
 
-prize-pool.html   Prize Pool Calculator — HTML pur
-prize-pool.css    Styles du calculateur
-prize-pool.js     Logique React du calculateur
+leaderboard/
+  leaderboard.html  Challenge Saisonnier — HTML pur
+  leaderboard.css   Styles du leaderboard
+  leaderboard.js    Logique JS du leaderboard (~400 lignes)
 
-declaration.html  Déclaration mensuelle PN — HTML pur
-declaration.css   Styles de la déclaration
-declaration.js    Logique JS de la déclaration (~450 lignes)
+prize-pool/
+  prize-pool.html   Prize Pool Calculator — HTML pur
+  prize-pool.css    Styles du calculateur
+  prize-pool.js     Logique React du calculateur
 
-courriers.html    Générateur de courriers PN — accessible depuis declaration.html uniquement
-courriers.css     Styles lettre A4 + règles d'impression
-courriers.js      Logique JS courriers (~300 lignes)
-
-casino-barriere-bordeaux-logo.png   Logo officiel utilisé dans les courriers
+declaration/
+  declaration.html  Déclaration mensuelle PN — HTML pur
+  declaration.css   Styles de la déclaration
+  declaration.js    Logique JS de la déclaration (~450 lignes)
+  courriers.html    Générateur de courriers PN — accessible depuis declaration.html uniquement
+  courriers.css     Styles lettre A4 + règles d'impression
+  courriers.js      Logique JS courriers (~300 lignes)
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés.
@@ -152,6 +156,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - On travaille toujours sur `develop`, jamais sur `main` directement
 - Tester avec Chrome ou Edge (File System Access API non disponible ailleurs)
 - `barriere_data.json` n'est pas dans le repo — les données restent locales
-- `courriers.html` ne doit PAS apparaître dans le hub (`index.html`) — accès réservé via `declaration.html`
-- Les 3 templates de courriers (Ministre, SIPJ 33, Préfecture) sont hardcodés dans `courriers.js` — modifier directement si les destinataires changent
+- `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html`
+- Les destinataires des courriers sont éditables dans l'app (accordéon) et persistés dans `localStorage('courriers_tpl')`
+- La déclaration extras sera dans `declaration/` quand elle sera implémentée, avec une entrée dans `admin.html`
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
