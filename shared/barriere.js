@@ -3,6 +3,23 @@
    Casino Barrière Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════ */
 
+/* Injection favicon — chemin déduit depuis l'URL du script lui-même */
+(function () {
+  const base = document.currentScript.src.replace('barriere.js', 'favicon/');
+  [
+    { rel: 'icon',            href: base + 'favicon.ico', sizes: '32x32' },
+    { rel: 'icon',            href: base + 'favicon.svg', type: 'image/svg+xml' },
+    { rel: 'apple-touch-icon',href: base + 'apple-touch-icon.png' },
+    { rel: 'manifest',        href: base + 'site.webmanifest' },
+  ].forEach(({ rel, href, sizes, type }) => {
+    const l = document.createElement('link');
+    l.rel = rel; l.href = href;
+    if (sizes) l.sizes = sizes;
+    if (type)  l.type  = type;
+    document.head.appendChild(l);
+  });
+})();
+
 function applyTheme(light) {
   document.body.classList.toggle('light', light);
   document.getElementById('theme-icon').textContent  = light ? '🌙' : '☀️';
