@@ -25,6 +25,7 @@ shared/
   barriere.css      Styles partagés (thème, composants communs)
   barriere.js       Scripts partagés (toggle jour/nuit)
   logo.png          Logo officiel utilisé dans les courriers
+  favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
 
 leaderboard/
   leaderboard.html  Challenge Saisonnier — HTML pur
