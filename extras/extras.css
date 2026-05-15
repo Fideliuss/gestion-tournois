@@ -255,7 +255,7 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print="declaration"] #tab-emargement      { display: none !important; }
   body[data-print="declaration"] #tab-declaration     { display: block !important; }
   body[data-print="declaration"] #decl-controls       { display: none !important; }
-  body[data-print="declaration"] #decl-output         { margin: 0; overflow: visible; }
+  body[data-print="declaration"] #decl-output         { margin: 0; overflow: visible !important; }
 
   body[data-print="declaration"] .decl-extras-tbl     { width: 100%; font-size: 9pt; border-collapse: collapse; table-layout: auto; }
   body[data-print="declaration"] .det-title           { background: #000 !important; color: #fff !important; font-size: 11pt; padding: 8px 12px; letter-spacing: .07em; }
