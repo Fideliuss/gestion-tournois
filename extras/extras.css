@@ -302,24 +302,24 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   }
 
   body[data-print="emargement"] .emarg-card thead tr th {
-    border-color: #888 !important; padding: 3px 4px;
+    border-color: #888 !important; padding: 2px 3px;
   }
   body[data-print="emargement"] .ec-week {
     background: #e8e8e8 !important; color: #000 !important;
-    font-size: 7.5pt; font-weight: 700; width: 18px;
+    font-size: 7pt; font-weight: 700; width: 18mm;
   }
-  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 7pt; width: 12px; background: #f4f4f4 !important; }
-  body[data-print="emargement"] .ec-name { color: #000 !important; font-size: 8.5pt; font-weight: 700; padding: 3px 5px; }
+  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 7pt; width: 9mm; background: #f4f4f4 !important; }
+  body[data-print="emargement"] .ec-name { color: #000 !important; font-size: 8pt; font-weight: 700; padding: 2px 4px; }
 
   body[data-print="emargement"] .emarg-card tbody td {
     border-color: #ccc !important; color: #000 !important;
-    padding: 2px 3px; font-size: 7pt;
+    padding: 1.5px 2px; font-size: 7pt; overflow: hidden;
   }
-  body[data-print="emargement"] .ec-date { font-size: 7pt; color: #222 !important; width: 22px; }
-  body[data-print="emargement"] .ec-dayl { font-size: 7pt; color: #222 !important; width: 16px; }
-  body[data-print="emargement"] .ec-time { font-size: 7pt; font-weight: 700; width: 28px; }
+  body[data-print="emargement"] .ec-date { color: #222 !important; width: 13mm; }
+  body[data-print="emargement"] .ec-dayl { color: #222 !important; width: 9mm; }
+  body[data-print="emargement"] .ec-time { font-weight: 700; width: 11mm; }
   body[data-print="emargement"] .ec-time.ec-eve { background: #4472C4 !important; color: #fff !important; }
   body[data-print="emargement"] .ec-time.ec-sun { background: #C55A11 !important; color: #fff !important; }
-  body[data-print="emargement"] .ec-dep  { width: 28px; }
-  body[data-print="emargement"] .ec-sig  { width: auto; min-height: 18mm; }
+  body[data-print="emargement"] .ec-dep  { width: 11mm; }
+  body[data-print="emargement"] .ec-sig  { width: auto; }
 }
