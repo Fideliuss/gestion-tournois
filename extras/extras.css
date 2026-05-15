@@ -289,35 +289,35 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
 
   body[data-print="emargement"] .emarg-grid {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2.5mm;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2mm;
     width: 100%;
   }
 
   body[data-print="emargement"] .emarg-card {
     width: 100%; border: 1px solid #888 !important;
-    background: #fff !important; font-size: 7pt;
+    background: #fff !important; font-size: 6pt;
     break-inside: avoid; page-break-inside: avoid;
   }
 
   body[data-print="emargement"] .emarg-card thead tr th {
-    border-color: #888 !important; padding: 3px 4px;
+    border-color: #888 !important; padding: 2px 3px;
   }
   body[data-print="emargement"] .ec-week {
     background: #e8e8e8 !important; color: #000 !important;
-    font-size: 7.5pt; font-weight: 700; width: 20px;
+    font-size: 6.5pt; font-weight: 700; width: 18px;
   }
-  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 6.5pt; width: 14px; background: #f4f4f4 !important; }
-  body[data-print="emargement"] .ec-name { color: #000 !important; font-size: 8pt; font-weight: 700; padding: 3px 5px; }
+  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 6pt; width: 12px; background: #f4f4f4 !important; }
+  body[data-print="emargement"] .ec-name { color: #000 !important; font-size: 7.5pt; font-weight: 700; padding: 2px 4px; }
 
   body[data-print="emargement"] .emarg-card tbody td {
     border-color: #ccc !important; color: #000 !important;
-    padding: 2.5px 3px; font-size: 6.5pt;
+    padding: 1px 2px; font-size: 6pt;
   }
-  body[data-print="emargement"] .ec-date { font-size: 6.5pt; color: #222 !important; width: 26px; }
-  body[data-print="emargement"] .ec-dayl { font-size: 6.5pt; color: #222 !important; width: 20px; }
-  body[data-print="emargement"] .ec-time { font-size: 6.5pt; font-weight: 700; width: 30px; }
+  body[data-print="emargement"] .ec-date { font-size: 6pt; color: #222 !important; width: 22px; }
+  body[data-print="emargement"] .ec-dayl { font-size: 6pt; color: #222 !important; width: 16px; }
+  body[data-print="emargement"] .ec-time { font-size: 6pt; font-weight: 700; width: 26px; }
   body[data-print="emargement"] .ec-time.ec-eve { background: #4472C4 !important; color: #fff !important; }
   body[data-print="emargement"] .ec-time.ec-sun { background: #C55A11 !important; color: #fff !important; }
-  body[data-print="emargement"] .ec-sig  { min-height: 26mm; }
+  body[data-print="emargement"] .ec-sig  { min-height: 28mm; }
 }

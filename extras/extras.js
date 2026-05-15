@@ -390,7 +390,7 @@ function renderEmargement() {
   /* Seuls les extras ayant au moins un jour coché */
   const sorted = sortedExtras().filter(e => DAY_KEYS.some(k => (emarg[e.id] || {})[k]));
   const cards  = [...sorted];
-  while (cards.length % 3 !== 0) cards.push(null);
+  while (cards.length % 4 !== 0) cards.push(null);
 
   const M      = ['jan.','fév.','mar.','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
   const MLONG  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
