@@ -1,0 +1,312 @@
+/* ═══════════════════════════════════════════════════════
+   extras.css — Déclaration Extras & Émargement
+   Casino Barrière Bordeaux · Outils Tournois
+═══════════════════════════════════════════════════════ */
+
+/* ── Conteneurs d'onglets (centrage) ── */
+.xt-panel {
+  width: 100%; max-width: 860px;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* ── Onglets ── */
+.xt-tabs {
+  display: flex; gap: 4px; margin-bottom: 20px;
+  background: rgba(10,9,7,.6); border: 1px solid rgba(196,160,74,.12);
+  border-radius: 4px; padding: 4px;
+  width: 100%; max-width: 860px; flex-wrap: wrap;
+}
+.xt-tab {
+  flex: 1; min-width: 100px; padding: 9px 8px;
+  font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--text-dim); background: none; border: none; border-radius: 3px;
+  cursor: pointer; transition: all .18s; text-align: center;
+}
+.xt-tab.active          { background: rgba(196,160,74,.15); color: var(--gold); border: 1px solid rgba(196,160,74,.25); }
+.xt-tab:hover:not(.active) { color: var(--text); background: rgba(196,160,74,.06); }
+body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(138,104,32,.15); }
+
+/* ── Période ── */
+.period-row {
+  display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;
+}
+.period-row .fg { max-width: 220px; }
+
+/* ── Formulaire ajout extra ── */
+.xt-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px 14px;
+  align-items: flex-end;
+  margin-bottom: 4px;
+}
+.xt-form .fg        { margin: 0; }
+.xt-form-wide       { grid-column: span 2; }
+@media(max-width:600px) { .xt-form-wide { grid-column: span 1; } }
+
+/* ── Tableau liste extras ── */
+.xt-tbl {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.xt-tbl thead th {
+  font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); font-weight: 600; padding: 8px 10px;
+  text-align: left; border-bottom: 1px solid rgba(196,160,74,.2);
+  white-space: nowrap;
+}
+.xt-tbl tbody tr {
+  border-bottom: 1px solid rgba(196,160,74,.06); transition: background .15s;
+}
+.xt-tbl tbody tr:hover { background: rgba(196,160,74,.03); }
+.xt-tbl td             { padding: 6px 10px; color: var(--text); vertical-align: middle; }
+.xt-nom                { font-weight: 600; color: var(--cream); letter-spacing: .04em; }
+.xt-prenom             { font-style: italic; }
+.xt-empty              { text-align: center; padding: 28px; color: var(--text-muted); font-size: 12px; font-style: italic; }
+
+/* ── Tableau des présences (assignment) ── */
+.assign-tbl {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.assign-tbl thead th {
+  font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold); padding: 8px 10px; text-align: center;
+  border-bottom: 1px solid rgba(196,160,74,.2); white-space: nowrap;
+}
+.assign-tbl thead th.assign-name-col { text-align: left; }
+.assign-tbl thead th small           { font-size: 9px; letter-spacing: .03em; color: var(--text-dim); display: block; font-weight: 400; }
+.assign-tbl tbody tr                 { border-bottom: 1px solid rgba(196,160,74,.06); }
+.assign-tbl tbody tr:hover           { background: rgba(196,160,74,.03); }
+.assign-tbl td                       { padding: 6px 10px; vertical-align: middle; text-align: center; }
+.assign-name  { text-align: left !important; color: var(--cream); font-size: 12px; white-space: nowrap; }
+.assign-check input[type=checkbox]   { width: 16px; height: 16px; cursor: pointer; accent-color: var(--gold); }
+
+/* Ligne heure-du-jour */
+.assign-hours-row   { background: rgba(196,160,74,.04); border-bottom: 1px solid rgba(196,160,74,.12) !important; }
+.assign-hours-label { font-size: 9px !important; letter-spacing: .16em !important; text-transform: uppercase; color: var(--gold-dim) !important; }
+.assign-day-hour {
+  display: block; width: 50px; margin: 0 auto;
+  text-align: center; font-family: var(--f-num); font-size: 10px;
+  padding: 2px 4px; background: var(--bg-input);
+  border: 1px solid rgba(196,160,74,.2); border-radius: 2px; color: var(--cream);
+}
+/* Override heure par cellule */
+.assign-cell-hour {
+  display: block; width: 46px; margin: 3px auto 0;
+  text-align: center; font-family: var(--f-num); font-size: 9px;
+  padding: 1px 3px; background: rgba(196,160,74,.08);
+  border: 1px solid rgba(196,160,74,.3); border-radius: 2px; color: var(--gold);
+}
+.assign-day-hour::placeholder, .assign-cell-hour::placeholder { color: var(--text-muted); }
+
+/* ── Label plage de dates ── */
+.week-range-label {
+  font-size: 11px; font-style: italic; color: var(--gold-dim); white-space: nowrap;
+}
+
+/* ── Tableau déclaration mensuelle (écran) ── */
+.decl-extras-tbl {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.det-title {
+  background: #1F4E79; color: #fff;
+  font-weight: 700; font-size: 14px;
+  letter-spacing: .1em; text-transform: uppercase;
+  padding: 12px 16px; text-align: center;
+}
+.det-hrow th {
+  background: rgba(196,160,74,.1); color: var(--gold);
+  font-size: 9px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700;
+  padding: 8px 10px; text-align: center;
+  border: 1px solid rgba(196,160,74,.2);
+}
+.decl-extras-tbl tbody tr:nth-child(even) { background: rgba(196,160,74,.03); }
+.decl-extras-tbl td {
+  border: 1px solid rgba(196,160,74,.15); padding: 7px 12px;
+  color: var(--text); vertical-align: middle; white-space: nowrap;
+}
+.det-nom    { font-weight: 700; color: var(--cream); text-align: center; letter-spacing: .04em; }
+.det-prenom { font-weight: 700; font-style: italic; color: var(--cream); text-align: center; }
+.det-italic { font-style: italic; text-align: center; }
+.det-lieu   { font-style: italic; text-transform: uppercase; text-align: center; }
+.det-ville  { text-transform: uppercase; font-weight: 500; text-align: center; }
+
+/* ── Header émargement ── */
+.emarg-header {
+  width: 100%; margin-bottom: 12px;
+  padding: 10px 14px; background: var(--bg-card);
+  border: 1px solid rgba(196,160,74,.2); border-radius: 3px;
+  text-align: center;
+}
+body.light .emarg-header { background: rgba(255,252,244,.97); }
+.emarg-header-title {
+  font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--cream);
+}
+.emarg-header-meta {
+  font-size: 11px; color: var(--gold-dim); margin-top: 3px;
+  letter-spacing: .06em;
+}
+
+/* ── Grille émargement (écran) ── */
+.emarg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+@media(max-width:640px) { .emarg-grid { grid-template-columns: 1fr; } }
+
+/* Carte émargement */
+.emarg-card {
+  width: 100%; border-collapse: collapse;
+  border: 1px solid rgba(196,160,74,.3);
+  background: var(--bg-card);
+}
+body.light .emarg-card { background: rgba(255,252,244,.97); }
+
+/* En-tête de carte */
+.emarg-card thead tr th {
+  border: 1px solid rgba(196,160,74,.25);
+  padding: 5px 7px; vertical-align: middle;
+}
+.ec-week {
+  width: 30px; text-align: center;
+  font-family: var(--f-num); font-size: 11px; font-weight: 700;
+  color: var(--gold); background: rgba(196,160,74,.12);
+}
+.ec-j {
+  width: 22px; text-align: center;
+  font-size: 10px; color: var(--text-dim); background: rgba(196,160,74,.05);
+}
+.ec-name {
+  text-align: center; font-weight: 600; font-size: 12px; color: var(--cream);
+  letter-spacing: .02em; padding: 5px 8px;
+}
+
+/* Lignes de jours */
+.emarg-card tbody td {
+  border: 1px solid rgba(196,160,74,.15);
+  padding: 4px 6px; font-size: 11px; color: var(--text); vertical-align: middle;
+}
+.ec-date {
+  width: 42px; font-family: var(--f-num); font-size: 10px;
+  color: var(--text-dim); text-align: center; white-space: nowrap;
+}
+.ec-dayl { width: 32px; font-size: 10px; color: var(--text-dim); text-align: center; }
+.ec-time {
+  width: 46px; text-align: center;
+  font-family: var(--f-num); font-size: 10px; font-weight: 600;
+}
+.ec-time.ec-eve { background: rgba(68,114,196,.25); color: #9bb8f0; }
+.ec-time.ec-sun { background: rgba(197,90,17,.25);  color: #f0a870; }
+.ec-sig  { min-height: 28px; }
+
+/* ── Modal édition extra ── */
+.xt-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.xt-modal {
+  background: var(--bg-card); border: 1px solid rgba(196,160,74,.25);
+  border-radius: 4px; padding: 28px 30px; width: 100%; max-width: 640px;
+  position: relative; max-height: 90vh; overflow-y: auto;
+}
+body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px rgba(0,0,0,.12); }
+.xt-modal-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 16px; cursor: pointer; transition: color .18s;
+}
+.xt-modal-close:hover { color: var(--text); }
+
+/* ══════════════════════════════════════════════════════
+   IMPRESSION
+══════════════════════════════════════════════════════ */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Fond blanc de base */
+  html, body { background: #fff !important; color: #000 !important; }
+
+  /* Masquer UI commune dans les deux modes */
+  body[data-print] .theme-toggle,
+  body[data-print] .back,
+  body[data-print] .hdr,
+  body[data-print] #xt-tabs,
+  body[data-print] .footer,
+  body[data-print] .xt-overlay     { display: none !important; }
+  body[data-print] .app            { padding: 0; background: none !important; min-height: unset; }
+
+  /* ── Impression déclaration (portrait) ── */
+  body[data-print="declaration"] #tab-liste,
+  body[data-print="declaration"] #tab-emargement      { display: none !important; }
+  body[data-print="declaration"] #tab-declaration     { display: block !important; }
+  body[data-print="declaration"] #decl-controls       { display: none !important; }
+  body[data-print="declaration"] #decl-output         { margin: 0; overflow: visible; }
+
+  body[data-print="declaration"] .decl-extras-tbl     { width: 100%; font-size: 9pt; border-collapse: collapse; table-layout: auto; }
+  body[data-print="declaration"] .det-title           { background: #000 !important; color: #fff !important; font-size: 11pt; padding: 8px 12px; letter-spacing: .07em; }
+  body[data-print="declaration"] .det-hrow th         { background: #f0f0f0 !important; color: #000 !important; border-color: #888 !important; font-size: 7.5pt; padding: 5px 8px; white-space: nowrap; }
+  body[data-print="declaration"] .decl-extras-tbl td  { border-color: #aaa !important; color: #000 !important; padding: 4px 8px; font-size: 8.5pt; white-space: nowrap; }
+  body[data-print="declaration"] .decl-extras-tbl tbody tr:nth-child(even) { background: #f7f7f7 !important; }
+  body[data-print="declaration"] .det-nom             { color: #000 !important; font-weight: 700; }
+  body[data-print="declaration"] .det-prenom          { color: #000 !important; font-weight: 700; font-style: italic; }
+  body[data-print="declaration"] .det-italic          { font-style: italic; color: #000 !important; }
+  body[data-print="declaration"] .det-lieu            { font-style: italic; color: #000 !important; }
+  body[data-print="declaration"] .det-ville           { color: #000 !important; }
+
+  /* ── Impression émargement (paysage) ── */
+  body[data-print="emargement"] #tab-liste,
+  body[data-print="emargement"] #tab-declaration      { display: none !important; }
+  body[data-print="emargement"] #tab-emargement       { display: block !important; }
+  body[data-print="emargement"] #emarg-controls,
+  body[data-print="emargement"] #assign-card          { display: none !important; }
+  body[data-print="emargement"] #emarg-output         { margin: 0; }
+
+  body[data-print="emargement"] .emarg-header {
+    background: none !important; border: none !important; border-bottom: 1.5pt solid #000 !important;
+    border-radius: 0 !important; padding: 0 0 3mm 0 !important; margin-bottom: 4mm;
+  }
+  body[data-print="emargement"] .emarg-header-title {
+    font-size: 11pt; font-weight: 700; letter-spacing: .1em; color: #000 !important;
+  }
+  body[data-print="emargement"] .emarg-header-meta {
+    font-size: 8.5pt; color: #444 !important; margin-top: 1mm;
+  }
+
+  body[data-print="emargement"] .emarg-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5mm;
+    width: 100%;
+  }
+
+  body[data-print="emargement"] .emarg-card {
+    width: 100%; border: 1px solid #888 !important;
+    background: #fff !important; font-size: 6pt;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+
+  body[data-print="emargement"] .emarg-card thead tr th {
+    border-color: #888 !important; padding: 2px 3px;
+  }
+  body[data-print="emargement"] .ec-week {
+    background: #e8e8e8 !important; color: #000 !important;
+    font-size: 6.5pt; font-weight: 700; width: 18px;
+  }
+  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 6pt; width: 12px; background: #f4f4f4 !important; }
+  body[data-print="emargement"] .ec-name { color: #000 !important; font-size: 7pt; font-weight: 700; padding: 2px 4px; }
+
+  body[data-print="emargement"] .emarg-card tbody td {
+    border-color: #ccc !important; color: #000 !important;
+    padding: 1.5px 2px; font-size: 5.5pt;
+  }
+  body[data-print="emargement"] .ec-date { font-size: 5.5pt; color: #222 !important; width: 24px; }
+  body[data-print="emargement"] .ec-dayl { font-size: 5.5pt; color: #222 !important; width: 18px; }
+  body[data-print="emargement"] .ec-time { font-size: 5.5pt; font-weight: 700; width: 26px; }
+  body[data-print="emargement"] .ec-time.ec-eve { background: #4472C4 !important; color: #fff !important; }
+  body[data-print="emargement"] .ec-time.ec-sun { background: #C55A11 !important; color: #fff !important; }
+  body[data-print="emargement"] .ec-sig  { min-height: 14mm; }
+}

@@ -48,7 +48,18 @@ const FS = {
       return false;
     }
     try {
-      const h = await window.showDirectoryPicker({mode:'readwrite'});
+      const root = await window.showDirectoryPicker({ mode: 'readwrite' });
+      const h    = await root.getDirectoryHandle('data', { create: true });
+      /* Migration : copie barriere_data.json de la racine vers data/ si absent */
+      try {
+        const oldFh   = await root.getFileHandle(this.fileName);
+        const already = await h.getFileHandle(this.fileName).catch(() => null);
+        if (!already) {
+          const content = await (await oldFh.getFile()).text();
+          const newFh   = await h.getFileHandle(this.fileName, { create: true });
+          const w = await newFh.createWritable(); await w.write(content); await w.close();
+        }
+      } catch {}
       this.dirHandle=h; await this._saveHandle(h); this._updateUI(); await this._ensureFile(); return true;
     } catch(e) {
       if (e.name !== 'AbortError') alert("Impossible d'ouvrir le sélecteur de dossier.\n" + e.message);
@@ -86,10 +97,13 @@ const FS = {
     catch { return {version:1,results:[],sessions:[],tournaments:null}; }
   },
   _updateUI() {
-    const c=!!this.dirHandle;
-    document.getElementById('fs-banner').style.display=c?'none':'flex';
-    document.getElementById('fs-status').style.display=c?'flex':'none';
-    if(c) document.getElementById('fs-filename').textContent=(this.dirHandle.name||'')+'/'+this.fileName;
+    const c  = !!this.dirHandle;
+    const el = document.getElementById('fs-indicator');
+    if (!el) return;
+    el.className = 'fs-indicator ' + (c ? 'connected' : 'disconnected');
+    el.title     = c ? `Connecté · data/${this.fileName}` : 'Cliquer pour connecter le dossier de données';
+    const lbl    = document.getElementById('fs-ind-label');
+    if (lbl) lbl.textContent = c ? 'data/' : 'Données';
   },
   get connected() { return !!this.dirHandle; }
 };
