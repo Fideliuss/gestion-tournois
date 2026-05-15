@@ -210,7 +210,8 @@ body.light .emarg-card { background: rgba(255,252,244,.97); }
 }
 .ec-time.ec-eve { background: rgba(68,114,196,.45); color: #c8dbff; border-color: rgba(68,114,196,.6) !important; }
 .ec-time.ec-sun { background: rgba(197,90,17,.45);  color: #ffc89a; border-color: rgba(197,90,17,.6) !important; }
-.ec-sig  { min-height: 52px; }
+.ec-dep  { width: 46px; text-align: center; }
+.ec-sig  { min-height: 68px; }
 
 /* ── Modal édition extra ── */
 .xt-overlay {
@@ -319,5 +320,6 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print="emargement"] .ec-time { font-size: 8pt; font-weight: 700; width: 32px; }
   body[data-print="emargement"] .ec-time.ec-eve { background: #4472C4 !important; color: #fff !important; }
   body[data-print="emargement"] .ec-time.ec-sun { background: #C55A11 !important; color: #fff !important; }
-  body[data-print="emargement"] .ec-sig  { min-height: 28mm; }
+  body[data-print="emargement"] .ec-dep  { width: 32px; }
+  body[data-print="emargement"] .ec-sig  { min-height: 36mm; }
 }
