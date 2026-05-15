@@ -24,12 +24,9 @@ admin.html          Sous-hub Gestion Administrative
 shared/
   barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator)
   barriere.js       Scripts partagés (toggle jour/nuit, favicon, BarriereFS — couche de persistance File System Access API + IndexedDB partagée entre leaderboard et extras)
-  changelog.js      Généré automatiquement par scripts/update-changelog.ps1 (CHANGELOG[])
+  changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
   logo.png          Logo officiel utilisé dans les courriers
   favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
-
-scripts/
-  update-changelog.ps1   Lit les tags git annotés, écrit shared/changelog.js
 
 leaderboard/
   leaderboard.html  Challenge Saisonnier — HTML pur
@@ -90,25 +87,18 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 6. Relecture + merge de la PR (pas de merge local direct)
 
 **Flux release (develop → main) :**
-1. Push de `develop` à jour : `git push origin develop`
-2. **Ouvrir une PR** `develop → main` sur GitHub — **obligatoire, sans exception**
-3. Vérifier que `CONTEXT.md` et `README.md` sont à jour avant de merger
-4. Merger la PR, puis taguer :
+1. Mettre à jour `shared/changelog.js` sur `develop` : ajouter l'entrée `{ version, date, message }` en tête du tableau — le message = titre de la PR à venir
+2. Mettre à jour `CONTEXT.md` et `README.md` si nécessaire
+3. Push `develop`, ouvrir une PR `develop → main` sur GitHub
+4. Merger la PR
+5. Taguer le merge commit :
    ```
-   git tag -a vX.Y.Z -m "vX.Y.Z — description courte de la release"
+   git checkout main && git pull
+   git tag -a vX.Y.Z -m "vX.Y.Z — titre de la release"
    git push origin vX.Y.Z
    ```
-5. Régénérer le changelog et commiter :
-   ```
-   .\scripts\update-changelog.ps1
-   git add shared/changelog.js
-   git commit -m "chore: changelog vX.Y.Z"
-   git push
-   ```
 
-> Le message du tag annoté est la source de vérité du changelog affiché dans `index.html`.
-
-> **Règle absolue :** aucun `git push` direct sur `main`. Tout passe par une PR GitHub.
+> **Règle absolue :** aucun commit direct sur `main`. Tout passe par une PR. Le tag se pose sur le merge commit, jamais sur un commit séparé.
 
 ---
 
@@ -211,7 +201,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - On travaille toujours sur `develop`, jamais sur `main` directement
 - Tester avec Chrome ou Edge (File System Access API non disponible ailleurs)
 - `data/barriere_data.json` et `data/extras_data.json` ne sont pas dans le repo — les données restent locales
-- `shared/changelog.js` EST dans le repo — généré par le script, pas à modifier à la main
+- `shared/changelog.js` EST dans le repo — **mis à jour manuellement** avant chaque PR de release, jamais via script
 - `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html` (bouton "✉ Courriers")
 - Les destinataires des courriers sont éditables dans l'app (accordéon discret) et persistés dans `localStorage('courriers_tpl')`
 - Si les valeurs par défaut des courriers changent (ex : triangle destinataires), l'utilisateur doit cliquer "Réinitialiser" dans l'accordéon pour purger le localStorage et recharger les nouvelles valeurs
@@ -222,4 +212,4 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - L'impression utilise `injectPageStyle()` pour injecter dynamiquement `@page` (portrait ou paysage) avant `window.print()`, puis nettoie avec un setTimeout
 - Les semaines utilisent la numérotation ISO (lun=1er jour, `getMondayOfISOWeek`)
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
-- **Changelog** : piloté par les tags git annotés. Après chaque release, lancer `.\scripts\update-changelog.ps1` et commiter `shared/changelog.js`. La version affichée dans `index.html` = `CHANGELOG[0].version` (tag le plus récent)
+- **Changelog** : mis à jour manuellement dans `shared/changelog.js` avant la PR de release. Ajouter l'entrée en tête du tableau avec le titre de la PR. La version affichée dans `index.html` = `CHANGELOG[0].version`
