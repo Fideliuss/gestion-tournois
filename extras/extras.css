@@ -276,17 +276,26 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print="emargement"] #emarg-controls,
   body[data-print="emargement"] #assign-card          { display: none !important; }
 
-  /* Casser le max-width des conteneurs pour couvrir toute la page */
+  /* Cascade hauteur : html→body→app→panel→output→grid pour remplir la page */
+  body[data-print="emargement"],
+  body[data-print="emargement"] .app          { height: 100vh !important; }
   body[data-print="emargement"] .xt-panel,
-  body[data-print="emargement"] #tab-emargement       {
+  body[data-print="emargement"] #tab-emargement {
     max-width: none !important; width: 100% !important;
     align-items: stretch !important; padding: 0 !important;
+    height: 100% !important;
+    display: flex !important; flex-direction: column;
   }
-  body[data-print="emargement"] #emarg-output         { margin: 0; padding: 3mm; }
+  body[data-print="emargement"] #emarg-output {
+    margin: 0; padding: 3mm 3mm 3mm 3mm;
+    flex: 1; display: flex; flex-direction: column;
+    height: 100%; box-sizing: border-box;
+  }
 
   body[data-print="emargement"] .emarg-header {
     background: none !important; border: none !important; border-bottom: 1.5pt solid #000 !important;
     border-radius: 0 !important; padding: 0 0 2mm 0 !important; margin-bottom: 3mm;
+    flex-shrink: 0;
   }
   body[data-print="emargement"] .emarg-header-title {
     font-size: 11pt; font-weight: 700; letter-spacing: .1em; color: #000 !important;
@@ -295,12 +304,14 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
     font-size: 8.5pt; color: #444 !important; margin-top: 1mm;
   }
 
-  /* Grille : border top+left sur le conteneur, cards gèrent right+bottom → 0 gap */
+  /* Grille : flex:1 pour remplir la hauteur, rows répartis en 4 égaux */
   body[data-print="emargement"] .emarg-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
     gap: 0;
     width: 100%;
+    flex: 1;
     border-top: 1px solid #000 !important;
     border-left: 1px solid #000 !important;
   }
@@ -325,9 +336,9 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   }
   body[data-print="emargement"] .ec-week {
     background: #e8e8e8 !important; color: #000 !important;
-    font-size: 7pt; font-weight: 700; width: 18mm; font-family: Arial, sans-serif;
+    font-size: 7pt; font-weight: 700; width: 22mm; font-family: Arial, sans-serif;
   }
-  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 7pt; width: 9mm; background: #f4f4f4 !important; font-family: Arial, sans-serif; }
+  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 7pt; width: 11mm; background: #f4f4f4 !important; font-family: Arial, sans-serif; }
   body[data-print="emargement"] .ec-name { color: #000 !important; font-size: 8pt; font-weight: 700; padding: 2px 4px; font-family: Arial, sans-serif; }
 
   body[data-print="emargement"] .emarg-card tbody td {
@@ -340,11 +351,12 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   }
   body[data-print="emargement"] .emarg-card tbody td:last-child { border-right: none !important; }
   body[data-print="emargement"] .emarg-card tbody tr:last-child td { border-bottom: none !important; }
-  body[data-print="emargement"] .ec-date { color: #222 !important; width: 14mm; }
-  body[data-print="emargement"] .ec-dayl { color: #222 !important; width: 10mm; }
-  body[data-print="emargement"] .ec-time { font-weight: 700; width: 12mm; }
+  /* Proportions colonnes calquées sur le modèle Excel (date:18% jour:13% arr:15% dep:15% sig:38%) */
+  body[data-print="emargement"] .ec-date { color: #222 !important; width: 13mm; text-align: center; }
+  body[data-print="emargement"] .ec-dayl { color: #222 !important; width: 9mm;  text-align: center; }
+  body[data-print="emargement"] .ec-time { font-weight: 700; width: 11mm; text-align: center; }
   body[data-print="emargement"] .ec-time.ec-eve { background: #4472C4 !important; color: #fff !important; }
   body[data-print="emargement"] .ec-time.ec-sun { background: #C55A11 !important; color: #fff !important; }
-  body[data-print="emargement"] .ec-dep  { width: 12mm; }
-  body[data-print="emargement"] .ec-sig  { width: auto; }
+  body[data-print="emargement"] .ec-dep  { width: 11mm; text-align: center; }
+  body[data-print="emargement"] .ec-sig  { width: auto; } /* prend le reste ≈ 28mm */
 }
