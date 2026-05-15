@@ -2,30 +2,6 @@
     .hdr { margin-bottom: 32px; }
     .hdr-season { margin-top: 8px; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-dim); }
 
-    /* ── Bandeau File System ── */
-    .fs-banner {
-      width: 100%; max-width: 860px; margin-bottom: 16px;
-      background: rgba(196,160,74,.06); border: 1px solid rgba(196,160,74,.2);
-      border-radius: 3px; padding: 16px 20px;
-      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-    }
-    .fs-banner-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
-    .fs-banner-text strong { color: var(--cream); display: block; margin-bottom: 2px; }
-    .fs-banner-text code { font-family: var(--f-num); font-size: 12px; color: var(--gold); background: rgba(196,160,74,.08); padding: 2px 6px; border-radius: 2px; }
-    body.light .fs-banner { background: rgba(138,104,32,.06); border-color: rgba(138,104,32,.25); }
-
-    .fs-status {
-      width: 100%; max-width: 860px; margin-bottom: 16px;
-      background: rgba(39,174,96,.06); border: 1px solid rgba(39,174,96,.2);
-      border-radius: 3px; padding: 10px 16px;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    }
-    .fs-status-left { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #6dcc8e; }
-    .fs-dot { width: 8px; height: 8px; border-radius: 50%; background: #27AE60; flex-shrink: 0; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-    .fs-filename { font-family: var(--f-num); font-size: 11px; color: var(--gold-dim); }
-    body.light .fs-status { background: rgba(138,104,32,.08); border-color: rgba(138,104,32,.2); }
-
     /* ── Tabs ── */
     .tabs {
       display: flex; gap: 4px; margin-bottom: 24px;

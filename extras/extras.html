@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Déclaration Extras — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css"/>
+  <link rel="stylesheet" href="extras.css"/>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+<button class="fs-indicator disconnected" id="fs-indicator" onclick="connectFolder()" title="Connecter le dossier de données">
+  <span class="fs-ind-dot"></span><span id="fs-ind-label">Données</span>
+</button>
+
+<div class="app">
+  <a href="../admin.html" class="back">← Retour</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Déclaration <em>Extras</em></div>
+    <div class="hdr-sub">Croupiers extras — Déclaration mensuelle DTPJ &amp; Émargement hebdomadaire</div>
+  </div>
+
+  <!-- ── Onglets ── -->
+  <div class="xt-tabs" id="xt-tabs">
+    <button class="xt-tab active" data-tab="liste"       onclick="showTab('liste')">👥 Liste</button>
+    <button class="xt-tab"        data-tab="declaration" onclick="showTab('declaration')">📋 Déclaration</button>
+    <button class="xt-tab"        data-tab="emargement"  onclick="showTab('emargement')">✍ Émargement</button>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       TAB : LISTE DES EXTRAS
+  ════════════════════════════════════════ -->
+  <div id="tab-liste" class="xt-panel">
+
+    <div class="card">
+      <div class="sec">Ajouter un extra</div>
+      <div class="xt-form">
+        <div class="fg">
+          <label class="fl">Nom *</label>
+          <input type="text" id="inp-nom" placeholder="NOM" autocomplete="off"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Prénom *</label>
+          <input type="text" id="inp-prenom" placeholder="Prénom" autocomplete="off"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Date de naissance</label>
+          <input type="text" id="inp-ddn" placeholder="jj/mm/aaaa" style="width:120px" autocomplete="off"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Lieu de naissance</label>
+          <input type="text" id="inp-lieu" placeholder="VILLE" autocomplete="off"/>
+        </div>
+        <div class="fg xt-form-wide">
+          <label class="fl">Adresse</label>
+          <input type="text" id="inp-adresse" placeholder="N° rue..." autocomplete="off"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Code postal</label>
+          <input type="text" id="inp-cp" placeholder="33000" style="width:82px" autocomplete="off"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Ville</label>
+          <input type="text" id="inp-ville" placeholder="BORDEAUX" autocomplete="off"/>
+        </div>
+        <div class="fg" style="justify-content:flex-end">
+          <label class="fl">&nbsp;</label>
+          <button class="btn btn-gold" onclick="addExtra()">+ Ajouter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="sec">Extras enregistrés</div>
+      <div style="overflow-x:auto">
+        <table class="xt-tbl">
+          <thead>
+            <tr>
+              <th>Nom</th><th>Prénom</th><th>Date naiss.</th>
+              <th>Lieu naiss.</th><th>Adresse</th><th>CP</th><th>Ville</th><th></th><th></th>
+            </tr>
+          </thead>
+          <tbody id="extras-list-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tab-liste -->
+
+  <!-- ════════════════════════════════════════
+       TAB : DÉCLARATION MENSUELLE
+  ════════════════════════════════════════ -->
+  <div id="tab-declaration" class="xt-panel" style="display:none">
+
+    <div class="card" id="decl-controls">
+      <div class="sec">Période</div>
+      <div class="period-row">
+        <div class="fg">
+          <label class="fl">Mois</label>
+          <input type="month" id="decl-month-input" onchange="renderDeclaration()"/>
+        </div>
+        <button class="btn btn-gold" onclick="printDeclaration()" style="margin-left:auto">🖨 Imprimer / PDF</button>
+      </div>
+    </div>
+
+    <div id="decl-output" style="margin-top:16px;overflow-x:auto"></div>
+
+  </div><!-- /tab-declaration -->
+
+  <!-- ════════════════════════════════════════
+       TAB : ÉMARGEMENT HEBDOMADAIRE
+  ════════════════════════════════════════ -->
+  <div id="tab-emargement" class="xt-panel" style="display:none">
+
+    <div class="card" id="emarg-controls">
+      <div class="sec">Semaine</div>
+      <div class="period-row">
+        <div class="fg">
+          <label class="fl">Semaine</label>
+          <input type="week" id="emarg-week-input" onchange="onWeekChange()"/>
+        </div>
+        <span id="week-range-label" class="week-range-label"></span>
+        <button class="btn btn-gold" onclick="printEmargement()" style="margin-left:auto">🖨 Imprimer / PDF</button>
+      </div>
+      <div class="div" style="margin:14px 0 10px"></div>
+      <details class="emarg-cfg">
+        <summary class="emarg-cfg-summary">⚙ Horaires par défaut</summary>
+        <div class="period-row" style="margin-top:10px">
+          <div class="fg">
+            <label class="fl">Lun – Sam</label>
+            <input type="text" id="cfg-weekday-time" style="width:80px" onchange="saveCfgFromUI()"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Dimanche</label>
+            <input type="text" id="cfg-sunday-time" style="width:80px" onchange="saveCfgFromUI()"/>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="card" style="margin-top:16px" id="assign-card">
+      <div class="sec">Présences de la semaine</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:14px">Cochez les jours de présence de chaque extra.</p>
+      <div style="overflow-x:auto">
+        <div id="assign-table-wrap"></div>
+      </div>
+    </div>
+
+    <div id="emarg-output" style="margin-top:16px"></div>
+
+  </div><!-- /tab-emargement -->
+
+  <div class="footer">Casino Barrière Bordeaux · Croupiers extras — Déclaration mensuelle DTPJ</div>
+</div>
+
+<!-- ── Modal édition extra ── -->
+<div class="xt-overlay" id="edit-modal" style="display:none" onclick="closeEditModal(event)">
+  <div class="xt-modal">
+    <button class="xt-modal-close" onclick="document.getElementById('edit-modal').style.display='none'">✕</button>
+    <div id="edit-modal-content"></div>
+  </div>
+</div>
+
+<script src="../shared/barriere.js"></script>
+<script src="extras.js"></script>
+</body>
+</html>

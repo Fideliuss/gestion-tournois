@@ -22,10 +22,14 @@ index.html          Hub principal
 admin.html          Sous-hub Gestion Administrative
 
 shared/
-  barriere.css      Styles partagés (thème, composants communs)
-  barriere.js       Scripts partagés (toggle jour/nuit)
+  barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator)
+  barriere.js       Scripts partagés (toggle jour/nuit, favicon)
+  changelog.js      Généré automatiquement par scripts/update-changelog.ps1 (CHANGELOG[])
   logo.png          Logo officiel utilisé dans les courriers
   favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
+
+scripts/
+  update-changelog.ps1   Lit les tags git annotés, écrit shared/changelog.js
 
 leaderboard/
   leaderboard.html  Challenge Saisonnier — HTML pur
@@ -44,6 +48,11 @@ declaration/
   courriers.html    Générateur de courriers PN — accessible depuis declaration.html uniquement
   courriers.css     Styles lettre A4 + règles d'impression
   courriers.js      Logique JS courriers (~300 lignes)
+
+extras/
+  extras.html       Déclaration extras & émargement — HTML pur
+  extras.css        Styles + règles d'impression (portrait déclaration / paysage émargement)
+  extras.js         Logique JS (~270 lignes)
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés.
@@ -56,7 +65,11 @@ declaration/
 - File System Access API (Chrome/Edge uniquement) pour la persistance des données
 - IndexedDB pour mémoriser le handle du dossier entre sessions
 - localStorage comme fallback si dossier non connecté
-- Données stockées dans `barriere_data.json` (exclu du repo via .gitignore)
+- Données stockées dans un sous-dossier `data/` du dossier choisi par l'utilisateur
+  - `data/barriere_data.json` — leaderboard (exclu du repo via .gitignore)
+  - `data/extras_data.json` — extras (exclu du repo, contient données personnelles)
+- Migration automatique : si `barriere_data.json` existe à la racine, il est copié dans `data/` au premier connect
+- Indicateur de connexion : pastille `.fs-indicator` fixe en haut à droite (vert animé = connecté, gris = déconnecté) — défini dans `shared/barriere.css`, présent sur toutes les pages avec FS
 
 ---
 
@@ -80,7 +93,20 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 1. Push de `develop` à jour : `git push origin develop`
 2. **Ouvrir une PR** `develop → main` sur GitHub — **obligatoire, sans exception**
 3. Vérifier que `CONTEXT.md` et `README.md` sont à jour avant de merger
-4. Merger la PR, puis taguer : `git tag vX.Y.Z main && git push origin vX.Y.Z`
+4. Merger la PR, puis taguer :
+   ```
+   git tag -a vX.Y.Z -m "vX.Y.Z — description courte de la release"
+   git push origin vX.Y.Z
+   ```
+5. Régénérer le changelog et commiter :
+   ```
+   .\scripts\update-changelog.ps1
+   git add shared/changelog.js
+   git commit -m "chore: changelog vX.Y.Z"
+   git push
+   ```
+
+> Le message du tag annoté est la source de vérité du changelog affiché dans `index.html`.
 
 > **Règle absolue :** aucun `git push` direct sur `main`. Tout passe par une PR GitHub.
 
@@ -99,6 +125,16 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 7 | declaration.css | Fond beige en mode jour à l'impression — `body` et `.app` passés en `!important` dans `@media print` |
 
 ---
+
+### Déclaration Extras (`extras/`)
+- Liste des croupiers extras avec infos personnelles CRUD (nom, prénom, date/lieu naissance, adresse)
+- **Déclaration mensuelle** : tableau « DECLARATION CROUPIER EXTRA [MOIS] [ANNÉE] - CASINO BORDEAUX » imprimable A4 portrait
+- **Émargement hebdomadaire** : grille 4×N imprimable A4 paysage, une carte par extra avec les 7 jours de la semaine ISO sélectionnée
+  - Cochage des jours travaillés → heure auto (20:55 semaine, 16:55 dimanche, configurables)
+  - Couleurs : bleu (#4472C4) pour jours semaine travaillés, orange (#C55A11) pour dimanche
+  - Cartes blanches en complément pour arriver à un multiple de 4
+- Persistance localStorage : `extras_list`, `extras_cfg`, `extras_emarg_YYYY_WW`
+- Accessible depuis `admin.html` (carte "Déclaration Extras")
 
 ## Fonctionnalités implémentées
 
@@ -172,11 +208,16 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Toujours mettre à jour `CONTEXT.md` et `README.md` avant de créer une PR et de merger** — sans attendre que l'utilisateur le demande
 - On travaille toujours sur `develop`, jamais sur `main` directement
 - Tester avec Chrome ou Edge (File System Access API non disponible ailleurs)
-- `barriere_data.json` n'est pas dans le repo — les données restent locales
+- `data/barriere_data.json` et `data/extras_data.json` ne sont pas dans le repo — les données restent locales
+- `shared/changelog.js` EST dans le repo — généré par le script, pas à modifier à la main
 - `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html` (bouton "✉ Courriers")
 - Les destinataires des courriers sont éditables dans l'app (accordéon discret) et persistés dans `localStorage('courriers_tpl')`
 - Si les valeurs par défaut des courriers changent (ex : triangle destinataires), l'utilisateur doit cliquer "Réinitialiser" dans l'accordéon pour purger le localStorage et recharger les nouvelles valeurs
 - Transitions de page (fade in/out) gérées dans `shared/barriere.js` — classe `is-leaving` sur `<body>`
 - Lien `.back` est `position:fixed` top-left sur toutes les pages
-- La déclaration extras sera dans `declaration/` quand elle sera implémentée, avec une entrée dans `admin.html`
+- La déclaration extras est dans `extras/` et accessible depuis `admin.html`
+- `extras/extras.html` gère 3 onglets : Liste / Déclaration / Émargement — tout en un seul fichier
+- L'impression utilise `injectPageStyle()` pour injecter dynamiquement `@page` (portrait ou paysage) avant `window.print()`, puis nettoie avec un setTimeout
+- Les semaines utilisent la numérotation ISO (lun=1er jour, `getMondayOfISOWeek`)
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
+- **Changelog** : piloté par les tags git annotés. Après chaque release, lancer `.\scripts\update-changelog.ps1` et commiter `shared/changelog.js`. La version affichée dans `index.html` = `CHANGELOG[0].version` (tag le plus récent)
