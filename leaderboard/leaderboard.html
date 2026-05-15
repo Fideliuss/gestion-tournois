@@ -12,6 +12,9 @@
 <button class="theme-toggle" onclick="toggleTheme()">
   <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
 </button>
+<button class="fs-indicator disconnected" id="fs-indicator" onclick="connectFolder()" title="Connecter le dossier de données">
+  <span class="fs-ind-dot"></span><span id="fs-ind-label">Données</span>
+</button>
 
 <div class="app">
   <a href="../index.html" class="back">← Retour au menu</a>
@@ -20,22 +23,6 @@
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
     <div class="hdr-title">Challenge <em>Saisonnier</em></div>
     <div class="hdr-season">Saison 2025 / 2026 · 1er nov → 31 oct</div>
-  </div>
-
-  <div class="fs-banner" id="fs-banner">
-    <div class="fs-banner-text">
-      <strong>📁 Connecter le dossier de données</strong>
-      Les données seront sauvegardées dans <code>barriere_data.json</code> dans ton dossier <code>Tournois Barrière/</code>.
-    </div>
-    <button class="btn-connect" onclick="connectFolder()">Choisir le dossier</button>
-  </div>
-  <div class="fs-status" id="fs-status" style="display:none">
-    <div class="fs-status-left">
-      <div class="fs-dot"></div>
-      <span>Données sauvegardées dans </span>
-      <span class="fs-filename" id="fs-filename">barriere_data.json</span>
-    </div>
-    <button class="btn-ghost" onclick="connectFolder()">Changer de dossier</button>
   </div>
 
   <div class="tabs">

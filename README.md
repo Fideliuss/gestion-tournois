@@ -50,18 +50,29 @@ Génération des 3 courriers officiels d'accompagnement à envoyer chaque mois.
 - Mise en page A4 portrait, police serif, style administratif français, 1 page
 - Export PDF natif via l'impression navigateur
 
+### 👥 Déclaration Extras
+Gestion des croupiers extras — déclaration mensuelle DTPJ et feuilles d'émargement hebdomadaires.
+
+- CRUD complet de la liste des extras (nom, prénom, date/lieu de naissance, adresse)
+- **Déclaration mensuelle** : tableau officiel « DECLARATION CROUPIER EXTRA » imprimable A4 paysage, sélecteur calendrier natif
+- **Émargement hebdomadaire** : grille imprimable A4 paysage, une carte par extra présent
+  - Sélection des présences par semaine (calendrier natif ISO)
+  - Horaires par défaut configurables (20:55 semaine / 16:55 dimanche)
+  - Overrides d'horaires ad-hoc par jour ou par extra × jour
+- Données extras persistées en JSON via File System API (même dossier que le leaderboard)
+
 ---
 
 ## Utilisation
 
 Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récente).
 
-> **Important :** la sauvegarde des données du Challenge Saisonnier utilise l'API File System Access, disponible uniquement sur Chrome et Edge. Les autres navigateurs ne sont pas supportés pour cette fonctionnalité.
+> **Important :** la sauvegarde des données utilise l'API File System Access, disponible uniquement sur Chrome et Edge.
 
-### Première utilisation — Challenge Saisonnier
-1. Ouvrir `leaderboard/leaderboard.html`
-2. Cliquer sur **Choisir le dossier** et sélectionner un dossier sur ton ordinateur
-3. Le fichier `barriere_data.json` sera créé automatiquement dans ce dossier
+### Première utilisation
+1. Ouvrir `leaderboard/leaderboard.html` ou `extras/extras.html`
+2. Cliquer sur l'indicateur **Données** et sélectionner un dossier sur ton ordinateur
+3. Les fichiers `data/barriere_data.json` et `data/extras_data.json` sont créés automatiquement
 4. Les données sont restaurées automatiquement à chaque réouverture
 
 ---
@@ -73,9 +84,13 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 ├── admin.html              — Sous-hub Gestion Administrative
 │
 ├── shared/
-│   ├── barriere.css        — Styles partagés (thème, composants)
-│   ├── barriere.js         — Scripts partagés (thème jour/nuit)
+│   ├── barriere.css        — Styles partagés (thème, composants, .fs-indicator)
+│   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS)
+│   ├── changelog.js        — Généré depuis les tags git (update-changelog.ps1)
 │   └── logo.png            — Logo Casino Barrière Bordeaux
+│
+├── scripts/
+│   └── update-changelog.ps1 — Génère changelog.js depuis les tags git annotés
 │
 ├── leaderboard/
 │   ├── leaderboard.html    — Challenge Saisonnier
@@ -87,13 +102,18 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 │   ├── prize-pool.css
 │   └── prize-pool.js       — Logique React
 │
-└── declaration/
-    ├── declaration.html    — Déclaration Tournois DTPJ
-    ├── declaration.css
-    ├── declaration.js
-    ├── courriers.html      — Courriers PN (accès via declaration.html)
-    ├── courriers.css
-    └── courriers.js
+├── declaration/
+│   ├── declaration.html    — Déclaration Tournois DTPJ
+│   ├── declaration.css
+│   ├── declaration.js
+│   ├── courriers.html      — Courriers PN (accès via declaration.html)
+│   ├── courriers.css
+│   └── courriers.js
+│
+└── extras/
+    ├── extras.html         — Déclaration Extras & Émargement
+    ├── extras.css
+    └── extras.js
 ```
 
 ---
@@ -104,7 +124,7 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 |-------|-------|
 | HTML / CSS / JS vanilla | Base de l'application |
 | React 18 (CDN) | Interface Prize Pool Calculator |
-| File System Access API | Persistance des données leaderboard |
+| File System Access API | Persistance des données leaderboard + extras |
 | IndexedDB | Mémorisation du dossier entre sessions |
 | `localStorage` | Fallback si dossier non connecté |
 
