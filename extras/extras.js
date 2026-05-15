@@ -55,11 +55,27 @@ const FS = {
       const h    = await root.getDirectoryHandle('data', { create: true });
       this.dirHandle = h;
       await this._saveHandle(h);
+      await this._initFiles(h);
       this._updateUI();
       return true;
     } catch (e) {
       if (e.name !== 'AbortError') alert("Impossible d'ouvrir le sélecteur de dossier.\n" + e.message);
       return false;
+    }
+  },
+
+  async _initFiles(h) {
+    const files = [
+      { name: 'barriere_data.json', init: { version:1, results:[], sessions:[], tournaments:null } },
+      { name: 'extras_data.json',   init: { version:1, extras:[] } },
+    ];
+    for (const f of files) {
+      try { await h.getFileHandle(f.name); }
+      catch {
+        const fh = await h.getFileHandle(f.name, { create: true });
+        const w  = await fh.createWritable();
+        await w.write(JSON.stringify(f.init, null, 2)); await w.close();
+      }
     }
   },
 

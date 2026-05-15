@@ -60,7 +60,7 @@ const FS = {
           const w = await newFh.createWritable(); await w.write(content); await w.close();
         }
       } catch {}
-      this.dirHandle=h; await this._saveHandle(h); this._updateUI(); await this._ensureFile(); return true;
+      this.dirHandle=h; await this._saveHandle(h); await this._initFiles(h); this._updateUI(); return true;
     } catch(e) {
       if (e.name !== 'AbortError') alert("Impossible d'ouvrir le sélecteur de dossier.\n" + e.message);
       return false;
@@ -89,8 +89,19 @@ const FS = {
     const w=await fh.createWritable();
     await w.write(JSON.stringify(data,null,2)); await w.close();
   },
-  async _ensureFile() {
-    const d=await this.read(); if(!d.results) await this.write({version:1,results:[],sessions:[],tournaments:null});
+  async _initFiles(h) {
+    const files = [
+      { name: 'barriere_data.json', init: { version:1, results:[], sessions:[], tournaments:null } },
+      { name: 'extras_data.json',   init: { version:1, extras:[] } },
+    ];
+    for (const f of files) {
+      try { await h.getFileHandle(f.name); }
+      catch {
+        const fh = await h.getFileHandle(f.name, { create: true });
+        const w  = await fh.createWritable();
+        await w.write(JSON.stringify(f.init, null, 2)); await w.close();
+      }
+    }
   },
   _fallback() {
     try { return JSON.parse(localStorage.getItem('barriere_fallback'))||{version:1,results:[],sessions:[],tournaments:null}; }
