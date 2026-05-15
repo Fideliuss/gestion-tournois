@@ -23,7 +23,7 @@ admin.html          Sous-hub Gestion Administrative
 
 shared/
   barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator)
-  barriere.js       Scripts partagés (toggle jour/nuit, favicon)
+  barriere.js       Scripts partagés (toggle jour/nuit, favicon, BarriereFS — couche de persistance File System Access API + IndexedDB partagée entre leaderboard et extras)
   changelog.js      Généré automatiquement par scripts/update-changelog.ps1 (CHANGELOG[])
   logo.png          Logo officiel utilisé dans les courriers
   favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
@@ -128,12 +128,14 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 
 ### Déclaration Extras (`extras/`)
 - Liste des croupiers extras avec infos personnelles CRUD (nom, prénom, date/lieu naissance, adresse)
-- **Déclaration mensuelle** : tableau « DECLARATION CROUPIER EXTRA [MOIS] [ANNÉE] - CASINO BORDEAUX » imprimable A4 portrait
-- **Émargement hebdomadaire** : grille 4×N imprimable A4 paysage, une carte par extra avec les 7 jours de la semaine ISO sélectionnée
+- **Déclaration mensuelle** : tableau « DECLARATION CROUPIER EXTRA [MOIS] [ANNÉE] - CASINO BORDEAUX » imprimable A4 paysage, sélecteur `<input type="month">`
+- **Émargement hebdomadaire** : grille 4×N imprimable A4 paysage, sélecteur `<input type="week">`
   - Cochage des jours travaillés → heure auto (20:55 semaine, 16:55 dimanche, configurables)
+  - Overrides d'horaires ad-hoc : par colonne (jour) et par cellule (extra × jour), chaîne de priorité `cellule → colonne → défaut`
+  - Seuls les extras cochés apparaissent dans l'émargement imprimé
   - Couleurs : bleu (#4472C4) pour jours semaine travaillés, orange (#C55A11) pour dimanche
   - Cartes blanches en complément pour arriver à un multiple de 4
-- Persistance localStorage : `extras_list`, `extras_cfg`, `extras_emarg_YYYY_WW`
+- Persistance : extras dans `data/extras_data.json` (via BarriereFS) ; config et émargement dans `localStorage` (`extras_cfg`, `extras_emarg_YYYY_WW`)
 - Accessible depuis `admin.html` (carte "Déclaration Extras")
 
 ## Fonctionnalités implémentées
