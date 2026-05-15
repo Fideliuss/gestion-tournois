@@ -430,6 +430,10 @@ function buildCard(e, week, days, eData, emarg) {
   }).join('');
 
   return `<table class="emarg-card">
+    <colgroup>
+      <col class="col-date"><col class="col-dayl">
+      <col class="col-time"><col class="col-dep"><col class="col-sig">
+    </colgroup>
     <thead><tr>
       <th class="ec-week">${week}</th>
       <th class="ec-j">J</th>
@@ -449,6 +453,10 @@ function buildBlankCard(week, days) {
   </tr>`).join('');
 
   return `<table class="emarg-card">
+    <colgroup>
+      <col class="col-date"><col class="col-dayl">
+      <col class="col-time"><col class="col-dep"><col class="col-sig">
+    </colgroup>
     <thead><tr>
       <th class="ec-week">${week}</th>
       <th class="ec-j">J</th>

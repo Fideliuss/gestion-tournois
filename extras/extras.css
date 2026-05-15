@@ -287,7 +287,7 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
     display: flex !important; flex-direction: column;
   }
   body[data-print="emargement"] #emarg-output {
-    margin: 0; padding: 3mm 3mm 3mm 3mm;
+    margin: 0; padding: 5mm;
     flex: 1; display: flex; flex-direction: column;
     height: 100%; box-sizing: border-box;
   }
@@ -336,9 +336,9 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   }
   body[data-print="emargement"] .ec-week {
     background: #e8e8e8 !important; color: #000 !important;
-    font-size: 7pt; font-weight: 700; width: 22mm; font-family: Arial, sans-serif;
+    font-size: 7pt; font-weight: 700; font-family: Arial, sans-serif;
   }
-  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 7pt; width: 11mm; background: #f4f4f4 !important; font-family: Arial, sans-serif; }
+  body[data-print="emargement"] .ec-j    { color: #000 !important; font-size: 7pt; background: #f4f4f4 !important; font-family: Arial, sans-serif; }
   body[data-print="emargement"] .ec-name { color: #000 !important; font-size: 8pt; font-weight: 700; padding: 2px 4px; font-family: Arial, sans-serif; }
 
   body[data-print="emargement"] .emarg-card tbody td {
@@ -351,12 +351,18 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   }
   body[data-print="emargement"] .emarg-card tbody td:last-child { border-right: none !important; }
   body[data-print="emargement"] .emarg-card tbody tr:last-child td { border-bottom: none !important; }
-  /* Proportions colonnes calquées sur le modèle Excel (date:18% jour:13% arr:15% dep:15% sig:38%) */
-  body[data-print="emargement"] .ec-date { color: #222 !important; width: 13mm; text-align: center; }
-  body[data-print="emargement"] .ec-dayl { color: #222 !important; width: 9mm;  text-align: center; }
-  body[data-print="emargement"] .ec-time { font-weight: 700; width: 11mm; text-align: center; }
+  /* Largeurs imposées via colgroup — table-layout:fixed respecte col avant thead */
+  body[data-print="emargement"] .col-date { width: 11%; }   /* date  : ~8mm  */
+  body[data-print="emargement"] .col-dayl { width: 10%; }   /* jour  : ~7mm  */
+  body[data-print="emargement"] .col-time { width: 14%; }   /* arr   : ~10mm */
+  body[data-print="emargement"] .col-dep  { width: 14%; }   /* dep   : ~10mm */
+  body[data-print="emargement"] .col-sig  { width: 51%; }   /* sig   : ~37mm */
+
+  body[data-print="emargement"] .ec-date { color: #222 !important; text-align: center; }
+  body[data-print="emargement"] .ec-dayl { color: #222 !important; text-align: center; }
+  body[data-print="emargement"] .ec-time { font-weight: 700; text-align: center; }
   body[data-print="emargement"] .ec-time.ec-eve { background: #4472C4 !important; color: #fff !important; }
   body[data-print="emargement"] .ec-time.ec-sun { background: #C55A11 !important; color: #fff !important; }
-  body[data-print="emargement"] .ec-dep  { width: 11mm; text-align: center; }
-  body[data-print="emargement"] .ec-sig  { width: auto; } /* prend le reste ≈ 28mm */
+  body[data-print="emargement"] .ec-dep  { text-align: center; }
+  body[data-print="emargement"] .ec-sig  { }
 }
