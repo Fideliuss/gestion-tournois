@@ -189,8 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     selM.appendChild(o);
   });
   document.getElementById('decl-year').value        = now.getFullYear();
-  document.getElementById('emarg-year').value       = now.getFullYear();
-  document.getElementById('emarg-week').value       = getISOWeek(now);
+  document.getElementById('emarg-week-input').value = `${now.getFullYear()}-W${String(getISOWeek(now)).padStart(2,'0')}`;
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;
   document.getElementById('cfg-sunday-time').value  = cfg.sundayTime;
 
@@ -374,8 +373,9 @@ function renderDeclaration() {
 }
 
 /* ── Émargement — tableau de saisie ── */
-function getEmargYear() { return +document.getElementById('emarg-year').value; }
-function getEmargWeek() { return +document.getElementById('emarg-week').value; }
+function getEmargWeekVal() { return document.getElementById('emarg-week-input').value || ''; }
+function getEmargYear() { const v = getEmargWeekVal(); return v ? +v.split('-W')[0] : new Date().getFullYear(); }
+function getEmargWeek() { const v = getEmargWeekVal(); return v ? +v.split('-W')[1] : getISOWeek(new Date()); }
 
 function onWeekChange() {
   renderAssignTable();

@@ -103,6 +103,17 @@ body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(
   font-size: 11px; font-style: italic; color: var(--gold-dim); white-space: nowrap;
 }
 
+/* ── Config horaires (details/summary) ── */
+.emarg-cfg { width: 100%; }
+.emarg-cfg-summary {
+  font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-muted); cursor: pointer; list-style: none; outline: none;
+  transition: color .18s; user-select: none;
+}
+.emarg-cfg-summary::-webkit-details-marker { display: none; }
+.emarg-cfg-summary:hover { color: var(--gold-dim); }
+.emarg-cfg[open] .emarg-cfg-summary { color: var(--gold-dim); }
+
 /* ── Tableau déclaration mensuelle (écran) ── */
 .decl-extras-tbl {
   width: 100%; border-collapse: collapse; font-size: 12px;

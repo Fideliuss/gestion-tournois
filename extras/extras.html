@@ -124,27 +124,26 @@
       <div class="sec">Semaine</div>
       <div class="period-row">
         <div class="fg">
-          <label class="fl">Année</label>
-          <input type="number" id="emarg-year" min="2020" max="2099" style="width:100px" onchange="onWeekChange()"/>
+          <label class="fl">Semaine</label>
+          <input type="week" id="emarg-week-input" onchange="onWeekChange()"/>
         </div>
-        <div class="fg">
-          <label class="fl">Semaine nº</label>
-          <input type="number" id="emarg-week" min="1" max="53" style="width:80px" onchange="onWeekChange()"/>
-        </div>
-        <div class="fg">
-          <label class="fl" style="white-space:nowrap">Heure semaine</label>
-          <input type="text" id="cfg-weekday-time" style="width:70px" onchange="saveCfgFromUI()"/>
-        </div>
-        <div class="fg">
-          <label class="fl" style="white-space:nowrap">Heure dimanche</label>
-          <input type="text" id="cfg-sunday-time" style="width:70px" onchange="saveCfgFromUI()"/>
-        </div>
-        <div class="fg" style="justify-content:center">
-          <label class="fl">&nbsp;</label>
-          <span id="week-range-label" class="week-range-label"></span>
-        </div>
+        <span id="week-range-label" class="week-range-label"></span>
         <button class="btn btn-gold" onclick="printEmargement()" style="margin-left:auto">🖨 Imprimer / PDF</button>
       </div>
+      <div class="div" style="margin:14px 0 10px"></div>
+      <details class="emarg-cfg">
+        <summary class="emarg-cfg-summary">⚙ Horaires par défaut</summary>
+        <div class="period-row" style="margin-top:10px">
+          <div class="fg">
+            <label class="fl">Lun – Sam</label>
+            <input type="text" id="cfg-weekday-time" style="width:80px" onchange="saveCfgFromUI()"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Dimanche</label>
+            <input type="text" id="cfg-sunday-time" style="width:80px" onchange="saveCfgFromUI()"/>
+          </div>
+        </div>
+      </details>
     </div>
 
     <div class="card" style="margin-top:16px" id="assign-card">
