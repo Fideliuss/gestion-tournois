@@ -86,11 +86,8 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 ├── shared/
 │   ├── barriere.css        — Styles partagés (thème, composants, .fs-indicator)
 │   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS)
-│   ├── changelog.js        — Généré depuis les tags git (update-changelog.ps1)
+│   ├── changelog.js        — Mis à jour manuellement avant chaque PR de release
 │   └── logo.png            — Logo Casino Barrière Bordeaux
-│
-├── scripts/
-│   └── update-changelog.ps1 — Génère changelog.js depuis les tags git annotés
 │
 ├── leaderboard/
 │   ├── leaderboard.html    — Challenge Saisonnier
