@@ -182,7 +182,7 @@ body.light .emarg-card { background: rgba(255,252,244,.97); }
 }
 .ec-week {
   width: 30px; text-align: center;
-  font-family: var(--f-num); font-size: 11px; font-weight: 700;
+  font-family: var(--f-ui); font-size: 11px; font-weight: 700;
   color: var(--gold); background: rgba(196,160,74,.12);
 }
 .ec-j {
@@ -200,16 +200,16 @@ body.light .emarg-card { background: rgba(255,252,244,.97); }
   padding: 4px 6px; font-size: 11px; color: var(--text); vertical-align: middle;
 }
 .ec-date {
-  width: 42px; font-family: var(--f-num); font-size: 10px;
+  width: 42px; font-family: var(--f-ui); font-size: 10px;
   color: var(--text-dim); text-align: center; white-space: nowrap;
 }
 .ec-dayl { width: 32px; font-size: 10px; color: var(--text-dim); text-align: center; }
 .ec-time {
   width: 46px; text-align: center;
-  font-family: var(--f-num); font-size: 10px; font-weight: 600;
+  font-family: var(--f-ui); font-size: 10px; font-weight: 600;
 }
-.ec-time.ec-eve { background: rgba(68,114,196,.25); color: #9bb8f0; }
-.ec-time.ec-sun { background: rgba(197,90,17,.25);  color: #f0a870; }
+.ec-time.ec-eve { background: rgba(68,114,196,.45); color: #c8dbff; border-color: rgba(68,114,196,.6) !important; }
+.ec-time.ec-sun { background: rgba(197,90,17,.45);  color: #ffc89a; border-color: rgba(197,90,17,.6) !important; }
 .ec-sig  { min-height: 28px; }
 
 /* ── Modal édition extra ── */
