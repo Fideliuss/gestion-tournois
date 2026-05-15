@@ -91,14 +91,15 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 2. Mettre à jour `CONTEXT.md` et `README.md` si nécessaire
 3. Push `develop`, ouvrir une PR `develop → main` sur GitHub
 4. Merger la PR
-5. Taguer le merge commit :
+5. Taguer le merge commit (tag léger — hérite du "Verified" GitHub) :
    ```
    git checkout main && git pull
-   git tag -a vX.Y.Z -m "vX.Y.Z — titre de la release"
+   git tag vX.Y.Z
    git push origin vX.Y.Z
    ```
 
 > **Règle absolue :** aucun commit direct sur `main`. Tout passe par une PR. Le tag se pose sur le merge commit, jamais sur un commit séparé.
+> **Tags légers** (`git tag` sans `-a`) : pointent directement sur le merge commit signé par GitHub → badge "Verified" automatique. Ne pas utiliser `-a`.
 
 ---
 

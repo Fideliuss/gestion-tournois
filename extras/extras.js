@@ -424,15 +424,20 @@ function buildCard(e, week, days, eData, emarg) {
       <td class="ec-date">${fmtDate(days[i])}</td>
       <td class="ec-dayl">${DAY_LABELS[i]}</td>
       <td class="ec-time${cls}">${time}</td>
+      <td class="ec-dep"></td>
       <td class="ec-sig"></td>
     </tr>`;
   }).join('');
 
   return `<table class="emarg-card">
+    <colgroup>
+      <col class="col-date"><col class="col-dayl">
+      <col class="col-time"><col class="col-dep"><col class="col-sig">
+    </colgroup>
     <thead><tr>
       <th class="ec-week">${week}</th>
       <th class="ec-j">J</th>
-      <th colspan="2" class="ec-name">${name}</th>
+      <th colspan="3" class="ec-name">${name}</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
@@ -443,14 +448,19 @@ function buildBlankCard(week, days) {
     <td class="ec-date">${fmtDate(days[i])}</td>
     <td class="ec-dayl">${DAY_LABELS[i]}</td>
     <td class="ec-time"></td>
+    <td class="ec-dep"></td>
     <td class="ec-sig"></td>
   </tr>`).join('');
 
   return `<table class="emarg-card">
+    <colgroup>
+      <col class="col-date"><col class="col-dayl">
+      <col class="col-time"><col class="col-dep"><col class="col-sig">
+    </colgroup>
     <thead><tr>
       <th class="ec-week">${week}</th>
       <th class="ec-j">J</th>
-      <th colspan="2" class="ec-name"></th>
+      <th colspan="3" class="ec-name"></th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
@@ -465,7 +475,7 @@ function printDeclaration() {
 }
 
 function printEmargement() {
-  injectPageStyle('@page{size:A4 landscape;margin:6mm}');
+  injectPageStyle('@page{size:A4 landscape;margin:0}');
   document.body.setAttribute('data-print', 'emargement');
   window.print();
   cleanupPrint();
