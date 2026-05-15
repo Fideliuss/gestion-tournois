@@ -181,14 +181,7 @@ function getWeekDays(week, year) {
 document.addEventListener('DOMContentLoaded', async () => {
   const now = new Date();
 
-  const selM = document.getElementById('decl-month');
-  MOIS_FULL.forEach((m, i) => {
-    const o = document.createElement('option');
-    o.value = i + 1; o.textContent = m;
-    if (i === now.getMonth()) o.selected = true;
-    selM.appendChild(o);
-  });
-  document.getElementById('decl-year').value        = now.getFullYear();
+  document.getElementById('decl-month-input').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`;
   document.getElementById('emarg-week-input').value = `${now.getFullYear()}-W${String(getISOWeek(now)).padStart(2,'0')}`;
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;
   document.getElementById('cfg-sunday-time').value  = cfg.sundayTime;
@@ -336,8 +329,9 @@ async function removeExtra(id) {
 }
 
 /* ── Déclaration mensuelle ── */
-function getDeclMonth() { return +document.getElementById('decl-month').value; }
-function getDeclYear()  { return +document.getElementById('decl-year').value; }
+function getDeclMonthVal() { return document.getElementById('decl-month-input').value || ''; }
+function getDeclMonth()    { const v = getDeclMonthVal(); return v ? +v.split('-')[1] : new Date().getMonth() + 1; }
+function getDeclYear()     { const v = getDeclMonthVal(); return v ? +v.split('-')[0] : new Date().getFullYear(); }
 
 function renderDeclaration() {
   const month = getDeclMonth(), year = getDeclYear();

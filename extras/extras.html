@@ -101,11 +101,7 @@
       <div class="period-row">
         <div class="fg">
           <label class="fl">Mois</label>
-          <select id="decl-month" onchange="renderDeclaration()"></select>
-        </div>
-        <div class="fg">
-          <label class="fl">Année</label>
-          <input type="number" id="decl-year" min="2020" max="2099" style="width:100px" onchange="renderDeclaration()"/>
+          <input type="month" id="decl-month-input" onchange="renderDeclaration()"/>
         </div>
         <button class="btn btn-gold" onclick="printDeclaration()" style="margin-left:auto">🖨 Imprimer / PDF</button>
       </div>
