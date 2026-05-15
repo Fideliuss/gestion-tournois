@@ -14,109 +14,22 @@ const DEFAULT_TOURNAMENTS = [
 ];
 
 // ══════════════════════════════════════════════════════
-//  FILE SYSTEM STORAGE
+//  FILE SYSTEM — wrapper leaderboard (via BarriereFS)
 // ══════════════════════════════════════════════════════
 const FS = {
-  dirHandle: null, fileName: 'barriere_data.json', dbName: 'barriere_fs_v1',
-
-  async _openDB() {
-    return new Promise((res,rej) => {
-      const req = indexedDB.open(this.dbName,1);
-      req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
-      req.onsuccess = e => res(e.target.result); req.onerror = rej;
-    });
-  },
-  async _saveHandle(h) {
-    const db = await this._openDB();
-    return new Promise((res,rej) => {
-      const tx = db.transaction('handles','readwrite');
-      tx.objectStore('handles').put(h,'dir');
-      tx.oncomplete=res; tx.onerror=rej;
-    });
-  },
-  async _loadHandle() {
-    const db = await this._openDB();
-    return new Promise((res,rej) => {
-      const tx=db.transaction('handles','readonly');
-      const req=tx.objectStore('handles').get('dir');
-      req.onsuccess=e=>res(e.target.result||null); req.onerror=rej;
-    });
-  },
-  async connect() {
-    if (!window.showDirectoryPicker) {
-      alert("Votre navigateur ne supporte pas la sélection de dossier.\nUtilisez Google Chrome ou Microsoft Edge (version récente).");
-      return false;
-    }
-    try {
-      const root = await window.showDirectoryPicker({ mode: 'readwrite' });
-      const h    = await root.getDirectoryHandle('data', { create: true });
-      /* Migration : copie barriere_data.json de la racine vers data/ si absent */
-      try {
-        const oldFh   = await root.getFileHandle(this.fileName);
-        const already = await h.getFileHandle(this.fileName).catch(() => null);
-        if (!already) {
-          const content = await (await oldFh.getFile()).text();
-          const newFh   = await h.getFileHandle(this.fileName, { create: true });
-          const w = await newFh.createWritable(); await w.write(content); await w.close();
-        }
-      } catch {}
-      this.dirHandle=h; await this._saveHandle(h); await this._initFiles(h); this._updateUI(); return true;
-    } catch(e) {
-      if (e.name !== 'AbortError') alert("Impossible d'ouvrir le sélecteur de dossier.\n" + e.message);
-      return false;
-    }
-  },
-  async restore() {
-    try {
-      const h = await this._loadHandle(); if(!h) return false;
-      const p = await h.queryPermission({mode:'readwrite'});
-      if(p==='granted') { this.dirHandle=h; this._updateUI(); return true; }
-      const g = await h.requestPermission({mode:'readwrite'});
-      if(g==='granted') { this.dirHandle=h; this._updateUI(); return true; }
-    } catch {}
-    return false;
-  },
+  fileName: 'barriere_data.json',
+  get connected() { return BarriereFS.connected; },
   async read() {
-    if(!this.dirHandle) return this._fallback();
-    try {
-      const fh=await this.dirHandle.getFileHandle(this.fileName);
-      return JSON.parse(await (await fh.getFile()).text());
-    } catch { return {version:1,results:[],sessions:[],tournaments:null}; }
+    const fb = { version:1, results:[], sessions:[], tournaments:null };
+    if (!BarriereFS.connected) {
+      try { return JSON.parse(localStorage.getItem('barriere_fallback')) || fb; } catch { return fb; }
+    }
+    return BarriereFS.read(this.fileName, fb);
   },
   async write(data) {
-    if(!this.dirHandle) { localStorage.setItem('barriere_fallback',JSON.stringify(data)); return; }
-    const fh=await this.dirHandle.getFileHandle(this.fileName,{create:true});
-    const w=await fh.createWritable();
-    await w.write(JSON.stringify(data,null,2)); await w.close();
+    if (!BarriereFS.connected) { localStorage.setItem('barriere_fallback', JSON.stringify(data)); return; }
+    await BarriereFS.write(this.fileName, data);
   },
-  async _initFiles(h) {
-    const files = [
-      { name: 'barriere_data.json', init: { version:1, results:[], sessions:[], tournaments:null } },
-      { name: 'extras_data.json',   init: { version:1, extras:[] } },
-    ];
-    for (const f of files) {
-      try { await h.getFileHandle(f.name); }
-      catch {
-        const fh = await h.getFileHandle(f.name, { create: true });
-        const w  = await fh.createWritable();
-        await w.write(JSON.stringify(f.init, null, 2)); await w.close();
-      }
-    }
-  },
-  _fallback() {
-    try { return JSON.parse(localStorage.getItem('barriere_fallback'))||{version:1,results:[],sessions:[],tournaments:null}; }
-    catch { return {version:1,results:[],sessions:[],tournaments:null}; }
-  },
-  _updateUI() {
-    const c  = !!this.dirHandle;
-    const el = document.getElementById('fs-indicator');
-    if (!el) return;
-    el.className = 'fs-indicator ' + (c ? 'connected' : 'disconnected');
-    el.title     = c ? `Connecté · data/${this.fileName}` : 'Cliquer pour connecter le dossier de données';
-    const lbl    = document.getElementById('fs-ind-label');
-    if (lbl) lbl.textContent = c ? 'data/' : 'Données';
-  },
-  get connected() { return !!this.dirHandle; }
 };
 
 // ══════════════════════════════════════════════════════
@@ -142,12 +55,12 @@ async function saveTournaments(t) { const d=await getData(); d.tournaments=t; aw
 // ══════════════════════════════════════════════════════
 async function init() {
   document.getElementById('inp-date').value = new Date().toISOString().split('T')[0];
-  await FS.restore();
+  await BarriereFS.restore();
   await populateTournoiSelects();
   await renderClassement();
 }
 
-async function connectFolder() { await FS.connect(); await renderClassement(); }
+async function connectFolder() { await BarriereFS.connect(); await renderClassement(); }
 
 async function populateTournoiSelects() {
   const tournaments = await getTournaments();

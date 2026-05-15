@@ -11,143 +11,32 @@ const DAY_HDR    = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 
 
 /* ══════════════════════════════════════════════════════
-   FILE SYSTEM STORAGE
-   Partage le même dossier/IndexedDB que le leaderboard
+   FILE SYSTEM — wrapper extras (via BarriereFS)
 ══════════════════════════════════════════════════════ */
 const FS = {
-  dirHandle: null,
-  fileName:  'extras_data.json',
-  dbName:    'barriere_fs_v1',
-
-  async _openDB() {
-    return new Promise((res, rej) => {
-      const req = indexedDB.open(this.dbName, 1);
-      req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
-      req.onsuccess = e => res(e.target.result);
-      req.onerror = rej;
-    });
-  },
-  async _saveHandle(h) {
-    const db = await this._openDB();
-    return new Promise((res, rej) => {
-      const tx = db.transaction('handles', 'readwrite');
-      tx.objectStore('handles').put(h, 'dir');
-      tx.oncomplete = res; tx.onerror = rej;
-    });
-  },
-  async _loadHandle() {
-    const db = await this._openDB();
-    return new Promise((res, rej) => {
-      const tx  = db.transaction('handles', 'readonly');
-      const req = tx.objectStore('handles').get('dir');
-      req.onsuccess = e => res(e.target.result || null);
-      req.onerror = rej;
-    });
-  },
-
-  async connect() {
-    if (!window.showDirectoryPicker) {
-      alert("Votre navigateur ne supporte pas la sélection de dossier.\nUtilisez Google Chrome ou Microsoft Edge.");
-      return false;
-    }
-    try {
-      const root = await window.showDirectoryPicker({ mode: 'readwrite' });
-      const h    = await root.getDirectoryHandle('data', { create: true });
-      this.dirHandle = h;
-      await this._saveHandle(h);
-      await this._initFiles(h);
-      this._updateUI();
-      return true;
-    } catch (e) {
-      if (e.name !== 'AbortError') alert("Impossible d'ouvrir le sélecteur de dossier.\n" + e.message);
-      return false;
-    }
-  },
-
-  async _initFiles(h) {
-    const files = [
-      { name: 'barriere_data.json', init: { version:1, results:[], sessions:[], tournaments:null } },
-      { name: 'extras_data.json',   init: { version:1, extras:[] } },
-    ];
-    for (const f of files) {
-      try { await h.getFileHandle(f.name); }
-      catch {
-        const fh = await h.getFileHandle(f.name, { create: true });
-        const w  = await fh.createWritable();
-        await w.write(JSON.stringify(f.init, null, 2)); await w.close();
-      }
-    }
-  },
-
-  async restore() {
-    try {
-      const h = await this._loadHandle();
-      if (!h) return false;
-      const p = await h.queryPermission({ mode: 'readwrite' });
-      if (p === 'granted')  { this.dirHandle = h; this._updateUI(); return true; }
-      const g = await h.requestPermission({ mode: 'readwrite' });
-      if (g === 'granted')  { this.dirHandle = h; this._updateUI(); return true; }
-    } catch {}
-    return false;
-  },
-
+  fileName: 'extras_data.json',
+  get connected() { return BarriereFS.connected; },
   async readAll() {
-    if (!this.dirHandle) return this._fallback();
-    try {
-      const fh = await this.dirHandle.getFileHandle(this.fileName);
-      return JSON.parse(await (await fh.getFile()).text());
-    } catch {
-      return { version: 1, extras: [] };
+    const fb = { version:1, extras:[] };
+    if (!BarriereFS.connected) {
+      try { return JSON.parse(localStorage.getItem('extras_fallback')) || fb; } catch { return fb; }
     }
+    return BarriereFS.read(this.fileName, fb);
   },
-
   async writeAll(data) {
-    if (!this.dirHandle) {
-      localStorage.setItem('extras_fallback', JSON.stringify(data));
-      return;
-    }
-    const fh = await this.dirHandle.getFileHandle(this.fileName, { create: true });
-    const w  = await fh.createWritable();
-    await w.write(JSON.stringify(data, null, 2));
-    await w.close();
+    if (!BarriereFS.connected) { localStorage.setItem('extras_fallback', JSON.stringify(data)); return; }
+    await BarriereFS.write(this.fileName, data);
   },
-
   async loadExtras() {
     const d = await this.readAll();
     return Array.isArray(d.extras) ? d.extras : [];
   },
-
   async saveExtras(list) {
     const d = await this.readAll();
-    d.version = 1;
-    d.extras  = list;
+    d.version = 1; d.extras = list;
     await this.writeAll(d);
-  },
-
-  _fallback() {
-    try {
-      return JSON.parse(localStorage.getItem('extras_fallback')) || { version: 1, extras: [] };
-    } catch {
-      return { version: 1, extras: [] };
-    }
-  },
-
-  _updateUI() {
-    const c  = !!this.dirHandle;
-    const el = document.getElementById('fs-indicator');
-    if (!el) return;
-    el.className = 'fs-indicator ' + (c ? 'connected' : 'disconnected');
-    el.title     = c ? `Connecté · data/${this.fileName}` : 'Cliquer pour connecter le dossier de données';
-    const lbl    = document.getElementById('fs-ind-label');
-    if (lbl) lbl.textContent = c ? 'data/' : 'Données';
-  },
-
-  get connected() { return !!this.dirHandle; }
+  }
 };
-
-async function connectFolder() {
-  await FS.connect();
-}
 
 /* ── Persistance config + émargement (localStorage) ── */
 function loadCfg()        { try { return Object.assign({weekdayTime:'20:55',sundayTime:'16:55'}, JSON.parse(localStorage.getItem('extras_cfg') || '{}')); } catch { return {weekdayTime:'20:55',sundayTime:'16:55'}; } }
@@ -202,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;
   document.getElementById('cfg-sunday-time').value  = cfg.sundayTime;
 
-  await FS.restore();
+  await BarriereFS.restore();
   extras = await FS.loadExtras();
   renderAll();
 });
