@@ -239,8 +239,8 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  /* Fond blanc de base */
-  html, body { background: #fff !important; color: #000 !important; }
+  /* Fond blanc de base + reset marges navigateur */
+  html, body { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important; }
 
   /* Masquer UI commune dans les deux modes */
   body[data-print] .theme-toggle,
@@ -249,7 +249,7 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print] #xt-tabs,
   body[data-print] .footer,
   body[data-print] .xt-overlay     { display: none !important; }
-  body[data-print] .app            { padding: 0; background: none !important; min-height: unset; }
+  body[data-print] .app            { margin: 0 !important; padding: 0 !important; background: none !important; min-height: unset; width: 100% !important; max-width: none !important; }
 
   /* ── Impression déclaration (portrait) ── */
   body[data-print="declaration"] #tab-liste,
@@ -275,11 +275,11 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print="emargement"] #tab-emargement       { display: block !important; }
   body[data-print="emargement"] #emarg-controls,
   body[data-print="emargement"] #assign-card          { display: none !important; }
-  body[data-print="emargement"] #emarg-output         { margin: 0; }
+  body[data-print="emargement"] #emarg-output         { margin: 0; padding: 4mm; }
 
   body[data-print="emargement"] .emarg-header {
     background: none !important; border: none !important; border-bottom: 1.5pt solid #000 !important;
-    border-radius: 0 !important; padding: 0 0 3mm 0 !important; margin-bottom: 4mm;
+    border-radius: 0 !important; padding: 0 0 2mm 0 !important; margin-bottom: 3mm;
   }
   body[data-print="emargement"] .emarg-header-title {
     font-size: 11pt; font-weight: 700; letter-spacing: .1em; color: #000 !important;

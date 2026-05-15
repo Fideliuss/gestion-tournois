@@ -467,7 +467,7 @@ function printDeclaration() {
 }
 
 function printEmargement() {
-  injectPageStyle('@page{size:A4 landscape;margin:4mm}');
+  injectPageStyle('@page{size:A4 landscape;margin:0}');
   document.body.setAttribute('data-print', 'emargement');
   window.print();
   cleanupPrint();
