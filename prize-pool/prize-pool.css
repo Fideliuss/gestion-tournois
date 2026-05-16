@@ -91,8 +91,12 @@ body.light .pp-preset.active { background: rgba(138,104,32,.1);   border-color: 
 }
 .tm-form-row-split .ig { flex: 1; }
 .tm-split-arrow {
-  font-size: 16px; color: var(--text-muted); opacity: .4;
+  font-size: 14px; color: var(--text-muted); opacity: .35;
   padding-bottom: 8px; flex-shrink: 0;
+}
+.tm-inp-computed {
+  opacity: .5; cursor: default;
+  border-style: dashed !important;
 }
 .tm-inp {
   width: 100%; padding: 8px 10px; font-size: 13px;

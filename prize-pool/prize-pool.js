@@ -711,23 +711,10 @@ function tmOpenForm(editId) {
   document.getElementById('tm-form-name').focus();
 }
 
-function tmOnBuyinChange() {
-  const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
+function tmRecalcBuyin() {
+  const pp    = parseFloat(document.getElementById('tm-form-pp').value)    || 0;
   const frais = parseFloat(document.getElementById('tm-form-frais').value) || 0;
-  if (buyin > 0 && frais > 0 && frais < buyin)
-    document.getElementById('tm-form-pp').value = buyin - frais;
-}
-function tmOnPpChange() {
-  const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
-  const pp    = parseFloat(document.getElementById('tm-form-pp').value) || 0;
-  if (buyin > 0 && pp > 0 && pp < buyin)
-    document.getElementById('tm-form-frais').value = buyin - pp;
-}
-function tmOnFraisChange() {
-  const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
-  const frais = parseFloat(document.getElementById('tm-form-frais').value) || 0;
-  if (buyin > 0 && frais > 0 && frais < buyin)
-    document.getElementById('tm-form-pp').value = buyin - frais;
+  document.getElementById('tm-form-buyin').value = pp + frais > 0 ? pp + frais : '';
 }
 
 function tmCloseForm() {

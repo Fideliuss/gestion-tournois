@@ -154,19 +154,18 @@
       </div>
       <div class="form-row-3" style="grid-template-columns:1fr 1fr 1fr">
         <div class="fg">
-          <div class="fl">Buy-in (€)</div>
-          <input type="number" id="form-buyin" min="1" placeholder="150" style="padding-left:12px"
-            oninput="lbOnBuyinChange()" />
-        </div>
-        <div class="fg">
           <div class="fl">Part PP (€)</div>
           <input type="number" id="form-pp" min="1" placeholder="130" style="padding-left:12px"
-            oninput="lbOnPpChange()" />
+            oninput="lbRecalcBuyin()" />
         </div>
         <div class="fg">
           <div class="fl">Frais (€)</div>
           <input type="number" id="form-frais" min="1" placeholder="20" style="padding-left:12px"
-            oninput="lbOnFraisChange()" />
+            oninput="lbRecalcBuyin()" />
+        </div>
+        <div class="fg">
+          <div class="fl">Buy-in (€) <span style="opacity:.4;font-size:9px">auto</span></div>
+          <input type="number" id="form-buyin" placeholder="150" style="padding-left:12px;opacity:.5;cursor:default" readonly tabindex="-1" />
         </div>
       </div>
 

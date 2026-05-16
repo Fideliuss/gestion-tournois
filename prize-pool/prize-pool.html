@@ -261,20 +261,19 @@
         </div>
         <div class="tm-form-row tm-form-row-split">
           <div class="ig">
-            <div class="il">Buy-in (€)</div>
-            <input type="number" id="tm-form-buyin" min="1" step="5" placeholder="150" class="tm-inp"
-              oninput="tmOnBuyinChange()" onkeydown="if(event.key==='Enter')tmSave()"/>
-          </div>
-          <div class="tm-split-arrow">⌥</div>
-          <div class="ig">
             <div class="il">Part PP (€)</div>
             <input type="number" id="tm-form-pp" min="1" step="1" placeholder="130" class="tm-inp"
-              oninput="tmOnPpChange()" onkeydown="if(event.key==='Enter')tmSave()"/>
+              oninput="tmRecalcBuyin()" onkeydown="if(event.key==='Enter')tmSave()"/>
           </div>
           <div class="ig">
             <div class="il">Frais (€)</div>
             <input type="number" id="tm-form-frais" min="1" step="1" placeholder="20" class="tm-inp"
-              oninput="tmOnFraisChange()" onkeydown="if(event.key==='Enter')tmSave()"/>
+              oninput="tmRecalcBuyin()" onkeydown="if(event.key==='Enter')tmSave()"/>
+          </div>
+          <div class="tm-split-arrow">=</div>
+          <div class="ig">
+            <div class="il">Buy-in (€)</div>
+            <input type="number" id="tm-form-buyin" class="tm-inp tm-inp-computed" readonly tabindex="-1"/>
           </div>
         </div>
         <div class="tm-form-actions">

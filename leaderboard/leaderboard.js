@@ -286,20 +286,10 @@ async function editTournament(id) {
   document.getElementById('form-name').focus();
 }
 
-function lbOnBuyinChange() {
-  const buyin=parseFloat(document.getElementById('form-buyin').value)||0;
-  const frais=parseFloat(document.getElementById('form-frais').value)||0;
-  if (buyin>0 && frais>0 && frais<buyin) document.getElementById('form-pp').value=buyin-frais;
-}
-function lbOnPpChange() {
-  const buyin=parseFloat(document.getElementById('form-buyin').value)||0;
+function lbRecalcBuyin() {
   const pp   =parseFloat(document.getElementById('form-pp').value)||0;
-  if (buyin>0 && pp>0 && pp<buyin) document.getElementById('form-frais').value=buyin-pp;
-}
-function lbOnFraisChange() {
-  const buyin=parseFloat(document.getElementById('form-buyin').value)||0;
   const frais=parseFloat(document.getElementById('form-frais').value)||0;
-  if (buyin>0 && frais>0 && frais<buyin) document.getElementById('form-pp').value=buyin-frais;
+  document.getElementById('form-buyin').value = pp+frais > 0 ? pp+frais : '';
 }
 
 async function deleteTournament(id) {
