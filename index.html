@@ -9,78 +9,67 @@
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
 
-    /* ── Grille ── */
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 14px;
-      width: 100%; max-width: 1060px;
+      width: 100%; max-width: 860px;
     }
-    @media(max-width:840px){ .grid { grid-template-columns: repeat(2,1fr); } }
-    @media(max-width:540px){ .grid { grid-template-columns: 1fr; } }
+    @media(max-width:720px){ .grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:460px){ .grid { grid-template-columns: 1fr; } }
 
-    /* ── Carte ── */
     .tool-card {
       display: flex; flex-direction: column;
-      text-decoration: none;
+      align-items: center; justify-content: center;
+      text-align: center; text-decoration: none;
+      min-height: 188px; padding: 32px 24px;
       background: var(--bg-card);
       border: 1px solid rgba(196,160,74,.13);
-      border-radius: 3px; padding: 26px 26px 22px;
-      position: relative; overflow: hidden;
-      transition: border-color .2s, background .2s, transform .15s;
+      border-radius: 3px; position: relative; overflow: hidden;
+      transition: border-color .2s, background .2s, transform .16s;
     }
     .tool-card::before, .tool-card::after {
       content: ''; position: absolute;
       width: 10px; height: 10px;
-      border-color: var(--gold); border-style: solid; opacity: .25;
+      border-color: var(--gold); border-style: solid; opacity: .22;
       transition: opacity .2s;
     }
     .tool-card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
     .tool-card::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
     .tool-card:hover {
-      border-color: rgba(196,160,74,.32);
+      border-color: rgba(196,160,74,.35);
       background: rgba(28,24,16,.95);
       transform: translateY(-2px);
     }
-    .tool-card:hover::before, .tool-card:hover::after { opacity: .55; }
-    .tool-card.soon { opacity: .38; cursor: not-allowed; pointer-events: none; }
+    .tool-card:hover::before, .tool-card:hover::after { opacity: .6; }
 
     body.light .tool-card { background: rgba(255,252,244,.97); border-color: rgba(138,104,32,.18); box-shadow: 0 2px 14px rgba(0,0,0,.05); }
     body.light .tool-card:hover { background: #fff; border-color: rgba(138,104,32,.38); box-shadow: 0 4px 20px rgba(0,0,0,.08); }
 
-    /* ── En-tête carte ── */
-    .tool-top {
-      display: flex; align-items: flex-start;
-      justify-content: space-between; margin-bottom: 20px;
-    }
     .tool-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 38px; height: 38px; flex-shrink: 0;
-      background: var(--gold-bg); border: 1px solid rgba(196,160,74,.2);
-      border-radius: 3px;
-      font-family: var(--f-num); font-size: 10px; font-weight: 700;
-      letter-spacing: .06em; color: var(--gold);
+      width: 58px; height: 58px; flex-shrink: 0; margin-bottom: 18px;
+      background: linear-gradient(140deg, rgba(196,160,74,.13), rgba(196,160,74,.05));
+      border: 1px solid rgba(196,160,74,.22);
+      border-radius: 4px;
+      font-family: var(--f-num); font-size: 12px; font-weight: 700;
+      letter-spacing: .08em; color: var(--gold);
+      transition: background .2s, border-color .2s;
     }
-    .tool-tag {
-      font-size: 9px; font-weight: 500;
-      letter-spacing: .18em; text-transform: uppercase;
-      color: var(--text-muted); background: transparent;
-      border: 1px solid rgba(196,160,74,.13);
-      border-radius: 2px; padding: 3px 7px;
-      margin-top: 2px;
+    .tool-card:hover .tool-badge {
+      background: linear-gradient(140deg, rgba(196,160,74,.22), rgba(196,160,74,.1));
+      border-color: rgba(196,160,74,.48);
     }
-    body.light .tool-badge { background: rgba(138,104,32,.07); border-color: rgba(138,104,32,.18); }
+    body.light .tool-badge {
+      background: linear-gradient(140deg, rgba(138,104,32,.1), rgba(138,104,32,.04));
+      border-color: rgba(138,104,32,.22);
+    }
 
-    /* ── Corps carte ── */
     .tool-name {
-      font-family: var(--f-display); font-size: 20px; font-weight: 600;
-      color: var(--cream); margin-bottom: 10px; line-height: 1.15;
+      font-family: var(--f-display); font-size: 17px; font-weight: 600;
+      color: var(--cream); line-height: 1.2;
     }
     .tool-name em { font-style: italic; color: var(--gold); }
-    .tool-desc {
-      font-size: 12px; font-weight: 300; color: var(--text-muted);
-      line-height: 1.6; flex: 1;
-    }
 
     /* ── Footer ── */
     .footer {
@@ -90,7 +79,7 @@
     .footer-version {
       display: inline-block; margin-top: 6px;
       font-family: var(--f-num); font-size: 9px;
-      color: var(--text-muted); letter-spacing: .12em; opacity: .6;
+      color: var(--text-muted); letter-spacing: .12em; opacity: .55;
     }
     details.changelog {
       margin-top: 10px; display: inline-block;
@@ -98,8 +87,7 @@
       color: var(--text-muted); letter-spacing: 0; text-align: left;
     }
     details.changelog summary {
-      cursor: pointer; letter-spacing: .12em;
-      list-style: none; outline: none;
+      cursor: pointer; letter-spacing: .12em; list-style: none; outline: none;
       color: var(--text-muted); transition: color .18s;
     }
     details.changelog summary::-webkit-details-marker { display: none; }
@@ -130,36 +118,18 @@
   <div class="grid">
 
     <a href="prize-pool/prize-pool.html" class="tool-card">
-      <div class="tool-top">
-        <div class="tool-badge">PP</div>
-        <span class="tool-tag">Tournoi</span>
-      </div>
+      <div class="tool-badge">PP</div>
       <div class="tool-name">Prize Pool <em>Builder</em></div>
-      <div class="tool-desc">
-        Construction manuelle du prize pool palier par palier — indicateurs en temps réel (Δ, ×Δ accélération, % pool), hints de saisie, suggestion géométrique et impression directe.
-      </div>
     </a>
 
     <a href="leaderboard/leaderboard.html" class="tool-card">
-      <div class="tool-top">
-        <div class="tool-badge">CS</div>
-        <span class="tool-tag">Saison</span>
-      </div>
+      <div class="tool-badge">CS</div>
       <div class="tool-name">Challenge <em>Saisonnier</em></div>
-      <div class="tool-desc">
-        Classement de la saison 2025/2026 — saisie des résultats par tournoi, barème de points configurable, historique complet et document de ranking imprimable.
-      </div>
     </a>
 
     <a href="admin.html" class="tool-card">
-      <div class="tool-top">
-        <div class="tool-badge">ADM</div>
-        <span class="tool-tag">Admin</span>
-      </div>
+      <div class="tool-badge">ADM</div>
       <div class="tool-name">Gestion <em>Administrative</em></div>
-      <div class="tool-desc">
-        Déclarations mensuelles DTPJ — formulaire tournois, gestion des extras, émargement hebdomadaire et courriers d'accompagnement.
-      </div>
     </a>
 
   </div>
