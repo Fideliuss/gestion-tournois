@@ -40,8 +40,96 @@ function calcAutoSpots(players) { return Math.max(1, Math.round(players * 0.12))
    ALGORITHME
    Géométrique bi-zone avec paliers groupés.
    Index interne : 0 = dernier payé, spots-1 = 1er.
+   Deux modes de paliers :
+     'min'   — saut minimum fixe en €
+     'ratio' — chaque saut = saut précédent × tierRatio (×Δ constant)
 ══════════════════════════════════════════════════════ */
-function genPayouts(pool, spots, buyinTotal, lastMult, steepFactor, minJump) {
+function genRaw(pool, spots, buyinTotal, lastMult, steepFactor) {
+  const targetLast = round5(buyinTotal * lastMult);
+  if (targetLast <= 0 || targetLast >= pool) return null;
+
+  const topN = Math.min(4, Math.max(1, Math.floor(spots * 0.45)));
+  const botN = spots - topN;
+
+  const sumForR = r1 => {
+    const r2 = r1 * steepFactor;
+    let s = 0;
+    for (let k = 0; k < botN; k++) s += targetLast * Math.pow(r1, k);
+    const anchor = targetLast * Math.pow(r1, botN - 1);
+    for (let j = 1; j <= topN; j++) s += anchor * Math.pow(r2, j);
+    return s;
+  };
+  let lo = 1.0001, hi = 500;
+  for (let i = 0; i < 400; i++) {
+    const mid = (lo + hi) / 2;
+    if (sumForR(mid) >= pool) hi = mid; else lo = mid;
+  }
+  const r1 = (lo + hi) / 2, r2 = r1 * steepFactor;
+
+  const raw = [];
+  for (let k = 0; k < botN; k++) raw.push(targetLast * Math.pow(r1, k));
+  const anchor = raw[botN - 1];
+  for (let j = 1; j <= topN; j++) raw.push(anchor * Math.pow(r2, j));
+  return raw; /* ascendant : 0 = dernier payé */
+}
+
+/* Mode "saut minimum €" : nouveau palier si saut >= minJump,
+   chaque saut >= saut précédent. */
+function applyTiersMin(raw, minJump) {
+  const result = new Array(raw.length);
+  result[0] = round5(raw[0]);
+  let prevTierVal = result[0], prevTierJump = minJump;
+
+  for (let k = 1; k < raw.length; k++) {
+    const rawR = round5(raw[k]);
+    const jump = rawR - prevTierVal;
+    if (jump < minJump) {
+      result[k] = prevTierVal;
+    } else {
+      const minReq = prevTierVal + Math.max(minJump, ceil5(prevTierJump));
+      result[k]    = Math.max(rawR, minReq);
+      prevTierJump = result[k] - prevTierVal;
+      prevTierVal  = result[k];
+    }
+  }
+  return result;
+}
+
+/* Mode "×Δ cible" : chaque saut de palier = saut précédent × tierRatio.
+   Les ×Δ sont tous exactement égaux à tierRatio. */
+function applyTiersRatio(raw, tierRatio) {
+  const result = new Array(raw.length);
+  result[0] = round5(raw[0]);
+  let prevTierVal = result[0], prevTierJump = 0;
+
+  for (let k = 1; k < raw.length; k++) {
+    const rawR = round5(raw[k]);
+
+    if (prevTierJump === 0) {
+      /* Premier saut : on prend la première valeur naturellement distincte */
+      if (rawR > prevTierVal) {
+        result[k]    = rawR;
+        prevTierJump = rawR - prevTierVal;
+        prevTierVal  = rawR;
+      } else {
+        result[k] = prevTierVal;
+      }
+    } else {
+      /* Saut requis pour le prochain palier = prevJump × tierRatio */
+      const nextTierVal = prevTierVal + round5(prevTierJump * tierRatio);
+      if (rawR < nextTierVal) {
+        result[k] = prevTierVal; /* pas encore atteint le seuil → même palier */
+      } else {
+        result[k]    = nextTierVal; /* snap au saut exact */
+        prevTierJump = round5(prevTierJump * tierRatio);
+        prevTierVal  = nextTierVal;
+      }
+    }
+  }
+  return result;
+}
+
+function genPayouts(pool, spots, buyinTotal, lastMult, steepFactor, tierMode, tierParam) {
   if (!pool || pool <= 0 || !spots || spots < 1) return null;
   if (spots === 1) return [pool];
 
@@ -53,61 +141,12 @@ function genPayouts(pool, spots, buyinTotal, lastMult, steepFactor, minJump) {
     return first > targetLast ? [first, targetLast] : null;
   }
 
-  /* Zones : top = min(4, 45% des places), bot = reste */
-  const topN = Math.min(4, Math.max(1, Math.floor(spots * 0.45)));
-  const botN = spots - topN;
+  const raw = genRaw(pool, spots, buyinTotal, lastMult, steepFactor);
+  if (!raw) return null;
 
-  /* Bisection sur r1 (ratio zone basse) tel que somme = pool.
-     Zone haute : r2 = r1 × steepFactor */
-  const sumForR = r1 => {
-    const r2 = r1 * steepFactor;
-    let s = 0;
-    for (let k = 0; k < botN; k++) s += targetLast * Math.pow(r1, k);
-    const anchor = targetLast * Math.pow(r1, botN - 1);
-    for (let j = 1; j <= topN; j++) s += anchor * Math.pow(r2, j);
-    return s;
-  };
-
-  let lo = 1.0001, hi = 500;
-  for (let i = 0; i < 400; i++) {
-    const mid = (lo + hi) / 2;
-    if (sumForR(mid) >= pool) hi = mid; else lo = mid;
-  }
-  const r1 = (lo + hi) / 2;
-  const r2 = r1 * steepFactor;
-
-  /* Génération des valeurs brutes (ascendant : 0 = dernier) */
-  const raw = [];
-  for (let k = 0; k < botN; k++) raw.push(targetLast * Math.pow(r1, k));
-  const anchor = raw[botN - 1];
-  for (let j = 1; j <= topN; j++) raw.push(anchor * Math.pow(r2, j));
-
-  /* Arrondi bas → haut avec contrainte de paliers.
-     Règles :
-     - Saut depuis le palier précédent < minJump → même palier (valeur identique)
-     - Saut >= minJump → nouveau palier, saut doit être >= saut précédent
-  */
-  const result = new Array(spots);
-  result[0] = round5(raw[0]);
-
-  let prevTierVal  = result[0];
-  let prevTierJump = minJump; /* le premier saut doit être >= minJump */
-
-  for (let k = 1; k < spots - 1; k++) {
-    const rawR = round5(raw[k]);
-    const jumpFromPrev = rawR - prevTierVal;
-
-    if (jumpFromPrev < minJump) {
-      /* Trop petit : même palier */
-      result[k] = prevTierVal;
-    } else {
-      /* Nouveau palier : saut doit être >= saut précédent */
-      const minRequired = prevTierVal + Math.max(minJump, ceil5(prevTierJump));
-      result[k] = Math.max(rawR, minRequired);
-      prevTierJump = result[k] - prevTierVal;
-      prevTierVal  = result[k];
-    }
-  }
+  const result = tierMode === 'ratio'
+    ? applyTiersRatio(raw, tierParam)
+    : applyTiersMin(raw, tierParam);
 
   /* 1er = reste exact du pool */
   const othersSum = result.slice(0, spots - 1).reduce((a, b) => a + b, 0);
@@ -124,7 +163,10 @@ function genPayouts(pool, spots, buyinTotal, lastMult, steepFactor, minJump) {
 let state = {
   total: 150, pp: 130, frais: 20,
   players: 77, spotsManual: false, spotsOverride: 9,
-  lastMult: 2.0, steepFactor: 1.5, minJump: 50,
+  lastMult: 2.0, steepFactor: 1.5,
+  tierMode: 'ratio', /* 'min' | 'ratio' */
+  minJump: 50,       /* utilisé si tierMode === 'min' */
+  tierRatio: 1.5,    /* utilisé si tierMode === 'ratio' */
   activeTournamentId: null,
   tournaments: [],
 };
@@ -136,10 +178,10 @@ function loadPersist() {
 }
 function savePersist() {
   const { total, pp, frais, players, spotsManual, spotsOverride,
-          lastMult, steepFactor, minJump, activeTournamentId } = state;
+          lastMult, steepFactor, tierMode, minJump, tierRatio, activeTournamentId } = state;
   localStorage.setItem(PP_STORE, JSON.stringify({
     total, pp, frais, players, spotsManual, spotsOverride,
-    lastMult, steepFactor, minJump, activeTournamentId
+    lastMult, steepFactor, tierMode, minJump, tierRatio, activeTournamentId
   }));
 }
 function saveSplits() {
@@ -151,7 +193,7 @@ function saveSplits() {
 ══════════════════════════════════════════════════════ */
 function derive() {
   const { total, pp, frais, players, spotsManual, spotsOverride,
-          lastMult, steepFactor, minJump } = state;
+          lastMult, steepFactor, tierMode, minJump, tierRatio } = state;
   const rake      = cent(pp * RAKE_RATE);
   const netPP     = cent(pp - rake);
   const fraisCas  = cent(frais - CAGNOTTE);
@@ -161,8 +203,9 @@ function derive() {
   const poolNet   = ok && players > 0 ? cent(players * netPP) : 0;
   const rakeTotal = ok && players > 0 ? cent(players * rake) : 0;
   const cagTotal  = ok && players > 0 ? cent(players * CAGNOTTE) : 0;
+  const tierParam = tierMode === 'ratio' ? tierRatio : minJump;
   const payouts   = ok && players > 0 && effSpots > 0 && poolNet > 0
-    ? genPayouts(poolNet, effSpots, total, lastMult, steepFactor, minJump)
+    ? genPayouts(poolNet, effSpots, total, lastMult, steepFactor, tierMode, tierParam)
     : null;
   return { rake, netPP, fraisCas, ok, autoSpots, effSpots, poolNet, rakeTotal, cagTotal, payouts };
 }
@@ -383,7 +426,8 @@ function onField(key, val) {
 }
 
 const KEY_TO_ID = { total:'inp-total', pp:'inp-pp', frais:'inp-frais',
-                    players:'inp-players', lastMult:'inp-lastmult', minJump:'inp-minjump' };
+                    players:'inp-players', lastMult:'inp-lastmult',
+                    minJump:'inp-minjump', tierRatio:'inp-tierratio' };
 function clampField(key, min) {
   const el = document.getElementById(KEY_TO_ID[key]);
   const v  = parseFloat(el?.value) || min;
@@ -416,9 +460,19 @@ function toggleManualSpots() {
 
 function setSteep(factor) {
   state.steepFactor = factor;
-  document.querySelectorAll('.param-btn').forEach(b =>
+  document.querySelectorAll('#steep-btns .param-btn').forEach(b =>
     b.classList.toggle('active', parseFloat(b.dataset.steep) === factor)
   );
+  savePersist();
+  render();
+}
+
+function setTierMode(mode) {
+  state.tierMode = mode;
+  document.getElementById('mode-min-btn').classList.toggle('active', mode === 'min');
+  document.getElementById('mode-ratio-btn').classList.toggle('active', mode === 'ratio');
+  document.getElementById('pg-minjump').style.display  = mode === 'min'   ? '' : 'none';
+  document.getElementById('pg-tierratio').style.display = mode === 'ratio' ? '' : 'none';
   savePersist();
   render();
 }
@@ -431,15 +485,21 @@ function doPrint() {
    SYNC INPUTS → valeurs de state vers les champs HTML
 ══════════════════════════════════════════════════════ */
 function syncInputs() {
-  document.getElementById('inp-total'   ).value = state.total;
-  document.getElementById('inp-pp'      ).value = state.pp;
-  document.getElementById('inp-frais'   ).value = state.frais;
-  document.getElementById('inp-players' ).value = state.players;
-  document.getElementById('inp-lastmult').value = state.lastMult;
-  document.getElementById('inp-minjump' ).value = state.minJump;
-  document.querySelectorAll('.param-btn').forEach(b =>
+  document.getElementById('inp-total'    ).value = state.total;
+  document.getElementById('inp-pp'       ).value = state.pp;
+  document.getElementById('inp-frais'    ).value = state.frais;
+  document.getElementById('inp-players'  ).value = state.players;
+  document.getElementById('inp-lastmult' ).value = state.lastMult;
+  document.getElementById('inp-minjump'  ).value = state.minJump;
+  document.getElementById('inp-tierratio').value = state.tierRatio;
+  document.querySelectorAll('#steep-btns .param-btn').forEach(b =>
     b.classList.toggle('active', parseFloat(b.dataset.steep) === state.steepFactor)
   );
+  /* Mode paliers */
+  document.getElementById('mode-min-btn').classList.toggle('active', state.tierMode === 'min');
+  document.getElementById('mode-ratio-btn').classList.toggle('active', state.tierMode === 'ratio');
+  document.getElementById('pg-minjump').style.display   = state.tierMode === 'min'   ? '' : 'none';
+  document.getElementById('pg-tierratio').style.display = state.tierMode === 'ratio' ? '' : 'none';
 }
 
 /* ══════════════════════════════════════════════════════
