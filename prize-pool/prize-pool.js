@@ -1,250 +1,468 @@
-const { useState } = React;
-const h = React.createElement;
+/* ═══════════════════════════════════════════════════════
+   prize-pool.js — Prize Pool Calculator
+   Casino Barrière Bordeaux · Outils Tournois
+═══════════════════════════════════════════════════════ */
 
 const RAKE_RATE = 0.04;
 const CAGNOTTE  = 2;
+const PP_STORE  = 'pp_cfg';
+const PP_SPLITS = 'pp_splits';
 
+const DEFAULT_TOURNAMENTS = [
+  { id:'lucky-monday',     name:'Lucky Monday',        day:'Lundi',     buyin:80  },
+  { id:'knockout-tuesday', name:'Tuesday Knock-Out',   day:'Mardi',     buyin:120 },
+  { id:'funrebuy-tuesday', name:'Fun Rebuy Tuesday',   day:'Mardi',     buyin:40  },
+  { id:'mercredi-poker',   name:'Mercredi Poker Time', day:'Mercredi',  buyin:75  },
+  { id:'small-jeudi',      name:'Small du Jeudi',      day:'Jeudi',     buyin:60  },
+  { id:'friday-highstack', name:'Friday High Stack',   day:'Vendredi',  buyin:150 },
+  { id:'sunday-30k',       name:'Sunday 30K',          day:'Dimanche',  buyin:100 },
+  { id:'sunday-40k',       name:'Sunday 40K',          day:'Dimanche',  buyin:200 },
+  { id:'vsd',              name:'Le 33 (VSD)',          day:'Événement', buyin:330 },
+];
+
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
 const cent   = v => Math.round(v * 100) / 100;
-const round5 = v => Math.round((v - 5) / 10) * 10 + 5;
-const ceil5  = v => Math.ceil((v - 5) / 10) * 10 + 5;
-const T      = k => k * (k + 1) / 2;
-
-function calcSpots(players) { return Math.max(1, Math.round(players * 0.12)); }
-
-function genPayouts(players, netPP, spots, buyinTotal) {
-  const pool = cent(players * netPP);
-  const last = cent(buyinTotal * 2);
-  if (!players||!netPP||!spots||!buyinTotal) return null;
-  if (last>=pool||spots<1||spots>players) return null;
-  if (spots===1) return [pool];
-  if (spots===2) { const f=cent(pool-last); return f>last?[f,last]:null; }
-  const target=pool/last;
-  let lo=1.00001, hi=50;
-  for (let i=0;i<300;i++) {
-    const mid=(lo+hi)/2;
-    const s=Array.from({length:spots},(_,k)=>Math.pow(mid,T(k))).reduce((a,b)=>a+b,0);
-    if (!isFinite(s)||s>=target) hi=mid; else lo=mid;
-  }
-  const r=(lo+hi)/2;
-  const raw=Array.from({length:spots},(_,k)=>last*Math.pow(r,T(k)));
-  const desc=[...raw].reverse();
-  const result=[...desc];
-  for (let i=spots-2;i>=1;i--) result[i]=Math.max(round5(result[i]),ceil5(result[i+1]+1));
-  result[spots-1]=last;
-  const othersSum=cent(result.slice(1).reduce((a,b)=>a+b,0));
-  result[0]=cent(pool-othersSum);
-  if (spots===1) return result;
-  return result[0]>result[1]?result:null;
-}
+const round5 = v => Math.round(v / 5) * 5;
+const ceil5  = v => Math.ceil(v / 5) * 5;
 
 function fmt(n) {
-  const f=Number(n).toFixed(2), [int,dec]=f.split(".");
-  const s=parseInt(int,10).toLocaleString("fr-FR");
-  return dec==="00"?s+" €":s+","+dec+" €";
+  const f = Number(n).toFixed(2), [int, dec] = f.split('.');
+  const s = parseInt(int, 10).toLocaleString('fr-FR');
+  return dec === '00' ? s + ' €' : s + ',' + dec + ' €';
 }
-const ord = n => n+(n===1?"er":"ème");
+const ord = n => n + (n === 1 ? 'er' : 'ème');
 
-const PrintIcon = () => h("svg",{viewBox:"0 0 24 24",xmlns:"http://www.w3.org/2000/svg"},
-  h("path",{d:"M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z",stroke:"currentColor",strokeWidth:1.5,fill:"none",strokeLinecap:"round",strokeLinejoin:"round"})
-);
+function calcAutoSpots(players) { return Math.max(1, Math.round(players * 0.12)); }
 
-function App() {
-  const [sTotal,   setSTotal]   = useState("150");
-  const [sPp,      setSPp]      = useState("125");
-  const [sFrais,   setSFrais]   = useState("25");
-  const [sPlayers, setSPlayers] = useState("77");
-  const [manual,   setManual]   = useState(false);
-  const [spots,    setSpots]    = useState(9);
+/* ══════════════════════════════════════════════════════
+   ALGORITHME
+   Géométrique bi-zone avec paliers groupés.
+   Index interne : 0 = dernier payé, spots-1 = 1er.
+══════════════════════════════════════════════════════ */
+function genPayouts(pool, spots, buyinTotal, lastMult, steepFactor, minJump) {
+  if (!pool || pool <= 0 || !spots || spots < 1) return null;
+  if (spots === 1) return [pool];
 
-  const total   = parseFloat(sTotal)    || 0;
-  const pp      = parseFloat(sPp)       || 0;
-  const frais   = parseFloat(sFrais)    || 0;
-  const players = parseInt(sPlayers,10) || 0;
+  const targetLast = round5(buyinTotal * lastMult);
+  if (targetLast <= 0 || targetLast >= pool) return null;
 
-  const onBT  = () => setSTotal(v   => String(Math.max(0.01, parseFloat(v)||0.01)));
-  const onBP  = () => setSPp(v      => String(Math.max(0.01, parseFloat(v)||0.01)));
-  const onBF  = () => setSFrais(v   => String(Math.max(CAGNOTTE, parseFloat(v)||CAGNOTTE)));
-  const onBPl = () => setSPlayers(v => String(Math.max(2, parseInt(v,10)||2)));
+  if (spots === 2) {
+    const first = pool - targetLast;
+    return first > targetLast ? [first, targetLast] : null;
+  }
 
-  const ok = total>0 && Math.abs(pp+frais-total)<0.001;
+  /* Zones : top = min(4, 45% des places), bot = reste */
+  const topN = Math.min(4, Math.max(1, Math.floor(spots * 0.45)));
+  const botN = spots - topN;
 
-  const rake        = cent(pp*RAKE_RATE);
-  const netPP       = cent(pp-rake);
-  const fraisCasino = cent(frais-CAGNOTTE);
-  const autoSpots   = players>0?calcSpots(players):1;
-  const effSpots    = manual?spots:autoSpots;
-  const poolTotal   = cent(players*netPP);
-  const rakeTotal   = cent(players*rake);
-  const cagTotal    = cent(players*CAGNOTTE);
-  const payouts     = ok&&players>0?genPayouts(players,netPP,effSpots,total):null;
-  const firstPct    = payouts?((payouts[0]/poolTotal)*100).toFixed(1)+" %":"—";
-  const hasErr      = !ok&&sTotal&&sPp&&sFrais;
+  /* Bisection sur r1 (ratio zone basse) tel que somme = pool.
+     Zone haute : r2 = r1 × steepFactor */
+  const sumForR = r1 => {
+    const r2 = r1 * steepFactor;
+    let s = 0;
+    for (let k = 0; k < botN; k++) s += targetLast * Math.pow(r1, k);
+    const anchor = targetLast * Math.pow(r1, botN - 1);
+    for (let j = 1; j <= topN; j++) s += anchor * Math.pow(r2, j);
+    return s;
+  };
 
-  const now = new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"});
+  let lo = 1.0001, hi = 500;
+  for (let i = 0; i < 400; i++) {
+    const mid = (lo + hi) / 2;
+    if (sumForR(mid) >= pool) hi = mid; else lo = mid;
+  }
+  const r1 = (lo + hi) / 2;
+  const r2 = r1 * steepFactor;
 
-  return h("div",{className:"app"},
+  /* Génération des valeurs brutes (ascendant : 0 = dernier) */
+  const raw = [];
+  for (let k = 0; k < botN; k++) raw.push(targetLast * Math.pow(r1, k));
+  const anchor = raw[botN - 1];
+  for (let j = 1; j <= topN; j++) raw.push(anchor * Math.pow(r2, j));
 
-    h("div",{className:"hdr"},
-      h("div",{className:"hdr-logo"},"Casino Barrière · Bordeaux"),
-      h("div",{className:"hdr-title"},"Prize Pool ",h("em",null,"Calculator")),
-      h("div",{className:"hdr-sub"},"Gestion des tournois de poker")
-    ),
+  /* Arrondi bas → haut avec contrainte de paliers.
+     Règles :
+     - Saut depuis le palier précédent < minJump → même palier (valeur identique)
+     - Saut >= minJump → nouveau palier, saut doit être >= saut précédent
+  */
+  const result = new Array(spots);
+  result[0] = round5(raw[0]);
 
-    h("div",{className:"card"},
-      h("div",{className:"sec"},"Structure du buy-in"),
+  let prevTierVal  = result[0];
+  let prevTierJump = minJump; /* le premier saut doit être >= minJump */
 
-      h("div",{className:"buyin-top"},
-        h("div",{className:"ig",style:{width:"210px",alignItems:"center"}},
-          h("div",{className:"il",style:{textAlign:"center"}},"Prix du tournoi"),
-          h("div",{className:"iw"},
-            h("span",{className:"ip"},"€"),
-            h("input",{type:"number",value:sTotal,min:"0.01",step:"0.01",className:hasErr?"err":"",onChange:ev=>setSTotal(ev.target.value),onBlur:onBT})
-          ),
-          h("div",{className:"is",style:{textAlign:"center"}},"Buy-in affiché au joueur")
-        )
-      ),
+  for (let k = 1; k < spots - 1; k++) {
+    const rawR = round5(raw[k]);
+    const jumpFromPrev = rawR - prevTierVal;
 
-      h("div",{className:"buyin-split"},
-        h("div",{className:"buyin-arm"},
-          h("div",{className:"buyin-arm-line"}),
-          h("span",{className:"buyin-arm-sym"},"⌥")
-        ),
-        h("div",{className:"buyin-cols"},
-          h("div",{className:"ig"},
-            h("div",{className:"il"},"Part prize pool"),
-            h("div",{className:"iw"},
-              h("span",{className:"ip"},"€"),
-              h("input",{type:"number",value:sPp,min:"0.01",step:"0.01",className:hasErr?"err":"",onChange:ev=>setSPp(ev.target.value),onBlur:onBP})
-            ),
-            h("div",{className:"is"},"Avant rake (4%)")
-          ),
-          h("div",{className:"ig"},
-            h("div",{className:"il"},"Frais d'entrée"),
-            h("div",{className:"iw"},
-              h("span",{className:"ip"},"€"),
-              h("input",{type:"number",value:sFrais,min:String(CAGNOTTE),step:"0.01",className:hasErr?"err":"",onChange:ev=>setSFrais(ev.target.value),onBlur:onBF})
-            ),
-            h("div",{className:"is"},"Dont "+CAGNOTTE+" € cagnotte fixe")
-          )
-        )
-      ),
+    if (jumpFromPrev < minJump) {
+      /* Trop petit : même palier */
+      result[k] = prevTierVal;
+    } else {
+      /* Nouveau palier : saut doit être >= saut précédent */
+      const minRequired = prevTierVal + Math.max(minJump, ceil5(prevTierJump));
+      result[k] = Math.max(rawR, minRequired);
+      prevTierJump = result[k] - prevTierVal;
+      prevTierVal  = result[k];
+    }
+  }
 
-      hasErr?h("div",{className:"alert"},
-        h("span",{className:"alert-ico"},"⚠"),
-        h("span",{className:"alert-txt"},
-          h("strong",null,"PP ("+fmt(pp)+") + Frais ("+fmt(frais)+") = "+fmt(cent(pp+frais))),
-          " ≠ Prix total ("+fmt(total)+")."
-        )
-      ):null,
+  /* 1er = reste exact du pool */
+  const othersSum = result.slice(0, spots - 1).reduce((a, b) => a + b, 0);
+  result[spots - 1] = pool - othersSum;
 
-      h("div",{className:"div"}),
-      h("div",{className:"sec"},"Décomposition par joueur"),
+  if (result[spots - 1] <= result[spots - 2]) return null;
 
-      h("div",{className:"bk-grid"},
-        h("div",{className:"bk hi"},  h("div",{className:"bk-v"},fmt(netPP)),       h("div",{className:"bk-l"},"PP net / joueur")),
-        h("div",{className:"bk warn"},h("div",{className:"bk-v"},fmt(rake)),         h("div",{className:"bk-l"},"Rake (4%)")),
-        h("div",{className:"bk"},     h("div",{className:"bk-v"},fmt(fraisCasino)),  h("div",{className:"bk-l"},"Frais casino nets")),
-        h("div",{className:"bk"},     h("div",{className:"bk-v"},fmt(CAGNOTTE)+" €"),h("div",{className:"bk-l"},"Cagnotte"))
-      )
-    ),
+  return result.reverse(); /* descendant : 1er en tête */
+}
 
-    h("div",{className:"card card-print"},
-      h("div",{className:"sec"},"Tournoi"),
+/* ══════════════════════════════════════════════════════
+   ÉTAT
+══════════════════════════════════════════════════════ */
+let state = {
+  total: 150, pp: 130, frais: 20,
+  players: 77, spotsManual: false, spotsOverride: 9,
+  lastMult: 2.0, steepFactor: 1.5, minJump: 50,
+  activeTournamentId: null,
+  tournaments: [],
+};
+let ppSplits = {};
 
-      h("div",{className:"print-header"},
-        h("div",null,
-          h("div",{className:"print-title"},"Casino Barrière Bordeaux — ",h("em",null,"Prize Pool")),
-          h("div",{style:{fontSize:"13px",color:"#555",marginTop:"4px",fontFamily:"var(--f-ui)"}},
-            players+" joueurs · Buy-in "+fmt(total)+" · "+effSpots+" places payées"
-          )
-        ),
-        h("div",{className:"print-meta"},
-          h("div",null,now),
-          h("div",null,"Dernier : "+fmt(total*2)),
-          h("div",null,"Prize pool net : "+fmt(poolTotal))
-        )
-      ),
+function loadPersist() {
+  try { Object.assign(state, JSON.parse(localStorage.getItem(PP_STORE) || '{}')); } catch {}
+  try { ppSplits = JSON.parse(localStorage.getItem(PP_SPLITS) || '{}'); } catch {}
+}
+function savePersist() {
+  const { total, pp, frais, players, spotsManual, spotsOverride,
+          lastMult, steepFactor, minJump, activeTournamentId } = state;
+  localStorage.setItem(PP_STORE, JSON.stringify({
+    total, pp, frais, players, spotsManual, spotsOverride,
+    lastMult, steepFactor, minJump, activeTournamentId
+  }));
+}
+function saveSplits() {
+  localStorage.setItem(PP_SPLITS, JSON.stringify(ppSplits));
+}
 
-      h("div",{className:"igrid"},
-        h("div",{className:"ig"},
-          h("div",{className:"il"},"Joueurs"),
-          h("div",{className:"iw"},
-            h("span",{className:"ip",style:{color:"var(--gold-dim)"}},"#"),
-            h("input",{type:"number",value:sPlayers,min:"2",max:"9999",onChange:ev=>setSPlayers(ev.target.value),onBlur:onBPl})
-          )
-        ),
-        h("div",{className:"ig",style:{opacity:.45}},
-          h("div",{className:"il"},"Dernier payé"),
-          h("div",{className:"iw"},
-            h("span",{className:"ip"},"€"),
-            h("input",{type:"number",value:total*2,disabled:true})
-          ),
-          h("div",{className:"is"},"= 2 × prix du tournoi")
-        ),
-        h("div",{className:"ig"},
-          h("div",{className:"il"},"Places payées"),
-          h("div",{className:"iw"},
-            h("span",{className:"ip",style:{color:manual?"var(--gold)":"var(--text-muted)"}},"#"),
-            h("input",{type:"number",value:effSpots,min:"1",max:String(players||9999),
-              disabled:!manual,style:{opacity:manual?1:.5},
-              onChange:ev=>{ let v=parseInt(ev.target.value,10)||1; v=Math.max(1,Math.min(players||9999,v)); setSpots(v); }
-            })
-          )
-        )
-      ),
+/* ══════════════════════════════════════════════════════
+   DÉRIVÉS
+══════════════════════════════════════════════════════ */
+function derive() {
+  const { total, pp, frais, players, spotsManual, spotsOverride,
+          lastMult, steepFactor, minJump } = state;
+  const rake      = cent(pp * RAKE_RATE);
+  const netPP     = cent(pp - rake);
+  const fraisCas  = cent(frais - CAGNOTTE);
+  const ok        = total > 0 && Math.abs(pp + frais - total) < 0.01;
+  const autoSpots = players > 0 ? calcAutoSpots(players) : 1;
+  const effSpots  = spotsManual ? spotsOverride : autoSpots;
+  const poolNet   = ok && players > 0 ? cent(players * netPP) : 0;
+  const rakeTotal = ok && players > 0 ? cent(players * rake) : 0;
+  const cagTotal  = ok && players > 0 ? cent(players * CAGNOTTE) : 0;
+  const payouts   = ok && players > 0 && effSpots > 0 && poolNet > 0
+    ? genPayouts(poolNet, effSpots, total, lastMult, steepFactor, minJump)
+    : null;
+  return { rake, netPP, fraisCas, ok, autoSpots, effSpots, poolNet, rakeTotal, cagTotal, payouts };
+}
 
-      h("div",{className:"tog-row"},
-        h("div",{className:"tog"+(manual?" on":""),onClick:()=>{ if(!manual)setSpots(autoSpots); setManual(m=>!m); }},
-          h("div",{className:"tog-k"})
-        ),
-        h("span",{className:"tog-lbl"},
-          manual?"Places : override manuel":"Places : auto — "+autoSpots+" (12% de "+players+" joueurs)"
-        )
-      ),
+/* ══════════════════════════════════════════════════════
+   RENDU
+══════════════════════════════════════════════════════ */
+function render() {
+  const d = derive();
+  const { ok, payouts } = d;
 
-      h("div",{className:"sum-bar"},
-        h("div",{className:"sum-i"},h("div",{className:"sum-v"},fmt(poolTotal)),h("div",{className:"sum-k"},"Prize pool net")),
-        h("div",{className:"sum-i"},h("div",{className:"sum-v"},fmt(rakeTotal)),h("div",{className:"sum-k"},"Rake total")),
-        h("div",{className:"sum-i"},h("div",{className:"sum-v"},fmt(cagTotal)),h("div",{className:"sum-k"},"Cagnotte totale")),
-        h("div",{className:"sum-i"},h("div",{className:"sum-v"},payouts?fmt(payouts[0]):"—"),h("div",{className:"sum-k"},"1er · "+firstPct))
-      ),
+  /* Tiles buy-in */
+  document.getElementById('bk-netpp').textContent = fmt(d.netPP);
+  document.getElementById('bk-rake' ).textContent = fmt(d.rake);
+  document.getElementById('bk-frais').textContent = fmt(d.fraisCas);
+  document.getElementById('bk-cag'  ).textContent = fmt(CAGNOTTE) + ' €';
 
-      h("div",{className:"table-hdr"},
-        h("div",{className:"tdiv-line"}),
-        payouts?h("button",{className:"btn-print",onClick:()=>window.print()},h(PrintIcon),"Imprimer le tableau"):null
-      ),
+  /* Alerte buy-in */
+  const alertEl = document.getElementById('buyin-alert');
+  if (!ok && state.total && state.pp && state.frais) {
+    alertEl.style.display = 'flex';
+    document.getElementById('buyin-alert-txt').innerHTML =
+      `<strong>PP (${fmt(state.pp)}) + Frais (${fmt(state.frais)}) = ${fmt(cent(state.pp + state.frais))}</strong>` +
+      ` ≠ Prix total (${fmt(state.total)}).`;
+  } else {
+    alertEl.style.display = 'none';
+  }
 
-      !ok
-        ?h("div",{className:"errblk"},"Corrige la décomposition du buy-in.")
-        :!payouts
-          ?h("div",{className:"errblk"},"Configuration invalide.")
-          :h("table",null,
-              h("thead",null,
-                h("tr",null,
-                  h("th",null,"Place"),
-                  h("th",null,"Gain"),
-                  h("th",null,"Δ palier"),
-                  h("th",null,"% pool"),
-                  h("th",{className:"bcell"})
-                )
-              ),
-              h("tbody",null,...payouts.map((amount,i)=>{
-                const delta=i<payouts.length-1?"+"+ Math.round(amount-payouts[i+1]).toLocaleString("fr-FR")+" €":"—";
-                return h("tr",{key:i,className:i===0?"r1":""},
-                  h("td",null,h("span",{className:"badge"},i+1),h("span",{className:"plbl"},ord(i+1))),
-                  h("td",null,h("span",{className:"amt"},fmt(amount))),
-                  h("td",null,h("span",{className:"delta"},delta)),
-                  h("td",null,h("span",{className:"pct"},((amount/poolTotal)*100).toFixed(1)+" %")),
-                  h("td",{className:"bcell"},h("div",{className:"bbg"},h("div",{className:"bfill",style:{width:(amount/payouts[0]*100)+"%"}})))
-                );
-              }))
-            ),
+  /* Classe err sur les inputs */
+  const hasErr = !ok && state.total && state.pp && state.frais;
+  ['inp-total', 'inp-pp', 'inp-frais'].forEach(id => {
+    document.getElementById(id).classList.toggle('err', !!hasErr);
+  });
 
-      h("div",{className:"fnote"},
-        "Progression super-géométrique · Écarts croissants exponentiellement · 1er ≈ 35% · Dernier = 2× prix tournoi · 12% des joueurs · Rake 4% · Cagnotte 2€/joueur"
-      )
-    )
+  /* Summary */
+  document.getElementById('sum-pool' ).textContent = ok ? fmt(d.poolNet)   : '—';
+  document.getElementById('sum-rake' ).textContent = ok ? fmt(d.rakeTotal) : '—';
+  document.getElementById('sum-cag'  ).textContent = ok ? fmt(d.cagTotal)  : '—';
+  document.getElementById('sum-first').textContent = payouts ? fmt(payouts[0]) : '—';
+
+  /* Spots */
+  const spotsInput = document.getElementById('inp-spots');
+  spotsInput.value    = d.effSpots;
+  spotsInput.disabled = !state.spotsManual;
+  document.getElementById('spots-pfx').style.color = state.spotsManual ? 'var(--gold)' : 'var(--text-muted)';
+  document.getElementById('spots-tog').classList.toggle('on', state.spotsManual);
+  document.getElementById('spots-tog-lbl').textContent = state.spotsManual
+    ? 'Places : override manuel'
+    : `Places : auto — ${d.autoSpots} (12% de ${state.players} joueurs)`;
+  document.getElementById('spots-auto-lbl').textContent = state.spotsManual ? '' : '';
+
+  /* Dernier payé hint */
+  const lastEur = round5(state.total * state.lastMult);
+  document.getElementById('last-lbl').textContent =
+    ok ? `≈ ${fmt(lastEur)} (${state.lastMult}× buy-in)` : '';
+
+  /* Table */
+  renderTable(d);
+
+  /* Print header (caché à l'écran, visible à l'impression) */
+  const now = new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+  document.getElementById('print-sub').textContent =
+    `${state.players} joueurs · Buy-in ${fmt(state.total)} · ${d.effSpots} places payées`;
+  document.getElementById('print-meta').innerHTML =
+    `<div>${now}</div><div>Dernier ≈ ${fmt(round5(state.total * state.lastMult))}</div><div>Pool net : ${fmt(d.poolNet)}</div>`;
+}
+
+function renderTable(d) {
+  const tbody   = document.getElementById('pp-tbody');
+  const table   = document.getElementById('pp-table');
+  const errEl   = document.getElementById('pp-error');
+  const fnote   = document.getElementById('pp-fnote');
+  const printBtn = document.getElementById('btn-print');
+
+  if (!d.payouts) {
+    table.style.display   = 'none';
+    fnote.style.display   = 'none';
+    printBtn.style.display = 'none';
+    errEl.style.display   = 'block';
+    errEl.textContent = !d.ok
+      ? 'Corrige la décomposition du buy-in.'
+      : 'Configuration invalide — réduire les places payées ou ajuster le multiplicateur dernier.';
+    return;
+  }
+
+  errEl.style.display    = 'none';
+  table.style.display    = '';
+  fnote.style.display    = '';
+  printBtn.style.display = '';
+
+  const p = d.payouts;
+  /* Calcul des sauts inter-paliers pour ×Δ.
+     On ne compare que les sauts non nuls (transitions de palier). */
+  let prevTierJump = null;
+  const rows = p.map((amount, i) => {
+    const nextAmt  = p[i + 1];
+    const delta    = nextAmt !== undefined ? amount - nextAmt : null;
+    const sameTier = i > 0 && p[i] === p[i - 1];
+    let ratioD = null;
+    if (delta !== null && delta > 0) {
+      if (prevTierJump !== null) ratioD = delta / prevTierJump;
+      prevTierJump = delta;
+    }
+    const pct = (amount / d.poolNet * 100).toFixed(1);
+    return { amount, delta, sameTier, ratioD, pct };
+  });
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const isFirst = i === 0;
+    const trClass = [isFirst ? 'r1' : '', r.sameTier ? 'tier-same' : ''].join(' ').trim();
+
+    let deltaStr = '—';
+    if (r.delta === null)      deltaStr = '<span class="delta">last</span>';
+    else if (r.delta === 0)    deltaStr = '<span class="delta-eq">=</span>';
+    else                       deltaStr = `<span class="delta">+${Math.round(r.delta).toLocaleString('fr-FR')} €</span>`;
+
+    let ratioDStr = '<span class="ratio-d" style="color:var(--text-muted);opacity:.3">—</span>';
+    if (r.ratioD !== null) {
+      const warn  = r.ratioD < 1.0;
+      const label = `×${r.ratioD.toFixed(2)}`;
+      ratioDStr = `<span class="ratio-d${warn ? ' ratio-warn' : ''}">${label}</span>`;
+    }
+
+    return `<tr class="${trClass}">
+      <td><span class="badge">${i + 1}</span><span class="plbl">${ord(i + 1)}</span></td>
+      <td><span class="amt">${fmt(r.amount)}</span></td>
+      <td>${deltaStr}</td>
+      <td>${ratioDStr}</td>
+      <td><span class="pct">${r.pct} %</span></td>
+      <td class="bcell"><div class="bbg"><div class="bfill" style="width:${(r.amount / p[0] * 100).toFixed(1)}%"></div></div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   PRESETS
+══════════════════════════════════════════════════════ */
+function renderPresets() {
+  const wrap = document.getElementById('presets-row');
+  if (!state.tournaments.length) {
+    wrap.innerHTML = '<span class="pp-no-preset">Connectez le dossier de données pour charger les tournois</span>';
+    return;
+  }
+  wrap.innerHTML = state.tournaments.map(t =>
+    `<button class="pp-preset${state.activeTournamentId === t.id ? ' active' : ''}"
+       onclick="applyPreset('${t.id}')">
+      <span class="pp-preset-name">${t.name}</span>
+      <span class="pp-preset-buyin">${t.buyin} €</span>
+    </button>`
+  ).join('');
+}
+
+function applyPreset(id) {
+  const t = state.tournaments.find(t => t.id === id);
+  if (!t) return;
+  state.total = t.buyin;
+  state.activeTournamentId = id;
+  if (ppSplits[id]) {
+    state.pp    = ppSplits[id].pp;
+    state.frais = ppSplits[id].frais;
+  } else {
+    /* Heuristique par défaut : frais ≈ 10% arrondi à 5€, min 5€ */
+    state.frais = Math.max(5, round5(t.buyin * 0.10));
+    state.pp    = t.buyin - state.frais;
+  }
+  /* minJump adaptatif au buy-in : ~25% arrondi à 5€ */
+  state.minJump = Math.max(10, round5(t.buyin * 0.25));
+
+  syncInputs();
+  renderPresets();
+  savePersist();
+  render();
+}
+
+function saveSplitIfActive() {
+  if (!state.activeTournamentId) return;
+  ppSplits[state.activeTournamentId] = { pp: state.pp, frais: state.frais };
+  saveSplits();
+}
+
+/* ══════════════════════════════════════════════════════
+   ÉVÉNEMENTS
+══════════════════════════════════════════════════════ */
+function onField(key, val) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return;
+  state[key] = n;
+
+  /* Synchronisation pp ↔ frais */
+  if (key === 'pp') {
+    state.frais = cent(state.total - state.pp);
+    document.getElementById('inp-frais').value = state.frais;
+    saveSplitIfActive();
+  }
+  if (key === 'frais') {
+    state.pp = cent(state.total - state.frais);
+    document.getElementById('inp-pp').value = state.pp;
+    saveSplitIfActive();
+  }
+  if (key === 'total') {
+    /* Ajuste frais en gardant le ratio, pp prend le reste */
+    if (state.frais > state.total) state.frais = state.total;
+    state.pp = cent(state.total - state.frais);
+    document.getElementById('inp-pp').value    = state.pp;
+    document.getElementById('inp-frais').value = state.frais;
+    saveSplitIfActive();
+  }
+  savePersist();
+  render();
+}
+
+const KEY_TO_ID = { total:'inp-total', pp:'inp-pp', frais:'inp-frais',
+                    players:'inp-players', lastMult:'inp-lastmult', minJump:'inp-minjump' };
+function clampField(key, min) {
+  const el = document.getElementById(KEY_TO_ID[key]);
+  const v  = parseFloat(el?.value) || min;
+  const clamped = Math.max(min, v);
+  if (el) el.value = clamped;
+  state[key] = clamped;
+  savePersist();
+  render();
+}
+
+function onSpotsInput(val) {
+  const n = parseInt(val, 10);
+  if (!isNaN(n) && n >= 1) {
+    state.spotsOverride = n;
+    savePersist();
+    render();
+  }
+}
+
+function toggleManualSpots() {
+  state.spotsManual = !state.spotsManual;
+  if (state.spotsManual) {
+    state.spotsOverride = derive().autoSpots;
+    document.getElementById('inp-spots').value = state.spotsOverride;
+  }
+  document.getElementById('inp-spots').disabled = !state.spotsManual;
+  savePersist();
+  render();
+}
+
+function setSteep(factor) {
+  state.steepFactor = factor;
+  document.querySelectorAll('.param-btn').forEach(b =>
+    b.classList.toggle('active', parseFloat(b.dataset.steep) === factor)
+  );
+  savePersist();
+  render();
+}
+
+function doPrint() {
+  window.print();
+}
+
+/* ══════════════════════════════════════════════════════
+   SYNC INPUTS → valeurs de state vers les champs HTML
+══════════════════════════════════════════════════════ */
+function syncInputs() {
+  document.getElementById('inp-total'   ).value = state.total;
+  document.getElementById('inp-pp'      ).value = state.pp;
+  document.getElementById('inp-frais'   ).value = state.frais;
+  document.getElementById('inp-players' ).value = state.players;
+  document.getElementById('inp-lastmult').value = state.lastMult;
+  document.getElementById('inp-minjump' ).value = state.minJump;
+  document.querySelectorAll('.param-btn').forEach(b =>
+    b.classList.toggle('active', parseFloat(b.dataset.steep) === state.steepFactor)
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  loadPersist();
+  syncInputs();
+
+  await BarriereFS.restore();
+  await loadTournaments();
+
+  render();
+
+  /* Recharger les tournois si le dossier se connecte après coup */
+  document.getElementById('fs-indicator')?.addEventListener('click', async () => {
+    await loadTournaments();
+    render();
+  });
+});
+
+async function loadTournaments() {
+  let tournaments = DEFAULT_TOURNAMENTS;
+  if (BarriereFS.connected) {
+    try {
+      const data = await BarriereFS.read('barriere_data.json',
+        { version:1, results:[], sessions:[], tournaments:null });
+      if (data.tournaments && data.tournaments.length > 0)
+        tournaments = data.tournaments;
+    } catch {}
+  }
+  state.tournaments = tournaments;
+  renderPresets();
+}
