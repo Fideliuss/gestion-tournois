@@ -20,19 +20,37 @@
 
     <div class="hdr">
       <div class="hdr-logo">Casino Barrière · Bordeaux</div>
-      <div class="hdr-title">Prize Pool <em>Calculator</em></div>
-      <div class="hdr-sub">Gestion des tournois de poker</div>
+      <div class="hdr-title">Prize Pool <em>Builder</em></div>
+      <div class="hdr-sub">Construction du prize pool de tournoi</div>
     </div>
 
     <!-- Presets tournois -->
     <div class="card pp-presets-card">
-      <div class="sec">Tournois</div>
-      <div id="presets-row" class="pp-presets-row"></div>
+      <div class="acc-hdr" onclick="toggleAcc('acc-presets')">
+        <div class="acc-hdr-left">
+          <span class="sec acc-title">Tournois</span>
+          <span class="acc-sum" id="acc-sum-presets"></span>
+        </div>
+        <div class="acc-hdr-right">
+          <button class="btn-tm-cfg" onclick="openTmModal(event)" title="Gérer les tournois">⚙</button>
+          <span class="acc-chevron">▾</span>
+        </div>
+      </div>
+      <div class="acc-body" id="acc-presets">
+        <div id="presets-row" class="pp-presets-row"></div>
+      </div>
     </div>
 
     <!-- Structure buy-in -->
     <div class="card">
-      <div class="sec">Structure du buy-in</div>
+      <div class="acc-hdr" onclick="toggleAcc('acc-buyin')">
+        <div class="acc-hdr-left">
+          <span class="sec acc-title">Structure du buy-in</span>
+          <span class="acc-sum" id="acc-sum-buyin"></span>
+        </div>
+        <span class="acc-chevron">▾</span>
+      </div>
+      <div class="acc-body" id="acc-buyin">
 
       <div class="buyin-top">
         <div class="ig" style="width:210px;align-items:center">
@@ -78,17 +96,11 @@
         <span class="alert-txt" id="buyin-alert-txt"></span>
       </div>
 
-      <div class="div"></div>
-      <div class="sec">Décomposition par joueur</div>
-      <div class="bk-grid">
-        <div class="bk hi" ><div class="bk-v" id="bk-netpp">—</div><div class="bk-l">PP net / joueur</div></div>
-        <div class="bk warn"><div class="bk-v" id="bk-rake" >—</div><div class="bk-l">Rake (4%)</div></div>
-        <div class="bk"    ><div class="bk-v" id="bk-frais">—</div><div class="bk-l">Frais casino nets</div></div>
-        <div class="bk"    ><div class="bk-v" id="bk-cag"  >—</div><div class="bk-l">Cagnotte</div></div>
-      </div>
+
+      </div><!-- /acc-body -->
     </div>
 
-    <!-- Tournoi + params + table -->
+    <!-- Tournoi + construction + table -->
     <div class="card card-print">
 
       <div class="print-header" id="print-header">
@@ -101,7 +113,8 @@
 
       <div class="sec">Tournoi</div>
 
-      <div class="igrid">
+      <!-- 2 colonnes : joueurs + places -->
+      <div class="igrid-2">
         <div class="ig">
           <div class="il">Joueurs</div>
           <div class="iw">
@@ -117,16 +130,6 @@
             <input type="number" id="inp-spots" min="1"
               oninput="onSpotsInput(this.value)"/>
           </div>
-          <div class="is" id="spots-auto-lbl"></div>
-        </div>
-        <div class="ig">
-          <div class="il">Dernier payé</div>
-          <div class="iw">
-            <span class="ip" style="color:var(--text-muted)">×</span>
-            <input type="number" id="inp-lastmult" min="1" max="5" step="0.1"
-              oninput="onField('lastMult',this.value)" onblur="clampField('lastMult',1)"/>
-          </div>
-          <div class="is" id="last-lbl"></div>
         </div>
       </div>
 
@@ -135,50 +138,72 @@
         <span class="tog-lbl" id="spots-tog-lbl">Places : auto</span>
       </div>
 
-      <div class="params-row">
-        <div class="param-group">
-          <div class="param-label">Structure</div>
-          <div class="param-btns" id="steep-btns">
-            <button class="param-btn" data-steep="1.2" onclick="setSteep(1.2)">Plate</button>
-            <button class="param-btn active" data-steep="1.5" onclick="setSteep(1.5)">Standard</button>
-            <button class="param-btn" data-steep="1.8" onclick="setSteep(1.8)">Accentuée</button>
+      <!-- Barre de suggestion -->
+      <div class="suggest-row">
+        <span class="sug-title">Suggestion</span>
+        <div class="sug-params">
+          <div class="sug-param">
+            <span class="sug-lbl">Dernier</span>
+            <div class="iw">
+              <span class="ip" style="color:var(--text-muted)">×</span>
+              <input type="number" id="inp-lastmult" min="1" max="5" step="0.1"
+                oninput="onField('lastMult',this.value)" onblur="clampField('lastMult',1,5)"/>
+            </div>
+          </div>
+          <div class="sug-param">
+            <span class="sug-lbl">1er cible</span>
+            <div class="iw">
+              <span class="ip" style="color:var(--text-muted)">%</span>
+              <input type="number" id="inp-firstpct" min="15" max="45" step="1"
+                oninput="onField('firstPct',this.value)" onblur="clampField('firstPct',15,45)"/>
+            </div>
           </div>
         </div>
-        <div class="param-group">
-          <div class="param-label">Mode paliers</div>
-          <div class="param-btns">
-            <button class="param-btn" id="mode-min-btn"   onclick="setTierMode('min')">Saut €</button>
-            <button class="param-btn active" id="mode-ratio-btn" onclick="setTierMode('ratio')">×Δ cible</button>
-          </div>
-        </div>
-        <div class="param-group" id="pg-minjump" style="display:none">
-          <div class="param-label">Saut minimum</div>
-          <div class="iw" style="max-width:110px">
-            <span class="ip">€</span>
-            <input type="number" id="inp-minjump" min="5" step="5"
-              oninput="onField('minJump',this.value)" onblur="clampField('minJump',5)"/>
-          </div>
-        </div>
-        <div class="param-group" id="pg-tierratio">
-          <div class="param-label">×Δ cible</div>
-          <div class="iw" style="max-width:100px">
-            <span class="ip" style="color:var(--text-muted)">×</span>
-            <input type="number" id="inp-tierratio" min="1.1" max="3" step="0.05"
-              oninput="onField('tierRatio',this.value)" onblur="clampField('tierRatio',1.1)"/>
-          </div>
+        <div class="sug-actions">
+          <button class="btn-suggest" onclick="suggest()">Suggérer</button>
+          <button class="btn-secondary" onclick="clearAmounts()">Effacer</button>
         </div>
       </div>
 
+      <!-- Récap pool -->
       <div class="sum-bar">
-        <div class="sum-i"><div class="sum-v" id="sum-pool" >—</div><div class="sum-k">Prize pool net</div></div>
-        <div class="sum-i"><div class="sum-v" id="sum-rake" >—</div><div class="sum-k">Rake total</div></div>
-        <div class="sum-i"><div class="sum-v" id="sum-cag"  >—</div><div class="sum-k">Cagnotte totale</div></div>
-        <div class="sum-i"><div class="sum-v" id="sum-first">—</div><div class="sum-k">1<sup>er</sup></div></div>
+        <div class="sum-i">
+          <div class="sum-v" id="sum-brut">—</div>
+          <div class="sum-k">Prize pool brut</div>
+        </div>
+        <div class="sum-sep">−</div>
+        <div class="sum-i">
+          <div class="sum-v sum-v-rake" id="sum-rake">—</div>
+          <div class="sum-k">Rake (4%)</div>
+        </div>
+        <div class="sum-i sum-i-accent">
+          <div class="sum-v" id="sum-pool">—</div>
+          <div class="sum-k">Prize pool net</div>
+        </div>
+        <div class="sum-i sum-i-cag">
+          <div class="sum-v-cag" id="sum-cag">—</div>
+          <div class="sum-k">Cagnotte</div>
+        </div>
       </div>
 
+      <!-- Barre restant (indicateur principal) -->
+      <div class="restant-bar restant-idle" id="restant-bar">
+        <div class="restant-info">
+          <span class="restant-label">Restant</span>
+          <span class="restant-value" id="restant-value">
+            <span class="restant-idle-txt">Configurez le buy-in et les joueurs</span>
+          </span>
+        </div>
+        <button class="btn-affecter" id="btn-affecter" onclick="affecterPremier()"
+          title="Affecter ce restant au 1er" style="display:none">
+          → 1er
+        </button>
+      </div>
+
+      <!-- En-tête table + bouton impression -->
       <div class="table-hdr">
         <div class="tdiv-line"></div>
-        <button class="btn-print" id="btn-print" style="display:none" onclick="doPrint()">
+        <button class="btn-print" id="btn-print" onclick="doPrint()" disabled style="opacity:.4">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"
               stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -191,9 +216,9 @@
         <thead>
           <tr>
             <th>Place</th>
-            <th>Gain</th>
+            <th>Montant</th>
             <th>Δ palier</th>
-            <th title="Ratio entre ce saut et le saut précédent — doit être ≥ ×1.0">×Δ</th>
+            <th title="Delta de ce palier / delta du palier inférieur — doit être ≥ ×1.0">×Δ</th>
             <th>% pool</th>
             <th class="bcell"></th>
           </tr>
@@ -203,12 +228,55 @@
 
       <div id="pp-error" class="errblk" style="display:none"></div>
       <div class="fnote" id="pp-fnote" style="display:none">
-        Progression géométrique bi-zone · Paliers groupés · Sauts strictement croissants · 1er = reste exact · Rake 4%
+        Saisie manuelle · Suggestion géométrique disponible · Rake 4% · 1er reçoit le restant exact
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal gestion des tournois -->
+  <div id="tm-modal" class="tm-modal" style="display:none" onclick="closeTmModalIfBg(event)">
+    <div class="tm-modal-box">
+      <div class="tm-modal-hdr">
+        <span class="tm-modal-title">Gestion des tournois</span>
+        <button class="tm-modal-close" onclick="closeTmModal()">✕</button>
+      </div>
+      <div id="tm-list" class="tm-list"></div>
+      <div id="tm-form" class="tm-form" style="display:none">
+        <div class="tm-form-title" id="tm-form-title">Nouveau tournoi</div>
+        <input type="hidden" id="tm-form-edit-id"/>
+        <div class="tm-form-row">
+          <div class="ig">
+            <div class="il">Nom</div>
+            <input type="text" id="tm-form-name" placeholder="Ex : Lucky Monday" class="tm-inp"
+              onkeydown="if(event.key==='Enter')tmSave()"/>
+          </div>
+          <div class="ig">
+            <div class="il">Jour</div>
+            <select id="tm-form-day" class="tm-inp tm-sel">
+              <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
+              <option>Jeudi</option><option>Vendredi</option><option>Samedi</option>
+              <option>Dimanche</option><option>Événement</option>
+            </select>
+          </div>
+          <div class="ig">
+            <div class="il">Buy-in (€)</div>
+            <input type="number" id="tm-form-buyin" min="1" step="5" placeholder="150" class="tm-inp"
+              onkeydown="if(event.key==='Enter')tmSave()"/>
+          </div>
+        </div>
+        <div class="tm-form-actions">
+          <button class="btn-suggest" onclick="tmSave()">Enregistrer</button>
+          <button class="btn-secondary" onclick="tmCloseForm()">Annuler</button>
+        </div>
+      </div>
+      <div class="tm-modal-footer">
+        <button class="btn-secondary" onclick="tmOpenForm(null)">+ Ajouter un tournoi</button>
       </div>
     </div>
   </div>
 
   <script src="../shared/barriere.js"></script>
+  <script src="../shared/tournaments.js"></script>
   <script src="prize-pool.js"></script>
 </body>
 </html>
