@@ -3,10 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Prize Pool" />
-  <meta name="theme-color" content="#0d0c0a" />
   <title>Prize Pool — Casino Barrière Bordeaux</title>
   <link rel="stylesheet" href="../shared/barriere.css" />
   <link rel="stylesheet" href="prize-pool.css" />
@@ -15,13 +11,284 @@
   <button class="theme-toggle" onclick="toggleTheme()">
     <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
   </button>
+  <button class="fs-indicator disconnected" id="fs-indicator" onclick="connectFolder()" title="Connecter le dossier de données">
+    <span class="fs-ind-dot"></span><span id="fs-ind-label">Données</span>
+  </button>
 
-  <div id="root"></div>
-  <a href="../index.html" class="back">← Menu</a>
+  <div class="app">
+    <a href="../index.html" class="back">← Menu</a>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <div class="hdr">
+      <div class="hdr-logo">Casino Barrière · Bordeaux</div>
+      <div class="hdr-title">Prize Pool <em>Builder</em></div>
+      <div class="hdr-sub">Construction du prize pool de tournoi</div>
+    </div>
+
+    <!-- Presets tournois -->
+    <div class="card pp-presets-card">
+      <div class="acc-hdr" onclick="toggleAcc('acc-presets')">
+        <div class="acc-hdr-left">
+          <span class="sec acc-title">Tournois</span>
+          <span class="acc-sum" id="acc-sum-presets"></span>
+        </div>
+        <div class="acc-hdr-right">
+          <button class="btn-tm-cfg" onclick="openTmModal(event)" title="Gérer les tournois">⚙</button>
+          <span class="acc-chevron">▾</span>
+        </div>
+      </div>
+      <div class="acc-body" id="acc-presets">
+        <div id="presets-row" class="pp-presets-row"></div>
+      </div>
+    </div>
+
+    <!-- Structure buy-in -->
+    <div class="card">
+      <div class="acc-hdr" onclick="toggleAcc('acc-buyin')">
+        <div class="acc-hdr-left">
+          <span class="sec acc-title">Structure du buy-in</span>
+          <span class="acc-sum" id="acc-sum-buyin"></span>
+        </div>
+        <span class="acc-chevron">▾</span>
+      </div>
+      <div class="acc-body" id="acc-buyin">
+
+      <div class="buyin-top">
+        <div class="ig" style="width:210px;align-items:center">
+          <div class="il" style="text-align:center">Prix du tournoi</div>
+          <div class="iw">
+            <span class="ip">€</span>
+            <input type="number" id="inp-total" min="0.01" step="0.01"
+              oninput="onField('total',this.value)" onblur="clampField('total',0.01)"/>
+          </div>
+          <div class="is" style="text-align:center">Buy-in affiché au joueur</div>
+        </div>
+      </div>
+
+      <div class="buyin-split">
+        <div class="buyin-arm">
+          <div class="buyin-arm-line"></div>
+          <span class="buyin-arm-sym">⌥</span>
+        </div>
+        <div class="buyin-cols">
+          <div class="ig">
+            <div class="il">Part prize pool</div>
+            <div class="iw">
+              <span class="ip">€</span>
+              <input type="number" id="inp-pp" min="0.01" step="0.01"
+                oninput="onField('pp',this.value)" onblur="clampField('pp',0.01)"/>
+            </div>
+            <div class="is">Avant rake (4%)</div>
+          </div>
+          <div class="ig">
+            <div class="il">Frais d'entrée</div>
+            <div class="iw">
+              <span class="ip">€</span>
+              <input type="number" id="inp-frais" min="2" step="0.01"
+                oninput="onField('frais',this.value)" onblur="clampField('frais',2)"/>
+            </div>
+            <div class="is">Dont <span id="cagnotte-lbl">2</span> € cagnotte</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert" id="buyin-alert" style="display:none">
+        <span class="alert-ico">⚠</span>
+        <span class="alert-txt" id="buyin-alert-txt"></span>
+      </div>
+
+
+      </div><!-- /acc-body -->
+    </div>
+
+    <!-- Tournoi + construction + table -->
+    <div class="card card-print">
+
+      <div class="print-header" id="print-header">
+        <div>
+          <div class="print-title">Casino Barrière Bordeaux — <em>Prize Pool</em></div>
+          <div id="print-sub" style="font-size:13px;color:#555;margin-top:4px;font-family:var(--f-ui)"></div>
+        </div>
+        <div class="print-meta" id="print-meta"></div>
+      </div>
+
+      <div class="sec">Tournoi</div>
+
+      <!-- 2 colonnes : joueurs + places -->
+      <div class="igrid-2">
+        <div class="ig">
+          <div class="il">Joueurs</div>
+          <div class="iw">
+            <span class="ip" style="color:var(--gold-dim)">#</span>
+            <input type="number" id="inp-players" min="2" max="9999"
+              oninput="onField('players',this.value)" onblur="clampField('players',2)"/>
+          </div>
+        </div>
+        <div class="ig">
+          <div class="il">Places payées</div>
+          <div class="iw">
+            <span class="ip" id="spots-pfx" style="color:var(--text-muted)">#</span>
+            <input type="number" id="inp-spots" min="1"
+              oninput="onSpotsInput(this.value)"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="tog-row">
+        <div class="tog" id="spots-tog" onclick="toggleManualSpots()"><div class="tog-k"></div></div>
+        <span class="tog-lbl" id="spots-tog-lbl">Places : auto</span>
+      </div>
+
+      <!-- Barre de suggestion -->
+      <div class="suggest-row">
+        <span class="sug-title">Suggestion</span>
+        <div class="sug-params">
+          <div class="sug-param">
+            <span class="sug-lbl">Dernier</span>
+            <div class="iw">
+              <span class="ip" style="color:var(--text-muted)">×</span>
+              <input type="number" id="inp-lastmult" min="1" max="5" step="0.1"
+                oninput="onField('lastMult',this.value)" onblur="clampField('lastMult',1,5)"/>
+            </div>
+          </div>
+          <div class="sug-param">
+            <span class="sug-lbl">1er cible</span>
+            <div class="iw">
+              <span class="ip" style="color:var(--text-muted)">%</span>
+              <input type="number" id="inp-firstpct" min="15" max="45" step="1"
+                oninput="onField('firstPct',this.value)" onblur="clampField('firstPct',15,45)"/>
+            </div>
+          </div>
+        </div>
+        <div class="sug-actions">
+          <button class="btn-suggest" onclick="suggest()">Suggérer</button>
+          <button class="btn-secondary" onclick="clearAmounts()">Effacer</button>
+        </div>
+      </div>
+
+      <!-- Récap pool -->
+      <div class="sum-bar">
+        <div class="sum-i">
+          <div class="sum-v" id="sum-brut">—</div>
+          <div class="sum-k">Prize pool brut</div>
+        </div>
+        <div class="sum-sep">−</div>
+        <div class="sum-i">
+          <div class="sum-v sum-v-rake" id="sum-rake">—</div>
+          <div class="sum-k">Rake (4%)</div>
+        </div>
+        <div class="sum-i sum-i-accent">
+          <div class="sum-v" id="sum-pool">—</div>
+          <div class="sum-k">Prize pool net</div>
+        </div>
+        <div class="sum-i sum-i-cag">
+          <div class="sum-v-cag" id="sum-cag">—</div>
+          <div class="sum-k">Cagnotte</div>
+        </div>
+      </div>
+
+      <!-- Barre restant (indicateur principal) -->
+      <div class="restant-bar restant-idle" id="restant-bar">
+        <div class="restant-info">
+          <span class="restant-label">Restant</span>
+          <span class="restant-value" id="restant-value">
+            <span class="restant-idle-txt">Configurez le buy-in et les joueurs</span>
+          </span>
+        </div>
+        <button class="btn-affecter" id="btn-affecter" onclick="affecterPremier()"
+          title="Affecter ce restant au 1er" style="display:none">
+          → 1er
+        </button>
+      </div>
+
+      <!-- En-tête table + bouton impression -->
+      <div class="table-hdr">
+        <div class="tdiv-line"></div>
+        <button class="btn-print" id="btn-print" onclick="doPrint()" disabled style="opacity:.4">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"
+              stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Imprimer
+        </button>
+      </div>
+
+      <table id="pp-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Place</th>
+            <th>Montant</th>
+            <th>Δ palier</th>
+            <th title="Delta de ce palier / delta du palier inférieur — doit être ≥ ×1.0">×Δ</th>
+            <th>% pool</th>
+            <th class="bcell"></th>
+          </tr>
+        </thead>
+        <tbody id="pp-tbody"></tbody>
+      </table>
+
+      <div id="pp-error" class="errblk" style="display:none"></div>
+      <div class="fnote" id="pp-fnote" style="display:none">
+        Saisie manuelle · Suggestion géométrique disponible · Rake 4% · 1er reçoit le restant exact
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal gestion des tournois -->
+  <div id="tm-modal" class="tm-modal" style="display:none" onclick="closeTmModalIfBg(event)">
+    <div class="tm-modal-box">
+      <div class="tm-modal-hdr">
+        <span class="tm-modal-title">Gestion des tournois</span>
+        <button class="tm-modal-close" onclick="closeTmModal()">✕</button>
+      </div>
+      <div id="tm-list" class="tm-list"></div>
+      <div id="tm-form" class="tm-form" style="display:none">
+        <div class="tm-form-title" id="tm-form-title">Nouveau tournoi</div>
+        <input type="hidden" id="tm-form-edit-id"/>
+        <div class="tm-form-row">
+          <div class="ig" style="grid-column:1/3">
+            <div class="il">Nom</div>
+            <input type="text" id="tm-form-name" placeholder="Ex : Lucky Monday" class="tm-inp"
+              onkeydown="if(event.key==='Enter')tmSave()"/>
+          </div>
+          <div class="ig">
+            <div class="il">Jour</div>
+            <select id="tm-form-day" class="tm-inp tm-sel">
+              <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
+              <option>Jeudi</option><option>Vendredi</option><option>Samedi</option>
+              <option>Dimanche</option><option>Événement</option>
+            </select>
+          </div>
+        </div>
+        <div class="tm-form-row tm-form-row-split">
+          <div class="ig">
+            <div class="il">Part PP (€)</div>
+            <input type="number" id="tm-form-pp" min="1" step="1" placeholder="130" class="tm-inp"
+              oninput="tmRecalcBuyin()" onkeydown="if(event.key==='Enter')tmSave()"/>
+          </div>
+          <div class="ig">
+            <div class="il">Frais (€)</div>
+            <input type="number" id="tm-form-frais" min="1" step="1" placeholder="20" class="tm-inp"
+              oninput="tmRecalcBuyin()" onkeydown="if(event.key==='Enter')tmSave()"/>
+          </div>
+          <div class="tm-split-arrow">=</div>
+          <div class="ig">
+            <div class="il">Buy-in (€)</div>
+            <input type="number" id="tm-form-buyin" class="tm-inp tm-inp-computed" readonly tabindex="-1"/>
+          </div>
+        </div>
+        <div class="tm-form-actions">
+          <button class="btn-suggest" onclick="tmSave()">Enregistrer</button>
+          <button class="btn-secondary" onclick="tmCloseForm()">Annuler</button>
+        </div>
+      </div>
+      <div class="tm-modal-footer">
+        <button class="btn-secondary" onclick="tmOpenForm(null)">+ Ajouter un tournoi</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../shared/barriere.js"></script>
+  <script src="../shared/tournaments.js"></script>
   <script src="prize-pool.js"></script>
 </body>
 </html>
