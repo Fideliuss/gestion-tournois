@@ -38,8 +38,10 @@ body.light .pp-preset.active { background: rgba(138,104,32,.1);   border-color: 
 /* ── Modal gestion tournois ── */
 .tm-modal {
   position: fixed; inset: 0; z-index: 900;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 72px;
   background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+  overflow-y: auto;
 }
 .tm-modal-box {
   background: var(--card-bg); border: 1px solid rgba(196,160,74,.18);
