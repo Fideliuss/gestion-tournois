@@ -9,9 +9,11 @@ Outils internes de gestion des tournois de poker. Application web locale, sans s
 ### 🎯 Prize Pool Calculator
 Calcule automatiquement la répartition des gains selon le nombre de joueurs et la structure du buy-in.
 
-- Décomposition buy-in : part prize pool, rake (4%), frais casino, cagnotte fixe
-- Progression super-géométrique avec écarts croissants exponentiellement
-- Dernier payé = 2× le prix du tournoi
+- Sélection du tournoi depuis les presets configurables (référentiel centralisé `tournaments.json`)
+- PP et Frais définis par tournoi ; Buy-in = PP + Frais (automatique)
+- Constructeur interactif de répartition avec indicateurs live, hints et suggestion géométrique
+- Bandeau récap : brut / rake / prize pool net / cagnotte
+- Gestion des tournois (CRUD) via ⚙ discret
 - 12% des joueurs payés (ajustable manuellement)
 - Impression directe du tableau
 
@@ -86,6 +88,7 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 ├── shared/
 │   ├── barriere.css        — Styles partagés (thème, composants, .fs-indicator)
 │   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS)
+│   ├── tournaments.js      — Référentiel tournois centralisé (TournamentsStore)
 │   ├── changelog.js        — Mis à jour manuellement avant chaque PR de release
 │   └── logo.png            — Logo Casino Barrière Bordeaux
 │
@@ -131,19 +134,19 @@ Aucun bundler, aucune dépendance npm, aucun serveur. Zéro friction.
 
 ## Tournois configurés par défaut
 
-| Tournoi | Jour | Buy-in | Places payées |
-|---------|------|--------|---------------|
-| Lucky Monday | Lundi | 80 € | 10 |
-| Tuesday Knock-Out | Mardi | 120 € | 10 |
-| Fun Rebuy Tuesday | Mardi | 40 € | 10 |
-| Mercredi Poker Time | Mercredi | 75 € | 10 |
-| Small du Jeudi | Jeudi | 60 € | 10 |
-| Friday High Stack | Vendredi | 150 € | 10 |
-| Sunday 30K | Dimanche | 100 € | 15 |
-| Sunday 40K | Dimanche | 200 € | 17 |
-| Le 33 (VSD) | Événement | 330 € | 20 |
+| Tournoi | Jour | PP | Frais | Buy-in | Places payées |
+|---------|------|----|-------|--------|---------------|
+| Lucky Monday | Lundi | 70 € | 10 € | 80 € | 10 |
+| Tuesday Knock-Out | Mardi | 110 € | 10 € | 120 € | 10 |
+| Fun Rebuy Tuesday | Mardi | 35 € | 5 € | 40 € | 10 |
+| Mercredi Poker Time | Mercredi | 65 € | 10 € | 75 € | 10 |
+| Small du Jeudi | Jeudi | 55 € | 5 € | 60 € | 10 |
+| Friday High Stack | Vendredi | 135 € | 15 € | 150 € | 10 |
+| Sunday 30K | Dimanche | 90 € | 10 € | 100 € | 15 |
+| Sunday 40K | Dimanche | 180 € | 20 € | 200 € | 17 |
+| Le 33 (VSD) | Événement | 295 € | 35 € | 330 € | 20 |
 
-Les tournois sont entièrement configurables depuis l'onglet **⚙ Tournois** du leaderboard.
+Les tournois sont entièrement configurables depuis le ⚙ du Prize Pool Calculator ou l'onglet **⚙ Tournois** du leaderboard.
 
 ---
 

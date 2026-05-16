@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.5.0', date: '2026-05-16', message: 'Prize Pool Builder — constructeur manuel, indicateurs live, hints, suggestion géométrique ; référentiel tournois centralisé (tournaments.json, PP/Frais par tournoi) ; menus redessinés (emoji + couleur accent par carte)' },
   { version: 'v1.4.2', date: '2026-05-15', message: 'Émargement — mise en page impression pleine page, proportions colonnes, colonne départ' },
   { version: 'v1.4.1', date: '2026-05-15', message: 'Corrections émargement — police, couleurs, mise en page impression' },
   { version: 'v1.4.0', date: '2026-05-15', message: 'Outil Déclaration Extras & Émargement hebdomadaire' },

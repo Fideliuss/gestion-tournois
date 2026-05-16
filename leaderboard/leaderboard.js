@@ -1,17 +1,7 @@
 // ══════════════════════════════════════════════════════
 //  TOURNOIS PAR DÉFAUT
 // ══════════════════════════════════════════════════════
-const DEFAULT_TOURNAMENTS = [
-  { id:'lucky-monday',     name:'Lucky Monday',        day:'Lundi',     buyin:80,  points:[22,16,13,11,9,8,7,6,5,4] },
-  { id:'knockout-tuesday', name:'Tuesday Knock-Out',   day:'Mardi',     buyin:120, points:[31,23,18,15,13,11,10,9,8,7] },
-  { id:'funrebuy-tuesday', name:'Fun Rebuy Tuesday',   day:'Mardi',     buyin:40,  points:[15,12,9,8,7,6,5,4,3,2] },
-  { id:'mercredi-poker',   name:'Mercredi Poker Time', day:'Mercredi',  buyin:75,  points:[22,16,13,11,9,8,7,6,5,4] },
-  { id:'small-jeudi',      name:'Small du jeudi',      day:'Jeudi',     buyin:60,  points:[19,14,11,10,8,7,6,5,4,3] },
-  { id:'friday-highstack', name:'Friday High Stack',   day:'Vendredi',  buyin:150, points:[32,24,19,16,14,12,11,10,9,8] },
-  { id:'sunday-30k',       name:'Sunday 30K',          day:'Dimanche',  buyin:100, points:[26,19,15,13,11,10,9,8,7,6,5,4,3,2,1] },
-  { id:'sunday-40k',       name:'Sunday 40K',          day:'Dimanche',  buyin:200, points:[58,43,35,29,25,22,19,17,16,14,13,12,11,10,9,8,7] },
-  { id:'vsd',              name:'Le 33 (VSD)',          day:'Événement', buyin:330, points:[86,65,52,43,37,32,29,26,24,22,20,18,17,16,15,14,13,12,11,10] }
-];
+/* Les tournois par défaut et TournamentsStore sont définis dans shared/tournaments.js */
 
 // ══════════════════════════════════════════════════════
 //  FILE SYSTEM — wrapper leaderboard (via BarriereFS)
@@ -43,12 +33,8 @@ async function saveResults(r)    { const d=await getData(); d.results  =r; await
 async function saveSessions(s)   { const d=await getData(); d.sessions =s; await setData(d); }
 async function totalCagnotte()   { return (await getSessions()).reduce((a,s)=>a+(s.cagnotte||0),0); }
 
-// Tournois : utilise ceux stockés en JSON, sinon les défauts
-async function getTournaments() {
-  const d = await getData();
-  return (d.tournaments && d.tournaments.length > 0) ? d.tournaments : DEFAULT_TOURNAMENTS;
-}
-async function saveTournaments(t) { const d=await getData(); d.tournaments=t; await setData(d); _tournamentsCache=t; }
+async function getTournaments()    { return TournamentsStore.read(); }
+async function saveTournaments(t)  { await TournamentsStore.write(t); _tournamentsCache = t; }
 
 // ══════════════════════════════════════════════════════
 //  INIT
@@ -274,6 +260,8 @@ function openTournamentForm(editId) {
   document.getElementById('form-name').value  = '';
   document.getElementById('form-day').value   = '';
   document.getElementById('form-buyin').value = '';
+  document.getElementById('form-pp').value    = '';
+  document.getElementById('form-frais').value = '';
   buildPointsGrid([22,16,13,11,9,8,7,6,5,4]);
   form.style.display='block';
   form.scrollIntoView({behavior:'smooth', block:'start'});
@@ -287,13 +275,21 @@ async function editTournament(id) {
   const form=document.getElementById('tournament-form');
   document.getElementById('form-title').textContent='Modifier le tournoi';
   document.getElementById('form-edit-id').value=id;
-  document.getElementById('form-name').value =t.name;
-  document.getElementById('form-day').value  =t.day;
-  document.getElementById('form-buyin').value=t.buyin;
+  document.getElementById('form-name').value  = t.name;
+  document.getElementById('form-day').value   = t.day;
+  document.getElementById('form-buyin').value = t.buyin;
+  document.getElementById('form-pp').value    = t.pp    != null ? t.pp    : '';
+  document.getElementById('form-frais').value = t.frais != null ? t.frais : '';
   buildPointsGrid(t.points);
   form.style.display='block';
   form.scrollIntoView({behavior:'smooth', block:'start'});
   document.getElementById('form-name').focus();
+}
+
+function lbRecalcBuyin() {
+  const pp   =parseFloat(document.getElementById('form-pp').value)||0;
+  const frais=parseFloat(document.getElementById('form-frais').value)||0;
+  document.getElementById('form-buyin').value = pp+frais > 0 ? pp+frais : '';
 }
 
 async function deleteTournament(id) {
@@ -315,6 +311,8 @@ async function saveTournamentForm() {
   const name  =(document.getElementById('form-name').value||'').trim();
   const day   =(document.getElementById('form-day').value||'').trim();
   const buyin =parseFloat(document.getElementById('form-buyin').value)||0;
+  const pp    =parseFloat(document.getElementById('form-pp').value)||null;
+  const frais =parseFloat(document.getElementById('form-frais').value)||null;
   const editId=document.getElementById('form-edit-id').value;
 
   if (!name) { alert('Donne un nom au tournoi.'); return; }
@@ -324,14 +322,15 @@ async function saveTournamentForm() {
   if (points.length===0) { alert('Ajoute au moins une place payée.'); return; }
   if (points.some(p=>p<0)) { alert('Les points ne peuvent pas être négatifs.'); return; }
 
+  const split = (pp && frais) ? { pp, frais } : {};
   const tournaments=await getTournaments();
 
   if (editId) {
     const idx=tournaments.findIndex(t=>t.id===editId);
-    if (idx>=0) { tournaments[idx]={...tournaments[idx], name, day, buyin, points}; }
+    if (idx>=0) { tournaments[idx]={...tournaments[idx], name, day, buyin, ...split, points}; }
   } else {
     const id=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
-    tournaments.push({id, name, day, buyin, points});
+    tournaments.push({id, name, day, buyin, ...split, points});
   }
 
   await saveTournaments(tournaments);

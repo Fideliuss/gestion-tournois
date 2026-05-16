@@ -87,6 +87,7 @@ const BarriereFS = {
     const files = [
       { name: 'barriere_data.json', init: { version:1, results:[], sessions:[], tournaments:null } },
       { name: 'extras_data.json',   init: { version:1, extras:[] } },
+      { name: 'tournaments.json',   init: { version:1, tournaments:[] } },
     ];
     for (const f of files) {
       try { await h.getFileHandle(f.name); }

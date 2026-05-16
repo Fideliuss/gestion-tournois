@@ -24,6 +24,7 @@ admin.html          Sous-hub Gestion Administrative
 shared/
   barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator)
   barriere.js       Scripts partagés (toggle jour/nuit, favicon, BarriereFS — couche de persistance File System Access API + IndexedDB partagée entre leaderboard et extras)
+  tournaments.js    Référentiel tournois centralisé : TOURNAMENT_DEFAULTS + TournamentsStore (CRUD FS/localStorage) — charger après barriere.js dans chaque module
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
   logo.png          Logo officiel utilisé dans les courriers
   favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
@@ -65,7 +66,9 @@ extras/
 - Données stockées dans un sous-dossier `data/` du dossier choisi par l'utilisateur
   - `data/barriere_data.json` — leaderboard (exclu du repo via .gitignore)
   - `data/extras_data.json` — extras (exclu du repo, contient données personnelles)
+  - `data/tournaments.json` — référentiel tournois (exclu du repo, éditable depuis prize-pool et leaderboard)
 - Migration automatique : si `barriere_data.json` existe à la racine, il est copié dans `data/` au premier connect
+- `TournamentsStore` (dans `shared/tournaments.js`) : lecture prioritaire FS > localStorage > TOURNAMENT_DEFAULTS ; préserve le champ `points` lors des mises à jour partielles
 - Indicateur de connexion : pastille `.fs-indicator` fixe en haut à droite (vert animé = connecté, gris = déconnecté) — défini dans `shared/barriere.css`, présent sur toutes les pages avec FS
 
 ---
@@ -132,8 +135,12 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 ## Fonctionnalités implémentées
 
 ### Prize Pool Calculator
-- Décomposition buy-in (prize pool, rake 4%, frais casino, cagnotte 2€)
-- Progression super-géométrique, dernier payé = 2× buy-in
+- Sélection du tournoi via presets configurables (référentiel centralisé `tournaments.json`)
+- PP et Frais définis par tournoi ; Buy-in = PP + Frais (calculé automatiquement, readonly)
+- Répartition manuelle des gains : constructeur interactif avec indicateurs live et hints
+- Suggestion géométrique automatique ajustable
+- Bandeau récap : brut / rake / prize pool net / cagnotte
+- Gestion des tournois (CRUD) accessible via ⚙ discret dans l'en-tête des presets
 - 12% des joueurs payés (ajustable manuellement)
 - Impression du tableau
 
