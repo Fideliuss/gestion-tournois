@@ -83,7 +83,17 @@ body.light .pp-preset.active { background: rgba(138,104,32,.1);   border-color: 
   background: rgba(196,160,74,.03);
 }
 .tm-form-title { font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 14px; }
-.tm-form-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.tm-form-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.tm-form-row-split {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 10px 12px; margin-bottom: 12px;
+  background: rgba(196,160,74,.03); border: 1px solid rgba(196,160,74,.08); border-radius: 3px;
+}
+.tm-form-row-split .ig { flex: 1; }
+.tm-split-arrow {
+  font-size: 16px; color: var(--text-muted); opacity: .4;
+  padding-bottom: 8px; flex-shrink: 0;
+}
 .tm-inp {
   width: 100%; padding: 8px 10px; font-size: 13px;
   background: rgba(8,7,5,.5); border: 1px solid rgba(196,160,74,.15);

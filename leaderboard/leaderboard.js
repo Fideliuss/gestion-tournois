@@ -260,6 +260,8 @@ function openTournamentForm(editId) {
   document.getElementById('form-name').value  = '';
   document.getElementById('form-day').value   = '';
   document.getElementById('form-buyin').value = '';
+  document.getElementById('form-pp').value    = '';
+  document.getElementById('form-frais').value = '';
   buildPointsGrid([22,16,13,11,9,8,7,6,5,4]);
   form.style.display='block';
   form.scrollIntoView({behavior:'smooth', block:'start'});
@@ -273,13 +275,31 @@ async function editTournament(id) {
   const form=document.getElementById('tournament-form');
   document.getElementById('form-title').textContent='Modifier le tournoi';
   document.getElementById('form-edit-id').value=id;
-  document.getElementById('form-name').value =t.name;
-  document.getElementById('form-day').value  =t.day;
-  document.getElementById('form-buyin').value=t.buyin;
+  document.getElementById('form-name').value  = t.name;
+  document.getElementById('form-day').value   = t.day;
+  document.getElementById('form-buyin').value = t.buyin;
+  document.getElementById('form-pp').value    = t.pp    != null ? t.pp    : '';
+  document.getElementById('form-frais').value = t.frais != null ? t.frais : '';
   buildPointsGrid(t.points);
   form.style.display='block';
   form.scrollIntoView({behavior:'smooth', block:'start'});
   document.getElementById('form-name').focus();
+}
+
+function lbOnBuyinChange() {
+  const buyin=parseFloat(document.getElementById('form-buyin').value)||0;
+  const frais=parseFloat(document.getElementById('form-frais').value)||0;
+  if (buyin>0 && frais>0 && frais<buyin) document.getElementById('form-pp').value=buyin-frais;
+}
+function lbOnPpChange() {
+  const buyin=parseFloat(document.getElementById('form-buyin').value)||0;
+  const pp   =parseFloat(document.getElementById('form-pp').value)||0;
+  if (buyin>0 && pp>0 && pp<buyin) document.getElementById('form-frais').value=buyin-pp;
+}
+function lbOnFraisChange() {
+  const buyin=parseFloat(document.getElementById('form-buyin').value)||0;
+  const frais=parseFloat(document.getElementById('form-frais').value)||0;
+  if (buyin>0 && frais>0 && frais<buyin) document.getElementById('form-pp').value=buyin-frais;
 }
 
 async function deleteTournament(id) {
@@ -301,6 +321,8 @@ async function saveTournamentForm() {
   const name  =(document.getElementById('form-name').value||'').trim();
   const day   =(document.getElementById('form-day').value||'').trim();
   const buyin =parseFloat(document.getElementById('form-buyin').value)||0;
+  const pp    =parseFloat(document.getElementById('form-pp').value)||null;
+  const frais =parseFloat(document.getElementById('form-frais').value)||null;
   const editId=document.getElementById('form-edit-id').value;
 
   if (!name) { alert('Donne un nom au tournoi.'); return; }
@@ -310,14 +332,15 @@ async function saveTournamentForm() {
   if (points.length===0) { alert('Ajoute au moins une place payée.'); return; }
   if (points.some(p=>p<0)) { alert('Les points ne peuvent pas être négatifs.'); return; }
 
+  const split = (pp && frais) ? { pp, frais } : {};
   const tournaments=await getTournaments();
 
   if (editId) {
     const idx=tournaments.findIndex(t=>t.id===editId);
-    if (idx>=0) { tournaments[idx]={...tournaments[idx], name, day, buyin, points}; }
+    if (idx>=0) { tournaments[idx]={...tournaments[idx], name, day, buyin, ...split, points}; }
   } else {
     const id=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
-    tournaments.push({id, name, day, buyin, points});
+    tournaments.push({id, name, day, buyin, ...split, points});
   }
 
   await saveTournaments(tournaments);

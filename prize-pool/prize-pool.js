@@ -6,7 +6,6 @@
 const RAKE_RATE = 0.04;
 const CAGNOTTE  = 2;
 const PP_STORE  = 'pp_cfg';
-const PP_SPLITS = 'pp_splits';
 
 /* Les tournois par défaut et TournamentsStore sont définis dans shared/tournaments.js */
 
@@ -88,11 +87,9 @@ let state = {
   activeTournamentId: null,
   tournaments: [],
 };
-let ppSplits = {};
 
 function loadPersist() {
   try { Object.assign(state, JSON.parse(localStorage.getItem(PP_STORE) || '{}')); } catch {}
-  try { ppSplits = JSON.parse(localStorage.getItem(PP_SPLITS) || '{}'); } catch {}
   if (!Array.isArray(state.amounts)) state.amounts = [];
 }
 function savePersist() {
@@ -103,7 +100,18 @@ function savePersist() {
     lastMult, firstPct, activeTournamentId, amounts
   }));
 }
-function saveSplits() { localStorage.setItem(PP_SPLITS, JSON.stringify(ppSplits)); }
+
+/* Sauvegarde la répartition PP/Frais dans le tournoi actif — debounce 800ms */
+let _splitSaveTimer = null;
+function saveSplitIfActive() {
+  if (!state.activeTournamentId) return;
+  const idx = state.tournaments.findIndex(t => t.id === state.activeTournamentId);
+  if (idx >= 0) state.tournaments[idx] = { ...state.tournaments[idx], pp: state.pp, frais: state.frais };
+  clearTimeout(_splitSaveTimer);
+  _splitSaveTimer = setTimeout(() => {
+    TournamentsStore.update(state.activeTournamentId, { pp: state.pp, frais: state.frais });
+  }, 800);
+}
 
 /* ══════════════════════════════════════════════════════
    DÉRIVÉS (pas de calcul de payouts ici)
@@ -599,25 +607,18 @@ function applyPreset(id) {
   if (!t) return;
   state.total = t.buyin;
   state.activeTournamentId = id;
-  if (ppSplits[id]) {
-    state.pp    = ppSplits[id].pp;
-    state.frais = ppSplits[id].frais;
+  if (t.pp != null && t.frais != null) {
+    state.pp    = t.pp;
+    state.frais = t.frais;
   } else {
     state.frais = Math.max(5, round5(t.buyin * 0.10));
     state.pp    = t.buyin - state.frais;
   }
-  /* Réinitialiser les montants pour le nouveau tournoi */
   state.amounts = [];
   syncInputs();
   renderPresets();
   savePersist();
   render();
-}
-
-function saveSplitIfActive() {
-  if (!state.activeTournamentId) return;
-  ppSplits[state.activeTournamentId] = { pp: state.pp, frais: state.frais };
-  saveSplits();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -703,9 +704,30 @@ function tmOpenForm(editId) {
   document.getElementById('tm-form-name').value    = t ? t.name  : '';
   document.getElementById('tm-form-day').value     = t ? t.day   : 'Lundi';
   document.getElementById('tm-form-buyin').value   = t ? t.buyin : '';
+  document.getElementById('tm-form-pp').value      = t?.pp    != null ? t.pp    : '';
+  document.getElementById('tm-form-frais').value   = t?.frais != null ? t.frais : '';
   document.getElementById('tm-form-title').textContent = editId ? 'Modifier le tournoi' : 'Nouveau tournoi';
   document.getElementById('tm-form').style.display = '';
   document.getElementById('tm-form-name').focus();
+}
+
+function tmOnBuyinChange() {
+  const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
+  const frais = parseFloat(document.getElementById('tm-form-frais').value) || 0;
+  if (buyin > 0 && frais > 0 && frais < buyin)
+    document.getElementById('tm-form-pp').value = buyin - frais;
+}
+function tmOnPpChange() {
+  const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
+  const pp    = parseFloat(document.getElementById('tm-form-pp').value) || 0;
+  if (buyin > 0 && pp > 0 && pp < buyin)
+    document.getElementById('tm-form-frais').value = buyin - pp;
+}
+function tmOnFraisChange() {
+  const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
+  const frais = parseFloat(document.getElementById('tm-form-frais').value) || 0;
+  if (buyin > 0 && frais > 0 && frais < buyin)
+    document.getElementById('tm-form-pp').value = buyin - frais;
 }
 
 function tmCloseForm() {
@@ -717,16 +739,20 @@ async function tmSave() {
   const name  = (document.getElementById('tm-form-name').value || '').trim();
   const day   = (document.getElementById('tm-form-day').value  || '').trim();
   const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
+  const pp    = parseFloat(document.getElementById('tm-form-pp').value)    || null;
+  const frais = parseFloat(document.getElementById('tm-form-frais').value) || null;
   const editId = document.getElementById('tm-form-edit-id').value;
 
   if (!name)    { document.getElementById('tm-form-name').focus();  return; }
   if (buyin <= 0){ document.getElementById('tm-form-buyin').focus(); return; }
 
+  const split = (pp && frais) ? { pp, frais } : {};
+
   if (editId) {
-    state.tournaments = await TournamentsStore.update(editId, { name, day, buyin });
+    state.tournaments = await TournamentsStore.update(editId, { name, day, buyin, ...split });
   } else {
     const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now();
-    state.tournaments = await TournamentsStore.add({ id, name, day, buyin, points: [] });
+    state.tournaments = await TournamentsStore.add({ id, name, day, buyin, ...split, points: [] });
   }
 
   tmCloseForm();
