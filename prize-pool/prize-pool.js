@@ -254,17 +254,25 @@ function renderTable(d) {
   printBtn.style.display = '';
 
   const p = d.payouts;
-  /* Calcul des sauts inter-paliers pour ×Δ.
-     On ne compare que les sauts non nuls (transitions de palier). */
-  let prevTierJump = null;
+  /* Calcul des sauts et ×Δ.
+     Le tableau est décroissant (1er en tête).
+     ×Δ[i] = delta[i] / prochain_delta_non_nul_en_dessous
+     → doit être ≥ 1 : chaque saut est plus grand que celui d'en dessous. */
+  const deltas = p.map((amount, i) =>
+    p[i + 1] !== undefined ? amount - p[i + 1] : null
+  );
   const rows = p.map((amount, i) => {
-    const nextAmt  = p[i + 1];
-    const delta    = nextAmt !== undefined ? amount - nextAmt : null;
+    const delta    = deltas[i];
     const sameTier = i > 0 && p[i] === p[i - 1];
     let ratioD = null;
     if (delta !== null && delta > 0) {
-      if (prevTierJump !== null) ratioD = delta / prevTierJump;
-      prevTierJump = delta;
+      /* Cherche le prochain saut non nul en dessous (index > i) */
+      for (let j = i + 1; j < deltas.length; j++) {
+        if (deltas[j] !== null && deltas[j] > 0) {
+          ratioD = delta / deltas[j];
+          break;
+        }
+      }
     }
     const pct = (amount / d.poolNet * 100).toFixed(1);
     return { amount, delta, sameTier, ratioD, pct };
