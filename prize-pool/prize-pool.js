@@ -420,9 +420,10 @@ function render() {
   if (pfx) pfx.style.color = state.spotsManual ? 'var(--gold)' : 'var(--text-muted)';
   document.getElementById('spots-tog')?.classList.toggle('on', state.spotsManual);
   const togLbl = document.getElementById('spots-tog-lbl');
+  const exactSpots = (state.players * 0.12).toFixed(2).replace('.', ',');
   if (togLbl) togLbl.textContent = state.spotsManual
-    ? 'Places : override manuel'
-    : `Places : auto — ${d.autoSpots} (12% de ${state.players} joueurs)`;
+    ? `Places : override manuel (12% de ${state.players} joueurs = ${exactSpots})`
+    : `Places : auto — ${d.autoSpots} (12% de ${state.players} joueurs = ${exactSpots})`;
 
   /* Table */
   renderTable(d);
@@ -468,13 +469,25 @@ function onAmountKey(event, i) {
   }
 }
 
+function diagSuggest(d) {
+  const last = round5(state.total * state.lastMult);
+  if (last >= d.poolNet)
+    return `Le dernier payé (×${state.lastMult} buy-in = ${fmt(last)}) est supérieur ou égal au pool net (${fmt(d.poolNet)}). Réduis le multiplicateur.`;
+  const firstTarget = round5(d.poolNet * state.firstPct / 100);
+  if (firstTarget <= last)
+    return `Le 1er cible (${state.firstPct}% = ${fmt(firstTarget)}) est inférieur ou égal au dernier payé (${fmt(last)}). Augmente le % 1er.`;
+  if (d.effSpots > 2 && last * (d.effSpots - 1) >= d.poolNet - firstTarget)
+    return `Pas assez de pool pour construire ${d.effSpots - 1} paliers entre la 2ème place et le dernier. Réduis le multiplicateur ou augmente le % 1er.`;
+  return 'Paramètres incompatibles — ajuste le % 1er ou le multiplicateur dernier.';
+}
+
 function suggest() {
   const d = derive();
   if (!d.ok || !d.poolNet) return;
   const payouts = genPayouts(d.poolNet, d.effSpots, state.total, state.lastMult, state.firstPct / 100);
   if (!payouts) {
     const errEl = document.getElementById('pp-error');
-    if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Suggestion impossible — ajuste le % 1er ou le multiplicateur dernier.'; }
+    if (errEl) { errEl.style.display = 'block'; errEl.textContent = `Suggestion impossible — ${diagSuggest(d)}`; }
     return;
   }
   document.getElementById('pp-error').style.display = 'none';
