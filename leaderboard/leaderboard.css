@@ -549,10 +549,10 @@
         padding-bottom: 2pt; margin: 7pt 0 3pt;
       }
 
-      /* Grilles */
-      .cp-grid { column-gap: 10pt; row-gap: 0; }
-      .cp-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); }
-      .cp-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+      /* Grilles — multi-column pour ordre colonne par colonne */
+      .cp-grid-3 { columns: 3; column-gap: 10pt; }
+      .cp-grid-4 { columns: 4; column-gap:  8pt; }
+      .cp-entry  { break-inside: avoid; }
 
       /* Entrée joueur */
       .cp-entry {
