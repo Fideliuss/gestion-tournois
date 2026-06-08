@@ -473,7 +473,7 @@
       .cp-header {
         display: flex; align-items: flex-end; justify-content: space-between;
         border-bottom: 1.5pt solid #C4A04A;
-        padding-bottom: 5pt; margin-bottom: 9pt; gap: 12pt;
+        padding-bottom: 4pt; margin-bottom: 7pt; gap: 12pt;
       }
       .cp-logo  { font-size: 6.5pt; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: #8A6E30; }
       .cp-title { font-size: 14pt; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #111; line-height: 1.1; }
@@ -486,7 +486,7 @@
         display: grid;
         grid-template-columns: 1fr 1.55fr 1fr;
         gap: 5pt;
-        margin-bottom: 10pt;
+        margin-bottom: 8pt;
         align-items: end;       /* effet marches : les boîtes s'alignent par le bas */
       }
       .cp-pod {
@@ -501,19 +501,19 @@
       .cp-p1 {
         border-color: #C4A04A; border-top-width: 4pt;
         background: rgba(196,160,74,.12);
-        padding: 12pt 8pt 9pt;
+        padding: 10pt 8pt 7pt;
       }
       /* 2ème — gauche, intermédiaire */
       .cp-p2 {
         border-color: rgba(196,160,74,.7); border-top-color: #a08038;
         background: rgba(196,160,74,.06);
-        padding: 9pt 7pt 7pt;
+        padding: 7pt 7pt 6pt;
       }
       /* 3ème — droite, le plus petit */
       .cp-p3 {
         border-color: rgba(196,160,74,.4); border-top-color: rgba(196,160,74,.7);
         background: rgba(196,160,74,.03);
-        padding: 7pt 7pt 6pt;
+        padding: 5pt 7pt 5pt;
       }
 
       .cp-pod-medal { line-height: 1; }
@@ -546,7 +546,7 @@
       .cp-section-title {
         font-size: 6.5pt; font-weight: 700; letter-spacing: .28em; text-transform: uppercase;
         color: #8A6E30; border-bottom: 1pt solid rgba(196,160,74,.35);
-        padding-bottom: 2pt; margin: 10pt 0 4pt;
+        padding-bottom: 2pt; margin: 7pt 0 3pt;
       }
 
       /* Grilles */
@@ -557,7 +557,7 @@
       /* Entrée joueur */
       .cp-entry {
         display: flex; align-items: baseline; gap: 3pt;
-        padding: 2.5pt 2pt; border-bottom: .5pt solid rgba(0,0,0,.07);
+        padding: 1.6pt 2pt; border-bottom: .5pt solid rgba(0,0,0,.07);
         overflow: hidden;
       }
       .cp-rank {
