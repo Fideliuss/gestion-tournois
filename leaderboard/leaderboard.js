@@ -748,9 +748,8 @@ async function printClassement() {
 
   const mid = sorted.slice(3, 30);
   const low = sorted.slice(30, 150);
-  const ext = sorted.slice(150);
 
-  const endMid = Math.min(30, sorted.length);
+  const endMid = Math.min(30,  sorted.length);
   const endLow = Math.min(150, sorted.length);
 
   const html = `
@@ -772,10 +771,6 @@ async function printClassement() {
     ${low.length ? `
     <div class="cp-section-title">31<sup>ème</sup> — ${endLow}<sup>ème</sup></div>
     <div class="cp-grid cp-grid-5">${gridHtml(low, 31)}</div>` : ''}
-
-    ${ext.length ? `
-    <div class="cp-section-title">151<sup>ème</sup> — ${sorted.length}<sup>ème</sup></div>
-    <div class="cp-grid cp-grid-5">${gridHtml(ext, 151)}</div>` : ''}
   `;
 
   document.getElementById('classement-print-page').innerHTML = html;
@@ -811,9 +806,19 @@ async function openPlayerModal(playerName) {
     <div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Historique</div>
     <table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>
   `;
-  document.getElementById('modal').style.display='flex';
+  const overlay = document.getElementById('modal');
+  overlay.scrollTop = 0;
+  overlay.style.display = 'flex';
+  document.body.classList.add('modal-open');
 }
-function closeModal(e) { if(e.target===document.getElementById('modal')) document.getElementById('modal').style.display='none'; }
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) _closeModal();
+}
+function _closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.classList.remove('modal-open');
+}
 
 // ══════════════════════════════════════════════════════
 //  HELPERS
