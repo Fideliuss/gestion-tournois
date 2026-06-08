@@ -22,9 +22,10 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 
 - Classement en temps réel avec podium visuel
 - Saisie des résultats par tournoi (places standards + places supplémentaires)
-- Historique complet des résultats et sessions
+- **Historique vue calendrier** : grille mensuelle 7 colonnes (Lun → Dim), chips cliquables sur les jours avec session, panneau détail sous le calendrier, édition inline des résultats et des entrées
+- **Impression classement one-page** (A4) : podium visuel 3 marches, places 4-30 et 31-150 en colonnes (ordre colonne par colonne), coupure stricte à 150
 - Gestion des tournois : création, modification, suppression, barèmes de points
-- Document ranking imprimable avec montant de la cagnotte
+- **Document ranking imprimable** : encadré doré centré A4, montant en grand, cases 1er (or) / 2ème (gris)
 - Fiche joueur détaillée (points, meilleur résultat, historique)
 - Données sauvegardées localement en JSON via File System API
 
@@ -84,6 +85,7 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 ```
 ├── index.html              — Hub principal
 ├── admin.html              — Sous-hub Gestion Administrative
+├── csv-import.html         — Outil one-shot import CSV → barriere_data.json (migration)
 │
 ├── shared/
 │   ├── barriere.css        — Styles partagés (thème, composants, .fs-indicator)

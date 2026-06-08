@@ -463,18 +463,17 @@ async function renderClassement() {
 }
 
 // ══════════════════════════════════════════════════════
-//  HISTORIQUE — sessions accordion
+//  HISTORIQUE — vue calendrier
 // ══════════════════════════════════════════════════════
 async function renderHistorique() {
   await refreshTournamentsCache();
   _histResultsCache = await getResults();
 
-  const allSessions = (await getSessions()).slice().reverse(); // récentes en premier
+  const allSessions = (await getSessions()).slice();
   const search  = (document.getElementById('search-hist')?.value  || '').toLowerCase().trim();
   const filterT = (document.getElementById('filter-tournoi-hist')?.value || '');
-  const filterD = (document.getElementById('filter-date-hist')?.value   || ''); // YYYY-MM-DD ou vide
+  const filterD = (document.getElementById('filter-date-hist')?.value   || '');
 
-  /* Bouton effacer date — visible uniquement si une date est sélectionnée */
   const clearBtn = document.getElementById('btn-clear-date');
   if (clearBtn) clearBtn.style.display = filterD ? 'inline-flex' : 'none';
 
@@ -488,16 +487,12 @@ async function renderHistorique() {
   let sessions = allSessions;
   if (filterT) sessions = sessions.filter(s => s.tournamentId === filterT);
   if (filterD) sessions = sessions.filter(s => s.date === filterD);
-
-  /* Recherche : garder sessions dont le tournoi ou un joueur matche */
-  const expandOnSearch = new Set();
   if (search) {
     sessions = sessions.filter(s => {
-      if (getTNameSync(s.tournamentId).toLowerCase().includes(search)) { expandOnSearch.add(s.id); return true; }
-      const hasPlayer = (resIndex[`${s.date}|${s.tournamentId}`] || [])
-        .some(r => r.player.toLowerCase().includes(search));
-      if (hasPlayer) expandOnSearch.add(s.id);
-      return hasPlayer;
+      const tMatch = getTNameSync(s.tournamentId).toLowerCase().includes(search);
+      const pMatch = (resIndex[`${s.date}|${s.tournamentId}`] || []).some(r => r.player.toLowerCase().includes(search));
+      if (tMatch || pMatch) { _histExpandedIds.add(s.id); return true; }
+      return false;
     });
   }
 
@@ -511,44 +506,118 @@ async function renderHistorique() {
   }
   emptyEl.style.display = 'none';
 
-  container.innerHTML = `<div class="hist-sessions">${sessions.map(s => {
-    const key     = `${s.date}|${s.tournamentId}`;
-    const results = (resIndex[key] || []).slice().sort((a, b) => a.place - b.place);
-    const isOpen  = _histExpandedIds.has(s.id) || expandOnSearch.has(s.id);
-    return _renderSessionCard(s, results, isOpen, search);
-  }).join('')}</div>`;
+  /* Grouper par mois YYYY-MM (récents en premier) */
+  const monthMap = {};
+  sessions.forEach(s => {
+    const m = s.date.substring(0, 7);
+    (monthMap[m] = monthMap[m] || []).push(s);
+  });
+  const sortedMonths = Object.keys(monthMap).sort().reverse();
+
+  container.innerHTML = `<div class="cal-months">${
+    sortedMonths.map(m => _renderCalendarMonth(m, monthMap[m], resIndex, search)).join('')
+  }</div>`;
 }
 
-function _renderSessionCard(s, results, isOpen, search = '') {
-  const dt     = new Date(s.date + 'T12:00:00');
-  const days   = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
-  const [y, m, d] = s.date.split('-');
-  const label  = `${days[dt.getDay()]} ${d}/${m}/${y}`;
-  const tname  = getTNameSync(s.tournamentId);
+const _MONTHS_FR  = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const _DAYS_SHORT = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const _DAYS_LONG  = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
 
-  return `<div class="sess-card${isOpen ? ' open' : ''}" id="sess-${s.id}">
-    <div class="sess-hdr" onclick="toggleSession(${s.id})">
-      <div class="sess-toggle">${isOpen ? '▾' : '▸'}</div>
-      <div class="sess-info">
+function _renderCalendarMonth(yearMonth, sessions, resIndex, search) {
+  const [year, month] = yearMonth.split('-').map(Number);
+
+  const firstDay    = new Date(year, month - 1, 1);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const startDow    = (firstDay.getDay() + 6) % 7; // 0 = Lun … 6 = Dim
+
+  /* Aujourd'hui */
+  const now       = new Date();
+  const todayDay  = (now.getFullYear() === year && now.getMonth() + 1 === month) ? now.getDate() : -1;
+
+  /* Sessions indexées par numéro de jour */
+  const byDay = {};
+  sessions.forEach(s => {
+    const d = parseInt(s.date.split('-')[2]);
+    (byDay[d] = byDay[d] || []).push(s);
+  });
+
+  /* Cellules de la grille */
+  let cells = '';
+  for (let i = 0; i < startDow; i++) cells += '<div class="cal-empty"></div>';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const daySessions = byDay[d];
+    const isToday     = d === todayDay;
+    if (daySessions && daySessions.length > 0) {
+      const chips = daySessions.map(s => {
+        const tname  = getTNameSync(s.tournamentId);
+        const short  = tname.length > 14 ? tname.slice(0, 13) + '…' : tname;
+        const isOpen = _histExpandedIds.has(s.id);
+        return `<div class="cal-chip${isOpen ? ' cal-chip-open' : ''}"
+          onclick="event.stopPropagation();toggleCalSession(${s.id})" id="chip-${s.id}">
+          <span class="cal-chip-name">${short}</span>
+          <span class="cal-chip-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>
+        </div>`;
+      }).join('');
+      cells += `<div class="cal-day cal-has-session${isToday ? ' cal-today' : ''}">
+        <div class="cal-day-num">${d}</div>${chips}
+      </div>`;
+    } else {
+      cells += `<div class="cal-day${isToday ? ' cal-today' : ''}">
+        <div class="cal-day-num">${d}</div>
+      </div>`;
+    }
+  }
+
+  /* Panneaux détail pour les sessions ouvertes ce mois */
+  const openSessions = sessions.filter(s => _histExpandedIds.has(s.id)).sort((a, b) => a.date.localeCompare(b.date));
+  const detailHtml   = openSessions.map(s => {
+    const key     = `${s.date}|${s.tournamentId}`;
+    const results = (resIndex[key] || []).slice().sort((a, b) => a.place - b.place);
+    return _renderCalDetail(s, results, search);
+  }).join('');
+
+  const totalCag = sessions.reduce((a, s) => a + (s.cagnotte || 0), 0);
+
+  return `<div class="cal-month">
+    <div class="cal-month-hdr">
+      <div class="cal-month-title">${_MONTHS_FR[month - 1]} <span class="cal-month-year">${year}</span></div>
+      <div class="cal-month-meta">
+        <span>${sessions.length} session${sessions.length > 1 ? 's' : ''}</span>
+        <span class="cal-month-cag">+${totalCag.toLocaleString('fr-FR')} €</span>
+      </div>
+    </div>
+    <div class="cal-week-hdr">${_DAYS_SHORT.map(d => `<div>${d}</div>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>
+    ${detailHtml ? `<div class="cal-details">${detailHtml}</div>` : ''}
+  </div>`;
+}
+
+function _renderCalDetail(s, results, search = '') {
+  const dt        = new Date(s.date + 'T12:00:00');
+  const [y, m, d] = s.date.split('-');
+  const label     = `${_DAYS_LONG[dt.getDay()]} ${d}/${m}/${y}`;
+  const tname     = getTNameSync(s.tournamentId);
+
+  return `<div class="cal-detail-card" id="sess-${s.id}">
+    <div class="cal-detail-hdr">
+      <div class="cal-detail-info">
         <span class="sess-date">${label}</span>
         <span class="tournament-badge">${tname}</span>
-        <span class="sess-meta">${s.entries || 0} entrées · ${results.length} résultats</span>
-      </div>
-      <div class="sess-right">
+        <span class="sess-meta" id="sess-meta-${s.id}">${s.entries || 0} entrées · ${results.length} résultats</span>
         <span class="session-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>
-        <span class="sess-actions" onclick="event.stopPropagation()">
-          <button class="btn-sess-edit" title="Modifier les entrées" onclick="editSession(${s.id})">✎</button>
-          <button class="btn-red" title="Supprimer" onclick="deleteSession(${s.id})">✕</button>
-        </span>
+      </div>
+      <div class="cal-detail-acts">
+        <button class="btn-sess-edit" title="Modifier les entrées" onclick="editSession(${s.id})">✎</button>
+        <button class="btn-red" title="Supprimer" onclick="deleteSession(${s.id})">✕</button>
+        <button class="btn-cancel-sm" onclick="toggleCalSession(${s.id})">Fermer</button>
       </div>
     </div>
-    <div class="sess-body" id="sess-body-${s.id}"${isOpen ? '' : ' style="display:none"'}>
-      <div class="sess-results">${
-        results.length
-          ? results.map(r => _renderResultRow(r, search)).join('')
-          : '<div class="sess-no-results">Aucun résultat pour cette session.</div>'
-      }</div>
-    </div>
+    <div class="sess-results">${
+      results.length
+        ? results.map(r => _renderResultRow(r, search)).join('')
+        : '<div class="sess-no-results">Aucun résultat pour cette session.</div>'
+    }</div>
   </div>`;
 }
 
@@ -568,16 +637,10 @@ function _renderResultRow(r, search = '') {
   </div>`;
 }
 
-/* ── Accordion toggle ── */
-function toggleSession(id) {
-  const card = document.getElementById(`sess-${id}`);
-  const body = document.getElementById(`sess-body-${id}`);
-  if (!card || !body) return;
-  const opening = !_histExpandedIds.has(id);
-  opening ? _histExpandedIds.add(id) : _histExpandedIds.delete(id);
-  card.classList.toggle('open', opening);
-  body.style.display = opening ? 'block' : 'none';
-  card.querySelector('.sess-toggle').textContent = opening ? '▾' : '▸';
+/* ── Calendrier toggle ── */
+function toggleCalSession(id) {
+  _histExpandedIds.has(id) ? _histExpandedIds.delete(id) : _histExpandedIds.add(id);
+  renderHistorique();
 }
 
 /* ── Édition inline résultat ── */
@@ -684,23 +747,40 @@ async function deleteSession(id) {
 //  RANKING DOC
 // ══════════════════════════════════════════════════════
 async function renderRankingDoc() {
-  const total=await totalCagnotte();
-  const prize1=Math.round(total*0.10*100)/100;
-  const prize2=Math.round(total*0.05*100)/100;
-  const today=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const todayCap=today.charAt(0).toUpperCase()+today.slice(1);
-  const inner=`
-    <div style="font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:.35em;text-transform:uppercase;color:#8A6E30;margin-bottom:4px">Casino</div>
-    <div style="font-size:28px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Barrière</div>
-    <div style="font-family:'Outfit',sans-serif;font-size:10px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:#888;margin-bottom:36px;padding-bottom:18px;border-bottom:2px solid #C4A04A">Bordeaux</div>
-    <div style="font-style:italic;font-size:28px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Montant du Ranking</div>
-    <div style="font-style:italic;font-size:20px;font-weight:400;text-decoration:underline;color:#555;margin-bottom:36px">Au ${todayCap}</div>
-    <div style="font-style:italic;font-size:68px;font-weight:600;line-height:1;margin-bottom:32px">${total.toLocaleString('fr-FR')} €</div>
-    <div style="background:#C4A04A;color:#fff;font-style:italic;font-size:30px;font-weight:600;padding:14px 24px;border-radius:4px;margin-bottom:12px">1er : ${fmtEur(prize1)}</div>
-    <div style="background:#888;color:#fff;font-style:italic;font-size:30px;font-weight:600;padding:14px 24px;border-radius:4px">2nd : ${fmtEur(prize2)}</div>
+  const total  = await totalCagnotte();
+  const prize1 = Math.round(total * 0.10 * 100) / 100;
+  const prize2 = Math.round(total * 0.05 * 100) / 100;
+  const today  = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
+
+  const inner = `
+    <div class="rp-header">
+      <div class="rp-casino-lbl">Casino</div>
+      <div class="rp-brand">Barrière</div>
+      <div class="rp-city">Bordeaux</div>
+    </div>
+    <div class="rp-hr"></div>
+    <div class="rp-main-title">Montant du Ranking</div>
+    <div class="rp-challenge">Challenge Saisonnier · 2025 / 2026</div>
+    <div class="rp-date">Au ${todayCap}</div>
+    <div class="rp-amount">${total.toLocaleString('fr-FR')} €</div>
+    <div class="rp-prizes">
+      <div class="rp-prize rp-gold">
+        <div class="rp-p-medal">🥇</div>
+        <div class="rp-p-rank">1<sup>er</sup></div>
+        <div class="rp-p-amt">${fmtEur(prize1)}</div>
+        <div class="rp-p-pct">10% de la cagnotte</div>
+      </div>
+      <div class="rp-prize rp-silver">
+        <div class="rp-p-medal">🥈</div>
+        <div class="rp-p-rank">2<sup>ème</sup></div>
+        <div class="rp-p-amt">${fmtEur(prize2)}</div>
+        <div class="rp-p-pct">5% de la cagnotte</div>
+      </div>
+    </div>
   `;
-  document.getElementById('ranking-doc-screen').innerHTML=inner;
-  document.getElementById('ranking-print-page').innerHTML=`<div style="font-family:'Cormorant Garamond',serif;text-align:center;padding:60px 40px">${inner}</div>`;
+  document.getElementById('ranking-doc-screen').innerHTML = `<div class="rp-doc">${inner}</div>`;
+  document.getElementById('ranking-print-page').innerHTML = `<div class="rp-page"><div class="rp-doc">${inner}</div></div>`;
 }
 
 function printRanking() {

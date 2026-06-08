@@ -20,6 +20,7 @@ Quatre outils disponibles, zéro serveur, zéro build — s'ouvre directement da
 ```
 index.html          Hub principal
 admin.html          Sous-hub Gestion Administrative
+csv-import.html     Outil one-shot d'import CSV → barriere_data.json (migration, à la racine du projet)
 
 shared/
   barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator)
@@ -32,7 +33,7 @@ shared/
 leaderboard/
   leaderboard.html  Challenge Saisonnier — HTML pur
   leaderboard.css   Styles du leaderboard
-  leaderboard.js    Logique JS du leaderboard (~400 lignes)
+  leaderboard.js    Logique JS du leaderboard (~600 lignes)
 
 prize-pool/
   prize-pool.html   Prize Pool Calculator — HTML pur
@@ -117,6 +118,10 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 5 | leaderboard.js | `showDirectoryPicker` — erreurs surfacées à l'utilisateur au lieu d'être avalées |
 | 6 | barriere.css | Bouton thème jour/nuit masqué à l'impression (`@media print`) |
 | 7 | declaration.css | Fond beige en mode jour à l'impression — `body` et `.app` passés en `!important` dans `@media print` |
+| 8 | csv-import.html | Sélection fichier silencieuse — `<div onclick="input.click()">` remplacé par `<label for="...">` natif |
+| 9 | csv-import.html | Preview ne s'affichait pas — `style.display = ''` ne surcharge pas `display:none` CSS → corrigé en `style.display = 'block'` |
+| 10 | leaderboard.css | Modal scroll figé — `overflow-y:auto` sur l'overlay `position:fixed` bloqué par Chrome → déplacé sur `.modal` avec `max-height: calc(100vh - 80px)` |
+| 11 | leaderboard.js | Impression classement en ordre ligne — CSS Grid (ordre lignes) remplacé par CSS `columns` (ordre colonnes) |
 
 ---
 
@@ -171,13 +176,34 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Classement en temps réel avec podium visuel (top 3 + colonnes 4-30 + 31-150+)
 - Saisie des résultats par tournoi (places standards + places supplémentaires)
 - **Blocage doublon** : validation impossible si même tournoi + même date déjà saisi
-- **Pagination historique** : 25 résultats/page, reset auto au filtrage
-- Historique des résultats avec recherche et filtre par tournoi
-- Suppression par résultat ou par session entière
+- **Historique vue calendrier** : grille mensuelle 7 colonnes (Lun → Dim), mois les plus récents en premier
+  - Jours avec session : chips cliquables (nom tournoi + cagnotte) — la date de saisie n'a aucun effet sur l'ordre
+  - Clic sur un chip → panneau détail sous le calendrier du mois (résultats, édition inline, suppression)
+  - Indicateur "aujourd'hui" dans le mois courant
+  - Cagnotte mensuelle totale affichée dans le header de chaque mois
+  - Recherche texte (joueur ou tournoi) + filtre par tournoi + filtre par date
+  - **Édition inline des résultats** : place, nom, points — directement dans la ligne, Enter=save, Escape=cancel
+  - **Édition inline des sessions** : nombre d'entrées (cagnotte recalculée automatiquement)
+  - Suppression par résultat ou par session entière
 - Gestion des tournois (CRUD complet + barèmes de points)
-- Document ranking imprimable (cagnotte totale, 1er=10%, 2ème=5%)
-- Fiche joueur détaillée (modal : total points, meilleur résultat, historique)
+- **Document ranking imprimable** (A4 portrait, centré) :
+  - Encadré doré (2pt `#C4A04A`), typographie Cormorant Garamond
+  - Casino Barrière Bordeaux → filet or → titre cursif → date → montant 68pt
+  - Cases 🥇 or / 🥈 gris avec rang, montant, % — fonds forcés avec `print-color-adjust`
+- **Impression classement one-page** (A4 portrait) :
+  - Podium visuel 3 marches (2ème | 1er | 3ème), bordure dorée 1er
+  - Places 4-30 en 3 colonnes, 31-150 en 4 colonnes — ordre colonne par colonne (CSS `columns`)
+  - Coupure stricte à 150 — pas de section 151+
+- Fiche joueur détaillée (modal : total points, meilleur résultat, historique) — affichée en haut de page
 - Sauvegarde locale en JSON via File System Access API
+
+### Outil import CSV (`csv-import.html`)
+- Outil de migration one-shot : charge un fichier CSV exporté depuis l'ancien système
+- Prévisualisation des données avant import : sessions, joueurs, entrées totales, cagnotte preview
+- Détection des sessions sans entrées (warning visuel)
+- Génère et propose au téléchargement un `barriere_data.json` compatible avec le leaderboard
+- Gestion BOM (UTF-8 BOM détecté via `charCodeAt(0) === 0xFEFF`)
+- Fichier autonome à la racine — aucune dépendance JS externe, pas lié au hub
 
 ---
 
@@ -195,7 +221,6 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 
 ## Pistes de fonctionnalités discutées
 
-- Édition d'un résultat existant (actuellement : suppression uniquement)
 - Export CSV des résultats
 - Filtrage du classement par tournoi
 - Évolution du rang d'un joueur sur la saison
@@ -221,3 +246,9 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Les semaines utilisent la numérotation ISO (lun=1er jour, `getMondayOfISOWeek`)
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
 - **Changelog** : mis à jour manuellement dans `shared/changelog.js` avant la PR de release. Ajouter l'entrée en tête du tableau avec le titre de la PR. La version affichée dans `index.html` = `CHANGELOG[0].version`
+- `csv-import.html` est un outil de migration ponctuel à la racine du projet — il n'est pas lié au hub et n'y apparaît pas
+- L'impression du classement (onglet 🏆) utilise un div dédié `#classement-print-page` (masqué en temps normal, affiché via `body.print-classement`), généré à la volée par `printClassement()` — même pattern que le document ranking
+- Le modal joueur utilise `_closeModal()` (retire `modal-open` du body) et `body.modal-open { overflow: hidden }` pour bloquer le scroll de fond
+- L'historique utilise une **vue calendrier** (grille 7 cols par mois) — plus d'accordion. `_histExpandedIds` (Set) mémorise les sessions dont le panneau détail est ouvert sous le calendrier
+- Le document ranking utilise des classes CSS `rp-*` (pas d'inline styles) — le même HTML alimente la prévisualisation écran (`.ranking-doc`) et le print (`.rp-page`) ; `print-color-adjust: exact` force les fonds colorés
+- `toggleCalSession(id)` ouvre/ferme le panneau détail d'une session dans la vue calendrier (remplace `toggleSession` de l'ancien accordion)
