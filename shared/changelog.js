@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.7.0', date: '2026-06-09', message: 'Historique — vue calendrier mensuelle (grille 7 cols, chips par session, panneau détail) ; Ranking — impression redessinée (encadré doré, typographie élégante, cases 1er/2ème colorées)' },
   { version: 'v1.6.0', date: '2026-06-08', message: 'Historique — accordion sessions + édition inline résultats/entrées + filtre date ; Classement — impression one-page (podium visuel, 4 colonnes, ordre colonne) ; outil import CSV one-shot' },
   { version: 'v1.5.1', date: '2026-06-08', message: 'Prize Pool — corrections impression (€, couleurs, marges) ; calcul exact 12% places ; diagnostic suggestion' },
   { version: 'v1.5.0', date: '2026-05-16', message: 'Prize Pool Builder — constructeur manuel, indicateurs live, hints, suggestion géométrique ; référentiel tournois centralisé (tournaments.json, PP/Frais par tournoi) ; menus redessinés (emoji + couleur accent par carte)' },
