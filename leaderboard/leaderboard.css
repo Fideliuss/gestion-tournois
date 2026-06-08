@@ -481,19 +481,66 @@
       .cp-cag   { font-size: 7.5pt; color: #8A6E30; text-align: right; white-space: nowrap; }
       .cp-cag strong { font-size: 12pt; font-weight: 700; color: #C4A04A; }
 
-      /* Podium — 3 colonnes horizontales */
-      .cp-podium { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6pt; margin-bottom: 10pt; }
-      .cp-pod {
-        border: 1pt solid #C4A04A; border-radius: 2pt;
-        padding: 7pt 9pt; display: flex; align-items: center; gap: 6pt;
+      /* Podium — 2ème | 1er | 3ème, marches visuelles */
+      .cp-podium {
+        display: grid;
+        grid-template-columns: 1fr 1.55fr 1fr;
+        gap: 5pt;
+        margin-bottom: 10pt;
+        align-items: end;       /* effet marches : les boîtes s'alignent par le bas */
       }
-      .cp-p1 { background: rgba(196,160,74,.13); border-width: 1.5pt; }
-      .cp-p2 { background: rgba(196,160,74,.07); }
-      .cp-p3 { background: rgba(196,160,74,.04); }
-      .cp-rank-icon { font-size: 14pt; line-height: 1; flex-shrink: 0; }
-      .cp-ord       { font-size: 6.5pt; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8A6E30; flex-shrink: 0; }
-      .cp-pod-name  { flex: 1; font-size: 10pt; font-weight: 600; color: #111; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .cp-pod-pts   { font-size: 8.5pt; font-weight: 700; color: #8A6E30; flex-shrink: 0; }
+      .cp-pod {
+        border: 1pt solid rgba(196,160,74,.5);
+        border-top-width: 2.5pt;
+        border-radius: 2pt;
+        display: flex; flex-direction: column; align-items: center;
+        text-align: center; gap: 2pt;
+        overflow: hidden;
+      }
+      /* 1er — centre, le plus grand */
+      .cp-p1 {
+        border-color: #C4A04A; border-top-width: 4pt;
+        background: rgba(196,160,74,.12);
+        padding: 12pt 8pt 9pt;
+      }
+      /* 2ème — gauche, intermédiaire */
+      .cp-p2 {
+        border-color: rgba(196,160,74,.7); border-top-color: #a08038;
+        background: rgba(196,160,74,.06);
+        padding: 9pt 7pt 7pt;
+      }
+      /* 3ème — droite, le plus petit */
+      .cp-p3 {
+        border-color: rgba(196,160,74,.4); border-top-color: rgba(196,160,74,.7);
+        background: rgba(196,160,74,.03);
+        padding: 7pt 7pt 6pt;
+      }
+
+      .cp-pod-medal { line-height: 1; }
+      .cp-p1 .cp-pod-medal { font-size: 20pt; margin-bottom: 1pt; }
+      .cp-p2 .cp-pod-medal { font-size: 16pt; }
+      .cp-p3 .cp-pod-medal { font-size: 14pt; }
+
+      .cp-pod-ord {
+        font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #8A6E30;
+      }
+      .cp-p1 .cp-pod-ord { font-size: 7pt; margin-bottom: 2pt; }
+      .cp-p2 .cp-pod-ord { font-size: 6.5pt; }
+      .cp-p3 .cp-pod-ord { font-size: 6pt; }
+
+      .cp-pod-name {
+        font-weight: 600; color: #111;
+        width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .cp-p1 .cp-pod-name { font-size: 11pt; margin-bottom: 2pt; }
+      .cp-p2 .cp-pod-name { font-size: 9pt; }
+      .cp-p3 .cp-pod-name { font-size: 8.5pt; }
+
+      .cp-pod-pts { font-weight: 700; color: #8A6E30; }
+      .cp-pod-ptslbl { font-weight: 400; color: #aaa; }
+      .cp-p1 .cp-pod-pts { font-size: 10pt; }
+      .cp-p2 .cp-pod-pts { font-size: 8.5pt; }
+      .cp-p3 .cp-pod-pts { font-size: 8pt; }
 
       /* Titres de section */
       .cp-section-title {

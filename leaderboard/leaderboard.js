@@ -727,13 +727,14 @@ async function printClassement() {
   /* ── Podium ── */
   const medals = ['🥇','🥈','🥉'];
   const ords   = ['1<sup>er</sup>','2<sup>ème</sup>','3<sup>ème</sup>'];
-  const podiumHtml = [0,1,2].map(i => {
+  /* Ordre classique podium : 2ème gauche · 1er centre · 3ème droite */
+  const podiumHtml = [1, 0, 2].map(i => {
     const p = sorted[i]; if (!p) return '';
     return `<div class="cp-pod cp-p${i+1}">
-      <span class="cp-rank-icon">${medals[i]}</span>
-      <span class="cp-ord">${ords[i]}</span>
-      <span class="cp-pod-name">${cap(p.player)}</span>
-      <span class="cp-pod-pts">${p.points} pts</span>
+      <div class="cp-pod-medal">${medals[i]}</div>
+      <div class="cp-pod-ord">${ords[i]}</div>
+      <div class="cp-pod-name">${cap(p.player)}</div>
+      <div class="cp-pod-pts">${p.points} <span class="cp-pod-ptslbl">pts</span></div>
     </div>`;
   }).join('');
 
