@@ -770,7 +770,7 @@ async function printClassement() {
 
     ${low.length ? `
     <div class="cp-section-title">31<sup>ème</sup> — ${endLow}<sup>ème</sup></div>
-    <div class="cp-grid cp-grid-5">${gridHtml(low, 31)}</div>` : ''}
+    <div class="cp-grid cp-grid-4">${gridHtml(low, 31)}</div>` : ''}
   `;
 
   document.getElementById('classement-print-page').innerHTML = html;
