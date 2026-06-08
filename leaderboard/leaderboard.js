@@ -110,9 +110,9 @@ async function refreshPlayersDl() {
 
 let currentPlaceCount = 0;
 
-// ── Pagination historique ──
-const HIST_PAGE_SIZE = 25;
-let histPage = 1;
+// ── État accordion historique ──
+let _histExpandedIds  = new Set();   // sessions actuellement ouvertes
+let _histResultsCache = null;        // cache résultats pour édition inline
 
 async function buildPlacementRows() {
   const tid        =document.getElementById('inp-tournoi').value;
@@ -463,74 +463,208 @@ async function renderClassement() {
 }
 
 // ══════════════════════════════════════════════════════
-//  HISTORIQUE
+//  HISTORIQUE — sessions accordion
 // ══════════════════════════════════════════════════════
-async function renderHistorique(resetPage=false) {
-  if (resetPage) histPage = 1;
+async function renderHistorique() {
+  await refreshTournamentsCache();
+  _histResultsCache = await getResults();
 
-  const results=(await getResults()).slice().reverse();
-  const search=(document.getElementById('search-hist')?.value||'').toLowerCase();
-  const filterT=document.getElementById('filter-tournoi-hist')?.value||'';
-  let filtered=results;
-  if(search)  filtered=filtered.filter(r=>r.player.toLowerCase().includes(search)||getTNameSync(r.tournamentId).toLowerCase().includes(search));
-  if(filterT) filtered=filtered.filter(r=>r.tournamentId===filterT);
+  const allSessions = (await getSessions()).slice().reverse(); // récentes en premier
+  const search  = (document.getElementById('search-hist')?.value  || '').toLowerCase().trim();
+  const filterT = (document.getElementById('filter-tournoi-hist')?.value || '');
+  const filterD = (document.getElementById('filter-date-hist')?.value   || ''); // YYYY-MM-DD ou vide
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / HIST_PAGE_SIZE));
-  if (histPage > totalPages) histPage = totalPages;
-  const pageStart = (histPage - 1) * HIST_PAGE_SIZE;
-  const paginated  = filtered.slice(pageStart, pageStart + HIST_PAGE_SIZE);
+  /* Bouton effacer date — visible uniquement si une date est sélectionnée */
+  const clearBtn = document.getElementById('btn-clear-date');
+  if (clearBtn) clearBtn.style.display = filterD ? 'inline-flex' : 'none';
 
-  const tbody      = document.getElementById('hist-body');
-  const empty      = document.getElementById('hist-empty');
-  const pagination = document.getElementById('hist-pagination');
+  /* Index results → date|tid */
+  const resIndex = {};
+  _histResultsCache.forEach(r => {
+    const key = `${r.date}|${r.tournamentId}`;
+    (resIndex[key] = resIndex[key] || []).push(r);
+  });
 
-  if (filtered.length===0) {
-    tbody.innerHTML=''; empty.style.display='block'; pagination.style.display='none';
-  } else {
-    empty.style.display='none';
-    tbody.innerHTML=paginated.map(r=>{
-      const pc=r.place===1?'p1':r.place<=3?'p3':'';
-      const extraBadge=r.extra?`<span style="font-size:9px;color:var(--text-muted);letter-spacing:.08em;margin-left:4px">+extra</span>`:'';
-      return `<tr>
-        <td>${fmtDate(r.date)}</td>
-        <td><span class="tournament-badge">${getTNameSync(r.tournamentId)}</span></td>
-        <td style="color:var(--cream);font-weight:500">${cap(r.player)}</td>
-        <td><span class="place-badge-sm ${pc}">${r.place}</span>${extraBadge}</td>
-        <td><span class="pts-badge">+${r.points}</span></td>
-        <td><button class="btn-red" onclick="deleteResult(${r.id})">✕</button></td>
-      </tr>`;
-    }).join('');
+  let sessions = allSessions;
+  if (filterT) sessions = sessions.filter(s => s.tournamentId === filterT);
+  if (filterD) sessions = sessions.filter(s => s.date === filterD);
 
-    if (totalPages > 1) {
-      pagination.style.display='flex';
-      pagination.innerHTML=`
-        <button onclick="histGoTo(${histPage-1})" ${histPage===1?'disabled':''}>← Préc.</button>
-        <span>Page <strong>${histPage}</strong> / ${totalPages} &nbsp;·&nbsp; ${filtered.length} résultat${filtered.length>1?'s':''}</span>
-        <button onclick="histGoTo(${histPage+1})" ${histPage===totalPages?'disabled':''}>Suiv. →</button>
-      `;
-    } else {
-      pagination.style.display='none';
-    }
+  /* Recherche : garder sessions dont le tournoi ou un joueur matche */
+  const expandOnSearch = new Set();
+  if (search) {
+    sessions = sessions.filter(s => {
+      if (getTNameSync(s.tournamentId).toLowerCase().includes(search)) { expandOnSearch.add(s.id); return true; }
+      const hasPlayer = (resIndex[`${s.date}|${s.tournamentId}`] || [])
+        .some(r => r.player.toLowerCase().includes(search));
+      if (hasPlayer) expandOnSearch.add(s.id);
+      return hasPlayer;
+    });
   }
 
-  const sessions=(await getSessions()).slice().reverse();
-  const sl=document.getElementById('sessions-list');
-  sl.innerHTML=sessions.length===0
-    ?'<div style="color:var(--text-muted);font-size:13px;padding:12px 0">Aucune session enregistrée.</div>'
-    :sessions.map(s=>`<div class="session-row">
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <span style="color:var(--text-dim);font-size:12px">${fmtDate(s.date)}</span>
-          <span class="tournament-badge">${getTNameSync(s.tournamentId)}</span>
-          <span style="font-size:12px;color:var(--text-muted)">${s.entries||0} entrées · ${s.nbResults} résultats</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <span class="session-cag">+${(s.cagnotte||0).toLocaleString('fr-FR')} €</span>
-          <button class="btn-red" onclick="deleteSession(${s.id})">✕</button>
-        </div>
-      </div>`).join('');
+  const container = document.getElementById('hist-sessions-list');
+  const emptyEl   = document.getElementById('hist-empty');
+
+  if (sessions.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = `<div class="hist-sessions">${sessions.map(s => {
+    const key     = `${s.date}|${s.tournamentId}`;
+    const results = (resIndex[key] || []).slice().sort((a, b) => a.place - b.place);
+    const isOpen  = _histExpandedIds.has(s.id) || expandOnSearch.has(s.id);
+    return _renderSessionCard(s, results, isOpen, search);
+  }).join('')}</div>`;
 }
 
-async function histGoTo(page) { histPage=page; await renderHistorique(); }
+function _renderSessionCard(s, results, isOpen, search = '') {
+  const dt     = new Date(s.date + 'T12:00:00');
+  const days   = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
+  const [y, m, d] = s.date.split('-');
+  const label  = `${days[dt.getDay()]} ${d}/${m}/${y}`;
+  const tname  = getTNameSync(s.tournamentId);
+
+  return `<div class="sess-card${isOpen ? ' open' : ''}" id="sess-${s.id}">
+    <div class="sess-hdr" onclick="toggleSession(${s.id})">
+      <div class="sess-toggle">${isOpen ? '▾' : '▸'}</div>
+      <div class="sess-info">
+        <span class="sess-date">${label}</span>
+        <span class="tournament-badge">${tname}</span>
+        <span class="sess-meta">${s.entries || 0} entrées · ${results.length} résultats</span>
+      </div>
+      <div class="sess-right">
+        <span class="session-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>
+        <span class="sess-actions" onclick="event.stopPropagation()">
+          <button class="btn-sess-edit" title="Modifier les entrées" onclick="editSession(${s.id})">✎</button>
+          <button class="btn-red" title="Supprimer" onclick="deleteSession(${s.id})">✕</button>
+        </span>
+      </div>
+    </div>
+    <div class="sess-body" id="sess-body-${s.id}"${isOpen ? '' : ' style="display:none"'}>
+      <div class="sess-results">${
+        results.length
+          ? results.map(r => _renderResultRow(r, search)).join('')
+          : '<div class="sess-no-results">Aucun résultat pour cette session.</div>'
+      }</div>
+    </div>
+  </div>`;
+}
+
+function _renderResultRow(r, search = '') {
+  const pc      = r.place === 1 ? 'p1' : r.place <= 3 ? 'p3' : '';
+  const extra   = r.extra ? '<span class="extra-badge">extra</span>' : '';
+  const name    = cap(r.player);
+  const hilite  = search && r.player.toLowerCase().includes(search) ? ' style="background:rgba(196,160,74,.09)"' : '';
+  return `<div class="res-row" id="res-${r.id}"${hilite}>
+    <span class="place-badge-sm ${pc}">${r.place}</span>
+    <span class="res-name">${name}${extra}</span>
+    <span class="pts-badge">+${r.points}</span>
+    <span class="res-acts">
+      <button class="btn-edit-sm" onclick="editResult(${r.id})">✎</button>
+      <button class="btn-red" onclick="deleteResult(${r.id})">✕</button>
+    </span>
+  </div>`;
+}
+
+/* ── Accordion toggle ── */
+function toggleSession(id) {
+  const card = document.getElementById(`sess-${id}`);
+  const body = document.getElementById(`sess-body-${id}`);
+  if (!card || !body) return;
+  const opening = !_histExpandedIds.has(id);
+  opening ? _histExpandedIds.add(id) : _histExpandedIds.delete(id);
+  card.classList.toggle('open', opening);
+  body.style.display = opening ? 'block' : 'none';
+  card.querySelector('.sess-toggle').textContent = opening ? '▾' : '▸';
+}
+
+/* ── Édition inline résultat ── */
+function editResult(id) {
+  const row = document.getElementById(`res-${id}`);
+  if (!row || row.dataset.editing) return;
+  const r = (_histResultsCache || []).find(r => r.id === id);
+  if (!r) return;
+
+  row.dataset.editing = '1';
+  row.innerHTML = `
+    <input type="number" class="edit-place" id="ep-${id}" value="${r.place}" min="1" max="99" />
+    <input type="text"   class="edit-name"  id="en-${id}" value="${cap(r.player)}" />
+    <input type="number" class="edit-pts"   id="ept-${id}" value="${r.points}" min="0" />
+    <span class="res-acts">
+      <button class="btn-save-sm"   onclick="saveResultEdit(${id})">✓</button>
+      <button class="btn-cancel-sm" onclick="renderHistorique()">✕</button>
+    </span>`;
+
+  const inp = document.getElementById(`en-${id}`);
+  if (inp) { inp.focus(); inp.select(); }
+  row.querySelectorAll('input').forEach(el => el.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  saveResultEdit(id);
+    if (e.key === 'Escape') renderHistorique();
+  }));
+}
+
+async function saveResultEdit(id) {
+  const place  = parseInt(document.getElementById(`ep-${id}`)?.value)  || 1;
+  const name   = (document.getElementById(`en-${id}`)?.value || '').trim().toUpperCase();
+  const points = parseInt(document.getElementById(`ept-${id}`)?.value) || 0;
+  if (!name) { alert('Le nom du joueur ne peut pas être vide.'); return; }
+
+  const results = await getResults();
+  const idx = results.findIndex(r => r.id === id);
+  if (idx >= 0) {
+    results[idx] = { ...results[idx], place, player: name, points };
+    await saveResults(results);
+  }
+  await renderHistorique();
+  await renderClassement();
+}
+
+/* ── Édition inline session (entrées / cagnotte) ── */
+async function editSession(id) {
+  const sessions = await getSessions();
+  const s = sessions.find(s => s.id === id);
+  if (!s) return;
+
+  const metaEl = document.querySelector(`#sess-${id} .sess-meta`);
+  if (!metaEl || metaEl.dataset.editing) return;
+  metaEl.dataset.editing = '1';
+
+  metaEl.innerHTML = `
+    <input type="number" id="se-${id}" value="${s.entries || 0}" min="0"
+      onclick="event.stopPropagation()" />
+    entrées
+    <button class="btn-save-sm"   onclick="event.stopPropagation();saveSessionEdit(${id})">✓</button>
+    <button class="btn-cancel-sm" onclick="event.stopPropagation();renderHistorique()">✕</button>`;
+
+  const inp = document.getElementById(`se-${id}`);
+  if (inp) {
+    inp.focus(); inp.select();
+    inp.addEventListener('keydown', e => {
+      e.stopPropagation();
+      if (e.key === 'Enter')  saveSessionEdit(id);
+      if (e.key === 'Escape') renderHistorique();
+    });
+  }
+}
+
+async function saveSessionEdit(id) {
+  const entries = parseInt(document.getElementById(`se-${id}`)?.value) || 0;
+  const sessions = await getSessions();
+  const idx = sessions.findIndex(s => s.id === id);
+  if (idx >= 0) {
+    sessions[idx] = { ...sessions[idx], entries, cagnotte: entries * 2 };
+    await saveSessions(sessions);
+  }
+  await renderHistorique();
+}
+
+function clearDateFilter() {
+  const inp = document.getElementById('filter-date-hist');
+  if (inp) inp.value = '';
+  renderHistorique();
+}
 
 async function deleteResult(id) {
   if(!confirm('Supprimer ce résultat ?')) return;
@@ -569,8 +703,82 @@ async function renderRankingDoc() {
   document.getElementById('ranking-print-page').innerHTML=`<div style="font-family:'Cormorant Garamond',serif;text-align:center;padding:60px 40px">${inner}</div>`;
 }
 
-function printRanking()    { document.body.className='print-ranking';    window.print(); setTimeout(()=>document.body.className='',500); }
-function printClassement() { document.body.className='print-classement'; window.print(); setTimeout(()=>document.body.className='',500); }
+function printRanking() {
+  document.body.className='print-ranking';
+  window.print();
+  setTimeout(()=>document.body.className='',500);
+}
+
+async function printClassement() {
+  /* ── Récupérer et trier les données ── */
+  const results  = await getResults();
+  const cagnotte = await totalCagnotte();
+  const map = {};
+  results.forEach(r => {
+    if (!map[r.player]) map[r.player] = { player:r.player, points:0, count:0 };
+    map[r.player].points += r.points;
+    map[r.player].count++;
+  });
+  const sorted = Object.values(map).sort((a,b) => b.points - a.points);
+  if (sorted.length === 0) return;
+
+  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  /* ── Podium ── */
+  const medals = ['🥇','🥈','🥉'];
+  const ords   = ['1<sup>er</sup>','2<sup>ème</sup>','3<sup>ème</sup>'];
+  /* Ordre classique podium : 2ème gauche · 1er centre · 3ème droite */
+  const podiumHtml = [1, 0, 2].map(i => {
+    const p = sorted[i]; if (!p) return '';
+    return `<div class="cp-pod cp-p${i+1}">
+      <div class="cp-pod-medal">${medals[i]}</div>
+      <div class="cp-pod-ord">${ords[i]}</div>
+      <div class="cp-pod-name">${cap(p.player)}</div>
+      <div class="cp-pod-pts">${p.points} <span class="cp-pod-ptslbl">pts</span></div>
+    </div>`;
+  }).join('');
+
+  /* ── Helper grille ── */
+  const gridHtml = (players, startRank) => players.map((p,i) =>
+    `<div class="cp-entry">
+      <span class="cp-rank">${startRank+i}</span>
+      <span class="cp-name">${cap(p.player)}</span>
+      <span class="cp-pts">${p.points}</span>
+    </div>`
+  ).join('');
+
+  const mid = sorted.slice(3, 30);
+  const low = sorted.slice(30, 150);
+
+  const endMid = Math.min(30,  sorted.length);
+  const endLow = Math.min(150, sorted.length);
+
+  const html = `
+    <div class="cp-header">
+      <div>
+        <div class="cp-logo">Casino Barrière · Bordeaux</div>
+        <div class="cp-title">Classement Challenge 2025 / 2026</div>
+      </div>
+      <div class="cp-meta">Au ${today}<br>${sorted.length} joueur${sorted.length>1?'s':''}</div>
+      <div class="cp-cag">Ranking<br><strong>${cagnotte.toLocaleString('fr-FR')} €</strong></div>
+    </div>
+
+    <div class="cp-podium">${podiumHtml}</div>
+
+    ${mid.length ? `
+    <div class="cp-section-title">4<sup>ème</sup> — ${endMid}<sup>ème</sup></div>
+    <div class="cp-grid cp-grid-3">${gridHtml(mid, 4)}</div>` : ''}
+
+    ${low.length ? `
+    <div class="cp-section-title">31<sup>ème</sup> — ${endLow}<sup>ème</sup></div>
+    <div class="cp-grid cp-grid-4">${gridHtml(low, 31)}</div>` : ''}
+  `;
+
+  document.getElementById('classement-print-page').innerHTML = html;
+  document.body.className = 'print-classement';
+  window.print();
+  setTimeout(() => document.body.className = '', 500);
+}
 
 // ══════════════════════════════════════════════════════
 //  MODAL
@@ -599,9 +807,19 @@ async function openPlayerModal(playerName) {
     <div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Historique</div>
     <table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>
   `;
-  document.getElementById('modal').style.display='flex';
+  const overlay = document.getElementById('modal');
+  overlay.scrollTop = 0;
+  overlay.style.display = 'flex';
+  document.body.classList.add('modal-open');
 }
-function closeModal(e) { if(e.target===document.getElementById('modal')) document.getElementById('modal').style.display='none'; }
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) _closeModal();
+}
+function _closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.body.classList.remove('modal-open');
+}
 
 // ══════════════════════════════════════════════════════
 //  HELPERS

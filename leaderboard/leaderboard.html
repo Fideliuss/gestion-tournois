@@ -96,24 +96,19 @@
 
   <!-- HISTORIQUE -->
   <div id="tab-historique" class="card" style="display:none">
-    <div class="sec">Historique des résultats</div>
+    <div class="sec">Historique des sessions</div>
     <div class="search-row">
-      <input type="text" id="search-hist" placeholder="Rechercher joueur ou tournoi…" oninput="renderHistorique(true)" />
-      <select id="filter-tournoi-hist" onchange="renderHistorique(true)">
+      <input type="text" id="search-hist" placeholder="Rechercher joueur ou tournoi…" oninput="renderHistorique()" />
+      <select id="filter-tournoi-hist" onchange="renderHistorique()">
         <option value="">Tous les tournois</option>
       </select>
+      <input type="date" id="filter-date-hist" onchange="renderHistorique()" title="Filtrer par date" />
+      <button class="btn-ghost-hist" id="btn-clear-date" onclick="clearDateFilter()" title="Effacer la date" style="display:none">✕</button>
     </div>
-    <table class="hist-table">
-      <thead><tr><th>Date</th><th>Tournoi</th><th>Joueur</th><th>Place</th><th>Pts</th><th></th></tr></thead>
-      <tbody id="hist-body"></tbody>
-    </table>
-    <div id="hist-pagination" class="hist-pagination" style="display:none"></div>
+    <div id="hist-sessions-list"></div>
     <div id="hist-empty" class="empty" style="display:none">
       <div class="empty-icon">📋</div>Aucun résultat trouvé.
     </div>
-    <div class="div"></div>
-    <div class="sec">Sessions enregistrées</div>
-    <div id="sessions-list"></div>
   </div>
 
   <!-- RANKING -->
@@ -195,10 +190,11 @@
 </div>
 
 <div class="ranking-print-page" id="ranking-print-page"></div>
+<div class="classement-print-page" id="classement-print-page"></div>
 
 <div class="overlay" id="modal" style="display:none" onclick="closeModal(event)">
   <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('modal').style.display='none'">✕</button>
+    <button class="modal-close" onclick="_closeModal()">✕</button>
     <div id="modal-content"></div>
   </div>
 </div>
