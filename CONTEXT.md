@@ -176,13 +176,20 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Classement en temps réel avec podium visuel (top 3 + colonnes 4-30 + 31-150+)
 - Saisie des résultats par tournoi (places standards + places supplémentaires)
 - **Blocage doublon** : validation impossible si même tournoi + même date déjà saisi
-- **Historique accordion** : sessions repliables/dépliables, état d'expansion persisté entre re-renders
+- **Historique vue calendrier** : grille mensuelle 7 colonnes (Lun → Dim), mois les plus récents en premier
+  - Jours avec session : chips cliquables (nom tournoi + cagnotte) — la date de saisie n'a aucun effet sur l'ordre
+  - Clic sur un chip → panneau détail sous le calendrier du mois (résultats, édition inline, suppression)
+  - Indicateur "aujourd'hui" dans le mois courant
+  - Cagnotte mensuelle totale affichée dans le header de chaque mois
   - Recherche texte (joueur ou tournoi) + filtre par tournoi + filtre par date
   - **Édition inline des résultats** : place, nom, points — directement dans la ligne, Enter=save, Escape=cancel
   - **Édition inline des sessions** : nombre d'entrées (cagnotte recalculée automatiquement)
   - Suppression par résultat ou par session entière
 - Gestion des tournois (CRUD complet + barèmes de points)
-- Document ranking imprimable (cagnotte totale, 1er=10%, 2ème=5%)
+- **Document ranking imprimable** (A4 portrait, centré) :
+  - Encadré doré (2pt `#C4A04A`), typographie Cormorant Garamond
+  - Casino Barrière Bordeaux → filet or → titre cursif → date → montant 68pt
+  - Cases 🥇 or / 🥈 gris avec rang, montant, % — fonds forcés avec `print-color-adjust`
 - **Impression classement one-page** (A4 portrait) :
   - Podium visuel 3 marches (2ème | 1er | 3ème), bordure dorée 1er
   - Places 4-30 en 3 colonnes, 31-150 en 4 colonnes — ordre colonne par colonne (CSS `columns`)
@@ -242,4 +249,6 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - `csv-import.html` est un outil de migration ponctuel à la racine du projet — il n'est pas lié au hub et n'y apparaît pas
 - L'impression du classement (onglet 🏆) utilise un div dédié `#classement-print-page` (masqué en temps normal, affiché via `body.print-classement`), généré à la volée par `printClassement()` — même pattern que le document ranking
 - Le modal joueur utilise `_closeModal()` (retire `modal-open` du body) et `body.modal-open { overflow: hidden }` pour bloquer le scroll de fond
-- L'accordéon historique maintient son état d'expansion dans `_histExpandedIds` (Set) — les sessions ouvertes restent ouvertes lors des re-renders (filtrage, édition inline)
+- L'historique utilise une **vue calendrier** (grille 7 cols par mois) — plus d'accordion. `_histExpandedIds` (Set) mémorise les sessions dont le panneau détail est ouvert sous le calendrier
+- Le document ranking utilise des classes CSS `rp-*` (pas d'inline styles) — le même HTML alimente la prévisualisation écran (`.ranking-doc`) et le print (`.rp-page`) ; `print-color-adjust: exact` force les fonds colorés
+- `toggleCalSession(id)` ouvre/ferme le panneau détail d'une session dans la vue calendrier (remplace `toggleSession` de l'ancien accordion)
