@@ -472,6 +472,11 @@ async function renderHistorique() {
   const allSessions = (await getSessions()).slice().reverse(); // récentes en premier
   const search  = (document.getElementById('search-hist')?.value  || '').toLowerCase().trim();
   const filterT = (document.getElementById('filter-tournoi-hist')?.value || '');
+  const filterD = (document.getElementById('filter-date-hist')?.value   || ''); // YYYY-MM-DD ou vide
+
+  /* Bouton effacer date — visible uniquement si une date est sélectionnée */
+  const clearBtn = document.getElementById('btn-clear-date');
+  if (clearBtn) clearBtn.style.display = filterD ? 'inline-flex' : 'none';
 
   /* Index results → date|tid */
   const resIndex = {};
@@ -482,6 +487,7 @@ async function renderHistorique() {
 
   let sessions = allSessions;
   if (filterT) sessions = sessions.filter(s => s.tournamentId === filterT);
+  if (filterD) sessions = sessions.filter(s => s.date === filterD);
 
   /* Recherche : garder sessions dont le tournoi ou un joueur matche */
   const expandOnSearch = new Set();
@@ -652,6 +658,12 @@ async function saveSessionEdit(id) {
     await saveSessions(sessions);
   }
   await renderHistorique();
+}
+
+function clearDateFilter() {
+  const inp = document.getElementById('filter-date-hist');
+  if (inp) inp.value = '';
+  renderHistorique();
 }
 
 async function deleteResult(id) {

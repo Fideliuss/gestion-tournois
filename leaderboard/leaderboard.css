@@ -133,10 +133,18 @@
     body.light .stat-item { background: rgba(138,104,32,.07); border-color: rgba(138,104,32,.2); }
 
     /* ── Recherche ── */
-    .search-row { display: flex; gap: 10px; margin-bottom: 18px; }
-    .search-row input  { flex: 1; }
-    .search-row select { flex: 0 0 200px; }
-    @media(max-width:500px){ .search-row { flex-direction: column; } .search-row select { flex: 1; } }
+    .search-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .search-row input[type="text"] { flex: 1; min-width: 160px; }
+    .search-row select             { flex: 0 0 200px; }
+    .search-row input[type="date"] { flex: 0 0 150px; }
+    .btn-ghost-hist {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: none; border: 1px solid rgba(196,160,74,.2); border-radius: 3px;
+      color: var(--text-muted); font-size: 12px; padding: 0 10px;
+      cursor: pointer; transition: all .15s; flex-shrink: 0;
+    }
+    .btn-ghost-hist:hover { background: rgba(192,57,43,.1); color: #e07a68; border-color: rgba(192,57,43,.3); }
+    @media(max-width:600px){ .search-row select, .search-row input[type="date"] { flex: 1 1 140px; } }
 
     /* ── Table classement ── */
     .ranking-table { width: 100%; border-collapse: collapse; }
