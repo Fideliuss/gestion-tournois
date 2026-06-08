@@ -703,8 +703,86 @@ async function renderRankingDoc() {
   document.getElementById('ranking-print-page').innerHTML=`<div style="font-family:'Cormorant Garamond',serif;text-align:center;padding:60px 40px">${inner}</div>`;
 }
 
-function printRanking()    { document.body.className='print-ranking';    window.print(); setTimeout(()=>document.body.className='',500); }
-function printClassement() { document.body.className='print-classement'; window.print(); setTimeout(()=>document.body.className='',500); }
+function printRanking() {
+  document.body.className='print-ranking';
+  window.print();
+  setTimeout(()=>document.body.className='',500);
+}
+
+async function printClassement() {
+  /* ── Récupérer et trier les données ── */
+  const results  = await getResults();
+  const cagnotte = await totalCagnotte();
+  const map = {};
+  results.forEach(r => {
+    if (!map[r.player]) map[r.player] = { player:r.player, points:0, count:0 };
+    map[r.player].points += r.points;
+    map[r.player].count++;
+  });
+  const sorted = Object.values(map).sort((a,b) => b.points - a.points);
+  if (sorted.length === 0) return;
+
+  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  /* ── Podium ── */
+  const medals = ['🥇','🥈','🥉'];
+  const ords   = ['1<sup>er</sup>','2<sup>ème</sup>','3<sup>ème</sup>'];
+  const podiumHtml = [0,1,2].map(i => {
+    const p = sorted[i]; if (!p) return '';
+    return `<div class="cp-pod cp-p${i+1}">
+      <span class="cp-rank-icon">${medals[i]}</span>
+      <span class="cp-ord">${ords[i]}</span>
+      <span class="cp-pod-name">${cap(p.player)}</span>
+      <span class="cp-pod-pts">${p.points} pts</span>
+    </div>`;
+  }).join('');
+
+  /* ── Helper grille ── */
+  const gridHtml = (players, startRank) => players.map((p,i) =>
+    `<div class="cp-entry">
+      <span class="cp-rank">${startRank+i}</span>
+      <span class="cp-name">${cap(p.player)}</span>
+      <span class="cp-pts">${p.points}</span>
+    </div>`
+  ).join('');
+
+  const mid = sorted.slice(3, 30);
+  const low = sorted.slice(30, 150);
+  const ext = sorted.slice(150);
+
+  const endMid = Math.min(30, sorted.length);
+  const endLow = Math.min(150, sorted.length);
+
+  const html = `
+    <div class="cp-header">
+      <div>
+        <div class="cp-logo">Casino Barrière · Bordeaux</div>
+        <div class="cp-title">Classement Challenge 2025 / 2026</div>
+      </div>
+      <div class="cp-meta">Au ${today}<br>${sorted.length} joueur${sorted.length>1?'s':''}</div>
+      <div class="cp-cag">Ranking<br><strong>${cagnotte.toLocaleString('fr-FR')} €</strong></div>
+    </div>
+
+    <div class="cp-podium">${podiumHtml}</div>
+
+    ${mid.length ? `
+    <div class="cp-section-title">4<sup>ème</sup> — ${endMid}<sup>ème</sup></div>
+    <div class="cp-grid cp-grid-3">${gridHtml(mid, 4)}</div>` : ''}
+
+    ${low.length ? `
+    <div class="cp-section-title">31<sup>ème</sup> — ${endLow}<sup>ème</sup></div>
+    <div class="cp-grid cp-grid-5">${gridHtml(low, 31)}</div>` : ''}
+
+    ${ext.length ? `
+    <div class="cp-section-title">151<sup>ème</sup> — ${sorted.length}<sup>ème</sup></div>
+    <div class="cp-grid cp-grid-5">${gridHtml(ext, 151)}</div>` : ''}
+  `;
+
+  document.getElementById('classement-print-page').innerHTML = html;
+  document.body.className = 'print-classement';
+  window.print();
+  setTimeout(() => document.body.className = '', 500);
+}
 
 // ══════════════════════════════════════════════════════
 //  MODAL

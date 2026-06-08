@@ -442,11 +442,84 @@
 
     .loading { text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px; }
 
+    .ranking-print-page    { display: none; }
+    .classement-print-page { display: none; }
+
     @media print {
-      body.print-ranking    .app { display: none; }
+      @page { size: A4 portrait; margin: 9mm 12mm; }
+
+      /* ── Masquer tout sauf la page active ── */
+      body.print-ranking    .app                { display: none; }
       body.print-ranking    .ranking-print-page { display: block !important; }
-      body.print-classement .app > * { display: none !important; }
-      body.print-classement .card-ranking { display: block !important; background: #fff !important; border: none !important; max-width: 100% !important; padding: 0 !important; }
+
+      body.print-classement .app                   { display: none; }
+      body.print-classement .ranking-print-page    { display: none; }
+      body.print-classement .classement-print-page { display: block !important; }
+
       body { background: #fff; }
+
+      /* ═══════════════════════════════════════
+         Classement print — mise en page
+      ═══════════════════════════════════════ */
+      .classement-print-page {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-size: 7.5pt;
+        color: #111;
+        line-height: 1.25;
+      }
+
+      /* En-tête */
+      .cp-header {
+        display: flex; align-items: flex-end; justify-content: space-between;
+        border-bottom: 1.5pt solid #C4A04A;
+        padding-bottom: 4pt; margin-bottom: 7pt; gap: 12pt;
+      }
+      .cp-logo  { font-size: 6pt; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: #8A6E30; }
+      .cp-title { font-size: 13pt; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #111; line-height: 1.1; }
+      .cp-meta  { font-size: 6.5pt; color: #666; text-align: center; white-space: nowrap; }
+      .cp-cag   { font-size: 7.5pt; color: #8A6E30; text-align: right; white-space: nowrap; }
+      .cp-cag strong { font-size: 11pt; font-weight: 700; color: #C4A04A; }
+
+      /* Podium — 3 colonnes horizontales */
+      .cp-podium { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5pt; margin-bottom: 8pt; }
+      .cp-pod {
+        border: 1pt solid #C4A04A; border-radius: 2pt;
+        padding: 5pt 7pt; display: flex; align-items: center; gap: 5pt;
+      }
+      .cp-p1 { background: rgba(196,160,74,.12); border-width: 1.5pt; }
+      .cp-p2 { background: rgba(196,160,74,.06); }
+      .cp-p3 { background: rgba(196,160,74,.04); }
+      .cp-rank-icon { font-size: 13pt; line-height: 1; flex-shrink: 0; }
+      .cp-ord       { font-size: 6pt; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8A6E30; flex-shrink: 0; }
+      .cp-pod-name  { flex: 1; font-size: 9pt; font-weight: 600; color: #111; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cp-pod-pts   { font-size: 8pt; font-weight: 700; color: #8A6E30; flex-shrink: 0; }
+
+      /* Titres de section */
+      .cp-section-title {
+        font-size: 6pt; font-weight: 700; letter-spacing: .28em; text-transform: uppercase;
+        color: #8A6E30; border-bottom: 1pt solid rgba(196,160,74,.35);
+        padding-bottom: 2pt; margin: 7pt 0 3pt;
+      }
+
+      /* Grilles */
+      .cp-grid { column-gap: 10pt; row-gap: 0; }
+      .cp-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .cp-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .cp-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); }
+
+      /* Entrée joueur */
+      .cp-entry {
+        display: flex; align-items: baseline; gap: 3pt;
+        padding: 1.5pt 2pt; border-bottom: .5pt solid rgba(0,0,0,.07);
+        overflow: hidden;
+      }
+      .cp-rank {
+        font-size: 6pt; font-weight: 700; color: #B09040;
+        width: 14pt; flex-shrink: 0; text-align: right;
+      }
+      .cp-name {
+        flex: 1; font-size: 7.5pt; color: #111;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .cp-pts { font-size: 7pt; font-weight: 600; color: #444; flex-shrink: 0; }
     }
-    .ranking-print-page { display: none; }
