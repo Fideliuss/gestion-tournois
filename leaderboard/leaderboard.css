@@ -248,6 +248,32 @@
     body.light .cal-chip-empty { border-color: rgba(180,80,0,.4); background: rgba(180,80,0,.06); }
     body.light .cal-chip-empty .cal-chip-cag { color: #b45309; }
 
+    /* Navigation mois */
+    .hist-nav {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px; margin-bottom: 18px;
+    }
+    .hist-nav-btn {
+      width: 34px; height: 34px; border-radius: 3px; flex-shrink: 0;
+      background: var(--bg-input); border: 1px solid rgba(196,160,74,.2);
+      color: var(--gold); font-size: 20px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, border-color .15s;
+    }
+    .hist-nav-btn:hover:not(:disabled) {
+      background: rgba(196,160,74,.1); border-color: rgba(196,160,74,.4);
+    }
+    .hist-nav-btn:disabled { opacity: .22; cursor: not-allowed; }
+    .hist-nav-label {
+      font-family: var(--f-display); font-size: 20px; font-style: italic;
+      color: var(--cream); min-width: 200px; text-align: center;
+    }
+    .hist-nav-year { font-weight: 400; opacity: .65; font-size: 16px; }
+    .hist-empty-month {
+      text-align: center; padding: 40px 0;
+      font-size: 13px; color: var(--text-muted); font-style: italic;
+    }
+
     /* Panneaux détail sous le calendrier */
     .cal-details { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 

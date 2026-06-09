@@ -79,6 +79,15 @@ const SB = {
     return rows.map(_toResult);
   },
 
+  async getResultsByMonth(yearMonth) {
+    const { data, error } = await _sb.from('results')
+      .select('*')
+      .gte('date', `${yearMonth}-01`)
+      .lte('date', `${yearMonth}-31`);
+    if (error) throw error;
+    return (data || []).map(_toResult);
+  },
+
   async insertResults(results) {
     const { data, error } = await _sb.from('results')
       .insert(results.map(_fromResult)).select();

@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.9.9', date: '2026-06-10', message: 'Historique — navigation mois par mois (flèches ‹ ›) ; résultats chargés à la demande par mois ; classement inchangé (tous les résultats)' },
   { version: 'v1.9.8', date: '2026-06-10', message: 'Fix limite 1000 lignes Supabase — getResults/getSessions paginés ; cache module-level (1 seul fetch par session navigateur, invalidé après chaque mutation)' },
   { version: 'v1.9.7', date: '2026-06-09', message: 'Historique — indicateur orange sur les sessions sans résultats dans le calendrier ; suppression import.html (migration terminée)' },
   { version: 'v1.9.6', date: '2026-06-09', message: 'Import — inserts résultats découpés en chunks de 500 (fix dates à 0 résultats) ; countRows pour vérification ; détection ex-æquo dans import.html' },
