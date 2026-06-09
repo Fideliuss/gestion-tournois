@@ -111,6 +111,39 @@ body.light .fs-indicator           { background: rgba(240,232,212,.9); border-co
 .theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
 @media print { .theme-toggle { display: none !important; } }
 
+/* ── Auth overlay (pendant la vérification) ── */
+#auth-overlay {
+  position: fixed; inset: 0; background: var(--bg, #1a1a1a);
+  z-index: 9999; display: flex; align-items: center; justify-content: center;
+}
+#auth-overlay::after {
+  content: ''; width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid rgba(196,160,74,.2); border-top-color: var(--gold, #C4A04A);
+  animation: auth-spin .7s linear infinite;
+}
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+
+/* ── Auth badge (utilisateur connecté) ── */
+#auth-badge {
+  position: fixed; top: 56px; right: 16px; z-index: 200;
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 10px 5px 12px;
+  font-family: var(--f-ui); font-size: 11px;
+  backdrop-filter: blur(8px);
+}
+.auth-email  { color: var(--text-muted); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.auth-chip   { border-radius: 10px; padding: 2px 7px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+.auth-chip-admin { background: rgba(196,160,74,.18); color: var(--gold, #C4A04A); }
+.auth-chip-floor { background: rgba(100,160,255,.15); color: #6da4ff; }
+.auth-logout {
+  background: none; border: none; cursor: pointer; padding: 2px 4px;
+  color: var(--text-muted); font-size: 11px; border-radius: 6px;
+  transition: color .15s;
+}
+.auth-logout:hover { color: #e74c3c; }
+@media print { #auth-badge, #auth-overlay { display: none !important; } }
+
 /* ── Header ── */
 .hdr { text-align: center; margin-bottom: 44px; }
 .hdr-logo {

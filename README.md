@@ -1,6 +1,8 @@
 # Outils Tournois — Casino Barrière Bordeaux
 
-Outils internes de gestion des tournois de poker. Application web locale, sans serveur, sans installation — s'ouvre directement dans le navigateur.
+Outils internes de gestion des tournois de poker. Application web déployée sur **GitHub Pages**, sécurisée par authentification magic link (Supabase Auth), sans serveur, sans installation — s'ouvre directement dans le navigateur.
+
+**URL de production :** https://fideliuss.github.io/gestion-tournois/
 
 ---
 
@@ -66,32 +68,50 @@ Gestion des croupiers extras — déclaration mensuelle DTPJ et feuilles d'émar
 
 ---
 
+## Accès et authentification
+
+L'application est sécurisée par **magic link** (Supabase Auth). Deux rôles :
+
+| Rôle | Accès |
+|------|-------|
+| **Admin** | Accès total (hub complet, leaderboard, déclaration, extras) |
+| **Floor** | Prize Pool Builder uniquement |
+
+### Connexion
+1. Ouvrir https://fideliuss.github.io/gestion-tournois/
+2. Saisir son adresse e-mail professionnelle
+3. Cliquer sur le lien reçu par e-mail
+4. Redirection automatique selon le rôle — session valable **7 jours**
+
+### Gestion des rôles (admin Supabase requis)
+Supabase Dashboard → Authentication → Users → Edit user → `raw_user_meta_data` :
+- Admin : `{ "role": "admin" }`
+- Floor : `{ "role": "floor" }` (ou laisser vide — floor par défaut)
+
+---
+
 ## Utilisation
 
-Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récente).
+Compatible **Google Chrome** et **Microsoft Edge** (version récente).
 
-### Première utilisation — Leaderboard
-Le leaderboard utilise **Supabase** (cloud PostgreSQL) — aucune configuration locale requise.
-1. Ouvrir `leaderboard/leaderboard.html` directement
-2. Les données sont chargées automatiquement depuis Supabase
-
-### Première utilisation — Extras
-1. Ouvrir `extras/extras.html` directement
-2. La liste des croupiers extras est chargée automatiquement depuis Supabase
+### Données cloud
+Toutes les données (leaderboard, extras) sont stockées dans **Supabase** (cloud PostgreSQL) — aucune configuration locale requise, synchronisées automatiquement entre toutes les machines.
 
 ---
 
 ## Structure des fichiers
 
 ```
-├── index.html              — Hub principal
-├── admin.html              — Sous-hub Gestion Administrative
+├── index.html              — Hub principal (guard auth, filtrage par rôle)
+├── admin.html              — Sous-hub Gestion Administrative (admin only)
+├── login.html              — Page de connexion magic link
 │
 ├── shared/
-│   ├── barriere.css        — Styles partagés (thème, composants, .fs-indicator)
-│   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS pour extras)
+│   ├── barriere.css        — Styles partagés (thème, composants, styles auth)
+│   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS)
 │   ├── tournaments.js      — TOURNAMENT_DEFAULTS (fallback leaderboard)
-│   ├── supabase.js         — Client Supabase + objet SB (CRUD complet + mappers)
+│   ├── supabase.js         — Client Supabase + objet SB (CRUD complet + auth + mappers)
+│   ├── auth.js             — AUTH.guard(), AUTH.signOut(), badge utilisateur
 │   ├── changelog.js        — Mis à jour manuellement avant chaque PR de release
 │   └── logo.png            — Logo Casino Barrière Bordeaux
 │
@@ -127,9 +147,11 @@ Le leaderboard utilise **Supabase** (cloud PostgreSQL) — aucune configuration 
 |-------|-------|
 | HTML / CSS / JS vanilla | Base de l'application |
 | React 18 (CDN) | Interface Prize Pool Calculator |
-| Supabase (PostgreSQL cloud) | Persistance leaderboard + extras (résultats, sessions, tournois, croupiers) |
+| Supabase (PostgreSQL cloud) | Persistance leaderboard + extras + **authentification** |
 | supabase-js v2 (CDN) | Client Supabase côté navigateur |
+| Supabase Auth (magic link) | Connexion sécurisée par e-mail, rôles admin/floor, session 7 jours |
 | `localStorage` | Configs déclaration / courriers / émargements hebdo |
+| GitHub Pages | Hébergement statique (branche `main`, auto-deploy) |
 
 Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
 

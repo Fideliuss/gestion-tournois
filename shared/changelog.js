@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.9.0', date: '2026-06-09', message: 'Authentification magic link — accès sécurisé par e-mail, rôles admin/floor, badge utilisateur, déconnexion' },
   { version: 'v1.8.1', date: '2026-06-09', message: 'Suppression des outils de migration one-shot (csv-import.html, supabase-import.html) — migrations terminées, déploiement GitHub Pages' },
   { version: 'v1.8.0', date: '2026-06-09', message: 'Migration Supabase complète — leaderboard (résultats, sessions, tournois) + extras (croupiers) persistés dans PostgreSQL cloud ; suppression totale de BarriereFS/File System Access API ; outil supabase-import.html' },
   { version: 'v1.7.0', date: '2026-06-09', message: 'Historique — vue calendrier mensuelle (grille 7 cols, chips par session, panneau détail) ; Ranking — impression redessinée (encadré doré, typographie élégante, cases 1er/2ème colorées)' },

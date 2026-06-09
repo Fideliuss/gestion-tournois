@@ -129,6 +129,29 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Auth ───────────────────────────────────────────
+  async sendMagicLink(email) {
+    const { error } = await _sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: 'https://fideliuss.github.io/gestion-tournois/login.html' }
+    });
+    if (error) throw error;
+  },
+
+  async signOut() {
+    const { error } = await _sb.auth.signOut();
+    if (error) throw error;
+  },
+
+  async getSession() {
+    const { data: { session } } = await _sb.auth.getSession();
+    return session;
+  },
+
+  onAuthStateChange(cb) {
+    return _sb.auth.onAuthStateChange(cb);
+  },
+
   // ── Extras ─────────────────────────────────────────
   async getExtras() {
     const { data, error } = await _sb.from('extras').select('*').order('nom');
