@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.9.5', date: '2026-06-09', message: 'Fix leaderboard — clic session n\'ouvrait pas le panneau détail (type mismatch bigint Supabase string vs JS number)' },
   { version: 'v1.9.4', date: '2026-06-09', message: 'Audit — suppression des derniers vestiges BarriereFS (tournaments.js, barriere.js, barriere.css) ; cohérence AUTH.guard admin.html' },
   { version: 'v1.9.2', date: '2026-06-09', message: 'Auth — changement de mot de passe in-app (modal 🔑 dans le badge utilisateur)' },
   { version: 'v1.9.1', date: '2026-06-09', message: 'Auth — passage mot de passe (email + password) + réinitialisation par lien e-mail ; suppression magic link' },
