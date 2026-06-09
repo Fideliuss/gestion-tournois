@@ -60,7 +60,7 @@
       background: var(--bg-input); color: var(--text);
       border: 1px solid rgba(196,160,74,.15); border-radius: 3px;
       font-family: var(--f-ui); font-size: 14px;
-      box-sizing: border-box; margin-bottom: 20px;
+      box-sizing: border-box; margin-bottom: 16px;
       outline: none; transition: border-color .2s;
     }
     .login-input:focus    { border-color: var(--gold); }
@@ -81,24 +81,36 @@
 
     .login-msg { margin-top: 12px; font-size: 12px; text-align: center; min-height: 16px; }
     .login-msg.err { color: var(--red); }
+    .login-msg.ok  { color: #6da; }
 
-    /* ── État "lien envoyé" ── */
-    .login-sent { display: none; text-align: center; padding: 8px 0; }
-    .login-sent-icon  { font-size: 40px; margin-bottom: 20px; display: block; }
-    .login-sent-title {
+    /* ── Lien mot de passe oublié ── */
+    .login-forgot {
+      display: block; margin-top: 14px; text-align: center;
+      font-size: 11px; color: var(--text-muted);
+      cursor: pointer; letter-spacing: .02em;
+      transition: color .18s; border: none; background: none;
+      font-family: var(--f-ui); text-decoration: none;
+    }
+    .login-forgot:hover { color: var(--gold-dim); }
+
+    /* ── État "reset envoyé" / "succès" ── */
+    .login-notice { display: none; text-align: center; padding: 8px 0; }
+    .login-notice-icon  { font-size: 40px; margin-bottom: 20px; display: block; }
+    .login-notice-title {
       font-family: var(--f-display); font-size: 24px; font-style: italic;
       color: var(--cream); margin-bottom: 12px;
     }
-    .login-sent-sub {
+    .login-notice-sub {
       font-size: 13px; color: var(--text-dim); line-height: 1.7;
     }
-    .login-sent-back {
+    .login-notice-back {
       display: inline-block; margin-top: 24px; font-size: 11px;
       color: var(--gold-dim); cursor: pointer; letter-spacing: .04em;
       text-decoration: none; border-bottom: 1px solid var(--gold-bd);
-      transition: color .18s;
+      transition: color .18s; background: none; border-top: none;
+      border-left: none; border-right: none; font-family: var(--f-ui);
     }
-    .login-sent-back:hover { color: var(--gold); }
+    .login-notice-back:hover { color: var(--gold); }
 
     /* ── Pied de carte ── */
     .login-footer {
@@ -126,30 +138,70 @@
 
   <div class="login-eyebrow">Casino Barrière · Bordeaux</div>
   <div class="login-hr-gold"></div>
-  <div class="login-title">Connexion</div>
-  <div class="login-sub">Outils internes de gestion des tournois</div>
+  <div class="login-title" id="login-title">Connexion</div>
+  <div class="login-sub" id="login-sub">Outils internes de gestion des tournois</div>
 
-  <!-- Formulaire -->
-  <div id="login-form">
+  <!-- ── État 1 : formulaire login ── -->
+  <div id="state-login">
     <label class="login-label" for="login-email">Adresse e-mail</label>
     <input type="email" id="login-email" class="login-input"
       placeholder="prenom.nom@groupebarriere.com"
       autocomplete="email"
-      onkeydown="if(event.key==='Enter') sendLink()" />
-    <button class="login-btn" id="login-btn" onclick="sendLink()">
-      Envoyer le lien de connexion →
+      onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()" />
+
+    <label class="login-label" for="login-password">Mot de passe</label>
+    <input type="password" id="login-password" class="login-input"
+      placeholder="••••••••"
+      autocomplete="current-password"
+      onkeydown="if(event.key==='Enter') signIn()" />
+
+    <button class="login-btn" id="login-btn" onclick="signIn()">
+      Se connecter →
     </button>
     <div class="login-msg" id="login-msg"></div>
+    <button class="login-forgot" onclick="showReset()">Mot de passe oublié ?</button>
   </div>
 
-  <!-- Confirmation envoi -->
-  <div class="login-sent" id="login-sent">
-    <span class="login-sent-icon">📬</span>
-    <div class="login-sent-title">Lien envoyé !</div>
-    <div class="login-sent-sub">
-      Vérifie ta boîte mail et clique sur le lien<br>pour te connecter. Expire dans 1 heure.
+  <!-- ── État 2 : formulaire reset ── -->
+  <div id="state-reset" style="display:none">
+    <label class="login-label" for="reset-email">Adresse e-mail</label>
+    <input type="email" id="reset-email" class="login-input"
+      placeholder="prenom.nom@groupebarriere.com"
+      autocomplete="email"
+      onkeydown="if(event.key==='Enter') sendReset()" />
+    <button class="login-btn" id="reset-btn" onclick="sendReset()">
+      Envoyer le lien de réinitialisation →
+    </button>
+    <div class="login-msg" id="reset-msg"></div>
+    <button class="login-forgot" onclick="showLogin()">← Retour à la connexion</button>
+  </div>
+
+  <!-- ── État 3 : nouveau mot de passe (après clic lien reset) ── -->
+  <div id="state-new-password" style="display:none">
+    <label class="login-label" for="new-password">Nouveau mot de passe</label>
+    <input type="password" id="new-password" class="login-input"
+      placeholder="••••••••"
+      autocomplete="new-password"
+      onkeydown="if(event.key==='Enter') saveNewPassword()" />
+    <label class="login-label" for="new-password-confirm">Confirmer le mot de passe</label>
+    <input type="password" id="new-password-confirm" class="login-input"
+      placeholder="••••••••"
+      autocomplete="new-password"
+      onkeydown="if(event.key==='Enter') saveNewPassword()" />
+    <button class="login-btn" id="new-password-btn" onclick="saveNewPassword()">
+      Enregistrer le mot de passe →
+    </button>
+    <div class="login-msg" id="new-password-msg"></div>
+  </div>
+
+  <!-- ── État 4 : confirmation reset envoyé ── -->
+  <div class="login-notice" id="state-reset-sent">
+    <span class="login-notice-icon">📬</span>
+    <div class="login-notice-title">Lien envoyé !</div>
+    <div class="login-notice-sub">
+      Vérifie ta boîte mail et clique sur le lien<br>pour réinitialiser ton mot de passe.
     </div>
-    <span class="login-sent-back" onclick="resetForm()">← Renvoyer à une autre adresse</span>
+    <button class="login-notice-back" onclick="showLogin()">← Retour à la connexion</button>
   </div>
 
   <div class="login-footer">
@@ -167,8 +219,15 @@ if (window.CHANGELOG?.[0]) {
   document.getElementById('login-version').textContent = CHANGELOG[0].version;
 }
 
+// ── Détection session existante + event PASSWORD_RECOVERY ──
 SB.onAuthStateChange((event, session) => {
-  if (session) _redirect(session);
+  if (event === 'PASSWORD_RECOVERY') {
+    showNewPassword();
+  } else if (event === 'SIGNED_IN' && session) {
+    // Ne pas rediriger si on est en train de changer le mdp
+    if (document.getElementById('state-new-password').style.display !== 'none') return;
+    _redirect(session);
+  }
 });
 
 (async () => {
@@ -181,34 +240,113 @@ function _redirect(session) {
   window.location.replace(role === 'admin' ? 'index.html' : 'prize-pool/prize-pool.html');
 }
 
-async function sendLink() {
-  const email = (document.getElementById('login-email').value || '').trim();
-  const msg   = document.getElementById('login-msg');
-  const btn   = document.getElementById('login-btn');
+// ── Navigation entre états ──
+function _setTitle(title, sub) {
+  document.getElementById('login-title').textContent = title;
+  document.getElementById('login-sub').textContent   = sub;
+}
+function _showState(id) {
+  ['state-login','state-reset','state-new-password','state-reset-sent'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? '' : 'none';
+  });
+}
+
+function showLogin() {
+  _setTitle('Connexion', 'Outils internes de gestion des tournois');
+  _showState('state-login');
+  document.getElementById('login-msg').textContent = '';
+}
+
+function showReset() {
+  _setTitle('Réinitialisation', 'Saisis ton adresse e-mail pour recevoir un lien.');
+  _showState('state-reset');
+  document.getElementById('reset-msg').textContent = '';
+  document.getElementById('reset-email').value = document.getElementById('login-email').value || '';
+  document.getElementById('reset-email').focus();
+}
+
+function showNewPassword() {
+  _setTitle('Nouveau mot de passe', 'Choisis un nouveau mot de passe pour ton compte.');
+  _showState('state-new-password');
+  document.getElementById('new-password').focus();
+}
+
+// ── Actions ──
+async function signIn() {
+  const email    = (document.getElementById('login-email').value    || '').trim();
+  const password = (document.getElementById('login-password').value || '').trim();
+  const msg      = document.getElementById('login-msg');
+  const btn      = document.getElementById('login-btn');
 
   msg.textContent = ''; msg.className = 'login-msg';
-  if (!email) { msg.textContent = 'Saisis ton adresse e-mail.'; msg.className = 'login-msg err'; return; }
+  if (!email || !password) {
+    msg.textContent = 'Saisis ton e-mail et ton mot de passe.';
+    msg.className = 'login-msg err'; return;
+  }
 
-  btn.disabled = true; btn.textContent = 'Envoi en cours…';
-
+  btn.disabled = true; btn.textContent = 'Connexion…';
   try {
-    await SB.sendMagicLink(email);
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('login-sent').style.display = 'block';
+    const session = await SB.signInWithPassword(email, password);
+    _redirect(session);
   } catch(ex) {
-    msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
+    msg.textContent = ex.message?.includes('Invalid login credentials')
+      ? 'E-mail ou mot de passe incorrect.'
+      : 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
     msg.className = 'login-msg err';
-    btn.disabled = false; btn.textContent = 'Envoyer le lien de connexion →';
+    btn.disabled = false; btn.textContent = 'Se connecter →';
   }
 }
 
-function resetForm() {
-  document.getElementById('login-form').style.display = '';
-  document.getElementById('login-sent').style.display = 'none';
-  document.getElementById('login-btn').disabled = false;
-  document.getElementById('login-btn').textContent = 'Envoyer le lien de connexion →';
-  document.getElementById('login-email').value = '';
-  document.getElementById('login-email').focus();
+async function sendReset() {
+  const email = (document.getElementById('reset-email').value || '').trim();
+  const msg   = document.getElementById('reset-msg');
+  const btn   = document.getElementById('reset-btn');
+
+  msg.textContent = ''; msg.className = 'login-msg';
+  if (!email) {
+    msg.textContent = 'Saisis ton adresse e-mail.';
+    msg.className = 'login-msg err'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Envoi en cours…';
+  try {
+    await SB.resetPassword(email);
+    _showState('state-reset-sent');
+  } catch(ex) {
+    msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
+    msg.className = 'login-msg err';
+    btn.disabled = false; btn.textContent = 'Envoyer le lien de réinitialisation →';
+  }
+}
+
+async function saveNewPassword() {
+  const pwd     = document.getElementById('new-password').value         || '';
+  const confirm = document.getElementById('new-password-confirm').value || '';
+  const msg     = document.getElementById('new-password-msg');
+  const btn     = document.getElementById('new-password-btn');
+
+  msg.textContent = ''; msg.className = 'login-msg';
+  if (pwd.length < 8) {
+    msg.textContent = 'Le mot de passe doit faire au moins 8 caractères.';
+    msg.className = 'login-msg err'; return;
+  }
+  if (pwd !== confirm) {
+    msg.textContent = 'Les deux mots de passe ne correspondent pas.';
+    msg.className = 'login-msg err'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Enregistrement…';
+  try {
+    await SB.updatePassword(pwd);
+    msg.textContent = 'Mot de passe mis à jour ! Redirection…';
+    msg.className = 'login-msg ok';
+    const session = await SB.getSession();
+    setTimeout(() => _redirect(session), 1200);
+  } catch(ex) {
+    msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
+    msg.className = 'login-msg err';
+    btn.disabled = false; btn.textContent = 'Enregistrer le mot de passe →';
+  }
 }
 </script>
 </body>
