@@ -86,8 +86,6 @@ Le leaderboard utilise **Supabase** (cloud PostgreSQL) — aucune configuration 
 ```
 ├── index.html              — Hub principal
 ├── admin.html              — Sous-hub Gestion Administrative
-├── csv-import.html         — Outil one-shot import CSV → barriere_data.json (migration)
-├── supabase-import.html    — Outil one-shot migration barriere_data.json → Supabase
 │
 ├── shared/
 │   ├── barriere.css        — Styles partagés (thème, composants, .fs-indicator)

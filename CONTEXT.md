@@ -20,8 +20,6 @@ Quatre outils disponibles, zéro serveur, zéro build — s'ouvre directement da
 ```
 index.html              Hub principal
 admin.html              Sous-hub Gestion Administrative
-csv-import.html         Outil one-shot d'import CSV → barriere_data.json (migration, à la racine)
-supabase-import.html    Outil one-shot de migration barriere_data.json → Supabase (à la racine)
 
 shared/
   barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator pour extras)
@@ -198,14 +196,6 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Fiche joueur détaillée (modal : total points, meilleur résultat, historique) — affichée en haut de page
 - Données sauvegardées dans **Supabase** (cloud PostgreSQL) — accessible depuis n'importe quelle machine
 
-### Outil import CSV (`csv-import.html`)
-- Outil de migration one-shot : charge un fichier CSV exporté depuis l'ancien système
-- Prévisualisation des données avant import : sessions, joueurs, entrées totales, cagnotte preview
-- Détection des sessions sans entrées (warning visuel)
-- Génère et propose au téléchargement un `barriere_data.json` compatible avec le leaderboard
-- Gestion BOM (UTF-8 BOM détecté via `charCodeAt(0) === 0xFEFF`)
-- Fichier autonome à la racine — aucune dépendance JS externe, pas lié au hub
-
 ---
 
 ## Conventions de code
@@ -247,8 +237,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Les semaines utilisent la numérotation ISO (lun=1er jour, `getMondayOfISOWeek`)
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
 - **Changelog** : mis à jour manuellement dans `shared/changelog.js` avant la PR de release. Ajouter l'entrée en tête du tableau avec le titre de la PR. La version affichée dans `index.html` = `CHANGELOG[0].version`
-- `csv-import.html` est un outil de migration ponctuel à la racine du projet — il n'est pas lié au hub et n'y apparaît pas
-- `supabase-import.html` est l'outil one-shot de migration `barriere_data.json` → Supabase — à utiliser une seule fois, puis supprimer
+- `csv-import.html` et `supabase-import.html` ont été supprimés du repo après migration — outils one-shot, migration terminée
 - Le schéma Supabase (tables `results`, `sessions`, `tournaments`) doit être créé manuellement via le SQL Editor de Supabase avant le premier usage
 - `_tournamentsCache` (var privée dans `leaderboard.js`) mis à `null` après chaque upsert/delete de tournoi pour forcer un rechargement depuis Supabase
 - L'impression du classement (onglet 🏆) utilise un div dédié `#classement-print-page` (masqué en temps normal, affiché via `body.print-classement`), généré à la volée par `printClassement()` — même pattern que le document ranking
