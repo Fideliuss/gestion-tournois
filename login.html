@@ -7,43 +7,47 @@
   <link rel="stylesheet" href="shared/barriere.css" />
   <style>
     body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; box-sizing: border-box; }
+
     .login-card {
-      width: 100%; max-width: 380px;
-      background: var(--card-bg, #1e1e1e); border: 1px solid var(--border, rgba(255,255,255,.08));
-      border-radius: 16px; padding: 40px 32px;
+      width: 100%; max-width: 360px;
+      background: var(--card-bg, #1e1e1e);
+      border: 1px solid var(--border, rgba(255,255,255,.08));
+      border-radius: 16px; padding: 44px 32px 36px;
+      text-align: center;
     }
-    .login-logo  { font-size: 11px; letter-spacing: .12em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-    .login-title { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
-    .login-sub   { font-size: 13px; color: var(--text-muted); margin: 0 0 32px; }
-    .login-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-    .login-input {
-      width: 100%; padding: 11px 14px; border-radius: 8px;
-      border: 1px solid var(--border, rgba(255,255,255,.1));
-      background: var(--bg, #111); color: var(--text, #f0f0f0);
-      font-size: 14px; box-sizing: border-box; margin-bottom: 16px;
-      outline: none; transition: border-color .2s;
+
+    .login-logo  { font-size: 11px; letter-spacing: .12em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .login-title { font-size: 23px; font-weight: 700; margin: 0 0 6px; }
+    .login-sub   { font-size: 13px; color: var(--text-muted); margin: 0 0 36px; line-height: 1.5; }
+
+    /* Bouton Google */
+    .btn-google {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 13px 20px;
+      background: #fff; color: #3c4043;
+      border: 1px solid #dadce0; border-radius: 8px;
+      font-family: 'Google Sans', Roboto, sans-serif; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: box-shadow .2s, background .15s;
+      text-decoration: none;
     }
-    .login-input:focus { border-color: var(--gold, #C4A04A); }
-    .login-btn {
-      width: 100%; padding: 12px; background: var(--gold, #C4A04A); color: #000;
-      border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
-      cursor: pointer; transition: opacity .2s;
+    .btn-google:hover   { box-shadow: 0 1px 6px rgba(0,0,0,.2); background: #f8f8f8; }
+    .btn-google:active  { background: #f0f0f0; }
+    .btn-google:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-google svg     { flex-shrink: 0; }
+
+    .login-note  { margin-top: 16px; font-size: 11px; color: var(--text-muted); opacity: .7; }
+
+    /* Message d'erreur */
+    .login-err {
+      display: none; margin-bottom: 20px;
+      background: rgba(231,76,60,.1); border: 1px solid rgba(231,76,60,.3);
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 12px; color: #e74c3c; line-height: 1.5;
     }
-    .login-btn:hover    { opacity: .88; }
-    .login-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .login-msg { margin-top: 14px; font-size: 13px; text-align: center; min-height: 18px; }
-    .login-msg.err { color: #e74c3c; }
-    /* État "lien envoyé" */
-    .login-sent { display: none; text-align: center; }
-    .login-sent-icon  { font-size: 44px; margin-bottom: 16px; }
-    .login-sent-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-    .login-sent-sub   { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
-    .login-sent-back  {
-      display: inline-block; margin-top: 20px; font-size: 12px;
-      color: var(--text-muted); cursor: pointer; text-decoration: underline;
-    }
-    .login-hr { border: none; border-top: 1px solid var(--border, rgba(255,255,255,.08)); margin: 24px 0; }
-    .login-version { text-align: center; font-size: 11px; color: var(--text-muted); opacity: .5; }
+    .login-err.visible { display: block; }
+
+    .login-hr      { border: none; border-top: 1px solid var(--border, rgba(255,255,255,.08)); margin: 28px 0 16px; }
+    .login-version { font-size: 11px; color: var(--text-muted); opacity: .45; }
   </style>
 </head>
 <body>
@@ -51,31 +55,22 @@
 <div class="login-card">
   <div class="login-logo">Casino Barrière · Bordeaux</div>
   <div class="login-title">Connexion</div>
-  <div class="login-sub">Outils de gestion des tournois</div>
+  <div class="login-sub">Outils de gestion des tournois<br>Accès réservé au personnel Barrière</div>
 
-  <!-- Formulaire -->
-  <div id="login-form">
-    <label class="login-label" for="login-email">Adresse e-mail</label>
-    <input type="email" id="login-email" class="login-input"
-      placeholder="prenom.nom@casino-bordeaux.fr"
-      autocomplete="email"
-      onkeydown="if(event.key==='Enter') sendLink()" />
-    <button class="login-btn" id="login-btn" onclick="sendLink()">
-      Envoyer le lien de connexion
-    </button>
-    <div class="login-msg" id="login-msg"></div>
-  </div>
+  <div class="login-err" id="login-err"></div>
 
-  <!-- Confirmation envoi -->
-  <div class="login-sent" id="login-sent">
-    <div class="login-sent-icon">📬</div>
-    <div class="login-sent-title">Lien envoyé !</div>
-    <div class="login-sent-sub">
-      Vérifie ta boîte mail et clique sur le lien pour te connecter.<br>
-      Le lien expire dans 1 heure.
-    </div>
-    <span class="login-sent-back" onclick="resetForm()">← Renvoyer à une autre adresse</span>
-  </div>
+  <button class="btn-google" id="btn-google" onclick="signInWithGoogle()">
+    <!-- Logo Google officiel -->
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+    </svg>
+    Se connecter avec Google
+  </button>
+
+  <div class="login-note">Utilise ton compte @groupebarriere.com</div>
 
   <div class="login-hr"></div>
   <div class="login-version" id="login-version"></div>
@@ -86,62 +81,49 @@
 <script src="shared/supabase.js"></script>
 <script>
 // Afficher la version
-document.getElementById('login-version').textContent =
-  window.CHANGELOG?.[0] ? `v${CHANGELOG[0].version}` : '';
+if (window.CHANGELOG?.[0]) {
+  document.getElementById('login-version').textContent = CHANGELOG[0].version;
+}
 
-// Écouter l'état d'auth — capte le retour du magic link
+// Afficher une erreur si redirigé avec ?err=
+const params = new URLSearchParams(window.location.search);
+if (params.get('err') === 'domain') {
+  const el = document.getElementById('login-err');
+  el.textContent = 'Accès refusé — seuls les comptes @groupebarriere.com sont autorisés.';
+  el.classList.add('visible');
+}
+
+// Écouter l'état d'auth — capte le retour OAuth Google
 SB.onAuthStateChange((event, session) => {
-  if (session) {
-    const role = session.user.user_metadata?.role || 'floor';
-    window.location.replace(role === 'admin' ? 'index.html' : 'prize-pool/prize-pool.html');
-  }
+  if (session) _redirect(session);
 });
 
 // Si déjà connecté au chargement
 (async () => {
   const session = await SB.getSession();
-  if (session) {
-    const role = session.user.user_metadata?.role || 'floor';
-    window.location.replace(role === 'admin' ? 'index.html' : 'prize-pool/prize-pool.html');
-  }
+  if (session) _redirect(session);
 })();
 
-async function sendLink() {
-  const email = (document.getElementById('login-email').value || '').trim();
-  const msg   = document.getElementById('login-msg');
-  const btn   = document.getElementById('login-btn');
-
-  msg.textContent = '';
-  msg.className   = 'login-msg';
-
-  if (!email) {
-    msg.textContent = 'Saisis ton adresse e-mail.';
-    msg.className   = 'login-msg err';
-    return;
-  }
-
-  btn.disabled    = true;
-  btn.textContent = 'Envoi en cours…';
-
-  try {
-    await SB.sendMagicLink(email);
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('login-sent').style.display = 'block';
-  } catch(ex) {
-    msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
-    msg.className   = 'login-msg err';
-    btn.disabled    = false;
-    btn.textContent = 'Envoyer le lien de connexion';
-  }
+function _redirect(session) {
+  const role = session.user.user_metadata?.role || 'floor';
+  window.location.replace(role === 'admin' ? 'index.html' : 'prize-pool/prize-pool.html');
 }
 
-function resetForm() {
-  document.getElementById('login-form').style.display = '';
-  document.getElementById('login-sent').style.display = 'none';
-  document.getElementById('login-btn').disabled        = false;
-  document.getElementById('login-btn').textContent     = 'Envoyer le lien de connexion';
-  document.getElementById('login-email').value         = '';
-  document.getElementById('login-email').focus();
+async function signInWithGoogle() {
+  const btn = document.getElementById('btn-google');
+  btn.disabled = true;
+  btn.querySelector('svg + *') // fallback
+  btn.lastChild.textContent && (btn.lastChild.textContent = ' Connexion en cours…');
+  try {
+    await SB.signInWithGoogle();
+    // La redirection OAuth se fait automatiquement — pas besoin de gérer la suite ici
+  } catch(ex) {
+    const el = document.getElementById('login-err');
+    el.textContent = 'Erreur de connexion : ' + (ex.message || 'Réessaie dans quelques instants.');
+    el.classList.add('visible');
+    btn.disabled = false;
+    btn.lastChild.textContent && (btn.lastChild.textContent = ' Se connecter avec Google');
+  }
 }
 </script>
 </body>

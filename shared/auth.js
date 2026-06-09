@@ -3,6 +3,8 @@
 //  Doit être chargé APRÈS supabase.js
 // ══════════════════════════════════════════════════════
 
+const AUTH_DOMAIN = 'groupebarriere.com';   // seul domaine autorisé
+
 const AUTH = {
 
   /**
@@ -21,6 +23,13 @@ const AUTH = {
 
     if (!session) {
       window.location.replace(loginUrl);
+      return null;
+    }
+
+    // Vérification du domaine @groupebarriere.com
+    if (!session.user.email.endsWith('@' + AUTH_DOMAIN)) {
+      await SB.signOut();
+      window.location.replace(loginUrl + '?err=domain');
       return null;
     }
 
