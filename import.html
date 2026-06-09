@@ -217,6 +217,9 @@
     </div>
   </div>
 
+  <!-- Avertissement ex-æquo -->
+  <div class="warn-box" id="dupes-box" style="background:rgba(196,160,74,.06);border-color:rgba(196,160,74,.3);color:#c8a84b;display:none;"></div>
+
   <!-- Avertissement + bouton -->
   <div class="warn-box" id="warn-box">
     ⚠️ <strong>Action irréversible.</strong> Le bouton ci-dessous va :<br>
@@ -263,6 +266,16 @@ function loadFile(key, file) {
   reader.readAsText(file);
 }
 
+function _findDupes(results) {
+  const seen = {}, dupes = new Set();
+  for (const r of results) {
+    const k = r.date + '|' + r.tournamentId + '|' + r.place;
+    if (seen[k]) dupes.add(r.date + ' / ' + r.tournamentId + ' / place ' + r.place);
+    seen[k] = true;
+  }
+  return [...dupes];
+}
+
 function parseAndStore(key, filename, json) {
   let results = [], sessions = [], tournaments = [], extras = [];
 
@@ -276,7 +289,12 @@ function parseAndStore(key, filename, json) {
       return;
     }
     _files.data = { results, sessions };
-    markOk(key, filename, `${results.length} résultats · ${sessions.length} sessions`);
+    // Détection ex-æquo (positions partagées)
+    const dupes = _findDupes(results);
+    let statsText = `${results.length} résultats · ${sessions.length} sessions`;
+    if (dupes.length) statsText += ` · ⚠ ${dupes.length} ex-æquo détectés`;
+    _files.data._dupes = dupes;
+    markOk(key, filename, statsText);
   }
 
   else if (key === 'tournaments') {
@@ -336,6 +354,18 @@ function updateSummary() {
   document.getElementById('warn-box').style.display    = allLoaded ? 'block' : 'none';
   document.getElementById('btn-import').style.display  = allLoaded ? 'block' : 'none';
 
+  // Avertissement ex-æquo
+  const dupesBox = document.getElementById('dupes-box');
+  const dupes = _files.data?._dupes || [];
+  if (dupes.length) {
+    dupesBox.style.display = 'block';
+    dupesBox.innerHTML = `ℹ️ <strong>${dupes.length} positions partagées détectées</strong> (ex-æquo, split final…)<br>
+      Ces entrées sont valides si la table Supabase n'a pas de contrainte UNIQUE sur (date, tournoi, place).<br>
+      <small style="opacity:.7">${dupes.slice(0,5).join(' — ')}${dupes.length > 5 ? ' …' : ''}</small>`;
+  } else {
+    dupesBox.style.display = 'none';
+  }
+
   if (allLoaded) showMsg('Tous les fichiers chargés — vérifie les compteurs.', 'info');
 }
 
@@ -344,10 +374,19 @@ function updateSummary() {
 async function startImport() {
   if (!_files.data || !_files.tournaments || !_files.extras) return;
 
+  const results     = _files.data.results;
+  const sessions    = _files.data.sessions;
+  const tournaments = _files.tournaments.tournaments;
+  const extras      = _files.extras.extras;
+
   const confirmed = confirm(
     '⚠️ DERNIÈRE CONFIRMATION\n\n' +
     'Cette action va SUPPRIMER DÉFINITIVEMENT toutes les données Supabase\n' +
-    'et les remplacer par les fichiers chargés.\n\n' +
+    'et les remplacer par les fichiers chargés :\n\n' +
+    `  • ${results.length} résultats  (${Math.ceil(results.length / 500)} batch(es) de 500)\n` +
+    `  • ${sessions.length} sessions\n` +
+    `  • ${tournaments.length} tournois\n` +
+    `  • ${extras.length} extras\n\n` +
     'Continuer ?'
   );
   if (!confirmed) return;
@@ -357,43 +396,68 @@ async function startImport() {
   btn.textContent = 'Import en cours…';
   document.getElementById('progress-wrap').style.display = 'block';
 
+  // Plage de progression : [from, to] par étape
+  // 0-10 : clearAll | 10-20 : tournois | 20-30 : sessions
+  // 30-85 : résultats (chunked, progress réel) | 85-92 : extras | 92-100 : vérification
+
   try {
     showMsg('Suppression des données existantes…', 'info');
-    setProgress(10);
+    setProgress(5);
     await SB.clearAll();
+    setProgress(10);
 
     showMsg('Import des tournois…', 'info');
-    setProgress(30);
-    await SB.importData({
-      tournaments: _files.tournaments.tournaments,
-      results:     [],
-      sessions:    [],
-      extras:      []
-    });
+    await SB.importData({ tournaments, results: [], sessions: [], extras: [] });
+    setProgress(20);
 
-    showMsg('Import des résultats et sessions…', 'info');
-    setProgress(55);
+    showMsg('Import des sessions…', 'info');
+    await SB.importData({ tournaments: [], results: [], sessions, extras: [] });
+    setProgress(30);
+
+    showMsg(`Import des résultats… (0 / ${results.length})`, 'info');
     await SB.importData({
-      tournaments: [],
-      results:     _files.data.results,
-      sessions:    _files.data.sessions,
-      extras:      []
+      tournaments: [], sessions: [], extras: [],
+      results,
+      onProgress(done, total) {
+        const pct = 30 + Math.round(55 * done / total);
+        setProgress(pct);
+        showMsg(`Import des résultats… (${done} / ${total})`, 'info');
+      }
     });
+    setProgress(85);
 
     showMsg('Import des extras…', 'info');
-    setProgress(80);
-    await SB.importData({
-      tournaments: [],
-      results:     [],
-      sessions:    [],
-      extras:      _files.extras.extras
-    });
+    await SB.importData({ tournaments: [], results: [], sessions: [], extras });
+    setProgress(92);
 
+    // Vérification comptage final (countRows évite la limite max-rows des SELECT)
+    showMsg('Vérification…', 'info');
+    const [dbResCount, dbSesCount] = await Promise.all([
+      SB.countRows('results'), SB.countRows('sessions')
+    ]);
     setProgress(100);
-    showMsg('✓ Import terminé ! Vérifie l\'app puis supprime import.html du repo.', 'ok');
-    btn.textContent = '✓ Import terminé';
+
+    const resOk = dbResCount === results.length;
+    const sesOk = dbSesCount === sessions.length;
+
+    if (resOk && sesOk) {
+      showMsg(
+        `✓ Import terminé et vérifié — ${dbResCount} résultats · ${dbSesCount} sessions. ` +
+        'Supprime import.html du repo une fois tout vérifié.',
+        'ok'
+      );
+      btn.textContent = '✓ Import terminé';
+    } else {
+      const diff = [];
+      if (!resOk) diff.push(`résultats : attendu ${results.length}, importé ${dbResCount}`);
+      if (!sesOk) diff.push(`sessions : attendu ${sessions.length}, importé ${dbSesCount}`);
+      showMsg('⚠ Import partiel — ' + diff.join(' | ') + '. Vérifie la console.', 'err');
+      btn.disabled = false;
+      btn.textContent = '🗑 Effacer et importer →';
+    }
 
   } catch(ex) {
+    console.error('[import]', ex);
     setProgress(0);
     showMsg('Erreur : ' + (ex.message || 'Vérifie la console navigateur.'), 'err');
     btn.disabled = false;
