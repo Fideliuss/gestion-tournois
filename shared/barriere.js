@@ -161,4 +161,3 @@ const BarriereFS = {
   get connected() { return !!this.dirHandle; }
 };
 
-async function connectFolder() { await BarriereFS.connect(); }

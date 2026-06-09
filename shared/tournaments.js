@@ -17,41 +17,24 @@ const TOURNAMENT_DEFAULTS = [
 ];
 
 /* ══════════════════════════════════════════════════════
-   TournamentsStore — accès centralisé à tournaments.json
-   Priorité : FS > localStorage fallback > defaults
+   TournamentsStore — accès centralisé aux tournois
+   Priorité : localStorage > defaults
    La clé "points" est préservée lors des mises à jour
    partielles (prize-pool ne la connaît pas).
 ══════════════════════════════════════════════════════ */
 const TournamentsStore = {
-  FILE:   'tournaments.json',
   LS_KEY: 'tournaments_data',
 
   async read() {
-    if (BarriereFS.connected) {
-      const data = await BarriereFS.read(this.FILE, null);
-      if (data && Array.isArray(data.tournaments) && data.tournaments.length > 0) {
-        return data.tournaments;
-      }
-      /* Migration one-shot : récupère depuis barriere_data.json si configuré là-bas */
-      const legacy = await BarriereFS.read('barriere_data.json', null);
-      if (legacy && Array.isArray(legacy.tournaments) && legacy.tournaments.length > 0) {
-        return legacy.tournaments;
-      }
-    } else {
-      try {
-        const stored = JSON.parse(localStorage.getItem(this.LS_KEY) || 'null');
-        if (stored && stored.length > 0) return stored;
-      } catch {}
-    }
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.LS_KEY) || 'null');
+      if (stored && stored.length > 0) return stored;
+    } catch {}
     return [...TOURNAMENT_DEFAULTS];
   },
 
   async write(tournaments) {
-    if (BarriereFS.connected) {
-      await BarriereFS.write(this.FILE, { version: 1, tournaments });
-    } else {
-      localStorage.setItem(this.LS_KEY, JSON.stringify(tournaments));
-    }
+    localStorage.setItem(this.LS_KEY, JSON.stringify(tournaments));
   },
 
   async add(t) {

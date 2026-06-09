@@ -115,6 +115,6 @@
 <script src="shared/barriere.js"></script>
 <script src="shared/supabase.js"></script>
 <script src="shared/auth.js"></script>
-<script>AUTH.guard({ loginUrl: 'login.html', role: 'admin' });</script>
+<script>AUTH.guard({ loginUrl: 'login.html', role: 'admin' }).then(function(user) { if (!user) return; });</script>
 </body>
 </html>
