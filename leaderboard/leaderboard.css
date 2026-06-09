@@ -238,6 +238,16 @@
     body.light .cal-chip:hover { background: rgba(138,104,32,.16); border-color: rgba(138,104,32,.38); }
     body.light .cal-chip.cal-chip-open { background: rgba(138,104,32,.2); border-color: rgba(138,104,32,.55); }
 
+    /* Session sans résultats */
+    .cal-chip-empty {
+      border-color: rgba(230,126,34,.5);
+      background: rgba(230,126,34,.07);
+    }
+    .cal-chip-empty:hover { background: rgba(230,126,34,.14); border-color: rgba(230,126,34,.7); }
+    .cal-chip-empty .cal-chip-cag { color: #e67e22; }
+    body.light .cal-chip-empty { border-color: rgba(180,80,0,.4); background: rgba(180,80,0,.06); }
+    body.light .cal-chip-empty .cal-chip-cag { color: #b45309; }
+
     /* Panneaux détail sous le calendrier */
     .cal-details { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 

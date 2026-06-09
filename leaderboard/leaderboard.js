@@ -514,13 +514,19 @@ function _renderCalendarMonth(yearMonth, sessions, resIndex, search) {
     const isToday     = d === todayDay;
     if (daySessions && daySessions.length > 0) {
       const chips = daySessions.map(s => {
-        const tname  = getTNameSync(s.tournamentId);
-        const short  = tname.length > 14 ? tname.slice(0, 13) + '…' : tname;
-        const isOpen = _histExpandedIds.has(s.id);
-        return `<div class="cal-chip${isOpen ? ' cal-chip-open' : ''}"
+        const tname   = getTNameSync(s.tournamentId);
+        const short   = tname.length > 14 ? tname.slice(0, 13) + '…' : tname;
+        const isOpen  = _histExpandedIds.has(s.id);
+        const key     = `${s.date}|${s.tournamentId}`;
+        const isEmpty = !(resIndex[key] && resIndex[key].length > 0);
+        const cls     = `cal-chip${isOpen ? ' cal-chip-open' : ''}${isEmpty ? ' cal-chip-empty' : ''}`;
+        const cagHtml = isEmpty
+          ? `<span class="cal-chip-cag">⚠ 0 résultats</span>`
+          : `<span class="cal-chip-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>`;
+        return `<div class="${cls}"
           onclick="event.stopPropagation();toggleCalSession(${s.id})" id="chip-${s.id}">
           <span class="cal-chip-name">${short}</span>
-          <span class="cal-chip-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>
+          ${cagHtml}
         </div>`;
       }).join('');
       cells += `<div class="cal-day cal-has-session${isToday ? ' cal-today' : ''}">
