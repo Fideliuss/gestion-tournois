@@ -27,7 +27,7 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Gestion des tournois : création, modification, suppression, barèmes de points
 - **Document ranking imprimable** : encadré doré centré A4, montant en grand, cases 1er (or) / 2ème (gris)
 - Fiche joueur détaillée (points, meilleur résultat, historique)
-- Données sauvegardées localement en JSON via File System API
+- Données sauvegardées dans **Supabase** (cloud) — synchronisées en temps réel, accessibles depuis n'importe quelle machine
 
 ### 🗂 Gestion Administrative *(sous-hub)*
 Regroupe les outils de déclaration mensuelle au Service Course et Jeux de la Police Judiciaire.
@@ -70,13 +70,17 @@ Gestion des croupiers extras — déclaration mensuelle DTPJ et feuilles d'émar
 
 Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récente).
 
-> **Important :** la sauvegarde des données utilise l'API File System Access, disponible uniquement sur Chrome et Edge.
+### Première utilisation — Leaderboard
+Le leaderboard utilise **Supabase** (cloud PostgreSQL) — aucune configuration locale requise.
+1. Ouvrir `leaderboard/leaderboard.html` directement
+2. Les données sont chargées automatiquement depuis Supabase
 
-### Première utilisation
-1. Ouvrir `leaderboard/leaderboard.html` ou `extras/extras.html`
+### Première utilisation — Extras
+1. Ouvrir `extras/extras.html`
 2. Cliquer sur l'indicateur **Données** et sélectionner un dossier sur ton ordinateur
-3. Les fichiers `data/barriere_data.json` et `data/extras_data.json` sont créés automatiquement
-4. Les données sont restaurées automatiquement à chaque réouverture
+3. Le fichier `data/extras_data.json` est créé automatiquement
+
+> **Note :** l'API File System Access (Chrome/Edge uniquement) est utilisée uniquement par le module Extras.
 
 ---
 
@@ -86,11 +90,13 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 ├── index.html              — Hub principal
 ├── admin.html              — Sous-hub Gestion Administrative
 ├── csv-import.html         — Outil one-shot import CSV → barriere_data.json (migration)
+├── supabase-import.html    — Outil one-shot migration barriere_data.json → Supabase
 │
 ├── shared/
 │   ├── barriere.css        — Styles partagés (thème, composants, .fs-indicator)
-│   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS)
-│   ├── tournaments.js      — Référentiel tournois centralisé (TournamentsStore)
+│   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS pour extras)
+│   ├── tournaments.js      — TOURNAMENT_DEFAULTS (fallback leaderboard)
+│   ├── supabase.js         — Client Supabase + objet SB (CRUD complet + mappers)
 │   ├── changelog.js        — Mis à jour manuellement avant chaque PR de release
 │   └── logo.png            — Logo Casino Barrière Bordeaux
 │
@@ -126,11 +132,13 @@ Ouvre `index.html` dans **Google Chrome** ou **Microsoft Edge** (version récent
 |-------|-------|
 | HTML / CSS / JS vanilla | Base de l'application |
 | React 18 (CDN) | Interface Prize Pool Calculator |
-| File System Access API | Persistance des données leaderboard + extras |
-| IndexedDB | Mémorisation du dossier entre sessions |
-| `localStorage` | Fallback si dossier non connecté |
+| Supabase (PostgreSQL cloud) | Persistance des données leaderboard (résultats, sessions, tournois) |
+| supabase-js v2 (CDN) | Client Supabase côté navigateur |
+| File System Access API | Persistance des données extras (`extras_data.json`) |
+| IndexedDB | Mémorisation du dossier FS entre sessions (extras) |
+| `localStorage` | Configs déclaration / courriers / extras |
 
-Aucun bundler, aucune dépendance npm, aucun serveur. Zéro friction.
+Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
 
 ---
 
