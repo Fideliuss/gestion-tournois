@@ -18,14 +18,16 @@ Quatre outils disponibles, zéro serveur, zéro build — s'ouvre directement da
 ## Architecture
 
 ```
-index.html              Hub principal
-admin.html              Sous-hub Gestion Administrative
+index.html              Hub principal (guard auth, filtrage cartes par rôle)
+admin.html              Sous-hub Gestion Administrative (guard admin)
+login.html              Page de connexion magic link (charte graphique, thème, redirect par rôle)
 
 shared/
-  barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator pour extras)
+  barriere.css      Styles partagés (thème, composants communs, styles auth : #auth-overlay, #auth-badge, .auth-chip-*)
   barriere.js       Scripts partagés (toggle jour/nuit, favicon, BarriereFS — couche de persistance File System Access API + IndexedDB pour extras uniquement)
   tournaments.js    Référentiel tournois centralisé : TOURNAMENT_DEFAULTS (leaderboard le lit comme fallback)
-  supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats, sessions, tournois + importData)
+  supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats, sessions, tournois, extras + auth)
+  auth.js           Garde d'accès auth : AUTH.guard(), AUTH.signOut(), AUTH._addBadge() — chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
   logo.png          Logo officiel utilisé dans les courriers
   favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
@@ -61,12 +63,23 @@ extras/
 ## Stack technique
 
 - Vanilla JS (leaderboard), React 18 via CDN (prize pool)
-- **Supabase** (PostgreSQL cloud) pour la persistance du leaderboard ET des extras
+- **Supabase** (PostgreSQL cloud) pour la persistance du leaderboard ET des extras ET pour l'authentification
   - URL : `https://grpzgidhawyhinzrqiqm.supabase.co`
-  - Clé : publishable key (frontend-safe, RLS activé avec politique `anon` permissive)
+  - Clé : publishable key (frontend-safe, RLS activé)
   - Client JS via CDN : `@supabase/supabase-js@2`
-  - `shared/supabase.js` : objet `SB` avec CRUD complet (résultats, sessions, tournois, extras) + mappers camelCase↔snake_case
+  - `shared/supabase.js` : objet `SB` avec CRUD complet (résultats, sessions, tournois, extras) + méthodes auth (`sendMagicLink`, `signOut`, `getSession`, `onAuthStateChange`) + mappers camelCase↔snake_case
   - Tables : `results`, `sessions`, `tournaments` (ids bigint auto-incrémentés) + `extras` (id texte généré côté client)
+  - **RLS** : politique `authenticated` sur les 4 tables — accès réservé aux utilisateurs connectés
+- **Auth magic link** (Supabase Auth) :
+  - `login.html` : page de connexion (magic link, redirect par rôle après authentification)
+  - `shared/auth.js` : `AUTH.guard({ loginUrl, role })` — overlay spinner, vérif session, vérif rôle, badge utilisateur
+  - Rôles : `admin` (accès total) et `floor` (prize pool uniquement) — stockés dans `auth.users.raw_user_meta_data.role`
+  - Default rôle : `floor` si aucune métadonnée définie
+  - Persistance session : JWT 7 jours (604800s) via localStorage (géré par supabase-js)
+  - Redirect magic link : `https://fideliuss.github.io/gestion-tournois/login.html`
+  - Pages admin-only : `admin.html`, `leaderboard/leaderboard.html`, `declaration/declaration.html`, `declaration/courriers.html`, `extras/extras.html`
+  - Pages authentifiées (tous rôles) : `index.html`, `prize-pool/prize-pool.html`
+  - Sur `index.html` : les cartes Challenge Saisonnier et Gestion Administrative ont `data-role="admin"` et sont masquées pour les utilisateurs `floor`
 - File System Access API — **plus utilisée** (BarriereFS toujours défini dans `shared/barriere.js` mais aucun module ne l'appelle)
 - localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_*`, `courriers_tpl`)
 - Indicateur de connexion FS (`.fs-indicator`) toujours défini dans `shared/barriere.css` mais retiré de toutes les pages
@@ -238,7 +251,10 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
 - **Changelog** : mis à jour manuellement dans `shared/changelog.js` avant la PR de release. Ajouter l'entrée en tête du tableau avec le titre de la PR. La version affichée dans `index.html` = `CHANGELOG[0].version`
 - `csv-import.html` et `supabase-import.html` ont été supprimés du repo après migration — outils one-shot, migration terminée
-- Le schéma Supabase (tables `results`, `sessions`, `tournaments`) doit être créé manuellement via le SQL Editor de Supabase avant le premier usage
+- Le schéma Supabase (tables `results`, `sessions`, `tournaments`, `extras`) doit être créé manuellement via le SQL Editor de Supabase avant le premier usage
+- **Supabase RLS** : les 4 tables (`results`, `sessions`, `tournaments`, `extras`) ont une politique `authenticated` (plus `anon`). Toute modification du RLS doit utiliser un bloc `DO $$ ... $$` pour dropper les polices existantes par nom dynamique (les noms varient)
+- **Auth guard pattern** : chaque page protégée charge `shared/supabase.js` + `shared/auth.js` via CDN supabase-js, puis appelle `AUTH.guard({ loginUrl, role })` — l'overlay est injecté de façon synchrone pour éviter le flash de contenu
+- Pour définir le rôle d'un utilisateur : dans Supabase Dashboard → Authentication → Users → Edit user → `raw_user_meta_data` → `{ "role": "admin" }` ou `{ "role": "floor" }`
 - `_tournamentsCache` (var privée dans `leaderboard.js`) mis à `null` après chaque upsert/delete de tournoi pour forcer un rechargement depuis Supabase
 - L'impression du classement (onglet 🏆) utilise un div dédié `#classement-print-page` (masqué en temps normal, affiché via `body.print-classement`), généré à la volée par `printClassement()` — même pattern que le document ranking
 - Le modal joueur utilise `_closeModal()` (retire `modal-open` du body) et `body.modal-open { overflow: hidden }` pour bloquer le scroll de fond
