@@ -11,9 +11,6 @@
 <button class="theme-toggle" onclick="toggleTheme()">
   <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
 </button>
-<button class="fs-indicator disconnected" id="fs-indicator" onclick="connectFolder()" title="Connecter le dossier de données">
-  <span class="fs-ind-dot"></span><span id="fs-ind-label">Données</span>
-</button>
 
 <div class="app">
   <a href="../admin.html" class="back">← Retour</a>
@@ -165,7 +162,9 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
 <script src="extras.js"></script>
 </body>
 </html>

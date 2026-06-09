@@ -10,6 +10,20 @@ const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── Mappers camelCase JS ↔ snake_case DB ────────────
 
+const _toExtra = r => ({
+  id: r.id, nom: r.nom, prenom: r.prenom,
+  dateNaissance: r.date_naissance, lieuNaissance: r.lieu_naissance,
+  adresse: r.adresse, codePostal: r.code_postal, ville: r.ville
+});
+const _fromExtra = e => ({
+  id: e.id, nom: e.nom, prenom: e.prenom,
+  date_naissance: e.dateNaissance || null,
+  lieu_naissance: e.lieuNaissance || null,
+  adresse: e.adresse || null,
+  code_postal: e.codePostal || null,
+  ville: e.ville || null
+});
+
 const _toResult = r => ({
   id: r.id, date: r.date, tournamentId: r.tournament_id,
   place: r.place, player: r.player, points: r.points, extra: r.extra
@@ -115,14 +129,37 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Extras ─────────────────────────────────────────
+  async getExtras() {
+    const { data, error } = await _sb.from('extras').select('*').order('nom');
+    if (error) throw error;
+    return (data || []).map(_toExtra);
+  },
+
+  async insertExtra(extra) {
+    const { error } = await _sb.from('extras').insert(_fromExtra(extra));
+    if (error) throw error;
+  },
+
+  async updateExtra(id, changes) {
+    const { error } = await _sb.from('extras').update(_fromExtra(changes)).eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteExtra(id) {
+    const { error } = await _sb.from('extras').delete().eq('id', id);
+    if (error) throw error;
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);
     await _sb.from('sessions').delete().neq('id', 0);
     await _sb.from('tournaments').delete().neq('id', '');
+    await _sb.from('extras').delete().neq('id', '');
   },
 
-  async importData({ results, sessions, tournaments }) {
+  async importData({ results, sessions, tournaments, extras }) {
     if (tournaments && tournaments.length) {
       const { error } = await _sb.from('tournaments')
         .upsert(tournaments.map(_fromTournament));
@@ -136,6 +173,11 @@ const SB = {
     if (results && results.length) {
       const { error } = await _sb.from('results')
         .insert(results.map(_fromResult));
+      if (error) throw error;
+    }
+    if (extras && extras.length) {
+      const { error } = await _sb.from('extras')
+        .upsert(extras.map(_fromExtra));
       if (error) throw error;
     }
   }
