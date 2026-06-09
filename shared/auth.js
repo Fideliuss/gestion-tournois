@@ -26,11 +26,11 @@ const AUTH = {
 
     const userRole = session.user.user_metadata?.role || 'floor';
 
-    // Floor qui tente d'accéder à une page admin → prize pool
+    // Floor qui tente d'accéder à une page admin → hub
     if (role === 'admin' && userRole !== 'admin') {
       const depth = (loginUrl.match(/\.\.\//g) || []).length;
       const root  = depth > 0 ? '../'.repeat(depth) : './';
-      window.location.replace(root + 'prize-pool/prize-pool.html');
+      window.location.replace(root + 'index.html');
       return null;
     }
 
