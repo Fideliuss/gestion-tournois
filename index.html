@@ -127,12 +127,12 @@
       <div class="tool-name">Prize Pool <em>Builder</em></div>
     </a>
 
-    <a href="leaderboard/leaderboard.html" class="tool-card c-blue">
+    <a href="leaderboard/leaderboard.html" class="tool-card c-blue" data-role="admin">
       <div class="tool-badge">🏆</div>
       <div class="tool-name">Challenge <em>Saisonnier</em></div>
     </a>
 
-    <a href="admin.html" class="tool-card c-teal">
+    <a href="admin.html" class="tool-card c-teal" data-role="admin">
       <div class="tool-badge">📁</div>
       <div class="tool-name">Gestion <em>Administrative</em></div>
     </a>
@@ -150,9 +150,20 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="shared/changelog.js"></script>
 <script src="shared/barriere.js"></script>
+<script src="shared/supabase.js"></script>
+<script src="shared/auth.js"></script>
 <script>
+AUTH.guard({ loginUrl: 'login.html' }).then(function(user) {
+  if (!user) return;
+  if ((user.user_metadata?.role || 'floor') !== 'admin') {
+    document.querySelectorAll('[data-role="admin"]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+  }
+});
 (function () {
   if (!window.CHANGELOG || !CHANGELOG.length) return;
   var ver = document.getElementById('app-version');
