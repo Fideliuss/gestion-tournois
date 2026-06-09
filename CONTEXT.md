@@ -63,17 +63,15 @@ extras/
 ## Stack technique
 
 - Vanilla JS (leaderboard), React 18 via CDN (prize pool)
-- **Supabase** (PostgreSQL cloud) pour la persistance du leaderboard (résultats, sessions, tournois)
+- **Supabase** (PostgreSQL cloud) pour la persistance du leaderboard ET des extras
   - URL : `https://grpzgidhawyhinzrqiqm.supabase.co`
   - Clé : publishable key (frontend-safe, RLS activé avec politique `anon` permissive)
   - Client JS via CDN : `@supabase/supabase-js@2`
-  - `shared/supabase.js` : objet `SB` avec CRUD complet + mappers camelCase↔snake_case
-- File System Access API (Chrome/Edge) — utilisé uniquement par **extras** (`data/extras_data.json`)
-- IndexedDB pour mémoriser le handle du dossier entre sessions (extras uniquement)
-- localStorage pour la persistance des configs déclaration/courriers/extras
-- Données extras stockées dans un sous-dossier `data/` du dossier choisi par l'utilisateur
-  - `data/extras_data.json` — extras (exclu du repo, contient données personnelles)
-- Indicateur de connexion FS : pastille `.fs-indicator` (définie dans `shared/barriere.css`) — présent uniquement sur `extras/extras.html` (leaderboard n'en a plus besoin)
+  - `shared/supabase.js` : objet `SB` avec CRUD complet (résultats, sessions, tournois, extras) + mappers camelCase↔snake_case
+  - Tables : `results`, `sessions`, `tournaments` (ids bigint auto-incrémentés) + `extras` (id texte généré côté client)
+- File System Access API — **plus utilisée** (BarriereFS toujours défini dans `shared/barriere.js` mais aucun module ne l'appelle)
+- localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_*`, `courriers_tpl`)
+- Indicateur de connexion FS (`.fs-indicator`) toujours défini dans `shared/barriere.css` mais retiré de toutes les pages
 
 ---
 
@@ -137,7 +135,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
   - Seuls les extras cochés apparaissent dans l'émargement imprimé
   - Couleurs : bleu (#4472C4) pour jours semaine travaillés, orange (#C55A11) pour dimanche
   - Cartes blanches en complément pour arriver à un multiple de 4
-- Persistance : extras dans `data/extras_data.json` (via BarriereFS) ; config et émargement dans `localStorage` (`extras_cfg`, `extras_emarg_YYYY_WW`)
+- Persistance : liste extras dans **Supabase** (table `extras`) ; config horaire et émargements hebdo dans `localStorage` (`extras_cfg`, `extras_emarg_YYYY_WW`)
 - Accessible depuis `admin.html` (carte "Déclaration Extras")
 
 ## Fonctionnalités implémentées
@@ -198,7 +196,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
   - Places 4-30 en 3 colonnes, 31-150 en 4 colonnes — ordre colonne par colonne (CSS `columns`)
   - Coupure stricte à 150 — pas de section 151+
 - Fiche joueur détaillée (modal : total points, meilleur résultat, historique) — affichée en haut de page
-- Données sauvegardées dans **Supabase** (cloud PostgreSQL) — plus de dépendance File System API
+- Données sauvegardées dans **Supabase** (cloud PostgreSQL) — accessible depuis n'importe quelle machine
 
 ### Outil import CSV (`csv-import.html`)
 - Outil de migration one-shot : charge un fichier CSV exporté depuis l'ancien système
@@ -236,8 +234,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Toujours mettre à jour `CONTEXT.md` et `README.md` avant de créer une PR et de merger** — sans attendre que l'utilisateur le demande
 - On travaille toujours sur `develop`, jamais sur `main` directement
 - Tester avec Chrome ou Edge
-- `data/extras_data.json` n'est pas dans le repo — données extras restent locales via FS API
-- Les données leaderboard sont dans **Supabase** (cloud) — synchronisées automatiquement, aucune config FS requise
+- Les données leaderboard ET extras sont dans **Supabase** (cloud) — synchronisées automatiquement, accessibles depuis n'importe quelle machine, aucune config FS requise
 - `shared/changelog.js` EST dans le repo — **mis à jour manuellement** avant chaque PR de release, jamais via script
 - `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html` (bouton "✉ Courriers")
 - Les destinataires des courriers sont éditables dans l'app (accordéon discret) et persistés dans `localStorage('courriers_tpl')`

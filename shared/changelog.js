@@ -2,7 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
-  { version: 'v1.8.0', date: '2026-06-09', message: 'Migration Supabase — données leaderboard (résultats, sessions, tournois) persistées dans PostgreSQL cloud ; suppression de la dépendance BarriereFS/File System Access API pour le leaderboard ; outil supabase-import.html' },
+  { version: 'v1.8.0', date: '2026-06-09', message: 'Migration Supabase complète — leaderboard (résultats, sessions, tournois) + extras (croupiers) persistés dans PostgreSQL cloud ; suppression totale de BarriereFS/File System Access API ; outil supabase-import.html' },
   { version: 'v1.7.0', date: '2026-06-09', message: 'Historique — vue calendrier mensuelle (grille 7 cols, chips par session, panneau détail) ; Ranking — impression redessinée (encadré doré, typographie élégante, cases 1er/2ème colorées)' },
   { version: 'v1.6.0', date: '2026-06-08', message: 'Historique — accordion sessions + édition inline résultats/entrées + filtre date ; Classement — impression one-page (podium visuel, 4 colonnes, ordre colonne) ; outil import CSV one-shot' },
   { version: 'v1.5.1', date: '2026-06-08', message: 'Prize Pool — corrections impression (€, couleurs, marges) ; calcul exact 12% places ; diagnostic suggestion' },

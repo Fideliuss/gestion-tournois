@@ -62,7 +62,7 @@ Gestion des croupiers extras — déclaration mensuelle DTPJ et feuilles d'émar
   - Sélection des présences par semaine (calendrier natif ISO)
   - Horaires par défaut configurables (20:55 semaine / 16:55 dimanche)
   - Overrides d'horaires ad-hoc par jour ou par extra × jour
-- Données extras persistées en JSON via File System API (même dossier que le leaderboard)
+- Liste des extras persistée dans **Supabase** (cloud) — synchronisée automatiquement
 
 ---
 
@@ -76,11 +76,8 @@ Le leaderboard utilise **Supabase** (cloud PostgreSQL) — aucune configuration 
 2. Les données sont chargées automatiquement depuis Supabase
 
 ### Première utilisation — Extras
-1. Ouvrir `extras/extras.html`
-2. Cliquer sur l'indicateur **Données** et sélectionner un dossier sur ton ordinateur
-3. Le fichier `data/extras_data.json` est créé automatiquement
-
-> **Note :** l'API File System Access (Chrome/Edge uniquement) est utilisée uniquement par le module Extras.
+1. Ouvrir `extras/extras.html` directement
+2. La liste des croupiers extras est chargée automatiquement depuis Supabase
 
 ---
 
@@ -132,11 +129,9 @@ Le leaderboard utilise **Supabase** (cloud PostgreSQL) — aucune configuration 
 |-------|-------|
 | HTML / CSS / JS vanilla | Base de l'application |
 | React 18 (CDN) | Interface Prize Pool Calculator |
-| Supabase (PostgreSQL cloud) | Persistance des données leaderboard (résultats, sessions, tournois) |
+| Supabase (PostgreSQL cloud) | Persistance leaderboard + extras (résultats, sessions, tournois, croupiers) |
 | supabase-js v2 (CDN) | Client Supabase côté navigateur |
-| File System Access API | Persistance des données extras (`extras_data.json`) |
-| IndexedDB | Mémorisation du dossier FS entre sessions (extras) |
-| `localStorage` | Configs déclaration / courriers / extras |
+| `localStorage` | Configs déclaration / courriers / émargements hebdo |
 
 Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
 
