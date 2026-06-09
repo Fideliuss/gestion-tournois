@@ -1,52 +1,25 @@
 // ══════════════════════════════════════════════════════
-//  TOURNOIS PAR DÉFAUT
+//  ACCÈS AUX DONNÉES — via Supabase (shared/supabase.js)
 // ══════════════════════════════════════════════════════
-/* Les tournois par défaut et TournamentsStore sont définis dans shared/tournaments.js */
+async function getResults()    { return SB.getResults(); }
+async function getSessions()   { return SB.getSessions(); }
+async function totalCagnotte() { return (await SB.getSessions()).reduce((a,s)=>a+(s.cagnotte||0),0); }
 
-// ══════════════════════════════════════════════════════
-//  FILE SYSTEM — wrapper leaderboard (via BarriereFS)
-// ══════════════════════════════════════════════════════
-const FS = {
-  fileName: 'barriere_data.json',
-  get connected() { return BarriereFS.connected; },
-  async read() {
-    const fb = { version:1, results:[], sessions:[], tournaments:null };
-    if (!BarriereFS.connected) {
-      try { return JSON.parse(localStorage.getItem('barriere_fallback')) || fb; } catch { return fb; }
-    }
-    return BarriereFS.read(this.fileName, fb);
-  },
-  async write(data) {
-    if (!BarriereFS.connected) { localStorage.setItem('barriere_fallback', JSON.stringify(data)); return; }
-    await BarriereFS.write(this.fileName, data);
-  },
-};
-
-// ══════════════════════════════════════════════════════
-//  ACCÈS AUX DONNÉES
-// ══════════════════════════════════════════════════════
-async function getData()         { return await FS.read(); }
-async function setData(d)        { await FS.write(d); }
-async function getResults()      { return (await getData()).results   || []; }
-async function getSessions()     { return (await getData()).sessions  || []; }
-async function saveResults(r)    { const d=await getData(); d.results  =r; await setData(d); }
-async function saveSessions(s)   { const d=await getData(); d.sessions =s; await setData(d); }
-async function totalCagnotte()   { return (await getSessions()).reduce((a,s)=>a+(s.cagnotte||0),0); }
-
-async function getTournaments()    { return TournamentsStore.read(); }
-async function saveTournaments(t)  { await TournamentsStore.write(t); _tournamentsCache = t; }
+async function getTournaments() {
+  if (_tournamentsCache) return _tournamentsCache;
+  const ts = await SB.getTournaments();
+  _tournamentsCache = ts.length > 0 ? ts : TOURNAMENT_DEFAULTS.map(t=>({...t}));
+  return _tournamentsCache;
+}
 
 // ══════════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════════
 async function init() {
   document.getElementById('inp-date').value = new Date().toISOString().split('T')[0];
-  await BarriereFS.restore();
   await populateTournoiSelects();
   await renderClassement();
 }
-
-async function connectFolder() { await BarriereFS.connect(); await renderClassement(); }
 
 async function populateTournoiSelects() {
   const tournaments = await getTournaments();
@@ -180,18 +153,16 @@ async function validateTournament() {
   const tournaments=await getTournaments();
   const t=tournaments.find(t=>t.id===tid);
   const newEntries=[];
-  let _uid=Date.now(); const nextId=()=>++_uid;
-
   t.points.forEach((pts,i) => {
     const place=i+1;
     const raw=(document.getElementById('player-'+place)?.value||'').trim();
-    if (raw) newEntries.push({id:nextId(), date, tournamentId:tid, place, player:raw.toUpperCase(), points:pts, extra:false});
+    if (raw) newEntries.push({date, tournamentId:tid, place, player:raw.toUpperCase(), points:pts, extra:false});
   });
 
   for (let place=t.points.length+1; place<=currentPlaceCount; place++) {
     const raw=(document.getElementById('player-'+place)?.value||'').trim();
     const pts=parseInt(document.getElementById('pts-'+place)?.value)||0;
-    if (raw) newEntries.push({id:nextId(), date, tournamentId:tid, place, player:raw.toUpperCase(), points:pts, extra:true});
+    if (raw) newEntries.push({date, tournamentId:tid, place, player:raw.toUpperCase(), points:pts, extra:true});
   }
 
   if (newEntries.length===0) { warnEl.innerHTML='⚠ Aucun nom de joueur renseigné.'; warnEl.style.display='flex'; return; }
@@ -201,12 +172,8 @@ async function validateTournament() {
   const missing=Array.from({length:maxP},(_,i)=>i+1).filter(p=>!places.includes(p));
   if (missing.length>0 && !confirm(`Places ${missing.join(', ')} sans joueur. Continuer ?`)) return;
 
-  const results =await getResults();
-  const sessions=await getSessions();
-  newEntries.forEach(e=>results.push(e));
-  sessions.push({id:nextId(), date, tournamentId:tid, entries, cagnotte:entries*2, nbResults:newEntries.length});
-  await saveResults(results);
-  await saveSessions(sessions);
+  const savedResults = await SB.insertResults(newEntries);
+  await SB.insertSession({date, tournamentId:tid, entries, cagnotte:entries*2, nbResults:savedResults.length});
 
   document.getElementById('inp-tournoi').value='';
   document.getElementById('inp-entrees').value='';
@@ -297,7 +264,8 @@ async function deleteTournament(id) {
   const t=tournaments.find(t=>t.id===id);
   if (!t) return;
   if (!confirm(`Supprimer "${t.name}" ? Les résultats déjà enregistrés ne seront pas effacés.`)) return;
-  await saveTournaments(tournaments.filter(t=>t.id!==id));
+  await SB.deleteTournament(id);
+  _tournamentsCache = null;
   await populateTournoiSelects();
   await renderConfigTournois();
   showConfigAlert(`"${t.name}" supprimé.`);
@@ -323,17 +291,13 @@ async function saveTournamentForm() {
   if (points.some(p=>p<0)) { alert('Les points ne peuvent pas être négatifs.'); return; }
 
   const split = (pp && frais) ? { pp, frais } : {};
-  const tournaments=await getTournaments();
 
-  if (editId) {
-    const idx=tournaments.findIndex(t=>t.id===editId);
-    if (idx>=0) { tournaments[idx]={...tournaments[idx], name, day, buyin, ...split, points}; }
-  } else {
-    const id=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
-    tournaments.push({id, name, day, buyin, ...split, points});
+  let id = editId;
+  if (!id) {
+    id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
   }
-
-  await saveTournaments(tournaments);
+  await SB.upsertTournament({id, name, day, buyin, ...split, points});
+  _tournamentsCache = null;
   await populateTournoiSelects();
   closeTournamentForm();
   await renderConfigTournois();
@@ -674,12 +638,8 @@ async function saveResultEdit(id) {
   const points = parseInt(document.getElementById(`ept-${id}`)?.value) || 0;
   if (!name) { alert('Le nom du joueur ne peut pas être vide.'); return; }
 
-  const results = await getResults();
-  const idx = results.findIndex(r => r.id === id);
-  if (idx >= 0) {
-    results[idx] = { ...results[idx], place, player: name, points };
-    await saveResults(results);
-  }
+  const r = (_histResultsCache || []).find(r => r.id === id);
+  if (r) await SB.updateResult(id, { ...r, place, player: name, points });
   await renderHistorique();
   await renderClassement();
 }
@@ -715,11 +675,8 @@ async function editSession(id) {
 async function saveSessionEdit(id) {
   const entries = parseInt(document.getElementById(`se-${id}`)?.value) || 0;
   const sessions = await getSessions();
-  const idx = sessions.findIndex(s => s.id === id);
-  if (idx >= 0) {
-    sessions[idx] = { ...sessions[idx], entries, cagnotte: entries * 2 };
-    await saveSessions(sessions);
-  }
+  const s = sessions.find(s => s.id === id);
+  if (s) await SB.updateSession(id, { ...s, entries, cagnotte: entries * 2 });
   await renderHistorique();
 }
 
@@ -731,15 +688,16 @@ function clearDateFilter() {
 
 async function deleteResult(id) {
   if(!confirm('Supprimer ce résultat ?')) return;
-  await saveResults((await getResults()).filter(r=>r.id!==id));
+  await SB.deleteResult(id);
   await renderHistorique(); await renderClassement();
 }
 
 async function deleteSession(id) {
   if(!confirm('Supprimer cette session et tous ses résultats associés ?')) return;
   const s=(await getSessions()).find(s=>s.id===id); if(!s) return;
-  await saveResults((await getResults()).filter(r=>!(r.date===s.date&&r.tournamentId===s.tournamentId)));
-  await saveSessions((await getSessions()).filter(s2=>s2.id!==id));
+  await SB.deleteResultsBySession(s.date, s.tournamentId);
+  await SB.deleteSession(id);
+  _histExpandedIds.delete(id);
   await renderHistorique(); await renderClassement();
 }
 

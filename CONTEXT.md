@@ -18,14 +18,16 @@ Quatre outils disponibles, zéro serveur, zéro build — s'ouvre directement da
 ## Architecture
 
 ```
-index.html          Hub principal
-admin.html          Sous-hub Gestion Administrative
-csv-import.html     Outil one-shot d'import CSV → barriere_data.json (migration, à la racine du projet)
+index.html              Hub principal
+admin.html              Sous-hub Gestion Administrative
+csv-import.html         Outil one-shot d'import CSV → barriere_data.json (migration, à la racine)
+supabase-import.html    Outil one-shot de migration barriere_data.json → Supabase (à la racine)
 
 shared/
-  barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator)
-  barriere.js       Scripts partagés (toggle jour/nuit, favicon, BarriereFS — couche de persistance File System Access API + IndexedDB partagée entre leaderboard et extras)
-  tournaments.js    Référentiel tournois centralisé : TOURNAMENT_DEFAULTS + TournamentsStore (CRUD FS/localStorage) — charger après barriere.js dans chaque module
+  barriere.css      Styles partagés (thème, composants communs — dont .fs-indicator pour extras)
+  barriere.js       Scripts partagés (toggle jour/nuit, favicon, BarriereFS — couche de persistance File System Access API + IndexedDB pour extras uniquement)
+  tournaments.js    Référentiel tournois centralisé : TOURNAMENT_DEFAULTS (leaderboard le lit comme fallback)
+  supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats, sessions, tournois + importData)
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
   logo.png          Logo officiel utilisé dans les courriers
   favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
@@ -61,16 +63,15 @@ extras/
 ## Stack technique
 
 - Vanilla JS (leaderboard), React 18 via CDN (prize pool)
-- File System Access API (Chrome/Edge uniquement) pour la persistance des données
-- IndexedDB pour mémoriser le handle du dossier entre sessions
-- localStorage comme fallback si dossier non connecté
-- Données stockées dans un sous-dossier `data/` du dossier choisi par l'utilisateur
-  - `data/barriere_data.json` — leaderboard (exclu du repo via .gitignore)
-  - `data/extras_data.json` — extras (exclu du repo, contient données personnelles)
-  - `data/tournaments.json` — référentiel tournois (exclu du repo, éditable depuis prize-pool et leaderboard)
-- Migration automatique : si `barriere_data.json` existe à la racine, il est copié dans `data/` au premier connect
-- `TournamentsStore` (dans `shared/tournaments.js`) : lecture prioritaire FS > localStorage > TOURNAMENT_DEFAULTS ; préserve le champ `points` lors des mises à jour partielles
-- Indicateur de connexion : pastille `.fs-indicator` fixe en haut à droite (vert animé = connecté, gris = déconnecté) — défini dans `shared/barriere.css`, présent sur toutes les pages avec FS
+- **Supabase** (PostgreSQL cloud) pour la persistance du leaderboard ET des extras
+  - URL : `https://grpzgidhawyhinzrqiqm.supabase.co`
+  - Clé : publishable key (frontend-safe, RLS activé avec politique `anon` permissive)
+  - Client JS via CDN : `@supabase/supabase-js@2`
+  - `shared/supabase.js` : objet `SB` avec CRUD complet (résultats, sessions, tournois, extras) + mappers camelCase↔snake_case
+  - Tables : `results`, `sessions`, `tournaments` (ids bigint auto-incrémentés) + `extras` (id texte généré côté client)
+- File System Access API — **plus utilisée** (BarriereFS toujours défini dans `shared/barriere.js` mais aucun module ne l'appelle)
+- localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_*`, `courriers_tpl`)
+- Indicateur de connexion FS (`.fs-indicator`) toujours défini dans `shared/barriere.css` mais retiré de toutes les pages
 
 ---
 
@@ -134,7 +135,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
   - Seuls les extras cochés apparaissent dans l'émargement imprimé
   - Couleurs : bleu (#4472C4) pour jours semaine travaillés, orange (#C55A11) pour dimanche
   - Cartes blanches en complément pour arriver à un multiple de 4
-- Persistance : extras dans `data/extras_data.json` (via BarriereFS) ; config et émargement dans `localStorage` (`extras_cfg`, `extras_emarg_YYYY_WW`)
+- Persistance : liste extras dans **Supabase** (table `extras`) ; config horaire et émargements hebdo dans `localStorage` (`extras_cfg`, `extras_emarg_YYYY_WW`)
 - Accessible depuis `admin.html` (carte "Déclaration Extras")
 
 ## Fonctionnalités implémentées
@@ -195,7 +196,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
   - Places 4-30 en 3 colonnes, 31-150 en 4 colonnes — ordre colonne par colonne (CSS `columns`)
   - Coupure stricte à 150 — pas de section 151+
 - Fiche joueur détaillée (modal : total points, meilleur résultat, historique) — affichée en haut de page
-- Sauvegarde locale en JSON via File System Access API
+- Données sauvegardées dans **Supabase** (cloud PostgreSQL) — accessible depuis n'importe quelle machine
 
 ### Outil import CSV (`csv-import.html`)
 - Outil de migration one-shot : charge un fichier CSV exporté depuis l'ancien système
@@ -213,7 +214,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - IDs HTML : kebab-case (`hist-body`, `fs-banner`)
 - Classes CSS : kebab-case, préfixe par composant (`fs-banner`, `rank-entry-sm`)
 - Apostrophes dans les onclick : toujours passer par `esc(s)` → `s.replace(/'/g,"\\x27")`
-- IDs d'entrées : générés via `nextId()` (compteur basé sur `Date.now()`)
+- IDs d'entrées leaderboard : générés par Supabase (`bigint generated always as identity`) — ne pas passer `id` dans les inserts
 - Noms de joueurs : stockés et comparés en MAJUSCULES, affichés via `cap()`
 - Pas de bundler, pas de npm — zéro dépendance locale
 
@@ -232,8 +233,8 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 
 - **Toujours mettre à jour `CONTEXT.md` et `README.md` avant de créer une PR et de merger** — sans attendre que l'utilisateur le demande
 - On travaille toujours sur `develop`, jamais sur `main` directement
-- Tester avec Chrome ou Edge (File System Access API non disponible ailleurs)
-- `data/barriere_data.json` et `data/extras_data.json` ne sont pas dans le repo — les données restent locales
+- Tester avec Chrome ou Edge
+- Les données leaderboard ET extras sont dans **Supabase** (cloud) — synchronisées automatiquement, accessibles depuis n'importe quelle machine, aucune config FS requise
 - `shared/changelog.js` EST dans le repo — **mis à jour manuellement** avant chaque PR de release, jamais via script
 - `declaration/courriers.html` ne doit PAS apparaître dans le hub — accès réservé via `declaration/declaration.html` (bouton "✉ Courriers")
 - Les destinataires des courriers sont éditables dans l'app (accordéon discret) et persistés dans `localStorage('courriers_tpl')`
@@ -247,6 +248,9 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Ce fichier est à mettre à jour en fin de chaque session avant de pusher
 - **Changelog** : mis à jour manuellement dans `shared/changelog.js` avant la PR de release. Ajouter l'entrée en tête du tableau avec le titre de la PR. La version affichée dans `index.html` = `CHANGELOG[0].version`
 - `csv-import.html` est un outil de migration ponctuel à la racine du projet — il n'est pas lié au hub et n'y apparaît pas
+- `supabase-import.html` est l'outil one-shot de migration `barriere_data.json` → Supabase — à utiliser une seule fois, puis supprimer
+- Le schéma Supabase (tables `results`, `sessions`, `tournaments`) doit être créé manuellement via le SQL Editor de Supabase avant le premier usage
+- `_tournamentsCache` (var privée dans `leaderboard.js`) mis à `null` après chaque upsert/delete de tournoi pour forcer un rechargement depuis Supabase
 - L'impression du classement (onglet 🏆) utilise un div dédié `#classement-print-page` (masqué en temps normal, affiché via `body.print-classement`), généré à la volée par `printClassement()` — même pattern que le document ranking
 - Le modal joueur utilise `_closeModal()` (retire `modal-open` du body) et `body.modal-open { overflow: hidden }` pour bloquer le scroll de fond
 - L'historique utilise une **vue calendrier** (grille 7 cols par mois) — plus d'accordion. `_histExpandedIds` (Set) mémorise les sessions dont le panneau détail est ouvert sous le calendrier
