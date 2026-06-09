@@ -65,7 +65,25 @@ const SB = {
 
   // ── Résultats ──────────────────────────────────────
   async getResults() {
-    const { data, error } = await _sb.from('results').select('*');
+    const rows = [];
+    const PAGE = 1000;
+    let from = 0;
+    while (true) {
+      const { data, error } = await _sb.from('results')
+        .select('*').order('id').range(from, from + PAGE - 1);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+    return rows.map(_toResult);
+  },
+
+  async getResultsByMonth(yearMonth) {
+    const { data, error } = await _sb.from('results')
+      .select('*')
+      .gte('date', `${yearMonth}-01`)
+      .lte('date', `${yearMonth}-31`);
     if (error) throw error;
     return (data || []).map(_toResult);
   },
@@ -96,9 +114,18 @@ const SB = {
 
   // ── Sessions ───────────────────────────────────────
   async getSessions() {
-    const { data, error } = await _sb.from('sessions').select('*');
-    if (error) throw error;
-    return (data || []).map(_toSession);
+    const rows = [];
+    const PAGE = 1000;
+    let from = 0;
+    while (true) {
+      const { data, error } = await _sb.from('sessions')
+        .select('*').order('id').range(from, from + PAGE - 1);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+    return rows.map(_toSession);
   },
 
   async insertSession(session) {
