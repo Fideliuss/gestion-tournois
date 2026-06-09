@@ -10,7 +10,7 @@
       justify-content:flex-start; min-height:100vh; padding:80px 20px 60px; }
 
     .import-card {
-      width:100%; max-width:580px;
+      width:100%; max-width:620px;
       background:var(--bg-card); border:1px solid var(--gold-bd);
       border-radius:4px; padding:48px 40px 36px; position:relative;
     }
@@ -45,7 +45,6 @@
       background:rgba(196,160,74,.1); color:var(--gold-dim);
       padding:2px 6px; border-radius:3px; font-weight:400;
     }
-
     .file-row {
       display:flex; align-items:center; gap:10px;
       padding:10px 14px;
@@ -55,7 +54,6 @@
     .file-row:hover { border-color:rgba(196,160,74,.3); }
     .file-row.loaded { border-color:rgba(100,220,140,.35); }
     .file-row input[type=file] { display:none; }
-
     .file-icon { font-size:18px; flex-shrink:0; }
     .file-info { flex:1; min-width:0; }
     .file-name {
@@ -63,11 +61,78 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .file-name.placeholder { color:var(--text-muted); font-style:italic; }
-    .file-stats {
-      font-size:10px; color:var(--text-muted); margin-top:2px;
-      font-family:var(--f-num);
-    }
+    .file-stats { font-size:10px; color:var(--text-muted); margin-top:2px; font-family:var(--f-num); }
     .file-status { font-size:16px; flex-shrink:0; }
+
+    /* ── Conflits ── */
+    .conflicts-section {
+      display:none; margin:24px 0 0;
+      border:1px solid rgba(231,76,60,.3); border-radius:3px; overflow:hidden;
+    }
+    .conflicts-header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:11px 16px;
+      background:rgba(231,76,60,.1);
+      font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+      color:#e88; transition:background .3s, color .3s;
+    }
+    .conflicts-header.all-ok { background:rgba(100,220,140,.08); color:#6da; }
+    .conflicts-progress { font-family:var(--f-num); font-size:12px; font-weight:700; }
+
+    .conflict-group {
+      border-top:1px solid rgba(231,76,60,.12);
+      padding:14px 16px 12px;
+      transition:background .25s;
+    }
+    .conflict-group.resolved { background:rgba(100,220,140,.03); border-color:rgba(100,220,140,.15); }
+
+    .conflict-group-head {
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .conflict-date  { font-family:var(--f-num); font-size:11px; color:var(--gold-dim); }
+    .conflict-tid   { font-size:11px; color:var(--text-dim); }
+    .conflict-badge {
+      font-size:10px; font-family:var(--f-num); padding:1px 7px;
+      border-radius:3px; background:rgba(231,76,60,.15); color:#e88;
+    }
+    .conflict-group.resolved .conflict-badge { background:rgba(100,220,140,.12); color:#6da; }
+
+    .conflict-row {
+      display:flex; align-items:center; gap:10px;
+      padding:5px 0;
+      border-bottom:1px solid rgba(255,255,255,.04);
+    }
+    .conflict-row:last-of-type { border-bottom:none; }
+    .conflict-player {
+      flex:1; font-size:12px; color:var(--cream);
+      font-family:var(--f-ui); letter-spacing:.02em;
+    }
+    .conflict-pts {
+      font-family:var(--f-num); font-size:11px; color:var(--text-muted);
+      width:46px; text-align:right; flex-shrink:0;
+    }
+    .conflict-place-lbl {
+      font-size:10px; color:var(--text-muted); letter-spacing:.06em;
+      text-transform:uppercase; flex-shrink:0;
+    }
+    .conflict-place-input {
+      width:58px; padding:5px 8px; text-align:center;
+      background:var(--bg-input); border:1px solid rgba(196,160,74,.25);
+      border-radius:3px; color:var(--cream);
+      font-family:var(--f-num); font-size:13px; flex-shrink:0;
+      -moz-appearance:textfield; transition:border-color .2s, background .2s;
+    }
+    .conflict-place-input::-webkit-outer-spin-button,
+    .conflict-place-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+    .conflict-place-input.err {
+      border-color:rgba(231,76,60,.65); background:rgba(231,76,60,.07);
+    }
+    .conflict-group-status {
+      margin-top:8px; font-size:11px; min-height:14px;
+    }
+    .conflict-group-status.ok   { color:#6da; }
+    .conflict-group-status.warn { color:#e88; }
 
     /* ── Résumé ── */
     .summary-box {
@@ -84,7 +149,7 @@
     .summary-stat-val { font-family:var(--f-num); font-size:20px; color:var(--cream); }
     .summary-stat-lbl { font-size:10px; color:var(--text-muted); letter-spacing:.05em; }
 
-    /* ── Avertissement ── */
+    /* ── Avertissement + bouton ── */
     .warn-box {
       display:none; margin-bottom:16px;
       background:rgba(231,76,60,.08); border:1px solid rgba(231,76,60,.25);
@@ -93,7 +158,6 @@
     }
     .warn-box strong { color:#e74c3c; }
 
-    /* ── Bouton ── */
     .btn-import {
       display:none; width:100%; padding:14px;
       background:#c0392b; color:#fff;
@@ -140,14 +204,13 @@
   <div class="import-title">Ré-import données</div>
   <div class="import-sub">
     Outil temporaire — admin uniquement.<br>
-    Charge les 3 fichiers JSON, vérifie les compteurs, puis lance l'import.
+    Charge les 3 fichiers, corrige les conflits détectés, puis lance l'import.
   </div>
 
   <!-- Fichier 1 : barriere_data.json -->
   <div class="file-section">
     <div class="file-label">
-      Résultats &amp; Sessions
-      <code>barriere_data.json</code>
+      Résultats &amp; Sessions <code>barriere_data.json</code>
     </div>
     <div class="file-row" id="row-data" onclick="document.getElementById('f-data').click()">
       <input type="file" id="f-data" accept=".json" onchange="loadFile('data', this.files[0])" />
@@ -163,8 +226,7 @@
   <!-- Fichier 2 : tournaments.json -->
   <div class="file-section">
     <div class="file-label">
-      Tournois
-      <code>tournaments.json</code>
+      Tournois <code>tournaments.json</code>
     </div>
     <div class="file-row" id="row-tournaments" onclick="document.getElementById('f-tournaments').click()">
       <input type="file" id="f-tournaments" accept=".json" onchange="loadFile('tournaments', this.files[0])" />
@@ -180,8 +242,7 @@
   <!-- Fichier 3 : extras_data.json -->
   <div class="file-section">
     <div class="file-label">
-      Extras (croupiers)
-      <code>extras_data.json</code>
+      Extras (croupiers) <code>extras_data.json</code>
     </div>
     <div class="file-row" id="row-extras" onclick="document.getElementById('f-extras').click()">
       <input type="file" id="f-extras" accept=".json" onchange="loadFile('extras', this.files[0])" />
@@ -192,6 +253,15 @@
       </div>
       <span class="file-status" id="status-extras">○</span>
     </div>
+  </div>
+
+  <!-- Éditeur de conflits -->
+  <div class="conflicts-section" id="conflicts-section">
+    <div class="conflicts-header" id="conflicts-header">
+      <span>⚠ Conflits de positions à corriger</span>
+      <span class="conflicts-progress" id="conflicts-progress">0 / 0</span>
+    </div>
+    <div id="conflicts-list"></div>
   </div>
 
   <!-- Résumé -->
@@ -217,14 +287,11 @@
     </div>
   </div>
 
-  <!-- Avertissement ex-æquo -->
-  <div class="warn-box" id="dupes-box" style="background:rgba(196,160,74,.06);border-color:rgba(196,160,74,.3);color:#c8a84b;display:none;"></div>
-
   <!-- Avertissement + bouton -->
   <div class="warn-box" id="warn-box">
     ⚠️ <strong>Action irréversible.</strong> Le bouton ci-dessous va :<br>
     1. <strong>Supprimer toutes les données actuelles</strong> de Supabase<br>
-    2. Réimporter les données des 3 fichiers chargés<br><br>
+    2. Réimporter les données des 3 fichiers (avec tes corrections)<br><br>
     Vérifie les compteurs avant de continuer.
   </div>
 
@@ -247,8 +314,9 @@
 <script>
 AUTH.guard({ loginUrl: 'login.html', role: 'admin' });
 
-// Données parsées par fichier
+// ── État ─────────────────────────────────────────────
 const _files = { data: null, tournaments: null, extras: null };
+let _conflictGroups = [];
 
 // ── Lecture fichier ──────────────────────────────────
 
@@ -266,59 +334,40 @@ function loadFile(key, file) {
   reader.readAsText(file);
 }
 
-function _findDupes(results) {
-  const seen = {}, dupes = new Set();
-  for (const r of results) {
-    const k = r.date + '|' + r.tournamentId + '|' + r.place;
-    if (seen[k]) dupes.add(r.date + ' / ' + r.tournamentId + ' / place ' + r.place);
-    seen[k] = true;
-  }
-  return [...dupes];
-}
-
 function parseAndStore(key, filename, json) {
-  let results = [], sessions = [], tournaments = [], extras = [];
-
   if (key === 'data') {
-    // barriere_data.json → { results, sessions }  ou  { data: { results, sessions } }
-    const src = json.results ? json : (json.data || {});
-    results  = src.results  || [];
-    sessions = src.sessions || [];
+    const src     = json.results ? json : (json.data || {});
+    const results = src.results  || [];
+    const sessions= src.sessions || [];
     if (!results.length && !sessions.length) {
-      markError(key, 'Aucun résultat ni session trouvé dans ce fichier.');
-      return;
+      markError(key, 'Aucun résultat ni session trouvé.'); return;
     }
-    _files.data = { results, sessions };
-    // Détection ex-æquo (positions partagées)
-    const dupes = _findDupes(results);
-    let statsText = `${results.length} résultats · ${sessions.length} sessions`;
-    if (dupes.length) statsText += ` · ⚠ ${dupes.length} ex-æquo détectés`;
-    _files.data._dupes = dupes;
-    markOk(key, filename, statsText);
+    // Deep-copy pour pouvoir modifier les places sans altérer l'objet JSON original
+    _files.data = {
+      results:  results.map(r => Object.assign({}, r)),
+      sessions: sessions
+    };
+    markOk(key, filename, `${results.length} résultats · ${sessions.length} sessions`);
+    renderConflicts();
   }
-
   else if (key === 'tournaments') {
-    // tournaments.json → { version, tournaments }  ou  []  ou  { tournaments: [] }
     const list = Array.isArray(json) ? json
       : (json.tournaments || json.data?.tournaments || []);
-    if (!list.length) { markError(key, 'Aucun tournoi trouvé dans ce fichier.'); return; }
+    if (!list.length) { markError(key, 'Aucun tournoi trouvé.'); return; }
     _files.tournaments = { tournaments: list };
     markOk(key, filename, `${list.length} tournois`);
   }
-
   else if (key === 'extras') {
-    // extras_data.json → { extras: [] }  ou  []
     const list = Array.isArray(json) ? json
       : (json.extras || json.data?.extras || []);
-    if (!list.length) { markError(key, 'Aucun extra trouvé dans ce fichier.'); return; }
+    if (!list.length) { markError(key, 'Aucun extra trouvé.'); return; }
     _files.extras = { extras: list };
     markOk(key, filename, `${list.length} extras`);
   }
-
   updateSummary();
 }
 
-// ── UI feedback ──────────────────────────────────────
+// ── UI fichiers ──────────────────────────────────────
 
 function markOk(key, filename, stats) {
   document.getElementById('name-' + key).textContent = filename;
@@ -336,43 +385,180 @@ function markError(key, msg) {
   showMsg(msg, 'err');
 }
 
+// ── Détection et rendu des conflits ──────────────────
+
+function _keyToId(key) {
+  return 'cg_' + key.replace(/[^a-z0-9]/gi, '_');
+}
+
+function getTournamentName(tid) {
+  const list = _files.tournaments?.tournaments || [];
+  const t = list.find(t => t.id === tid);
+  return t ? t.name : tid;
+}
+
+function buildConflictGroups(results) {
+  const map = {};
+  for (const r of results) {
+    const k = r.date + '|' + r.tournamentId + '|' + r.place;
+    if (!map[k]) map[k] = { key: k, date: r.date, tournamentId: r.tournamentId, originalPlace: r.place, rows: [] };
+    map[k].rows.push(r);
+  }
+  return Object.values(map).filter(g => g.rows.length > 1);
+}
+
+function renderConflicts() {
+  const results = _files.data?.results || [];
+  _conflictGroups = buildConflictGroups(results);
+
+  const section = document.getElementById('conflicts-section');
+  if (!_conflictGroups.length) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  const list = document.getElementById('conflicts-list');
+  list.innerHTML = '';
+
+  for (const group of _conflictGroups) {
+    group.resolved = false;
+    const name  = getTournamentName(group.tournamentId);
+    const domId = _keyToId(group.key);
+
+    const rowsHtml = group.rows.map((r, ri) => `
+      <div class="conflict-row">
+        <span class="conflict-player">${r.player}</span>
+        <span class="conflict-pts">${r.points} pts</span>
+        <span class="conflict-place-lbl">Place</span>
+        <input type="number" class="conflict-place-input"
+          id="${domId}_r${ri}"
+          value="${r.place}" min="1" max="200"
+          data-group="${group.key}" data-row="${ri}"
+          oninput="onPlaceChange(this)">
+      </div>`).join('');
+
+    const el = document.createElement('div');
+    el.className = 'conflict-group';
+    el.id = domId;
+    el.innerHTML = `
+      <div class="conflict-group-head">
+        <span class="conflict-date">${group.date}</span>
+        <span class="conflict-tid">· ${name}</span>
+        <span class="conflict-badge" id="${domId}_badge">place ${group.originalPlace} · ${group.rows.length} joueurs</span>
+      </div>
+      ${rowsHtml}
+      <div class="conflict-group-status warn" id="${domId}_status">
+        ⚠ ${group.rows.length} joueurs à la même place — corrige les places ci-dessus
+      </div>`;
+    list.appendChild(el);
+  }
+
+  refreshConflictsHeader();
+}
+
+function onPlaceChange(input) {
+  const key = input.dataset.group;
+  const ri  = parseInt(input.dataset.row);
+  const val = parseInt(input.value);
+
+  const group = _conflictGroups.find(g => g.key === key);
+  if (!group) return;
+
+  group.rows[ri].place = isNaN(val) ? group.originalPlace : val;
+
+  const places  = group.rows.map(r => r.place);
+  const anyBad  = places.some(p => !p || p < 1 || isNaN(p));
+  const allDiff = !anyBad && (places.length === new Set(places).size);
+
+  group.resolved = allDiff;
+
+  const domId    = _keyToId(key);
+  const statusEl = document.getElementById(domId + '_status');
+  const groupEl  = document.getElementById(domId);
+
+  // Marquer les inputs en erreur
+  group.rows.forEach((r, i) => {
+    const inp = document.getElementById(domId + '_r' + i);
+    if (!inp) return;
+    const dup = places.filter((p,j) => p === r.place && j !== i).length > 0;
+    inp.classList.toggle('err', dup || isNaN(r.place) || r.place < 1);
+  });
+
+  if (group.resolved) {
+    statusEl.textContent = '✓ Résolu';
+    statusEl.className   = 'conflict-group-status ok';
+    groupEl.classList.add('resolved');
+    document.getElementById(domId + '_badge').textContent = '✓ corrigé';
+  } else {
+    const dups = [...new Set(places.filter((p,i) => places.indexOf(p) !== i))];
+    statusEl.textContent = dups.length
+      ? '⚠ Place ' + dups.join(', ') + ' encore en doublon'
+      : '⚠ Place invalide';
+    statusEl.className = 'conflict-group-status warn';
+    groupEl.classList.remove('resolved');
+    document.getElementById(domId + '_badge').textContent =
+      `place ${group.originalPlace} · ${group.rows.length} joueurs`;
+  }
+
+  refreshConflictsHeader();
+  updateSummary();
+}
+
+function refreshConflictsHeader() {
+  const total    = _conflictGroups.length;
+  const resolved = _conflictGroups.filter(g => g.resolved).length;
+  const header   = document.getElementById('conflicts-header');
+
+  document.getElementById('conflicts-progress').textContent = `${resolved} / ${total} résolus`;
+
+  if (resolved === total) {
+    header.classList.add('all-ok');
+    header.querySelector('span').textContent = '✓ Tous les conflits résolus';
+  } else {
+    header.classList.remove('all-ok');
+    header.querySelector('span').textContent = '⚠ Conflits de positions à corriger';
+  }
+}
+
+function allConflictsResolved() {
+  return _conflictGroups.length === 0 || _conflictGroups.every(g => g.resolved);
+}
+
+// ── Résumé + visibilité bouton ───────────────────────
+
 function updateSummary() {
   const results     = _files.data?.results     || [];
   const sessions    = _files.data?.sessions    || [];
   const tournaments = _files.tournaments?.tournaments || [];
   const extras      = _files.extras?.extras    || [];
 
-  const allLoaded = _files.data && _files.tournaments && _files.extras;
+  const allLoaded   = _files.data && _files.tournaments && _files.extras;
+  const conflictsOk = allConflictsResolved();
+  const allReady    = allLoaded && conflictsOk;
 
-  document.getElementById('cnt-results').textContent     = results.length;
-  document.getElementById('cnt-sessions').textContent    = sessions.length;
-  document.getElementById('cnt-tournaments').textContent = tournaments.length;
-  document.getElementById('cnt-extras').textContent      = extras.length;
+  document.getElementById('cnt-results').textContent     = results.length   || '—';
+  document.getElementById('cnt-sessions').textContent    = sessions.length  || '—';
+  document.getElementById('cnt-tournaments').textContent = tournaments.length|| '—';
+  document.getElementById('cnt-extras').textContent      = extras.length     || '—';
 
   const showSummary = _files.data || _files.tournaments || _files.extras;
   document.getElementById('summary-box').style.display = showSummary ? 'block' : 'none';
-  document.getElementById('warn-box').style.display    = allLoaded ? 'block' : 'none';
-  document.getElementById('btn-import').style.display  = allLoaded ? 'block' : 'none';
+  document.getElementById('warn-box').style.display    = allReady    ? 'block' : 'none';
+  document.getElementById('btn-import').style.display  = allReady    ? 'block' : 'none';
 
-  // Avertissement ex-æquo
-  const dupesBox = document.getElementById('dupes-box');
-  const dupes = _files.data?._dupes || [];
-  if (dupes.length) {
-    dupesBox.style.display = 'block';
-    dupesBox.innerHTML = `ℹ️ <strong>${dupes.length} positions partagées détectées</strong> (ex-æquo, split final…)<br>
-      Ces entrées sont valides si la table Supabase n'a pas de contrainte UNIQUE sur (date, tournoi, place).<br>
-      <small style="opacity:.7">${dupes.slice(0,5).join(' — ')}${dupes.length > 5 ? ' …' : ''}</small>`;
-  } else {
-    dupesBox.style.display = 'none';
+  if (allLoaded && !conflictsOk) {
+    const remaining = _conflictGroups.filter(g => !g.resolved).length;
+    showMsg(`⚠ Corrige les ${remaining} conflit(s) en rouge avant d'importer.`, 'err');
+  } else if (allReady) {
+    showMsg('Tous les fichiers chargés et conflits résolus — prêt à importer.', 'info');
+  } else if (allLoaded) {
+    showMsg('Tous les fichiers chargés — vérifie les compteurs.', 'info');
   }
-
-  if (allLoaded) showMsg('Tous les fichiers chargés — vérifie les compteurs.', 'info');
 }
 
 // ── Import ───────────────────────────────────────────
 
 async function startImport() {
   if (!_files.data || !_files.tournaments || !_files.extras) return;
+  if (!allConflictsResolved()) { showMsg('Corrige tous les conflits avant d\'importer.', 'err'); return; }
 
   const results     = _files.data.results;
   const sessions    = _files.data.sessions;
@@ -396,10 +582,6 @@ async function startImport() {
   btn.textContent = 'Import en cours…';
   document.getElementById('progress-wrap').style.display = 'block';
 
-  // Plage de progression : [from, to] par étape
-  // 0-10 : clearAll | 10-20 : tournois | 20-30 : sessions
-  // 30-85 : résultats (chunked, progress réel) | 85-92 : extras | 92-100 : vérification
-
   try {
     showMsg('Suppression des données existantes…', 'info');
     setProgress(5);
@@ -419,8 +601,7 @@ async function startImport() {
       tournaments: [], sessions: [], extras: [],
       results,
       onProgress(done, total) {
-        const pct = 30 + Math.round(55 * done / total);
-        setProgress(pct);
+        setProgress(30 + Math.round(55 * done / total));
         showMsg(`Import des résultats… (${done} / ${total})`, 'info');
       }
     });
@@ -430,7 +611,6 @@ async function startImport() {
     await SB.importData({ tournaments: [], results: [], sessions: [], extras });
     setProgress(92);
 
-    // Vérification comptage final (countRows évite la limite max-rows des SELECT)
     showMsg('Vérification…', 'info');
     const [dbResCount, dbSesCount] = await Promise.all([
       SB.countRows('results'), SB.countRows('sessions')
@@ -450,7 +630,7 @@ async function startImport() {
     } else {
       const diff = [];
       if (!resOk) diff.push(`résultats : attendu ${results.length}, importé ${dbResCount}`);
-      if (!sesOk) diff.push(`sessions : attendu ${sessions.length}, importé ${dbSesCount}`);
+      if (!sesOk) diff.push(`sessions  : attendu ${sessions.length}, importé ${dbSesCount}`);
       showMsg('⚠ Import partiel — ' + diff.join(' | ') + '. Vérifie la console.', 'err');
       btn.disabled = false;
       btn.textContent = '🗑 Effacer et importer →';
@@ -471,7 +651,7 @@ function setProgress(pct) {
 function showMsg(text, type) {
   const el = document.getElementById('import-msg');
   el.textContent = text;
-  el.className = 'import-msg' + (type ? ' ' + type : '');
+  el.className   = 'import-msg' + (type ? ' ' + type : '');
 }
 </script>
 </body>
