@@ -18,44 +18,37 @@ const TOURNAMENT_DEFAULTS = [
 
 /* ══════════════════════════════════════════════════════
    TournamentsStore — accès centralisé aux tournois
-   Priorité : localStorage > defaults
+   Source de vérité : Supabase (SB.getTournaments)
+   Fallback : TOURNAMENT_DEFAULTS si Supabase inaccessible
    La clé "points" est préservée lors des mises à jour
    partielles (prize-pool ne la connaît pas).
 ══════════════════════════════════════════════════════ */
 const TournamentsStore = {
-  LS_KEY: 'tournaments_data',
 
   async read() {
     try {
-      const stored = JSON.parse(localStorage.getItem(this.LS_KEY) || 'null');
-      if (stored && stored.length > 0) return stored;
+      const ts = await SB.getTournaments();
+      if (ts && ts.length > 0) return ts;
     } catch {}
-    return [...TOURNAMENT_DEFAULTS];
+    return TOURNAMENT_DEFAULTS.map(t => ({ ...t }));
   },
 
-  async write(tournaments) {
-    localStorage.setItem(this.LS_KEY, JSON.stringify(tournaments));
+  /* Mise à jour partielle : lit d'abord le tournoi complet depuis Supabase
+     pour préserver les champs non fournis (ex: points depuis le prize-pool) */
+  async update(id, changes) {
+    const list    = await this.read();
+    const current = list.find(t => t.id === id) || {};
+    await SB.upsertTournament({ ...current, ...changes });
+    return await this.read();
   },
 
   async add(t) {
-    const list = await this.read();
-    list.push(t);
-    await this.write(list);
-    return list;
-  },
-
-  /* Mise à jour partielle : préserve les champs non fournis (ex: points) */
-  async update(id, changes) {
-    const list = await this.read();
-    const idx  = list.findIndex(t => t.id === id);
-    if (idx >= 0) list[idx] = { ...list[idx], ...changes };
-    await this.write(list);
-    return list;
+    await SB.upsertTournament(t);
+    return await this.read();
   },
 
   async remove(id) {
-    const list = (await this.read()).filter(t => t.id !== id);
-    await this.write(list);
-    return list;
+    await SB.deleteTournament(id);
+    return await this.read();
   },
 };
