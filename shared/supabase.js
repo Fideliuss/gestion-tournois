@@ -25,7 +25,7 @@ const _fromExtra = e => ({
 });
 
 const _toResult = r => ({
-  id: r.id, date: r.date, tournamentId: r.tournament_id,
+  id: Number(r.id), date: r.date, tournamentId: r.tournament_id,
   place: r.place, player: r.player, points: r.points, extra: r.extra
 });
 const _fromResult = r => ({
@@ -34,7 +34,7 @@ const _fromResult = r => ({
 });
 
 const _toSession = r => ({
-  id: r.id, date: r.date, tournamentId: r.tournament_id,
+  id: Number(r.id), date: r.date, tournamentId: r.tournament_id,
   entries: r.entries, cagnotte: r.cagnotte, nbResults: r.nb_results
 });
 const _fromSession = s => ({
