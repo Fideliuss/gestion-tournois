@@ -79,24 +79,6 @@ body.light .app {
     #F0E8D4;
 }
 
-/* ── FS Save Indicator (discret, fixé en haut à droite) ── */
-.fs-indicator {
-  position: fixed; top: 14px; right: 148px; z-index: 200;
-  display: flex; align-items: center; gap: 5px;
-  padding: 6px 11px; border-radius: 20px;
-  font-family: var(--f-ui); font-size: 10px; font-weight: 500;
-  letter-spacing: .07em; color: var(--text-muted);
-  background: var(--bg-card); border: 1px solid rgba(196,160,74,.1);
-  cursor: pointer; transition: all .2s; backdrop-filter: blur(8px);
-}
-.fs-indicator:hover                { border-color: rgba(196,160,74,.28); color: var(--text-dim); }
-body.light .fs-indicator           { background: rgba(240,232,212,.9); border-color: rgba(138,104,32,.12); }
-.fs-ind-dot                        { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; transition: background .3s; }
-.fs-indicator.connected .fs-ind-dot    { background: #27AE60; animation: fs-pulse 2s infinite; }
-.fs-indicator.disconnected .fs-ind-dot { background: #4a4a4a; }
-@keyframes fs-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-@media print { .fs-indicator { display: none !important; } }
-
 /* ── Toggle thème (fixé en haut à droite) ── */
 .theme-toggle {
   position: fixed; top: 14px; right: 16px; z-index: 200;
