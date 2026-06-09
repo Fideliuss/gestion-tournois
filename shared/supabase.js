@@ -51,6 +51,14 @@ const _fromTournament = t => ({
   buyin: t.buyin, pp: t.pp || null, frais: t.frais || null, points: t.points || []
 });
 
+// ── Helpers ─────────────────────────────────────────
+
+function _chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
 // ── Interface publique SB ────────────────────────────
 
 const SB = {
@@ -192,7 +200,14 @@ const SB = {
     await _sb.from('extras').delete().neq('id', '');
   },
 
-  async importData({ results, sessions, tournaments, extras }) {
+  // Compte les lignes d'une table (évite le max-rows des SELECT)
+  async countRows(table) {
+    const { count, error } = await _sb.from(table).select('*', { count: 'exact', head: true });
+    if (error) throw error;
+    return count;
+  },
+
+  async importData({ results, sessions, tournaments, extras, onProgress } = {}) {
     if (tournaments && tournaments.length) {
       const { error } = await _sb.from('tournaments')
         .upsert(tournaments.map(_fromTournament));
@@ -204,9 +219,15 @@ const SB = {
       if (error) throw error;
     }
     if (results && results.length) {
-      const { error } = await _sb.from('results')
-        .insert(results.map(_fromResult));
-      if (error) throw error;
+      const rows    = results.map(_fromResult);
+      const chunks  = _chunk(rows, 500);
+      let inserted  = 0;
+      for (const chunk of chunks) {
+        const { error } = await _sb.from('results').insert(chunk);
+        if (error) throw error;
+        inserted += chunk.length;
+        if (onProgress) onProgress(inserted, rows.length);
+      }
     }
     if (extras && extras.length) {
       const { error } = await _sb.from('extras')
