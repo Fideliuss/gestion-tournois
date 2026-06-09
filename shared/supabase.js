@@ -130,11 +130,21 @@ const SB = {
   },
 
   // ── Auth ───────────────────────────────────────────
-  async sendMagicLink(email) {
-    const { error } = await _sb.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: 'https://fideliuss.github.io/gestion-tournois/login.html' }
+  async signInWithPassword(email, password) {
+    const { data, error } = await _sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data.session;
+  },
+
+  async resetPassword(email) {
+    const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://fideliuss.github.io/gestion-tournois/login.html'
     });
+    if (error) throw error;
+  },
+
+  async updatePassword(password) {
+    const { error } = await _sb.auth.updateUser({ password });
     if (error) throw error;
   },
 
