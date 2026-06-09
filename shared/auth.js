@@ -54,7 +54,87 @@ const AUTH = {
     badge.innerHTML = `
       <span class="auth-email">${short}</span>
       <span class="auth-chip ${roleClass}">${roleLabel}</span>
+      <button class="auth-pwd-btn" onclick="AUTH._openChangePwd()" title="Changer le mot de passe">🔑</button>
       <button class="auth-logout" onclick="AUTH.signOut('${loginUrl}')">Déconnexion</button>`;
     document.body.appendChild(badge);
+  },
+
+  // ── Modal changement de mot de passe ──────────────────
+
+  _openChangePwd() {
+    if (document.getElementById('auth-pwd-overlay')) return; // déjà ouvert
+
+    const overlay = document.createElement('div');
+    overlay.id = 'auth-pwd-overlay';
+    overlay.innerHTML = `
+      <div id="auth-pwd-modal" role="dialog" aria-modal="true" aria-labelledby="auth-pwd-title">
+        <div class="auth-pwd-title" id="auth-pwd-title">Changer le mot de passe</div>
+
+        <label class="auth-pwd-label" for="auth-pwd-new">Nouveau mot de passe</label>
+        <input type="password" id="auth-pwd-new" class="auth-pwd-input"
+          placeholder="••••••••" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter') document.getElementById('auth-pwd-confirm').focus()" />
+
+        <label class="auth-pwd-label" for="auth-pwd-confirm">Confirmer le mot de passe</label>
+        <input type="password" id="auth-pwd-confirm" class="auth-pwd-input"
+          placeholder="••••••••" autocomplete="new-password"
+          onkeydown="if(event.key==='Enter') AUTH._saveNewPwd()" />
+
+        <div class="auth-pwd-actions">
+          <button class="auth-pwd-save" id="auth-pwd-save-btn" onclick="AUTH._saveNewPwd()">
+            Enregistrer →
+          </button>
+          <button class="auth-pwd-cancel" onclick="AUTH._closeChangePwd()">Annuler</button>
+        </div>
+        <div class="auth-pwd-msg" id="auth-pwd-msg"></div>
+      </div>`;
+
+    // Fermer en cliquant l'overlay (hors modal)
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) AUTH._closeChangePwd();
+    });
+    // Fermer avec Escape
+    overlay._keyHandler = function(e) { if (e.key === 'Escape') AUTH._closeChangePwd(); };
+    document.addEventListener('keydown', overlay._keyHandler);
+
+    document.body.appendChild(overlay);
+    setTimeout(() => document.getElementById('auth-pwd-new').focus(), 50);
+  },
+
+  _closeChangePwd() {
+    const overlay = document.getElementById('auth-pwd-overlay');
+    if (!overlay) return;
+    document.removeEventListener('keydown', overlay._keyHandler);
+    overlay.remove();
+  },
+
+  async _saveNewPwd() {
+    const pwd     = (document.getElementById('auth-pwd-new').value     || '').trim();
+    const confirm = (document.getElementById('auth-pwd-confirm').value || '').trim();
+    const msg     = document.getElementById('auth-pwd-msg');
+    const btn     = document.getElementById('auth-pwd-save-btn');
+
+    msg.textContent = ''; msg.className = 'auth-pwd-msg';
+
+    if (pwd.length < 8) {
+      msg.textContent = 'Le mot de passe doit faire au moins 8 caractères.';
+      msg.className = 'auth-pwd-msg err'; return;
+    }
+    if (pwd !== confirm) {
+      msg.textContent = 'Les deux mots de passe ne correspondent pas.';
+      msg.className = 'auth-pwd-msg err'; return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Enregistrement…';
+    try {
+      await SB.updatePassword(pwd);
+      msg.textContent = 'Mot de passe mis à jour ✓';
+      msg.className = 'auth-pwd-msg ok';
+      setTimeout(() => AUTH._closeChangePwd(), 1200);
+    } catch(ex) {
+      msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
+      msg.className = 'auth-pwd-msg err';
+      btn.disabled = false; btn.textContent = 'Enregistrer →';
+    }
   }
 };
