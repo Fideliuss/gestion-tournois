@@ -1,9 +1,23 @@
 // ══════════════════════════════════════════════════════
-//  ACCÈS AUX DONNÉES — via Supabase (shared/supabase.js)
+//  ACCÈS AUX DONNÉES — cache + pagination transparente
+//  Les données sont chargées une seule fois par session
+//  navigateur, puis relues depuis le cache.
+//  invalidateCache() vide le cache après toute mutation.
 // ══════════════════════════════════════════════════════
-async function getResults()    { return SB.getResults(); }
-async function getSessions()   { return SB.getSessions(); }
-async function totalCagnotte() { return (await SB.getSessions()).reduce((a,s)=>a+(s.cagnotte||0),0); }
+let _cacheResults  = null;
+let _cacheSessions = null;
+
+async function getResults(force = false) {
+  if (!_cacheResults || force) _cacheResults = await SB.getResults();
+  return _cacheResults;
+}
+async function getSessions(force = false) {
+  if (!_cacheSessions || force) _cacheSessions = await SB.getSessions();
+  return _cacheSessions;
+}
+function invalidateCache() { _cacheResults = null; _cacheSessions = null; }
+
+async function totalCagnotte() { return (await getSessions()).reduce((a,s)=>a+(s.cagnotte||0),0); }
 
 async function getTournaments() {
   if (_tournamentsCache) return _tournamentsCache;
@@ -85,7 +99,6 @@ let currentPlaceCount = 0;
 
 // ── État accordion historique ──
 let _histExpandedIds  = new Set();   // sessions actuellement ouvertes
-let _histResultsCache = null;        // cache résultats pour édition inline
 
 async function buildPlacementRows() {
   const tid        =document.getElementById('inp-tournoi').value;
@@ -174,6 +187,7 @@ async function validateTournament() {
 
   const savedResults = await SB.insertResults(newEntries);
   await SB.insertSession({date, tournamentId:tid, entries, cagnotte:entries*2, nbResults:savedResults.length});
+  invalidateCache();
 
   document.getElementById('inp-tournoi').value='';
   document.getElementById('inp-entrees').value='';
@@ -431,8 +445,6 @@ async function renderClassement() {
 // ══════════════════════════════════════════════════════
 async function renderHistorique() {
   await refreshTournamentsCache();
-  _histResultsCache = await getResults();
-
   const allSessions = (await getSessions()).slice();
   const search  = (document.getElementById('search-hist')?.value  || '').toLowerCase().trim();
   const filterT = (document.getElementById('filter-tournoi-hist')?.value || '');
@@ -443,7 +455,7 @@ async function renderHistorique() {
 
   /* Index results → date|tid */
   const resIndex = {};
-  _histResultsCache.forEach(r => {
+  (await getResults()).forEach(r => {
     const key = `${r.date}|${r.tournamentId}`;
     (resIndex[key] = resIndex[key] || []).push(r);
   });
@@ -617,7 +629,7 @@ function toggleCalSession(id) {
 function editResult(id) {
   const row = document.getElementById(`res-${id}`);
   if (!row || row.dataset.editing) return;
-  const r = (_histResultsCache || []).find(r => r.id === id);
+  const r = (_cacheResults || []).find(r => r.id === id);
   if (!r) return;
 
   row.dataset.editing = '1';
@@ -644,8 +656,9 @@ async function saveResultEdit(id) {
   const points = parseInt(document.getElementById(`ept-${id}`)?.value) || 0;
   if (!name) { alert('Le nom du joueur ne peut pas être vide.'); return; }
 
-  const r = (_histResultsCache || []).find(r => r.id === id);
+  const r = (_cacheResults || []).find(r => r.id === id);
   if (r) await SB.updateResult(id, { ...r, place, player: name, points });
+  invalidateCache();
   await renderHistorique();
   await renderClassement();
 }
@@ -683,6 +696,7 @@ async function saveSessionEdit(id) {
   const sessions = await getSessions();
   const s = sessions.find(s => s.id === id);
   if (s) await SB.updateSession(id, { ...s, entries, cagnotte: entries * 2 });
+  invalidateCache();
   await renderHistorique();
 }
 
@@ -695,6 +709,7 @@ function clearDateFilter() {
 async function deleteResult(id) {
   if(!confirm('Supprimer ce résultat ?')) return;
   await SB.deleteResult(id);
+  invalidateCache();
   await renderHistorique(); await renderClassement();
 }
 
@@ -704,6 +719,7 @@ async function deleteSession(id) {
   await SB.deleteResultsBySession(s.date, s.tournamentId);
   await SB.deleteSession(id);
   _histExpandedIds.delete(id);
+  invalidateCache();
   await renderHistorique(); await renderClassement();
 }
 
