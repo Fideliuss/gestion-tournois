@@ -130,13 +130,10 @@ const SB = {
   },
 
   // ── Auth ───────────────────────────────────────────
-  async signInWithGoogle() {
-    const { error } = await _sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: 'https://fideliuss.github.io/gestion-tournois/login.html',
-        queryParams: { hd: 'groupebarriere.com' }   // hint Google : comptes pro uniquement
-      }
+  async sendMagicLink(email) {
+    const { error } = await _sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: 'https://fideliuss.github.io/gestion-tournois/login.html' }
     });
     if (error) throw error;
   },
