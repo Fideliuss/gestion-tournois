@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.9.10', date: '2026-06-10', message: 'Fix synchronisation tournois — TournamentsStore branché sur Supabase (source unique) ; Prize Pool et Leaderboard partagent désormais le même référentiel' },
   { version: 'v1.9.9', date: '2026-06-10', message: 'Historique — navigation mois par mois (flèches ‹ ›) ; résultats chargés à la demande par mois ; classement inchangé (tous les résultats)' },
   { version: 'v1.9.8', date: '2026-06-10', message: 'Fix limite 1000 lignes Supabase — getResults/getSessions paginés ; cache module-level (1 seul fetch par session navigateur, invalidé après chaque mutation)' },
   { version: 'v1.9.7', date: '2026-06-09', message: 'Historique — indicateur orange sur les sessions sans résultats dans le calendrier ; suppression import.html (migration terminée)' },
