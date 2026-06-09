@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="shared/barriere.css" />
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; box-sizing: border-box; }
+    .login-card {
+      width: 100%; max-width: 380px;
+      background: var(--card-bg, #1e1e1e); border: 1px solid var(--border, rgba(255,255,255,.08));
+      border-radius: 16px; padding: 40px 32px;
+    }
+    .login-logo  { font-size: 11px; letter-spacing: .12em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .login-title { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+    .login-sub   { font-size: 13px; color: var(--text-muted); margin: 0 0 32px; }
+    .login-label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .login-input {
+      width: 100%; padding: 11px 14px; border-radius: 8px;
+      border: 1px solid var(--border, rgba(255,255,255,.1));
+      background: var(--bg, #111); color: var(--text, #f0f0f0);
+      font-size: 14px; box-sizing: border-box; margin-bottom: 16px;
+      outline: none; transition: border-color .2s;
+    }
+    .login-input:focus { border-color: var(--gold, #C4A04A); }
+    .login-btn {
+      width: 100%; padding: 12px; background: var(--gold, #C4A04A); color: #000;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .login-btn:hover    { opacity: .88; }
+    .login-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .login-msg { margin-top: 14px; font-size: 13px; text-align: center; min-height: 18px; }
+    .login-msg.err { color: #e74c3c; }
+    /* État "lien envoyé" */
+    .login-sent { display: none; text-align: center; }
+    .login-sent-icon  { font-size: 44px; margin-bottom: 16px; }
+    .login-sent-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .login-sent-sub   { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+    .login-sent-back  {
+      display: inline-block; margin-top: 20px; font-size: 12px;
+      color: var(--text-muted); cursor: pointer; text-decoration: underline;
+    }
+    .login-hr { border: none; border-top: 1px solid var(--border, rgba(255,255,255,.08)); margin: 24px 0; }
+    .login-version { text-align: center; font-size: 11px; color: var(--text-muted); opacity: .5; }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="login-logo">Casino Barrière · Bordeaux</div>
+  <div class="login-title">Connexion</div>
+  <div class="login-sub">Outils de gestion des tournois</div>
+
+  <!-- Formulaire -->
+  <div id="login-form">
+    <label class="login-label" for="login-email">Adresse e-mail</label>
+    <input type="email" id="login-email" class="login-input"
+      placeholder="prenom.nom@casino-bordeaux.fr"
+      autocomplete="email"
+      onkeydown="if(event.key==='Enter') sendLink()" />
+    <button class="login-btn" id="login-btn" onclick="sendLink()">
+      Envoyer le lien de connexion
+    </button>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+
+  <!-- Confirmation envoi -->
+  <div class="login-sent" id="login-sent">
+    <div class="login-sent-icon">📬</div>
+    <div class="login-sent-title">Lien envoyé !</div>
+    <div class="login-sent-sub">
+      Vérifie ta boîte mail et clique sur le lien pour te connecter.<br>
+      Le lien expire dans 1 heure.
+    </div>
+    <span class="login-sent-back" onclick="resetForm()">← Renvoyer à une autre adresse</span>
+  </div>
+
+  <div class="login-hr"></div>
+  <div class="login-version" id="login-version"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared/changelog.js"></script>
+<script src="shared/supabase.js"></script>
+<script>
+// Afficher la version
+document.getElementById('login-version').textContent =
+  window.CHANGELOG?.[0] ? `v${CHANGELOG[0].version}` : '';
+
+// Écouter l'état d'auth — capte le retour du magic link
+SB.onAuthStateChange((event, session) => {
+  if (session) {
+    const role = session.user.user_metadata?.role || 'floor';
+    window.location.replace(role === 'admin' ? 'index.html' : 'prize-pool/prize-pool.html');
+  }
+});
+
+// Si déjà connecté au chargement
+(async () => {
+  const session = await SB.getSession();
+  if (session) {
+    const role = session.user.user_metadata?.role || 'floor';
+    window.location.replace(role === 'admin' ? 'index.html' : 'prize-pool/prize-pool.html');
+  }
+})();
+
+async function sendLink() {
+  const email = (document.getElementById('login-email').value || '').trim();
+  const msg   = document.getElementById('login-msg');
+  const btn   = document.getElementById('login-btn');
+
+  msg.textContent = '';
+  msg.className   = 'login-msg';
+
+  if (!email) {
+    msg.textContent = 'Saisis ton adresse e-mail.';
+    msg.className   = 'login-msg err';
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = 'Envoi en cours…';
+
+  try {
+    await SB.sendMagicLink(email);
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('login-sent').style.display = 'block';
+  } catch(ex) {
+    msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
+    msg.className   = 'login-msg err';
+    btn.disabled    = false;
+    btn.textContent = 'Envoyer le lien de connexion';
+  }
+}
+
+function resetForm() {
+  document.getElementById('login-form').style.display = '';
+  document.getElementById('login-sent').style.display = 'none';
+  document.getElementById('login-btn').disabled        = false;
+  document.getElementById('login-btn').textContent     = 'Envoyer le lien de connexion';
+  document.getElementById('login-email').value         = '';
+  document.getElementById('login-email').focus();
+}
+</script>
+</body>
+</html>

@@ -214,7 +214,11 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
 <script src="declaration.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', role: 'admin' });</script>
 </body>
 </html>
