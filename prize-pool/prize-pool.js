@@ -603,7 +603,7 @@ function toggleManualSpots() {
 function renderPresets() {
   const wrap = document.getElementById('presets-row');
   if (!state.tournaments.length) {
-    wrap.innerHTML = '<span class="pp-no-preset">Connectez le dossier de données pour charger les tournois</span>';
+    wrap.innerHTML = '<span class="pp-no-preset">Aucun tournoi configuré</span>';
     return;
   }
   wrap.innerHTML = state.tournaments.map(t =>
@@ -653,15 +653,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadPersist();
   syncInputs();
 
-  await BarriereFS.restore();
   await loadTournaments();
 
   render();
-
-  document.getElementById('fs-indicator')?.addEventListener('click', async () => {
-    await loadTournaments();
-    render();
-  });
 });
 
 async function loadTournaments() {

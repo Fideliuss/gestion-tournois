@@ -424,7 +424,7 @@ body.light .hint-flat  { color: rgba(138,104,32,.4); }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #fff !important; color: #111 !important; }
   .app { background: #fff !important; padding: 0; display: block !important; }
-  .hdr, .back, .theme-toggle, .fs-indicator,
+  .hdr, .back, .theme-toggle,
   .pp-presets-card, .card:not(.card-print) { display: none !important; }
   .card-print {
     background: #fff !important; border: none !important;
