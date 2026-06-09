@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Import Supabase — Migration données</title>
+  <link rel="stylesheet" href="shared/barriere.css" />
+  <style>
+    body { max-width: 720px; margin: 0 auto; padding: 32px 16px; }
+    h1   { font-size: 20px; margin-bottom: 4px; }
+    .sub { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
+    .step { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+    .step-num { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .step h2  { font-size: 15px; margin: 0 0 12px; }
+    label     { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    input[type="file"] { width: 100%; font-size: 13px; margin-bottom: 10px; }
+    .btn      { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px;
+                font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-danger  { background: #c0392b; color: #fff; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .log  { background: #111; color: #ccc; border-radius: 8px; padding: 14px 16px; font-size: 12px;
+            font-family: monospace; min-height: 80px; max-height: 320px; overflow-y: auto;
+            white-space: pre-wrap; margin-top: 14px; display: none; }
+    .log.visible { display: block; }
+    .ok  { color: #2ecc71; }
+    .err { color: #e74c3c; }
+    .info{ color: #f39c12; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    .stat  { background: var(--bg); border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-val  { font-size: 22px; font-weight: 700; color: var(--accent); }
+    .stat-lbl  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .files-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .file-block { }
+    .file-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .05em;
+                background: rgba(196,160,74,.15); color: var(--accent); border-radius: 4px;
+                padding: 2px 8px; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+<h1>🗄 Migration → Supabase</h1>
+<p class="sub">Outil one-shot pour importer les données locales vers Supabase.<br>
+À utiliser une seule fois. Supprime-le ensuite.</p>
+
+<!-- ÉTAPE 1 : charger les fichiers -->
+<div class="step">
+  <div class="step-num">Étape 1</div>
+  <h2>Charger les fichiers de données locaux</h2>
+  <div class="files-row">
+    <div class="file-block">
+      <div class="file-tag">LEADERBOARD</div>
+      <label for="file-leaderboard">Sélectionne <strong>barriere_data.json</strong></label>
+      <input type="file" id="file-leaderboard" accept=".json" onchange="loadLeaderboard(this)" />
+    </div>
+    <div class="file-block">
+      <div class="file-tag">EXTRAS</div>
+      <label for="file-extras">Sélectionne <strong>extras_data.json</strong></label>
+      <input type="file" id="file-extras" accept=".json" onchange="loadExtras(this)" />
+    </div>
+  </div>
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat"><div class="stat-val" id="cnt-results">—</div><div class="stat-lbl">Résultats</div></div>
+    <div class="stat"><div class="stat-val" id="cnt-sessions">—</div><div class="stat-lbl">Sessions</div></div>
+    <div class="stat"><div class="stat-val" id="cnt-tournaments">—</div><div class="stat-lbl">Tournois</div></div>
+    <div class="stat"><div class="stat-val" id="cnt-extras">—</div><div class="stat-lbl">Extras</div></div>
+  </div>
+</div>
+
+<!-- ÉTAPE 2 : vider Supabase (optionnel) -->
+<div class="step">
+  <div class="step-num">Étape 2 — optionnel</div>
+  <h2>Vider Supabase avant import</h2>
+  <p style="font-size:13px;color:var(--text-muted);margin:0 0 12px">
+    À faire uniquement si Supabase contient déjà des données erronées ou des doublons de tests.</p>
+  <button class="btn btn-danger" onclick="clearAll()" id="btn-clear">🗑 Tout vider</button>
+  <div class="log" id="log-clear"></div>
+</div>
+
+<!-- ÉTAPE 3 : importer -->
+<div class="step">
+  <div class="step-num">Étape 3</div>
+  <h2>Importer dans Supabase</h2>
+  <button class="btn btn-primary" onclick="doImport()" id="btn-import" disabled>⬆ Lancer l'import</button>
+  <div class="log" id="log-import"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared/tournaments.js"></script>
+<script src="shared/supabase.js"></script>
+<script>
+let _leaderboard = null;
+let _extrasData  = null;
+
+function _updateStats() {
+  const r = (_leaderboard?.results     || []).length;
+  const s = (_leaderboard?.sessions    || []).length;
+  const t = (_leaderboard?.tournaments || []).length;
+  const e = (_extrasData?.extras       || []).length;
+  document.getElementById('cnt-results').textContent    = r;
+  document.getElementById('cnt-sessions').textContent   = s;
+  document.getElementById('cnt-tournaments').textContent = t;
+  document.getElementById('cnt-extras').textContent     = e;
+  document.getElementById('stats').style.display = 'grid';
+  document.getElementById('btn-import').disabled = (_leaderboard === null && _extrasData === null);
+}
+
+function loadLeaderboard(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { _leaderboard = JSON.parse(e.target.result); _updateStats(); }
+    catch(ex) { alert('barriere_data.json invalide : ' + ex.message); }
+  };
+  reader.readAsText(file);
+}
+
+function loadExtras(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { _extrasData = JSON.parse(e.target.result); _updateStats(); }
+    catch(ex) { alert('extras_data.json invalide : ' + ex.message); }
+  };
+  reader.readAsText(file);
+}
+
+function _log(logId, msg, cls='') {
+  const el = document.getElementById(logId);
+  el.classList.add('visible');
+  el.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+  el.scrollTop = el.scrollHeight;
+}
+
+async function clearAll() {
+  const btn = document.getElementById('btn-clear');
+  if (!confirm('Vider TOUTES les données Supabase ? Cette action est irréversible.')) return;
+  btn.disabled = true;
+  const log = 'log-clear';
+  _log(log, '⏳ Suppression en cours…', 'info');
+  try {
+    await SB.clearAll();
+    _log(log, '✓ Supabase vidé (résultats, sessions, tournois, extras).', 'ok');
+  } catch(ex) {
+    _log(log, '✗ Erreur : ' + ex.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function doImport() {
+  const btn = document.getElementById('btn-import');
+  btn.disabled = true;
+  const log = 'log-import';
+
+  const tournaments = _leaderboard?.tournaments?.length
+    ? _leaderboard.tournaments
+    : TOURNAMENT_DEFAULTS;
+  const sessions  = _leaderboard?.sessions  || [];
+  const results   = _leaderboard?.results   || [];
+  const extras    = _extrasData?.extras     || [];
+
+  _log(log, `⏳ Import de ${tournaments.length} tournois, ${sessions.length} sessions, ${results.length} résultats, ${extras.length} extras…`, 'info');
+
+  try {
+    await SB.importData({ results, sessions, tournaments, extras });
+    if (tournaments.length) _log(log, `✓ ${tournaments.length} tournois importés.`, 'ok');
+    if (sessions.length)    _log(log, `✓ ${sessions.length} sessions importées.`, 'ok');
+    if (results.length)     _log(log, `✓ ${results.length} résultats importés.`, 'ok');
+    if (extras.length)      _log(log, `✓ ${extras.length} extras importés.`, 'ok');
+    _log(log, '\n🎉 Import terminé ! Tu peux maintenant utiliser le leaderboard et les extras.', 'ok');
+  } catch(ex) {
+    _log(log, '✗ Erreur : ' + ex.message, 'err');
+    _log(log, 'Vérifie que le schéma SQL est bien appliqué dans Supabase et que RLS est activé.', 'info');
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

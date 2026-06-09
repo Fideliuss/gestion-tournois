@@ -11,32 +11,8 @@ const DAY_HDR    = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 
 
 /* ══════════════════════════════════════════════════════
-   FILE SYSTEM — wrapper extras (via BarriereFS)
+   DONNÉES — via Supabase (shared/supabase.js)
 ══════════════════════════════════════════════════════ */
-const FS = {
-  fileName: 'extras_data.json',
-  get connected() { return BarriereFS.connected; },
-  async readAll() {
-    const fb = { version:1, extras:[] };
-    if (!BarriereFS.connected) {
-      try { return JSON.parse(localStorage.getItem('extras_fallback')) || fb; } catch { return fb; }
-    }
-    return BarriereFS.read(this.fileName, fb);
-  },
-  async writeAll(data) {
-    if (!BarriereFS.connected) { localStorage.setItem('extras_fallback', JSON.stringify(data)); return; }
-    await BarriereFS.write(this.fileName, data);
-  },
-  async loadExtras() {
-    const d = await this.readAll();
-    return Array.isArray(d.extras) ? d.extras : [];
-  },
-  async saveExtras(list) {
-    const d = await this.readAll();
-    d.version = 1; d.extras = list;
-    await this.writeAll(d);
-  }
-};
 
 /* ── Persistance config + émargement (localStorage) ── */
 function loadCfg()        { try { return Object.assign({weekdayTime:'20:55',sundayTime:'16:55'}, JSON.parse(localStorage.getItem('extras_cfg') || '{}')); } catch { return {weekdayTime:'20:55',sundayTime:'16:55'}; } }
@@ -91,8 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;
   document.getElementById('cfg-sunday-time').value  = cfg.sundayTime;
 
-  await BarriereFS.restore();
-  extras = await FS.loadExtras();
+  extras = await SB.getExtras();
   renderAll();
 });
 
@@ -196,7 +171,7 @@ async function saveEdit() {
     codePostal:    document.getElementById('edit-cp').value.trim(),
     ville:         document.getElementById('edit-ville').value.trim().toUpperCase(),
   };
-  await FS.saveExtras(extras);
+  await SB.updateExtra(editingId, extras[idx]);
   document.getElementById('edit-modal').style.display = 'none';
   renderAll();
 }
@@ -217,8 +192,9 @@ async function addExtra() {
 
   if (!nom || !prenom) return alert('Nom et prénom obligatoires.');
 
-  extras.push({ id: uid(), nom, prenom, dateNaissance, lieuNaissance, adresse, codePostal, ville });
-  await FS.saveExtras(extras);
+  const newExtra = { id: uid(), nom, prenom, dateNaissance, lieuNaissance, adresse, codePostal, ville };
+  await SB.insertExtra(newExtra);
+  extras.push(newExtra);
 
   ['inp-nom','inp-prenom','inp-ddn','inp-lieu','inp-adresse','inp-cp','inp-ville']
     .forEach(id => { document.getElementById(id).value = ''; });
@@ -228,8 +204,8 @@ async function addExtra() {
 
 async function removeExtra(id) {
   if (!confirm('Supprimer cet extra ?')) return;
+  await SB.deleteExtra(id);
   extras = extras.filter(e => e.id !== id);
-  await FS.saveExtras(extras);
   renderAll();
 }
 
