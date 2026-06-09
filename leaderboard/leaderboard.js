@@ -4,8 +4,10 @@
 //  navigateur, puis relues depuis le cache.
 //  invalidateCache() vide le cache après toute mutation.
 // ══════════════════════════════════════════════════════
-let _cacheResults  = null;
-let _cacheSessions = null;
+let _cacheResults      = null;   // tous les résultats — pour le classement
+let _cacheSessions     = null;   // toutes les sessions — pour la navigation
+let _cacheByMonth      = {};     // { 'YYYY-MM': [...results] } — pour l'historique
+let _histCurrentMonth  = null;   // mois affiché dans l'historique
 
 async function getResults(force = false) {
   if (!_cacheResults || force) _cacheResults = await SB.getResults();
@@ -15,7 +17,24 @@ async function getSessions(force = false) {
   if (!_cacheSessions || force) _cacheSessions = await SB.getSessions();
   return _cacheSessions;
 }
-function invalidateCache() { _cacheResults = null; _cacheSessions = null; }
+async function getResultsForMonth(ym) {
+  if (!_cacheByMonth[ym]) _cacheByMonth[ym] = await SB.getResultsByMonth(ym);
+  return _cacheByMonth[ym];
+}
+function invalidateCache() {
+  _cacheResults  = null;
+  _cacheSessions = null;
+  _cacheByMonth  = {};
+  // _histCurrentMonth conservé : l'utilisateur reste sur le même mois
+}
+function _ymPrev(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  return m === 1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2,'0')}`;
+}
+function _ymNext(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  return m === 12 ? `${y+1}-01` : `${y}-${String(m+1).padStart(2,'0')}`;
+}
 
 async function totalCagnotte() { return (await getSessions()).reduce((a,s)=>a+(s.cagnotte||0),0); }
 
@@ -441,58 +460,78 @@ async function renderClassement() {
 }
 
 // ══════════════════════════════════════════════════════
-//  HISTORIQUE — vue calendrier
+//  HISTORIQUE — navigation mois par mois
 // ══════════════════════════════════════════════════════
 async function renderHistorique() {
   await refreshTournamentsCache();
+
   const allSessions = (await getSessions()).slice();
   const search  = (document.getElementById('search-hist')?.value  || '').toLowerCase().trim();
   const filterT = (document.getElementById('filter-tournoi-hist')?.value || '');
-  const filterD = (document.getElementById('filter-date-hist')?.value   || '');
 
-  const clearBtn = document.getElementById('btn-clear-date');
-  if (clearBtn) clearBtn.style.display = filterD ? 'inline-flex' : 'none';
+  /* Bornes de navigation : premier et dernier mois avec des sessions */
+  const sessionMonths = [...new Set(allSessions.map(s => s.date.substring(0, 7)))].sort();
+  const minMonth  = sessionMonths[0] || new Date().toISOString().substring(0, 7);
+  const nowMonth  = new Date().toISOString().substring(0, 7);
 
-  /* Index results → date|tid */
+  /* Initialisation au mois le plus récent avec des sessions */
+  if (!_histCurrentMonth) {
+    _histCurrentMonth = sessionMonths.length > 0
+      ? sessionMonths[sessionMonths.length - 1]
+      : nowMonth;
+  }
+
+  /* Résultats du mois courant seulement */
+  const monthResults = await getResultsForMonth(_histCurrentMonth);
   const resIndex = {};
-  (await getResults()).forEach(r => {
+  monthResults.forEach(r => {
     const key = `${r.date}|${r.tournamentId}`;
     (resIndex[key] = resIndex[key] || []).push(r);
   });
 
-  let sessions = allSessions;
+  /* Sessions du mois courant */
+  let sessions = allSessions.filter(s => s.date.startsWith(_histCurrentMonth));
   if (filterT) sessions = sessions.filter(s => s.tournamentId === filterT);
-  if (filterD) sessions = sessions.filter(s => s.date === filterD);
   if (search) {
     sessions = sessions.filter(s => {
       const tMatch = getTNameSync(s.tournamentId).toLowerCase().includes(search);
-      const pMatch = (resIndex[`${s.date}|${s.tournamentId}`] || []).some(r => r.player.toLowerCase().includes(search));
+      const pMatch = (resIndex[`${s.date}|${s.tournamentId}`] || [])
+        .some(r => r.player.toLowerCase().includes(search));
       if (tMatch || pMatch) { _histExpandedIds.add(s.id); return true; }
       return false;
     });
   }
 
   const container = document.getElementById('hist-sessions-list');
-  const emptyEl   = document.getElementById('hist-empty');
+  document.getElementById('hist-empty').style.display = 'none';
+
+  /* Barre de navigation */
+  const [y, mo] = _histCurrentMonth.split('-').map(Number);
+  const hasPrev  = _histCurrentMonth > minMonth;
+  const hasNext  = _histCurrentMonth < nowMonth;
+  const navHtml  = `
+    <div class="hist-nav">
+      <button class="hist-nav-btn" onclick="histGoMonth('${_ymPrev(_histCurrentMonth)}')"
+        ${hasPrev ? '' : 'disabled'} title="Mois précédent">‹</button>
+      <span class="hist-nav-label">${_MONTHS_FR[mo - 1]} <span class="hist-nav-year">${y}</span></span>
+      <button class="hist-nav-btn" onclick="histGoMonth('${_ymNext(_histCurrentMonth)}')"
+        ${hasNext ? '' : 'disabled'} title="Mois suivant">›</button>
+    </div>`;
 
   if (sessions.length === 0) {
-    container.innerHTML = '';
-    emptyEl.style.display = 'block';
+    container.innerHTML = navHtml +
+      `<div class="hist-empty-month">Aucune session ce mois</div>`;
     return;
   }
-  emptyEl.style.display = 'none';
 
-  /* Grouper par mois YYYY-MM (récents en premier) */
-  const monthMap = {};
-  sessions.forEach(s => {
-    const m = s.date.substring(0, 7);
-    (monthMap[m] = monthMap[m] || []).push(s);
-  });
-  const sortedMonths = Object.keys(monthMap).sort().reverse();
-
-  container.innerHTML = `<div class="cal-months">${
-    sortedMonths.map(m => _renderCalendarMonth(m, monthMap[m], resIndex, search)).join('')
+  container.innerHTML = navHtml + `<div class="cal-months">${
+    _renderCalendarMonth(_histCurrentMonth, sessions, resIndex, search)
   }</div>`;
+}
+
+async function histGoMonth(ym) {
+  _histCurrentMonth = ym;
+  await renderHistorique();
 }
 
 const _MONTHS_FR  = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -700,11 +739,6 @@ async function saveSessionEdit(id) {
   await renderHistorique();
 }
 
-function clearDateFilter() {
-  const inp = document.getElementById('filter-date-hist');
-  if (inp) inp.value = '';
-  renderHistorique();
-}
 
 async function deleteResult(id) {
   if(!confirm('Supprimer ce résultat ?')) return;
