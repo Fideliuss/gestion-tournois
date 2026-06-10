@@ -366,6 +366,13 @@ body.light input:focus, body.light select:focus {
   background: rgba(196,160,74,.18); border-color: var(--gold);
   color: var(--gold); font-weight: 600;
 }
+/* Tournoi(s) du jour sélectionné — mis en évidence sans être actif */
+.sem-btn.sem-suggested {
+  border-color: rgba(196,160,74,.38);
+  background: rgba(196,160,74,.07);
+  box-shadow: 0 0 0 1px rgba(196,160,74,.12) inset;
+}
+.sem-day.sem-day-suggested .sem-day-label { color: var(--gold-dim); opacity: 1; }
 body.light .sem-btn { background: var(--bg-input); color: var(--text); }
 body.light .sem-btn.sem-active { color: var(--gold); }
 

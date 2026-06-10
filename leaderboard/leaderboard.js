@@ -81,7 +81,7 @@ function selectTournoiSaisir(id) {
 function _renderSaisirSemainier(selectedId) {
   const el = document.getElementById('semainier-saisir');
   if (!el) return;
-  el.innerHTML = buildSemainier(_tournamentsCache || [], selectedId || '', 'selectTournoiSaisir');
+  el.innerHTML = buildSemainier(_tournamentsCache || [], selectedId || '', 'selectTournoiSaisir', _suggestedDay);
 }
 
 // ══════════════════════════════════════════════════════
@@ -116,6 +116,32 @@ async function checkDuplicate() {
   } else { el.style.display='none'; }
 }
 
+/* Déclencheur date — vérifie doublon + met à jour la suggestion */
+async function onDateChange() {
+  await checkDuplicate();
+  await autoSuggestByDate();
+}
+
+/* Auto-sélectionne le tournoi si un seul correspond au jour ; sinon suggère */
+async function autoSuggestByDate() {
+  const dateStr = document.getElementById('inp-date').value;
+  if (!dateStr || !_tournamentsCache) return;
+
+  const dayFr  = _DAY_JS_TO_FR[new Date(dateStr + 'T12:00:00').getDay()];
+  _suggestedDay = dayFr;
+
+  const matching  = _tournamentsCache.filter(function(t) { return t.day === dayFr; });
+  const currentId = document.getElementById('inp-tournoi').value;
+
+  if (matching.length === 1) {
+    // Un seul tournoi ce jour : auto-sélection
+    selectTournoiSaisir(matching[0].id);
+  } else {
+    // Plusieurs ou aucun : mise en surbrillance uniquement, sélection inchangée
+    _renderSaisirSemainier(currentId);
+  }
+}
+
 function onTournoiChange() { checkDuplicate(); buildPlacementRows(); }
 
 function updateCagnotte() {
@@ -135,6 +161,10 @@ let currentPlaceCount = 0;
 
 // ── État accordion historique ──
 let _histExpandedIds  = new Set();   // sessions actuellement ouvertes
+
+// ── Auto-suggestion semainier ──
+const _DAY_JS_TO_FR = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+let   _suggestedDay = '';            // jour affiché en surbrillance dans le semainier
 
 async function buildPlacementRows() {
   const tid        =document.getElementById('inp-tournoi').value;
@@ -226,9 +256,10 @@ async function validateTournament() {
   invalidateCache();
 
   document.getElementById('inp-tournoi').value='';
-  _renderSaisirSemainier('');
   document.getElementById('inp-entrees').value='';
   document.getElementById('inp-date').value=new Date().toISOString().split('T')[0];
+  // Relance la suggestion pour la nouvelle date (aujourd'hui)
+  await autoSuggestByDate();
   document.getElementById('placement-placeholder').style.display='block';
   document.getElementById('placement-section').style.display='none';
   document.getElementById('cagnotte-box').style.display='none';
@@ -794,4 +825,4 @@ function cap(str)     { return str.split(' ').map(w=>w.charAt(0).toUpperCase()+w
 function fmtEur(n)    { const f=n.toFixed(2);const[i,d]=f.split('.');return parseInt(i).toLocaleString('fr-FR')+(d==='00'?' €':','+d+' €'); }
 
 // ══════════════════════════════════════════════════════
-init().then(refreshTournamentsCache);
+init().then(refreshTournamentsCache).then(autoSuggestByDate);

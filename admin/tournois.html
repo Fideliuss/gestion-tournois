@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Config Tournois — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <style>
+    .app { padding: 64px 20px 80px; }
+
+    /* ── En-tête ── */
+    .hdr-sub { font-size: 11px; color: var(--text-muted); letter-spacing: .1em; margin-top: 6px; }
+
+    /* ══════════════════════════════════════════════════════
+       SEMAINIER ADMIN — grille par jour
+    ══════════════════════════════════════════════════════ */
+    .tm-week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    @media(max-width: 760px) { .tm-week { grid-template-columns: repeat(4, 1fr); } }
+    @media(max-width: 440px) { .tm-week { grid-template-columns: repeat(3, 1fr); } }
+
+    .tm-day { display: flex; flex-direction: column; gap: 6px; }
+    .tm-day-label {
+      font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-muted); text-align: center; padding-bottom: 4px;
+      border-bottom: 1px solid rgba(196,160,74,.08);
+    }
+    .tm-day-empty .tm-day-label { opacity: .35; }
+
+    /* ── Carte tournoi ── */
+    .tm-card {
+      background: rgba(196,160,74,.03); border: 1px solid rgba(196,160,74,.14);
+      border-radius: 3px; padding: 10px 10px 8px;
+      display: flex; flex-direction: column; gap: 5px;
+      transition: border-color .16s, background .16s;
+      position: relative;
+    }
+    .tm-card:hover { border-color: rgba(196,160,74,.3); background: rgba(196,160,74,.06); }
+    body.light .tm-card { background: rgba(200,185,150,.1); border-color: rgba(138,104,32,.16); }
+    body.light .tm-card:hover { background: rgba(200,185,150,.2); }
+
+    .tm-card-name {
+      font-family: var(--f-display); font-size: 13px; font-weight: 600;
+      color: var(--cream); line-height: 1.25; word-break: break-word;
+    }
+    .tm-card-buyin {
+      font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--gold-dim);
+    }
+    .tm-card-meta {
+      font-size: 9px; color: var(--text-muted); font-family: var(--f-num);
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .tm-card-meta-chip {
+      background: var(--gold-bg); border: 1px solid rgba(196,160,74,.14);
+      border-radius: 2px; padding: 1px 5px; font-size: 9px; color: var(--gold-dim);
+    }
+    .tm-card-pts {
+      font-size: 9px; color: var(--text-muted); font-family: var(--f-num);
+      letter-spacing: .02em;
+    }
+    .tm-card-actions {
+      display: flex; gap: 4px; margin-top: 4px; border-top: 1px solid rgba(196,160,74,.07);
+      padding-top: 6px;
+    }
+    .tm-btn-edit {
+      flex: 1; padding: 4px 6px; font-size: 10px; font-family: var(--f-ui);
+      background: rgba(196,160,74,.07); border: 1px solid rgba(196,160,74,.18);
+      border-radius: 2px; color: var(--gold-dim); cursor: pointer; transition: all .13s;
+      text-align: center;
+    }
+    .tm-btn-edit:hover { background: rgba(196,160,74,.18); color: var(--gold); border-color: rgba(196,160,74,.4); }
+
+    /* ── Bouton + Ajouter ── */
+    .tm-day-add {
+      padding: 7px 6px; font-size: 11px; text-align: center; width: 100%; box-sizing: border-box;
+      background: transparent; border: 1px dashed rgba(196,160,74,.12);
+      border-radius: 3px; color: var(--text-muted); cursor: pointer;
+      transition: all .15s; font-family: var(--f-ui); line-height: 1;
+    }
+    .tm-day-add:hover { border-color: rgba(196,160,74,.38); color: var(--gold-dim); background: rgba(196,160,74,.04); }
+
+    /* ── Section Événements ── */
+    .tm-events-section {
+      display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+      border-top: 1px solid rgba(196,160,74,.1); padding-top: 14px; margin-top: 6px;
+    }
+    .tm-events-label {
+      font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-muted); flex-shrink: 0; padding-top: 6px; white-space: nowrap;
+    }
+    .tm-events-cards { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-items: flex-start; }
+    .tm-events-cards .tm-card { min-width: 140px; max-width: 200px; }
+
+    /* ── Bouton nouveau tournoi ── */
+    .btn-new-tm {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
+      padding: 10px 20px; border-radius: 3px;
+      font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      background: rgba(196,160,74,.14); color: var(--gold);
+      border: 1px solid rgba(196,160,74,.35); cursor: pointer; transition: all .18s;
+    }
+    .btn-new-tm:hover { background: rgba(196,160,74,.24); }
+
+    /* ── Empty state ── */
+    .tm-empty {
+      text-align: center; padding: 48px 20px; color: var(--text-muted);
+      font-size: 13px; border: 1px dashed rgba(196,160,74,.13); border-radius: 3px;
+    }
+    .tm-empty-icon { font-size: 28px; margin-bottom: 12px; }
+
+    /* ══════════════════════════════════════════════════════
+       FORMULAIRE CRÉATION / ÉDITION
+    ══════════════════════════════════════════════════════ */
+    .form-panel {
+      background: rgba(196,160,74,.03); border: 1px solid rgba(196,160,74,.2);
+      border-radius: 3px; padding: 24px 28px; margin-bottom: 20px;
+    }
+    body.light .form-panel { background: rgba(138,104,32,.03); border-color: rgba(138,104,32,.22); }
+
+    .form-panel-title {
+      font-size: 9px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 20px;
+    }
+
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    @media(max-width: 560px) { .form-row-3 { grid-template-columns: 1fr 1fr; } }
+
+    .tm-inp {
+      width: 100%; padding: 10px 12px; box-sizing: border-box;
+      background: rgba(10,9,7,.9); border: 1px solid rgba(196,160,74,.2);
+      border-radius: 3px; color: var(--cream); font-size: 13px; font-family: var(--f-ui);
+      outline: none; transition: border-color .15s;
+    }
+    .tm-inp:focus { border-color: rgba(196,160,74,.48); box-shadow: 0 0 0 3px rgba(196,160,74,.07); }
+    .tm-inp[readonly] { opacity: .5; cursor: default; }
+    body.light .tm-inp { background: rgba(238,230,212,.9); color: var(--text); }
+    .tm-sel { cursor: pointer; }
+
+    .form-divider { border: none; border-top: 1px solid rgba(196,160,74,.1); margin: 16px 0 14px; }
+
+    .pts-editor-label {
+      font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pts-editor-label span { font-weight: 300; text-transform: none; letter-spacing: 0; font-size: 10px; color: var(--text-muted); }
+    .pts-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .pts-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .pts-cell-num { font-size: 9px; color: var(--text-muted); font-family: var(--f-num); }
+    .pts-cell input {
+      width: 52px; padding: 7px 6px; text-align: center;
+      font-family: var(--f-num); font-size: 13px; font-weight: 600; color: var(--gold);
+      background: rgba(10,9,7,.6); border: 1px solid rgba(196,160,74,.18);
+      border-radius: 3px; outline: none; transition: border-color .15s;
+      -moz-appearance: textfield; appearance: textfield;
+    }
+    .pts-cell input::-webkit-outer-spin-button,
+    .pts-cell input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .pts-cell input:focus { border-color: rgba(196,160,74,.48); }
+    body.light .pts-cell input { background: rgba(200,185,150,.2); border-color: rgba(138,104,32,.2); }
+
+    .pts-actions { display: flex; gap: 8px; margin-bottom: 18px; }
+    .btn-pts-add { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(196,160,74,.1); color: var(--gold-dim); border: 1px solid rgba(196,160,74,.22); border-radius: 3px; cursor: pointer; transition: all .15s; }
+    .btn-pts-add:hover { background: rgba(196,160,74,.2); color: var(--gold); }
+    .btn-pts-rem { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(192,57,43,.07); color: #e07a68; border: 1px solid rgba(192,57,43,.2); border-radius: 3px; cursor: pointer; transition: all .15s; }
+    .btn-pts-rem:hover { background: rgba(192,57,43,.16); }
+
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-save   { padding: 10px 24px; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; background: rgba(196,160,74,.18); color: var(--gold); border: 1px solid rgba(196,160,74,.4); border-radius: 3px; cursor: pointer; transition: all .18s; }
+    .btn-save:hover { background: rgba(196,160,74,.3); }
+    .btn-cancel { padding: 10px 18px; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; background: none; color: var(--text-dim); border: 1px solid rgba(196,160,74,.12); border-radius: 3px; cursor: pointer; transition: all .18s; }
+    .btn-cancel:hover { color: var(--text); border-color: rgba(196,160,74,.28); }
+
+    /* ── Alert succès ── */
+    .alert-ok {
+      background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.25);
+      border-radius: 3px; padding: 10px 16px; font-size: 12px; color: #6dcc8e;
+      margin-bottom: 16px; display: none;
+    }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="../admin.html" class="back">← Administration</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Config <em>Tournois</em></div>
+    <div class="hdr-sub">Barèmes de points · Buy-ins · Jours</div>
+  </div>
+
+  <div class="alert-ok" id="alert-ok"></div>
+
+  <!-- Formulaire création / édition (masqué par défaut) -->
+  <div id="form-panel" class="form-panel" style="display:none">
+    <div class="form-panel-title" id="form-panel-title">Nouveau tournoi</div>
+    <input type="hidden" id="form-edit-id" />
+
+    <div class="form-row-3">
+      <div class="fg" style="grid-column:1/3">
+        <div class="fl">Nom du tournoi</div>
+        <input type="text" id="form-name" class="tm-inp" placeholder="ex: Friday High Stack" />
+      </div>
+      <div class="fg">
+        <div class="fl">Jour / type</div>
+        <select id="form-day" class="tm-inp tm-sel">
+          <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
+          <option>Jeudi</option><option>Vendredi</option><option>Samedi</option>
+          <option>Dimanche</option><option>Événement</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row-3">
+      <div class="fg">
+        <div class="fl">Part PP (€)</div>
+        <input type="number" id="form-pp" class="tm-inp" min="1" placeholder="130"
+          oninput="recalcBuyin()" />
+      </div>
+      <div class="fg">
+        <div class="fl">Frais (€)</div>
+        <input type="number" id="form-frais" class="tm-inp" min="1" placeholder="20"
+          oninput="recalcBuyin()" />
+      </div>
+      <div class="fg">
+        <div class="fl">Buy-in (€) <span style="opacity:.35;font-size:9px">auto</span></div>
+        <input type="number" id="form-buyin" class="tm-inp" placeholder="150" readonly tabindex="-1" />
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="pts-editor-label">
+      Barème de points
+      <span id="pts-count-label">0 places payées</span>
+    </div>
+    <div class="pts-grid" id="pts-grid"></div>
+    <div class="pts-actions">
+      <button class="btn-pts-add" onclick="addPtsSlot()">＋ Ajouter une place</button>
+      <button class="btn-pts-rem" onclick="remPtsSlot()">− Retirer la dernière</button>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeForm()">Annuler</button>
+      <button class="btn-save"   onclick="saveForm()">✓ Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- Semainier admin -->
+  <div class="card" style="max-width:100%">
+    <div class="sec" style="margin-bottom:16px">Calendrier des tournois</div>
+    <div id="tm-content"></div>
+    <button class="btn-new-tm" onclick="openForm(null)">＋ Nouveau tournoi</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/tournaments.js"></script>
+<script src="../shared/auth.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', role: 'admin' }).then(function(user) {
+  if (!user) return;
+  loadAndRender();
+});
+
+/* ══════════════════════════════════════════════════════
+   DONNÉES
+══════════════════════════════════════════════════════ */
+const DAYS_ORDER = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const DAYS_SHORT = ['Lun',  'Mar',  'Mer',    'Jeu',  'Ven',    'Sam',   'Dim'];
+
+let _cache = null;
+
+async function getTournaments(force) {
+  if (!_cache || force) {
+    const ts = await SB.getTournaments();
+    _cache = (ts && ts.length > 0) ? ts : TOURNAMENT_DEFAULTS.map(t => ({ ...t }));
+  }
+  return _cache;
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDU SEMAINIER
+══════════════════════════════════════════════════════ */
+async function loadAndRender() {
+  const tournaments = await getTournaments(true);
+  renderSemainier(tournaments);
+}
+
+function renderSemainier(tournaments) {
+  const byDay  = {};
+  const events = [];
+  DAYS_ORDER.forEach(d => { byDay[d] = []; });
+  tournaments.forEach(t => {
+    if (DAYS_ORDER.includes(t.day)) byDay[t.day].push(t);
+    else events.push(t);
+  });
+
+  /* ── Colonnes de jours ── */
+  const weekHtml = DAYS_ORDER.map((day, i) => {
+    const ts = byDay[day];
+    const cards = ts.map(t => tmCardHtml(t)).join('');
+    return `<div class="tm-day${ts.length === 0 ? ' tm-day-empty' : ''}">
+      <div class="tm-day-label">${DAYS_SHORT[i]}</div>
+      ${cards}
+      <button class="tm-day-add" onclick="openForm('${day}')" title="Ajouter un tournoi ce jour">＋</button>
+    </div>`;
+  }).join('');
+
+  /* ── Événements ── */
+  let eventsHtml = '';
+  if (events.length > 0) {
+    const evtCards = events.map(t => tmCardHtml(t)).join('');
+    eventsHtml = `<div class="tm-events-section">
+      <span class="tm-events-label">Événements</span>
+      <div class="tm-events-cards">
+        ${evtCards}
+        <button class="tm-day-add" style="min-width:70px;align-self:flex-start"
+          onclick="openForm('Événement')" title="Ajouter un événement">＋</button>
+      </div>
+    </div>`;
+  } else {
+    eventsHtml = `<div class="tm-events-section">
+      <span class="tm-events-label">Événements</span>
+      <button class="tm-day-add" style="min-width:90px"
+        onclick="openForm('Événement')">＋ Ajouter</button>
+    </div>`;
+  }
+
+  /* ── Vide ── */
+  if (tournaments.length === 0) {
+    document.getElementById('tm-content').innerHTML = `
+      <div class="tm-empty">
+        <div class="tm-empty-icon">🎴</div>
+        Aucun tournoi configuré.<br>Crée ton premier tournoi ci-dessous.
+      </div>`;
+    return;
+  }
+
+  document.getElementById('tm-content').innerHTML =
+    `<div class="tm-week">${weekHtml}</div>${eventsHtml}`;
+}
+
+function tmCardHtml(t) {
+  const ptsTxt = t.points && t.points.length
+    ? `${t.points.length} place${t.points.length > 1 ? 's' : ''} · ${t.points.slice(0,4).join(', ')}${t.points.length > 4 ? '…' : ''}`
+    : '— aucun barème';
+  return `<div class="tm-card">
+    <div class="tm-card-name">${t.name}</div>
+    <div class="tm-card-buyin">${t.buyin} €</div>
+    <div class="tm-card-meta">
+      ${t.pp    != null ? `<span class="tm-card-meta-chip">PP ${t.pp}€</span>` : ''}
+      ${t.frais != null ? `<span class="tm-card-meta-chip">Frais ${t.frais}€</span>` : ''}
+    </div>
+    <div class="tm-card-pts">${ptsTxt}</div>
+    <div class="tm-card-actions">
+      <button class="tm-btn-edit" onclick="editTournament('${t.id}')">✎ Modifier</button>
+      <button class="btn-red" style="padding:4px 8px;font-size:11px"
+        onclick="deleteTournament('${t.id}')">✕</button>
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   FORMULAIRE
+══════════════════════════════════════════════════════ */
+function openForm(preselectedDay) {
+  /* preselectedDay = jour (ex: 'Jeudi') ou null pour no preselection */
+  document.getElementById('form-panel-title').textContent = 'Nouveau tournoi';
+  document.getElementById('form-edit-id').value = '';
+  document.getElementById('form-name').value  = '';
+  document.getElementById('form-day').value   = preselectedDay || 'Lundi';
+  document.getElementById('form-buyin').value = '';
+  document.getElementById('form-pp').value    = '';
+  document.getElementById('form-frais').value = '';
+  buildPtsGrid([22, 16, 13, 11, 9, 8, 7, 6, 5, 4]);
+  showForm();
+  document.getElementById('form-name').focus();
+}
+
+async function editTournament(id) {
+  const ts = await getTournaments();
+  const t  = ts.find(t => t.id === id);
+  if (!t) return;
+  document.getElementById('form-panel-title').textContent = 'Modifier le tournoi';
+  document.getElementById('form-edit-id').value = id;
+  document.getElementById('form-name').value  = t.name;
+  document.getElementById('form-day').value   = t.day;
+  document.getElementById('form-buyin').value = t.buyin;
+  document.getElementById('form-pp').value    = t.pp    != null ? t.pp    : '';
+  document.getElementById('form-frais').value = t.frais != null ? t.frais : '';
+  buildPtsGrid(t.points && t.points.length ? t.points : [22, 16, 13, 11, 9, 8, 7, 6, 5, 4]);
+  showForm();
+  document.getElementById('form-name').focus();
+}
+
+function showForm() {
+  const panel = document.getElementById('form-panel');
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeForm() {
+  document.getElementById('form-panel').style.display = 'none';
+}
+
+async function saveForm() {
+  const name   = (document.getElementById('form-name').value || '').trim();
+  const day    = (document.getElementById('form-day').value  || '').trim();
+  const buyin  = parseFloat(document.getElementById('form-buyin').value) || 0;
+  const pp     = parseFloat(document.getElementById('form-pp').value)    || null;
+  const frais  = parseFloat(document.getElementById('form-frais').value) || null;
+  const editId = document.getElementById('form-edit-id').value;
+
+  if (!name)    { alert('Donne un nom au tournoi.'); return; }
+  if (buyin <= 0) { alert('Indique un buy-in valide (PP + Frais).'); return; }
+  const points = getPtsFromGrid();
+  if (points.length === 0) { alert('Ajoute au moins une place payée.'); return; }
+
+  const split = (pp && frais) ? { pp, frais } : {};
+  let id = editId;
+  if (!id) {
+    id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now();
+  }
+  await SB.upsertTournament({ id, name, day, buyin, ...split, points });
+  _cache = null;
+  closeForm();
+  const ts = await getTournaments(true);
+  renderSemainier(ts);
+  showAlert(editId ? `"${name}" mis à jour.` : `"${name}" ajouté.`);
+}
+
+async function deleteTournament(id) {
+  const ts = await getTournaments();
+  const t  = ts.find(t => t.id === id);
+  if (!t) return;
+  if (!confirm(`Supprimer "${t.name}" ?\nLes résultats existants ne seront pas effacés.`)) return;
+  await SB.deleteTournament(id);
+  _cache = null;
+  const newTs = await getTournaments(true);
+  renderSemainier(newTs);
+  showAlert(`"${t.name}" supprimé.`);
+}
+
+/* ══════════════════════════════════════════════════════
+   BARÈME POINTS
+══════════════════════════════════════════════════════ */
+function recalcBuyin() {
+  const pp    = parseFloat(document.getElementById('form-pp').value)    || 0;
+  const frais = parseFloat(document.getElementById('form-frais').value) || 0;
+  document.getElementById('form-buyin').value = pp + frais > 0 ? pp + frais : '';
+}
+
+function buildPtsGrid(pts) {
+  const grid = document.getElementById('pts-grid');
+  grid.innerHTML = pts.map((v, i) => `
+    <div class="pts-cell">
+      <div class="pts-cell-num">${i + 1}</div>
+      <input type="number" min="0" value="${v}" oninput="updatePtsLabel()" />
+    </div>`).join('');
+  updatePtsLabel();
+}
+
+function addPtsSlot() {
+  const grid  = document.getElementById('pts-grid');
+  const cells = grid.querySelectorAll('.pts-cell');
+  const n     = cells.length + 1;
+  const last  = cells.length > 0 ? parseInt(cells[cells.length - 1].querySelector('input').value) || 0 : 0;
+  const div   = document.createElement('div');
+  div.className = 'pts-cell';
+  div.innerHTML = `<div class="pts-cell-num">${n}</div><input type="number" min="0" value="${Math.max(0, last - 1)}" oninput="updatePtsLabel()" />`;
+  grid.appendChild(div);
+  updatePtsLabel();
+  div.querySelector('input').focus();
+}
+
+function remPtsSlot() {
+  const cells = document.getElementById('pts-grid').querySelectorAll('.pts-cell');
+  if (cells.length > 1) { cells[cells.length - 1].remove(); updatePtsLabel(); }
+}
+
+function getPtsFromGrid() {
+  return [...document.getElementById('pts-grid').querySelectorAll('.pts-cell input')]
+    .map(i => parseInt(i.value) || 0);
+}
+
+function updatePtsLabel() {
+  const n = document.getElementById('pts-grid').querySelectorAll('.pts-cell').length;
+  document.getElementById('pts-count-label').textContent =
+    `${n} place${n > 1 ? 's' : ''} payée${n > 1 ? 's' : ''}`;
+}
+
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
+function showAlert(msg) {
+  const el = document.getElementById('alert-ok');
+  el.textContent = '✓ ' + msg; el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  setTimeout(() => el.style.display = 'none', 3500);
+}
+</script>
+</body>
+</html>
