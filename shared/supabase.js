@@ -219,6 +219,40 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Gestion des comptes (Edge Function) ───────────
+  async _callUsers(method, body) {
+    const session = await this.getSession();
+    if (!session) throw new Error('Non authentifié');
+    const opts = {
+      method,
+      headers: {
+        'Authorization': 'Bearer ' + session.access_token,
+        'Content-Type': 'application/json',
+      },
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res  = await fetch(SUPABASE_URL + '/functions/v1/manage-users', opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+    return data;
+  },
+
+  async listUsers() {
+    return (await this._callUsers('GET')).users;
+  },
+
+  async createUser(email, password, role) {
+    return (await this._callUsers('POST', { email, password, role })).user;
+  },
+
+  async updateUser(id, changes) {
+    return this._callUsers('PATCH', { id, ...changes });
+  },
+
+  async deleteUser(id) {
+    return this._callUsers('DELETE', { id });
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);

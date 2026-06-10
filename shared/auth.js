@@ -49,8 +49,8 @@ const AUTH = {
     const badge = document.createElement('div');
     badge.id = 'auth-badge';
     const short     = email.split('@')[0];
-    const roleLabel = role === 'admin' ? 'Admin' : 'Floor';
-    const roleClass = role === 'admin' ? 'auth-chip-admin' : 'auth-chip-floor';
+    const roleLabel = role === 'admin' ? 'Admin' : (role === 'mcd' ? 'MCD' : 'Floor');
+    const roleClass = role === 'admin' ? 'auth-chip-admin' : (role === 'mcd' ? 'auth-chip-mcd' : 'auth-chip-floor');
     badge.innerHTML = `
       <span class="auth-email">${short}</span>
       <span class="auth-chip ${roleClass}">${roleLabel}</span>
