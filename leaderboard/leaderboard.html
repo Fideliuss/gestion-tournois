@@ -27,7 +27,6 @@
     <button class="tab" onclick="showTab('saisir')">＋ Saisir</button>
     <button class="tab" onclick="showTab('historique')">📋 Historique</button>
     <button class="tab" onclick="showTab('ranking')">💰 Ranking</button>
-    <button class="tab" onclick="showTab('config')">⚙ Tournois</button>
   </div>
 
   <!-- CLASSEMENT -->
@@ -49,22 +48,22 @@
     <div id="alert-warn"    class="alert-warn"    style="display:none"></div>
     <div id="alert-dup"     class="alert-dup"     style="display:none"></div>
 
-    <div class="form-grid form-grid-3" style="margin-bottom:14px">
+    <div class="form-grid" style="margin-bottom:12px">
       <div class="fg">
         <div class="fl">Date</div>
         <input type="date" id="inp-date" onchange="checkDuplicate()" />
-      </div>
-      <div class="fg">
-        <div class="fl">Type de tournoi</div>
-        <select id="inp-tournoi" onchange="onTournoiChange()">
-          <option value="">— Choisir —</option>
-        </select>
       </div>
       <div class="fg">
         <div class="fl">Nombre d'entrées</div>
         <input type="number" id="inp-entrees" min="1" placeholder="ex: 77" oninput="updateCagnotte()" />
         <div class="fsub">Joueurs + rebuys · cagnotte = × 2 €</div>
       </div>
+    </div>
+
+    <div class="fg" style="margin-bottom:14px">
+      <div class="fl">Type de tournoi</div>
+      <select id="inp-tournoi" style="display:none"></select>
+      <div id="semainier-saisir"></div>
     </div>
 
     <div class="cagnotte-box" id="cagnotte-box" style="display:none">
@@ -115,73 +114,6 @@
     <button class="btn-print-ranking" onclick="printRanking()">🖨 Imprimer le document ranking</button>
   </div>
 
-  <!-- CONFIG TOURNOIS -->
-  <div id="tab-config" class="card" style="display:none">
-    <div class="sec">Configuration des tournois</div>
-
-    <div class="alert-config-success" id="alert-config-success"></div>
-
-    <div class="config-header">
-      <div style="font-size:13px;color:var(--text-dim)">
-        Barèmes de points et buy-ins. Modifie ou crée des tournois selon tes besoins.
-      </div>
-      <button class="btn-new-tournament" onclick="openTournamentForm()">＋ Nouveau tournoi</button>
-    </div>
-
-    <div class="tournament-form" id="tournament-form" style="display:none">
-      <div class="form-title" id="form-title">Nouveau tournoi</div>
-      <input type="hidden" id="form-edit-id" value="" />
-
-      <div class="form-row-3">
-        <div class="fg" style="grid-column:1/3">
-          <div class="fl">Nom du tournoi</div>
-          <input type="text" id="form-name" placeholder="ex: Friday High Stack" />
-        </div>
-        <div class="fg">
-          <div class="fl">Jour / type</div>
-          <input type="text" id="form-day" placeholder="ex: Vendredi" />
-        </div>
-      </div>
-      <div class="form-row-3" style="grid-template-columns:1fr 1fr 1fr">
-        <div class="fg">
-          <div class="fl">Part PP (€)</div>
-          <input type="number" id="form-pp" min="1" placeholder="130" style="padding-left:12px"
-            oninput="lbRecalcBuyin()" />
-        </div>
-        <div class="fg">
-          <div class="fl">Frais (€)</div>
-          <input type="number" id="form-frais" min="1" placeholder="20" style="padding-left:12px"
-            oninput="lbRecalcBuyin()" />
-        </div>
-        <div class="fg">
-          <div class="fl">Buy-in (€) <span style="opacity:.4;font-size:9px">auto</span></div>
-          <input type="number" id="form-buyin" placeholder="150" style="padding-left:12px;opacity:.5;cursor:default" readonly tabindex="-1" />
-        </div>
-      </div>
-
-      <div class="div" style="margin:14px 0 12px"></div>
-
-      <div class="points-editor-label">
-        Barème de points
-        <span id="points-count-label">0 places payées</span>
-      </div>
-      <div class="points-grid" id="points-grid"></div>
-      <div class="points-actions">
-        <button class="btn-pts-add" onclick="addPointsSlot()">＋ Ajouter une place</button>
-        <button class="btn-pts-rem" onclick="removePointsSlot()">− Retirer la dernière</button>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-cancel" onclick="closeTournamentForm()">Annuler</button>
-        <button class="btn-save" onclick="saveTournamentForm()">✓ Enregistrer</button>
-      </div>
-    </div>
-
-    <div class="tournament-list" id="tournament-list"></div>
-    <div class="config-empty" id="config-empty" style="display:none">
-      Aucun tournoi configuré. Crée ton premier tournoi ci-dessus.
-    </div>
-  </div>
 </div>
 
 <div class="ranking-print-page" id="ranking-print-page"></div>
@@ -198,8 +130,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../shared/barriere.js"></script>
-<script src="../shared/tournaments.js"></script>
 <script src="../shared/supabase.js"></script>
+<script src="../shared/tournaments.js"></script>
+<script src="../shared/semainier.js"></script>
 <script src="../shared/auth.js"></script>
 <script src="leaderboard.js"></script>
 <script>AUTH.guard({ loginUrl: '../login.html', role: 'admin' });</script>

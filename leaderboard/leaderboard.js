@@ -56,20 +56,38 @@ async function init() {
 
 async function populateTournoiSelects() {
   const tournaments = await getTournaments();
-  const sel  = document.getElementById('inp-tournoi');
+
+  // Select caché — utilisé par checkDuplicate / validateTournament
+  const sel = document.getElementById('inp-tournoi');
+  sel.innerHTML = '<option value="">— Choisir —</option>';
+  tournaments.forEach(t => sel.appendChild(new Option(t.name, t.id)));
+
+  // Semainier
+  _renderSaisirSemainier(sel.value);
+
+  // Filtre historique
   const selH = document.getElementById('filter-tournoi-hist');
-  sel.innerHTML  = '<option value="">— Choisir —</option>';
   selH.innerHTML = '<option value="">Tous les tournois</option>';
-  tournaments.forEach(t => {
-    sel.appendChild( new Option(`${t.day} — ${t.name} (${t.buyin}€)`, t.id));
-    selH.appendChild(new Option(t.name, t.id));
-  });
+  tournaments.forEach(t => selH.appendChild(new Option(t.name, t.id)));
+}
+
+/* Sélection depuis le semainier — met à jour le select caché et re-rend le semainier */
+function selectTournoiSaisir(id) {
+  document.getElementById('inp-tournoi').value = id;
+  _renderSaisirSemainier(id);
+  onTournoiChange();
+}
+
+function _renderSaisirSemainier(selectedId) {
+  const el = document.getElementById('semainier-saisir');
+  if (!el) return;
+  el.innerHTML = buildSemainier(_tournamentsCache || [], selectedId || '', 'selectTournoiSaisir');
 }
 
 // ══════════════════════════════════════════════════════
 //  TABS
 // ══════════════════════════════════════════════════════
-const TAB_NAMES = ['classement','saisir','historique','ranking','config'];
+const TAB_NAMES = ['classement','saisir','historique','ranking'];
 async function showTab(name) {
   TAB_NAMES.forEach(t => {
     document.getElementById('tab-'+t).style.display = t===name?'block':'none';
@@ -80,7 +98,6 @@ async function showTab(name) {
   if (name==='classement') await renderClassement();
   if (name==='historique') await renderHistorique();
   if (name==='ranking')    await renderRankingDoc();
-  if (name==='config')     await renderConfigTournois();
 }
 
 // ══════════════════════════════════════════════════════
@@ -209,6 +226,7 @@ async function validateTournament() {
   invalidateCache();
 
   document.getElementById('inp-tournoi').value='';
+  _renderSaisirSemainier('');
   document.getElementById('inp-entrees').value='';
   document.getElementById('inp-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('placement-placeholder').style.display='block';
@@ -222,165 +240,6 @@ async function validateTournament() {
   succEl.style.display='flex';
   setTimeout(()=>succEl.style.display='none',5000);
   await refreshPlayersDl();
-}
-
-// ══════════════════════════════════════════════════════
-//  CONFIG TOURNOIS
-// ══════════════════════════════════════════════════════
-async function renderConfigTournois() {
-  const tournaments=await getTournaments();
-  const list=document.getElementById('tournament-list');
-  const empty=document.getElementById('config-empty');
-  if (tournaments.length===0) { list.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  list.innerHTML=tournaments.map((t,i) => {
-    const ptsPrev=t.points.slice(0,8).join(', ')+(t.points.length>8?'…':'');
-    return `<div class="tournament-item">
-      <div class="t-info">
-        <div class="t-name">${t.name}</div>
-        <div class="t-meta">
-          <span class="t-meta-chip">${t.day}</span>
-          <span class="t-meta-chip">${t.buyin} €</span>
-          <span style="color:var(--text-muted)">${t.points.length} place${t.points.length>1?'s':''} payée${t.points.length>1?'s':''}</span>
-        </div>
-        <div class="t-points-preview">${ptsPrev}</div>
-      </div>
-      <div class="t-actions">
-        <button class="btn btn-ghost" style="font-size:10px;padding:5px 10px" onclick="editTournament('${t.id}')">Modifier</button>
-        <button class="btn-red" onclick="deleteTournament('${t.id}')">✕</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openTournamentForm(editId) {
-  const form=document.getElementById('tournament-form');
-  document.getElementById('form-title').textContent = editId ? 'Modifier le tournoi' : 'Nouveau tournoi';
-  document.getElementById('form-edit-id').value = editId||'';
-  document.getElementById('form-name').value  = '';
-  document.getElementById('form-day').value   = '';
-  document.getElementById('form-buyin').value = '';
-  document.getElementById('form-pp').value    = '';
-  document.getElementById('form-frais').value = '';
-  buildPointsGrid([22,16,13,11,9,8,7,6,5,4]);
-  form.style.display='block';
-  form.scrollIntoView({behavior:'smooth', block:'start'});
-  document.getElementById('form-name').focus();
-}
-
-async function editTournament(id) {
-  const tournaments=await getTournaments();
-  const t=tournaments.find(t=>t.id===id);
-  if (!t) return;
-  const form=document.getElementById('tournament-form');
-  document.getElementById('form-title').textContent='Modifier le tournoi';
-  document.getElementById('form-edit-id').value=id;
-  document.getElementById('form-name').value  = t.name;
-  document.getElementById('form-day').value   = t.day;
-  document.getElementById('form-buyin').value = t.buyin;
-  document.getElementById('form-pp').value    = t.pp    != null ? t.pp    : '';
-  document.getElementById('form-frais').value = t.frais != null ? t.frais : '';
-  buildPointsGrid(t.points);
-  form.style.display='block';
-  form.scrollIntoView({behavior:'smooth', block:'start'});
-  document.getElementById('form-name').focus();
-}
-
-function lbRecalcBuyin() {
-  const pp   =parseFloat(document.getElementById('form-pp').value)||0;
-  const frais=parseFloat(document.getElementById('form-frais').value)||0;
-  document.getElementById('form-buyin').value = pp+frais > 0 ? pp+frais : '';
-}
-
-async function deleteTournament(id) {
-  const tournaments=await getTournaments();
-  const t=tournaments.find(t=>t.id===id);
-  if (!t) return;
-  if (!confirm(`Supprimer "${t.name}" ? Les résultats déjà enregistrés ne seront pas effacés.`)) return;
-  await SB.deleteTournament(id);
-  _tournamentsCache = null;
-  await populateTournoiSelects();
-  await renderConfigTournois();
-  showConfigAlert(`"${t.name}" supprimé.`);
-}
-
-function closeTournamentForm() {
-  document.getElementById('tournament-form').style.display='none';
-}
-
-async function saveTournamentForm() {
-  const name  =(document.getElementById('form-name').value||'').trim();
-  const day   =(document.getElementById('form-day').value||'').trim();
-  const buyin =parseFloat(document.getElementById('form-buyin').value)||0;
-  const pp    =parseFloat(document.getElementById('form-pp').value)||null;
-  const frais =parseFloat(document.getElementById('form-frais').value)||null;
-  const editId=document.getElementById('form-edit-id').value;
-
-  if (!name) { alert('Donne un nom au tournoi.'); return; }
-  if (buyin<=0) { alert('Indique un buy-in valide.'); return; }
-
-  const points=getPointsFromGrid();
-  if (points.length===0) { alert('Ajoute au moins une place payée.'); return; }
-  if (points.some(p=>p<0)) { alert('Les points ne peuvent pas être négatifs.'); return; }
-
-  const split = (pp && frais) ? { pp, frais } : {};
-
-  let id = editId;
-  if (!id) {
-    id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
-  }
-  await SB.upsertTournament({id, name, day, buyin, ...split, points});
-  _tournamentsCache = null;
-  await populateTournoiSelects();
-  closeTournamentForm();
-  await renderConfigTournois();
-  showConfigAlert(editId ? `"${name}" mis à jour.` : `"${name}" ajouté avec ${points.length} places.`);
-}
-
-function showConfigAlert(msg) {
-  const el=document.getElementById('alert-config-success');
-  el.textContent='✓ '+msg; el.style.display='block';
-  setTimeout(()=>el.style.display='none', 3500);
-}
-
-function buildPointsGrid(pts) {
-  const grid=document.getElementById('points-grid');
-  grid.innerHTML=pts.map((v,i) => `
-    <div class="pts-cell">
-      <div class="pts-cell-num">${i+1}</div>
-      <input type="number" min="0" value="${v}" oninput="updatePointsCountLabel()" />
-    </div>`).join('');
-  updatePointsCountLabel();
-}
-
-function addPointsSlot() {
-  const grid=document.getElementById('points-grid');
-  const cells=grid.querySelectorAll('.pts-cell');
-  const n=cells.length+1;
-  const lastVal=cells.length>0?parseInt(cells[cells.length-1].querySelector('input').value)||0:0;
-  const newVal=Math.max(0,lastVal-1);
-  const div=document.createElement('div');
-  div.className='pts-cell';
-  div.innerHTML=`<div class="pts-cell-num">${n}</div><input type="number" min="0" value="${newVal}" oninput="updatePointsCountLabel()" />`;
-  grid.appendChild(div);
-  updatePointsCountLabel();
-  div.querySelector('input').focus();
-}
-
-function removePointsSlot() {
-  const grid=document.getElementById('points-grid');
-  const cells=grid.querySelectorAll('.pts-cell');
-  if (cells.length>1) { cells[cells.length-1].remove(); updatePointsCountLabel(); }
-}
-
-function getPointsFromGrid() {
-  return [...document.getElementById('points-grid').querySelectorAll('.pts-cell input')]
-    .map(i=>parseInt(i.value)||0);
-}
-
-function updatePointsCountLabel() {
-  const n=document.getElementById('points-grid').querySelectorAll('.pts-cell').length;
-  document.getElementById('points-count-label').textContent=`${n} place${n>1?'s':''} payée${n>1?'s':''}`;
 }
 
 // ══════════════════════════════════════════════════════

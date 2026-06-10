@@ -598,7 +598,7 @@ function toggleManualSpots() {
 }
 
 /* ══════════════════════════════════════════════════════
-   PRESETS
+   PRESETS — semainier
 ══════════════════════════════════════════════════════ */
 function renderPresets() {
   const wrap = document.getElementById('presets-row');
@@ -606,13 +606,7 @@ function renderPresets() {
     wrap.innerHTML = '<span class="pp-no-preset">Aucun tournoi configuré</span>';
     return;
   }
-  wrap.innerHTML = state.tournaments.map(t =>
-    `<button class="pp-preset${state.activeTournamentId === t.id ? ' active' : ''}"
-       onclick="applyPreset('${t.id}')">
-      <span class="pp-preset-name">${t.name}</span>
-      <span class="pp-preset-buyin">${t.buyin} €</span>
-    </button>`
-  ).join('');
+  wrap.innerHTML = buildSemainier(state.tournaments, state.activeTournamentId, 'applyPreset');
 }
 
 function applyPreset(id) {
@@ -663,105 +657,3 @@ async function loadTournaments() {
   renderPresets();
 }
 
-/* ══════════════════════════════════════════════════════
-   MODAL — GESTION DES TOURNOIS
-   Interface discrète : ⚙ dans l'en-tête des presets.
-   Modifie uniquement name / day / buyin.
-   La clé "points" (leaderboard) est préservée.
-══════════════════════════════════════════════════════ */
-function openTmModal(e) {
-  if (e) e.stopPropagation();
-  tmRenderList();
-  document.getElementById('tm-modal').style.display = 'flex';
-}
-
-function closeTmModal() {
-  document.getElementById('tm-modal').style.display = 'none';
-  tmCloseForm();
-}
-
-function closeTmModalIfBg(e) {
-  if (e.target === document.getElementById('tm-modal')) closeTmModal();
-}
-
-function tmRenderList() {
-  const list = document.getElementById('tm-list');
-  if (!list) return;
-  const ts = state.tournaments;
-  if (!ts.length) {
-    list.innerHTML = '<div class="tm-empty">Aucun tournoi — cliquez + Ajouter</div>';
-    return;
-  }
-  list.innerHTML = ts.map(t => `
-    <div class="tm-row" id="tm-row-${t.id}">
-      <div class="tm-row-info">
-        <span class="tm-row-name">${t.name}</span>
-        <span class="tm-row-meta">${t.day} · ${t.buyin} €</span>
-      </div>
-      <div class="tm-row-actions">
-        <button class="tm-btn-edit" onclick="tmOpenForm('${t.id}')" title="Modifier">✎</button>
-        <button class="tm-btn-del"  onclick="tmDelete('${t.id}')"   title="Supprimer">✕</button>
-      </div>
-    </div>`).join('');
-}
-
-function tmOpenForm(editId) {
-  const t = editId ? state.tournaments.find(t => t.id === editId) : null;
-  document.getElementById('tm-form-edit-id').value = editId || '';
-  document.getElementById('tm-form-name').value    = t ? t.name  : '';
-  document.getElementById('tm-form-day').value     = t ? t.day   : 'Lundi';
-  document.getElementById('tm-form-buyin').value   = t ? t.buyin : '';
-  document.getElementById('tm-form-pp').value      = t?.pp    != null ? t.pp    : '';
-  document.getElementById('tm-form-frais').value   = t?.frais != null ? t.frais : '';
-  document.getElementById('tm-form-title').textContent = editId ? 'Modifier le tournoi' : 'Nouveau tournoi';
-  document.getElementById('tm-form').style.display = '';
-  document.getElementById('tm-form-name').focus();
-}
-
-function tmRecalcBuyin() {
-  const pp    = parseFloat(document.getElementById('tm-form-pp').value)    || 0;
-  const frais = parseFloat(document.getElementById('tm-form-frais').value) || 0;
-  document.getElementById('tm-form-buyin').value = pp + frais > 0 ? pp + frais : '';
-}
-
-function tmCloseForm() {
-  const f = document.getElementById('tm-form');
-  if (f) f.style.display = 'none';
-}
-
-async function tmSave() {
-  const name  = (document.getElementById('tm-form-name').value || '').trim();
-  const day   = (document.getElementById('tm-form-day').value  || '').trim();
-  const buyin = parseFloat(document.getElementById('tm-form-buyin').value) || 0;
-  const pp    = parseFloat(document.getElementById('tm-form-pp').value)    || null;
-  const frais = parseFloat(document.getElementById('tm-form-frais').value) || null;
-  const editId = document.getElementById('tm-form-edit-id').value;
-
-  if (!name)    { document.getElementById('tm-form-name').focus();  return; }
-  if (buyin <= 0){ document.getElementById('tm-form-buyin').focus(); return; }
-
-  const split = (pp && frais) ? { pp, frais } : {};
-
-  if (editId) {
-    state.tournaments = await TournamentsStore.update(editId, { name, day, buyin, ...split });
-  } else {
-    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now();
-    state.tournaments = await TournamentsStore.add({ id, name, day, buyin, ...split, points: [] });
-  }
-
-  tmCloseForm();
-  tmRenderList();
-  renderPresets();
-  savePersist();
-}
-
-async function tmDelete(id) {
-  const t = state.tournaments.find(t => t.id === id);
-  if (!t) return;
-  if (!confirm(`Supprimer "${t.name}" ?`)) return;
-  state.tournaments = await TournamentsStore.remove(id);
-  if (state.activeTournamentId === id) state.activeTournamentId = null;
-  tmRenderList();
-  renderPresets();
-  savePersist();
-}
