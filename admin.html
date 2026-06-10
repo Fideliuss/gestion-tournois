@@ -11,11 +11,12 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 14px;
-      width: 100%; max-width: 580px;
+      width: 100%; max-width: 860px;
     }
-    @media(max-width:460px){ .grid { grid-template-columns: 1fr; } }
+    @media(max-width:600px){ .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width:400px){ .grid { grid-template-columns: 1fr; } }
 
     /* ── Couleurs par carte ── */
     .tool-card             { --accent: 128,108,196; } /* indigo  */
@@ -79,110 +80,6 @@
       font-size: 10px; letter-spacing: .14em; color: var(--text-muted);
     }
 
-    /* ── Section tournois ── */
-    .admin-card {
-      width: 100%; max-width: 580px;
-      background: var(--bg-card);
-      border: 1px solid rgba(196,160,74,.15);
-      border-radius: 3px; padding: 28px 30px;
-      margin-bottom: 16px; position: relative;
-    }
-    .admin-card::before, .admin-card::after {
-      content: ''; position: absolute;
-      width: 10px; height: 10px;
-      border-color: var(--gold); border-style: solid; opacity: .35;
-    }
-    .admin-card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
-    .admin-card::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
-    body.light .admin-card { background: rgba(255,252,244,.97); border-color: rgba(138,104,32,.2); }
-
-    .config-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .btn-new-tournament {
-      display: flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 3px;
-      font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-      background: rgba(196,160,74,.18); color: var(--gold);
-      border: 1px solid rgba(196,160,74,.4); cursor: pointer; transition: all .18s;
-    }
-    .btn-new-tournament:hover { background: rgba(196,160,74,.28); }
-
-    .tournament-list  { display: flex; flex-direction: column; gap: 8px; }
-    .tournament-item  {
-      background: rgba(10,9,7,.5); border: 1px solid rgba(196,160,74,.12);
-      border-radius: 3px; padding: 14px 16px;
-      display: flex; align-items: center; gap: 14px; transition: border-color .15s;
-    }
-    .tournament-item:hover { border-color: rgba(196,160,74,.25); }
-    body.light .tournament-item { background: rgba(200,185,150,.15); border-color: rgba(138,104,32,.15); }
-    .t-info { flex: 1; min-width: 0; }
-    .t-name { font-family: var(--f-display); font-size: 17px; font-weight: 600; color: var(--cream); margin-bottom: 3px; }
-    .t-meta { font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .t-meta-chip {
-      background: var(--gold-bg); border: 1px solid rgba(196,160,74,.18);
-      border-radius: 2px; padding: 2px 8px; font-family: var(--f-num); font-size: 10px; color: var(--gold-dim);
-    }
-    .t-points-preview { font-size: 10px; color: var(--text-muted); margin-top: 5px; font-family: var(--f-num); letter-spacing: .04em; }
-    .t-actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-    .tournament-form {
-      background: rgba(196,160,74,.04); border: 1px solid rgba(196,160,74,.2);
-      border-radius: 3px; padding: 20px; margin-bottom: 16px;
-    }
-    .tournament-form .form-title {
-      font-size: 9px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 16px;
-    }
-    body.light .tournament-form { background: rgba(138,104,32,.04); border-color: rgba(138,104,32,.22); }
-
-    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-    @media(max-width:560px){ .form-row-3 { grid-template-columns: 1fr 1fr; } }
-
-    .points-editor-label {
-      font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase;
-      color: var(--gold-dim); margin-bottom: 8px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .points-editor-label span { font-weight: 300; text-transform: none; letter-spacing: 0; font-size: 10px; color: var(--text-muted); }
-    .points-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-    .pts-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-    .pts-cell-num { font-size: 9px; color: var(--text-muted); font-family: var(--f-num); }
-    .pts-cell input {
-      width: 52px; padding: 7px 6px; text-align: center;
-      font-family: var(--f-num); font-size: 13px; font-weight: 600; color: var(--gold);
-      background: rgba(10,9,7,.6); border: 1px solid rgba(196,160,74,.18);
-      border-radius: 3px; outline: none; transition: border-color .15s;
-      -moz-appearance: textfield; appearance: textfield;
-    }
-    .pts-cell input::-webkit-outer-spin-button,
-    .pts-cell input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .pts-cell input:focus { border-color: rgba(196,160,74,.48); }
-    body.light .pts-cell input { background: rgba(200,185,150,.2); border-color: rgba(138,104,32,.2); }
-
-    .points-actions { display: flex; gap: 8px; margin-bottom: 16px; }
-    .btn-pts-add { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(196,160,74,.1); color: var(--gold-dim); border: 1px solid rgba(196,160,74,.22); border-radius: 3px; cursor: pointer; transition: all .15s; }
-    .btn-pts-add:hover { background: rgba(196,160,74,.2); color: var(--gold); }
-    .btn-pts-rem { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(192,57,43,.07); color: #e07a68; border: 1px solid rgba(192,57,43,.2); border-radius: 3px; cursor: pointer; transition: all .15s; }
-    .btn-pts-rem:hover { background: rgba(192,57,43,.16); }
-
-    .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-save   { padding: 10px 22px; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; background: rgba(196,160,74,.18); color: var(--gold); border: 1px solid rgba(196,160,74,.4); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-save:hover { background: rgba(196,160,74,.28); }
-    .btn-cancel { padding: 10px 18px; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; background: none; color: var(--text-dim); border: 1px solid rgba(196,160,74,.12); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-cancel:hover { color: var(--text); border-color: rgba(196,160,74,.25); }
-
-    .config-empty { text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px; border: 1px dashed rgba(196,160,74,.15); border-radius: 3px; }
-    .alert-config-success { background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.25); border-radius: 3px; padding: 10px 14px; font-size: 12px; color: #6dcc8e; margin-bottom: 14px; display: none; }
-
-    /* Inputs admin (pour le formulaire de création/édition) */
-    .admin-inp {
-      width: 100%; padding: 10px 12px; box-sizing: border-box;
-      background: rgba(10,9,7,.9); border: 1px solid rgba(196,160,74,.2);
-      border-radius: 3px; color: var(--cream); font-size: 13px; font-family: var(--f-ui);
-      outline: none; transition: border-color .15s;
-    }
-    .admin-inp:focus { border-color: rgba(196,160,74,.45); box-shadow: 0 0 0 3px rgba(196,160,74,.07); }
-    .admin-inp[readonly] { opacity: .5; cursor: default; }
-    body.light .admin-inp { background: rgba(238,230,212,.9); color: var(--text); }
-    .admin-select { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -211,78 +108,11 @@
       <div class="tool-name">Déclaration <em>Extras</em></div>
     </a>
 
-  </div>
+    <a href="admin/tournois.html" class="tool-card" style="--accent:196,160,74">
+      <div class="tool-badge">🎴</div>
+      <div class="tool-name">Config <em>Tournois</em></div>
+    </a>
 
-  <!-- ── Gestion des tournois ── -->
-  <div class="admin-card" style="margin-top:32px">
-    <div class="sec" style="margin-bottom:18px">Gestion des tournois</div>
-
-    <div class="alert-config-success" id="alert-config-success"></div>
-
-    <div class="config-header">
-      <div style="font-size:13px;color:var(--text-dim)">
-        Barèmes de points et buy-ins pour le Challenge Saisonnier et le Prize Pool.
-      </div>
-      <button class="btn-new-tournament" onclick="openTournamentForm()">＋ Nouveau tournoi</button>
-    </div>
-
-    <div class="tournament-form" id="tournament-form" style="display:none">
-      <div class="form-title" id="form-title">Nouveau tournoi</div>
-      <input type="hidden" id="form-edit-id" value="" />
-
-      <div class="form-row-3">
-        <div class="fg" style="grid-column:1/3">
-          <div class="fl">Nom du tournoi</div>
-          <input type="text" id="form-name" class="admin-inp" placeholder="ex: Friday High Stack" />
-        </div>
-        <div class="fg">
-          <div class="fl">Jour / type</div>
-          <select id="form-day" class="admin-inp admin-select">
-            <option>Lundi</option><option>Mardi</option><option>Mercredi</option>
-            <option>Jeudi</option><option>Vendredi</option><option>Samedi</option>
-            <option>Dimanche</option><option>Événement</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row-3">
-        <div class="fg">
-          <div class="fl">Part PP (€)</div>
-          <input type="number" id="form-pp" class="admin-inp" min="1" placeholder="130"
-            oninput="adminRecalcBuyin()" />
-        </div>
-        <div class="fg">
-          <div class="fl">Frais (€)</div>
-          <input type="number" id="form-frais" class="admin-inp" min="1" placeholder="20"
-            oninput="adminRecalcBuyin()" />
-        </div>
-        <div class="fg">
-          <div class="fl">Buy-in (€) <span style="opacity:.4;font-size:9px">auto</span></div>
-          <input type="number" id="form-buyin" class="admin-inp" placeholder="150" readonly tabindex="-1" />
-        </div>
-      </div>
-
-      <hr style="border:none;border-top:1px solid rgba(196,160,74,.12);margin:14px 0 12px">
-
-      <div class="points-editor-label">
-        Barème de points
-        <span id="points-count-label">0 places payées</span>
-      </div>
-      <div class="points-grid" id="points-grid"></div>
-      <div class="points-actions">
-        <button class="btn-pts-add" onclick="addPointsSlot()">＋ Ajouter une place</button>
-        <button class="btn-pts-rem" onclick="removePointsSlot()">− Retirer la dernière</button>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-cancel" onclick="closeTournamentForm()">Annuler</button>
-        <button class="btn-save" onclick="saveTournamentForm()">✓ Enregistrer</button>
-      </div>
-    </div>
-
-    <div class="tournament-list" id="tournament-list"></div>
-    <div class="config-empty" id="config-empty" style="display:none">
-      Aucun tournoi configuré. Crée ton premier tournoi ci-dessus.
-    </div>
   </div>
 
   <div class="footer">Casino Barrière Bordeaux · Outils internes tournois</div>
@@ -291,183 +121,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="shared/barriere.js"></script>
 <script src="shared/supabase.js"></script>
-<script src="shared/tournaments.js"></script>
 <script src="shared/auth.js"></script>
-<script>
-AUTH.guard({ loginUrl: 'login.html', role: 'admin' }).then(function(user) {
-  if (!user) return;
-  adminInitTournois();
-});
-
-/* ══════════════════════════════════════════════════════
-   GESTION DES TOURNOIS
-══════════════════════════════════════════════════════ */
-let _adminTournamentsCache = null;
-
-async function _adminGetTournaments(force) {
-  if (!_adminTournamentsCache || force) {
-    const ts = await SB.getTournaments();
-    _adminTournamentsCache = (ts && ts.length > 0) ? ts : TOURNAMENT_DEFAULTS.map(t => ({ ...t }));
-  }
-  return _adminTournamentsCache;
-}
-
-async function adminInitTournois() {
-  await adminRenderTournois();
-}
-
-async function adminRenderTournois() {
-  const tournaments = await _adminGetTournaments(true);
-  const list  = document.getElementById('tournament-list');
-  const empty = document.getElementById('config-empty');
-  if (!tournaments.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  list.innerHTML = tournaments.map(t => {
-    const ptsPrev = t.points.slice(0, 8).join(', ') + (t.points.length > 8 ? '…' : '');
-    return `<div class="tournament-item">
-      <div class="t-info">
-        <div class="t-name">${t.name}</div>
-        <div class="t-meta">
-          <span class="t-meta-chip">${t.day}</span>
-          <span class="t-meta-chip">${t.buyin} €</span>
-          <span style="color:var(--text-muted)">${t.points.length} place${t.points.length > 1 ? 's' : ''} payée${t.points.length > 1 ? 's' : ''}</span>
-        </div>
-        <div class="t-points-preview">${ptsPrev}</div>
-      </div>
-      <div class="t-actions">
-        <button class="btn btn-ghost" style="font-size:10px;padding:5px 10px" onclick="editTournament('${t.id}')">Modifier</button>
-        <button class="btn-red" onclick="deleteTournament('${t.id}')">✕</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openTournamentForm(editId) {
-  const form = document.getElementById('tournament-form');
-  document.getElementById('form-title').textContent = editId ? 'Modifier le tournoi' : 'Nouveau tournoi';
-  document.getElementById('form-edit-id').value = editId || '';
-  document.getElementById('form-name').value  = '';
-  document.getElementById('form-day').value   = 'Lundi';
-  document.getElementById('form-buyin').value = '';
-  document.getElementById('form-pp').value    = '';
-  document.getElementById('form-frais').value = '';
-  buildPointsGrid([22, 16, 13, 11, 9, 8, 7, 6, 5, 4]);
-  form.style.display = 'block';
-  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  document.getElementById('form-name').focus();
-}
-
-async function editTournament(id) {
-  const tournaments = await _adminGetTournaments();
-  const t = tournaments.find(t => t.id === id);
-  if (!t) return;
-  const form = document.getElementById('tournament-form');
-  document.getElementById('form-title').textContent = 'Modifier le tournoi';
-  document.getElementById('form-edit-id').value = id;
-  document.getElementById('form-name').value  = t.name;
-  document.getElementById('form-day').value   = t.day;
-  document.getElementById('form-buyin').value = t.buyin;
-  document.getElementById('form-pp').value    = t.pp    != null ? t.pp    : '';
-  document.getElementById('form-frais').value = t.frais != null ? t.frais : '';
-  buildPointsGrid(t.points);
-  form.style.display = 'block';
-  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  document.getElementById('form-name').focus();
-}
-
-function adminRecalcBuyin() {
-  const pp    = parseFloat(document.getElementById('form-pp').value)    || 0;
-  const frais = parseFloat(document.getElementById('form-frais').value) || 0;
-  document.getElementById('form-buyin').value = pp + frais > 0 ? pp + frais : '';
-}
-
-async function deleteTournament(id) {
-  const tournaments = await _adminGetTournaments();
-  const t = tournaments.find(t => t.id === id);
-  if (!t) return;
-  if (!confirm(`Supprimer "${t.name}" ? Les résultats déjà enregistrés ne seront pas effacés.`)) return;
-  await SB.deleteTournament(id);
-  _adminTournamentsCache = null;
-  await adminRenderTournois();
-  showConfigAlert(`"${t.name}" supprimé.`);
-}
-
-function closeTournamentForm() {
-  document.getElementById('tournament-form').style.display = 'none';
-}
-
-async function saveTournamentForm() {
-  const name   = (document.getElementById('form-name').value || '').trim();
-  const day    = (document.getElementById('form-day').value  || '').trim();
-  const buyin  = parseFloat(document.getElementById('form-buyin').value) || 0;
-  const pp     = parseFloat(document.getElementById('form-pp').value)    || null;
-  const frais  = parseFloat(document.getElementById('form-frais').value) || null;
-  const editId = document.getElementById('form-edit-id').value;
-
-  if (!name)    { alert('Donne un nom au tournoi.'); return; }
-  if (buyin <= 0) { alert('Indique un buy-in valide (PP + Frais).'); return; }
-
-  const points = getPointsFromGrid();
-  if (points.length === 0) { alert('Ajoute au moins une place payée.'); return; }
-  if (points.some(p => p < 0)) { alert('Les points ne peuvent pas être négatifs.'); return; }
-
-  const split = (pp && frais) ? { pp, frais } : {};
-  let id = editId;
-  if (!id) {
-    id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now();
-  }
-  await SB.upsertTournament({ id, name, day, buyin, ...split, points });
-  _adminTournamentsCache = null;
-  closeTournamentForm();
-  await adminRenderTournois();
-  showConfigAlert(editId ? `"${name}" mis à jour.` : `"${name}" ajouté avec ${points.length} places.`);
-}
-
-function showConfigAlert(msg) {
-  const el = document.getElementById('alert-config-success');
-  el.textContent = '✓ ' + msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 3500);
-}
-
-function buildPointsGrid(pts) {
-  const grid = document.getElementById('points-grid');
-  grid.innerHTML = pts.map((v, i) => `
-    <div class="pts-cell">
-      <div class="pts-cell-num">${i + 1}</div>
-      <input type="number" min="0" value="${v}" oninput="updatePointsCountLabel()" />
-    </div>`).join('');
-  updatePointsCountLabel();
-}
-
-function addPointsSlot() {
-  const grid  = document.getElementById('points-grid');
-  const cells = grid.querySelectorAll('.pts-cell');
-  const n     = cells.length + 1;
-  const lastVal = cells.length > 0 ? parseInt(cells[cells.length - 1].querySelector('input').value) || 0 : 0;
-  const newVal  = Math.max(0, lastVal - 1);
-  const div = document.createElement('div');
-  div.className = 'pts-cell';
-  div.innerHTML = `<div class="pts-cell-num">${n}</div><input type="number" min="0" value="${newVal}" oninput="updatePointsCountLabel()" />`;
-  grid.appendChild(div);
-  updatePointsCountLabel();
-  div.querySelector('input').focus();
-}
-
-function removePointsSlot() {
-  const grid  = document.getElementById('points-grid');
-  const cells = grid.querySelectorAll('.pts-cell');
-  if (cells.length > 1) { cells[cells.length - 1].remove(); updatePointsCountLabel(); }
-}
-
-function getPointsFromGrid() {
-  return [...document.getElementById('points-grid').querySelectorAll('.pts-cell input')]
-    .map(i => parseInt(i.value) || 0);
-}
-
-function updatePointsCountLabel() {
-  const n = document.getElementById('points-grid').querySelectorAll('.pts-cell').length;
-  document.getElementById('points-count-label').textContent = `${n} place${n > 1 ? 's' : ''} payée${n > 1 ? 's' : ''}`;
-}
-</script>
+<script>AUTH.guard({ loginUrl: 'login.html', role: 'admin' });</script>
 </body>
 </html>

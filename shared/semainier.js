@@ -9,64 +9,73 @@ const SEMAINIER_DAYS_SHORT = ['Lun',  'Mar',  'Mer',    'Jeu',  'Ven',    'Sam',
 
 /**
  * Construit le HTML du semainier (sélecteur de tournoi par jour).
- * @param {Array}  tournaments  — liste {id, name, day, buyin, …}
- * @param {string} selectedId   — id du tournoi actif ('' si aucun)
- * @param {string} onSelectFn   — nom de la fonction JS globale : onSelectFn('id')
- * @returns {string} HTML à injecter via innerHTML
+ * @param {Array}  tournaments   - liste {id, name, day, buyin, ...}
+ * @param {string} selectedId    - id du tournoi actif ('' si aucun)
+ * @param {string} onSelectFn   - nom de la fonction JS globale : onSelectFn('id')
+ * @param {string} [suggestedDay] - jour mis en surbrillance (ex: 'Jeudi')
+ * @returns {string} HTML a injecter via innerHTML
  */
-function buildSemainier(tournaments, selectedId, onSelectFn) {
+function buildSemainier(tournaments, selectedId, onSelectFn, suggestedDay) {
   const byDay  = {};
   const events = [];
 
-  SEMAINIER_DAYS.forEach(d => { byDay[d] = []; });
+  SEMAINIER_DAYS.forEach(function(d) { byDay[d] = []; });
 
-  (tournaments || []).forEach(t => {
-    if (SEMAINIER_DAYS.includes(t.day)) {
+  (tournaments || []).forEach(function(t) {
+    if (SEMAINIER_DAYS.indexOf(t.day) !== -1) {
       byDay[t.day].push(t);
     } else {
       events.push(t);
     }
   });
 
-  /* ── Colonnes de la semaine ── */
-  const weekCols = SEMAINIER_DAYS.map((day, i) => {
-    const ts = byDay[day];
+  /* Colonnes de la semaine */
+  var weekCols = SEMAINIER_DAYS.map(function(day, i) {
+    var ts = byDay[day];
+    var isDaySuggested = !!(suggestedDay && day === suggestedDay);
 
     if (ts.length === 0) {
-      return `<div class="sem-day sem-day-empty">
-        <div class="sem-day-label">${SEMAINIER_DAYS_SHORT[i]}</div>
-        <div class="sem-day-off"></div>
-      </div>`;
+      return '<div class="sem-day sem-day-empty' + (isDaySuggested ? ' sem-day-suggested' : '') + '">'
+        + '<div class="sem-day-label">' + SEMAINIER_DAYS_SHORT[i] + '</div>'
+        + '<div class="sem-day-off"></div>'
+        + '</div>';
     }
 
-    const btns = ts.map(t =>
-      `<button class="sem-btn${t.id === selectedId ? ' sem-active' : ''}"
-        onclick="${onSelectFn}('${t.id}')"
-        title="${t.name} · ${t.buyin} €">${t.name}</button>`
-    ).join('');
+    var btns = ts.map(function(t) {
+      var isActive    = t.id === selectedId;
+      var isSuggested = isDaySuggested && !isActive;
+      var cls = 'sem-btn' + (isActive ? ' sem-active' : '') + (isSuggested ? ' sem-suggested' : '');
+      return '<button class="' + cls + '"'
+        + ' onclick="' + onSelectFn + '(\'' + t.id + '\')"'
+        + ' title="' + t.name + ' · ' + t.buyin + ' €">'
+        + t.name + '</button>';
+    }).join('');
 
-    return `<div class="sem-day">
-      <div class="sem-day-label">${SEMAINIER_DAYS_SHORT[i]}</div>
-      ${btns}
-    </div>`;
+    return '<div class="sem-day' + (isDaySuggested ? ' sem-day-suggested' : '') + '">'
+      + '<div class="sem-day-label">' + SEMAINIER_DAYS_SHORT[i] + '</div>'
+      + btns
+      + '</div>';
   }).join('');
 
-  /* ── Section Événements ── */
-  const evtBtns = events.map(t =>
-    `<button class="sem-btn${t.id === selectedId ? ' sem-active' : ''}"
-      onclick="${onSelectFn}('${t.id}')"
-      title="${t.name} · ${t.buyin} €">${t.name}</button>`
-  ).join('');
+  /* Section Evenements */
+  var evtBtns = events.map(function(t) {
+    var isActive = t.id === selectedId;
+    var cls = 'sem-btn' + (isActive ? ' sem-active' : '');
+    return '<button class="' + cls + '"'
+      + ' onclick="' + onSelectFn + '(\'' + t.id + '\')"'
+      + ' title="' + t.name + ' · ' + t.buyin + ' €">'
+      + t.name + '</button>';
+  }).join('');
 
-  const eventsHtml = events.length
-    ? `<div class="sem-events">
-        <span class="sem-events-label">Événements</span>
-        <div class="sem-events-btns">${evtBtns}</div>
-      </div>`
+  var eventsHtml = events.length
+    ? '<div class="sem-events">'
+      + '<span class="sem-events-label">&#201;v&#233;nements</span>'
+      + '<div class="sem-events-btns">' + evtBtns + '</div>'
+      + '</div>'
     : '';
 
-  return `<div class="semainier">
-    <div class="sem-week">${weekCols}</div>
-    ${eventsHtml}
-  </div>`;
+  return '<div class="semainier">'
+    + '<div class="sem-week">' + weekCols + '</div>'
+    + eventsHtml
+    + '</div>';
 }
