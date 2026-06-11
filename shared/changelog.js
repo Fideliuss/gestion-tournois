@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.11.1', date: '2026-06-11', message: 'Accès MCD — Leaderboard et Prize Pool accessibles aux MCD ; grilles de navigation auto-centrées (index + admin)' },
   { version: 'v1.11.0', date: '2026-06-10', message: 'Gestion des comptes — page dédiée dans Admin ; création/édition/suppression de comptes (Admin, MCD, Floor) via Edge Function Supabase sécurisée' },
   { version: 'v1.10.0', date: '2026-06-10', message: 'Config Tournois — page dédiée dans Admin avec semainier par jour (cartes edit/delete) ; auto-sélection du tournoi du jour dans Saisir ; suggestion dorée si plusieurs tournois le même jour' },
   { version: 'v1.9.11', date: '2026-06-10', message: 'Semainier — sélection de tournoi par jour de la semaine dans Saisir et Prize Pool ; gestion des tournois (CRUD + barème de points) déplacée dans Gestion Administrative' },

@@ -8,8 +8,8 @@ const AUTH = {
   /**
    * À appeler sur chaque page protégée.
    * @param {object} opts
-   *   loginUrl    {string} — chemin relatif vers login.html depuis cette page
-   *   role        {string|null} — 'admin' = admin seulement, null = tout utilisateur connecté
+   *   loginUrl    {string}            — chemin relatif vers login.html depuis cette page
+   *   role        {string|string[]|null} — 'admin', ['admin','mcd'], ou null = tout connecté
    */
   async guard({ loginUrl = 'login.html', role = null } = {}) {
     // Overlay immédiat pour éviter le flash de contenu
@@ -26,12 +26,15 @@ const AUTH = {
 
     const userRole = session.user.user_metadata?.role || 'floor';
 
-    // Floor qui tente d'accéder à une page admin → hub
-    if (role === 'admin' && userRole !== 'admin') {
-      const depth = (loginUrl.match(/\.\.\//g) || []).length;
-      const root  = depth > 0 ? '../'.repeat(depth) : './';
-      window.location.replace(root + 'index.html');
-      return null;
+    // Vérification du rôle (string ou tableau)
+    if (role !== null) {
+      const allowed = Array.isArray(role) ? role : [role];
+      if (!allowed.includes(userRole)) {
+        const depth = (loginUrl.match(/\.\.\//g) || []).length;
+        const root  = depth > 0 ? '../'.repeat(depth) : './';
+        window.location.replace(root + 'index.html');
+        return null;
+      }
     }
 
     // Auth OK
