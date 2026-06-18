@@ -14,17 +14,28 @@
     .page-sub { font-size: 11px; color: var(--text-muted); letter-spacing: .08em;
       text-transform: uppercase; margin-bottom: 36px; }
 
-    /* ── Bouton Nouveau compte ── */
-    .btn-new {
+    /* ── Actions haut de page ── */
+    .top-actions {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .btn-new, .btn-perm {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 9px 20px; border-radius: 3px; border: none; cursor: pointer;
       font-size: 13px; font-weight: 600; font-family: var(--f-ui);
+      transition: background .2s, border-color .2s;
+    }
+    .btn-new {
       background: rgba(196,160,74,.12); color: var(--gold);
       border: 1px solid rgba(196,160,74,.28);
-      transition: background .2s, border-color .2s;
-      margin-bottom: 28px;
     }
     .btn-new:hover { background: rgba(196,160,74,.2); border-color: rgba(196,160,74,.5); }
+    .btn-perm {
+      background: rgba(255,255,255,.06); color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .btn-perm:hover { background: rgba(255,255,255,.1); color: var(--cream); border-color: rgba(255,255,255,.18); }
+    .btn-perm.active { background: rgba(196,160,74,.08); color: var(--gold); border-color: rgba(196,160,74,.3); }
 
     /* ── Liste des comptes ── */
     .accounts-list { display: flex; flex-direction: column; gap: 10px; }
@@ -43,13 +54,16 @@
     .role-chip {
       font-size: 10px; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; padding: 3px 10px; border-radius: 2px;
+      white-space: nowrap;
     }
-    .chip-admin { background: rgba(196,160,74,.15); color: rgb(196,160,74);
+    .chip-admin  { background: rgba(196,160,74,.15); color: rgb(196,160,74);
       border: 1px solid rgba(196,160,74,.3); }
-    .chip-mcd   { background: rgba(128,108,196,.15); color: rgb(160,145,220);
+    .chip-mcd    { background: rgba(128,108,196,.15); color: rgb(160,145,220);
       border: 1px solid rgba(128,108,196,.3); }
-    .chip-floor { background: rgba(255,255,255,.07); color: var(--text-muted);
+    .chip-floor  { background: rgba(255,255,255,.07); color: var(--text-muted);
       border: 1px solid rgba(255,255,255,.1); }
+    .chip-custom { background: rgba(80,160,200,.1); color: rgb(120,190,220);
+      border: 1px solid rgba(80,160,200,.25); }
 
     .account-actions { display: flex; gap: 8px; }
     .btn-edit, .btn-del {
@@ -111,64 +125,90 @@
     }
     .btn-cancel:hover { border-color: rgba(255,255,255,.2); color: var(--cream); }
 
-    /* ── Gestion des accès ── */
-    .access-section { margin-top: 40px; }
-    .access-section-title {
+    /* ── Panneau Permissions (inline) ── */
+    .perm-panel {
+      background: var(--bg-card);
+      border: 1px solid rgba(196,160,74,.18);
+      border-radius: 3px; padding: 24px; margin-bottom: 28px;
+    }
+    .perm-panel.hidden { display: none; }
+    .perm-title {
       font-family: var(--f-display); font-size: 16px; font-weight: 600;
       color: var(--cream); margin-bottom: 6px;
     }
-    .access-section-sub {
-      font-size: 11px; color: var(--text-muted); margin-bottom: 20px;
-      letter-spacing: .04em;
+    .perm-sub {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 20px; letter-spacing: .04em;
     }
-    .access-table-wrap { overflow-x: auto; }
-    .access-table {
+    .perm-table-wrap { overflow-x: auto; margin-bottom: 20px; }
+    .perm-table {
       width: 100%; border-collapse: collapse;
       font-size: 12px; font-family: var(--f-ui);
     }
-    .access-table th {
-      padding: 8px 12px; text-align: center;
+    .perm-table th {
+      padding: 8px 10px; text-align: center;
       font-size: 10px; font-weight: 600; letter-spacing: .1em;
       text-transform: uppercase; color: var(--text-muted);
       border-bottom: 1px solid rgba(255,255,255,.07);
     }
-    .access-table th.col-user { text-align: left; min-width: 180px; }
-    .access-table td {
-      padding: 10px 12px; text-align: center;
+    .perm-table th.col-role { text-align: left; min-width: 130px; }
+    .perm-table th.col-del  { min-width: 36px; }
+    .perm-table td {
+      padding: 10px 10px; text-align: center;
       border-bottom: 1px solid rgba(255,255,255,.04);
       vertical-align: middle;
     }
-    .access-table td.col-user {
-      text-align: left; color: var(--cream);
-      font-size: 12px;
+    .perm-table td.col-role {
+      text-align: left; color: var(--cream); font-size: 13px; font-weight: 500;
     }
-    .access-table td.col-user .role-chip { margin-left: 8px; }
-    .access-table tr:last-child td { border-bottom: none; }
-    .access-table tr:hover td { background: rgba(255,255,255,.02); }
-
-    .access-cb {
-      width: 16px; height: 16px; cursor: pointer;
-      accent-color: var(--gold);
+    .perm-table td.col-role .role-locked {
+      font-size: 10px; color: var(--text-muted); margin-left: 6px;
     }
-    .access-cb:disabled { opacity: .35; cursor: not-allowed; }
-    .access-admin-dot {
+    .perm-table tr:last-child td { border-bottom: none; }
+    .perm-table tr:hover td { background: rgba(255,255,255,.02); }
+    .perm-cb {
+      width: 16px; height: 16px; cursor: pointer; accent-color: var(--gold);
+    }
+    .perm-admin-dot {
       display: inline-block; width: 10px; height: 10px;
       border-radius: 50%; background: rgba(196,160,74,.35);
       border: 1px solid rgba(196,160,74,.5);
     }
-    .access-save-row {
-      margin-top: 20px; display: flex; align-items: center; gap: 14px;
+    .btn-del-role {
+      border: none; background: transparent; color: rgba(220,100,100,.6);
+      cursor: pointer; font-size: 14px; padding: 2px 6px;
+      transition: color .15s;
     }
-    .access-msg {
-      font-size: 12px; display: none;
-    }
-    .access-msg.ok  { color: rgb(120,200,120); }
-    .access-msg.err { color: rgb(220,120,120); }
+    .btn-del-role:hover { color: rgba(220,100,100,1); }
 
-    body.light .access-table th { border-bottom-color: rgba(0,0,0,.1); }
-    body.light .access-table td { border-bottom-color: rgba(0,0,0,.05); }
-    body.light .access-table td.col-user { color: #1a1610; }
-    body.light .access-table tr:hover td { background: rgba(0,0,0,.02); }
+    /* ── Nouveau rôle inline ── */
+    .new-role-row {
+      display: flex; align-items: flex-end; gap: 14px;
+      padding: 14px 0; border-top: 1px solid rgba(255,255,255,.06);
+      flex-wrap: wrap;
+    }
+    .new-role-row.hidden { display: none; }
+    .new-role-slug {
+      font-size: 11px; color: var(--text-muted);
+      align-self: center; padding-bottom: 4px; min-width: 100px;
+    }
+    .new-role-slug span { color: var(--gold); font-weight: 600; }
+    .new-role-actions { display: flex; gap: 8px; }
+
+    /* ── Actions permissions ── */
+    .perm-actions {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,.06); padding-top: 16px;
+    }
+    .btn-add-role {
+      padding: 8px 16px; border-radius: 2px; cursor: pointer;
+      background: rgba(255,255,255,.05); color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,.1);
+      font-size: 12px; font-family: var(--f-ui); transition: background .15s;
+    }
+    .btn-add-role:hover { background: rgba(255,255,255,.1); color: var(--cream); }
+    .perm-msg { font-size: 12px; }
+    .perm-msg.ok  { color: rgb(120,200,120); }
+    .perm-msg.err { color: rgb(220,120,120); }
 
     /* ── Alertes ── */
     .alert { padding: 10px 14px; border-radius: 2px; font-size: 13px;
@@ -187,6 +227,10 @@
     body.light .fg input, body.light .fg select {
       background: #fff; border-color: rgba(0,0,0,.15); color: #1a1610; }
     body.light .fg select option { background: #fff; }
+    body.light .perm-table th { border-bottom-color: rgba(0,0,0,.1); }
+    body.light .perm-table td { border-bottom-color: rgba(0,0,0,.05); }
+    body.light .perm-table td.col-role { color: #1a1610; }
+    body.light .perm-table tr:hover td { background: rgba(0,0,0,.02); }
 
   </style>
 </head>
@@ -207,7 +251,51 @@
   <div id="alert-ok"  class="alert alert-ok"></div>
   <div id="alert-err" class="alert alert-err"></div>
 
-  <button class="btn-new" onclick="openForm()">＋ Nouveau compte</button>
+  <div class="top-actions">
+    <button class="btn-new"  onclick="openForm()">＋ Nouveau compte</button>
+    <button class="btn-perm" id="btn-perm" onclick="togglePermissions()">⚙ Permissions</button>
+  </div>
+
+  <!-- Panneau gestion des rôles (inline, masqué par défaut) -->
+  <div id="perm-panel" class="perm-panel hidden">
+    <div class="perm-title">Gestion des rôles</div>
+    <div class="perm-sub">Définissez quels panneaux sont accessibles pour chaque rôle. Les admins ont toujours accès à tout.</div>
+    <div class="perm-table-wrap">
+      <table class="perm-table">
+        <thead>
+          <tr>
+            <th class="col-role">Rôle</th>
+            <th>Déclarations</th>
+            <th>Extras</th>
+            <th>Config.</th>
+            <th>Prize Pool</th>
+            <th>Leaderboard</th>
+            <th class="col-del"></th>
+          </tr>
+        </thead>
+        <tbody id="perm-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Formulaire nouveau rôle -->
+    <div id="new-role-row" class="new-role-row hidden">
+      <div class="fg" style="max-width:220px;margin-bottom:0">
+        <div class="fl">Label du rôle</div>
+        <input type="text" id="new-role-label" placeholder="Ex: Superviseur" oninput="onNewRoleInput(this.value)" />
+      </div>
+      <div class="new-role-slug" id="new-role-slug-preview"></div>
+      <div class="new-role-actions">
+        <button class="btn-save" onclick="confirmNewRole()">Créer →</button>
+        <button class="btn-cancel" onclick="cancelNewRole()">Annuler</button>
+      </div>
+    </div>
+
+    <div class="perm-actions">
+      <button class="btn-add-role" id="btn-add-role" onclick="showNewRoleRow()">＋ Nouveau rôle</button>
+      <button class="btn-save" id="perm-save-btn" onclick="savePermissions()">Enregistrer →</button>
+      <span class="perm-msg" id="perm-msg"></span>
+    </div>
+  </div>
 
   <!-- Formulaire création / édition -->
   <div id="form-panel" class="form-panel hidden">
@@ -225,11 +313,7 @@
     </div>
     <div class="fg">
       <div class="fl">Rôle</div>
-      <select id="inp-role">
-        <option value="floor">Floor</option>
-        <option value="mcd">MCD</option>
-        <option value="admin">Admin</option>
-      </select>
+      <select id="inp-role"></select>
     </div>
 
     <div class="form-actions">
@@ -243,33 +327,6 @@
     <div class="loader">Chargement…</div>
   </div>
 
-  <!-- Gestion des accès -->
-  <div class="access-section">
-    <div class="access-section-title">Gestion des accès</div>
-    <div class="access-section-sub">Définissez quels panneaux sont accessibles pour chaque compte. Les admins ont accès à tout.</div>
-    <div class="access-table-wrap">
-      <table class="access-table">
-        <thead>
-          <tr>
-            <th class="col-user">Compte</th>
-            <th>Déclarations</th>
-            <th>Extras</th>
-            <th>Configurations</th>
-            <th>Prize Pool</th>
-            <th>Leaderboard</th>
-          </tr>
-        </thead>
-        <tbody id="access-table-body">
-          <tr><td colspan="6" class="loader">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="access-save-row">
-      <button class="btn-save" id="access-save-btn" onclick="saveAccess()">Enregistrer les accès →</button>
-      <span class="access-msg" id="access-msg"></span>
-    </div>
-  </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -279,12 +336,13 @@
 <script>
   AUTH.guard({ loginUrl: '../login.html', role: 'admin' });
 
-  let _editId = null;
+  let _editId    = null;
+  let _allRoles  = [];
 
   const PANELS = [
     { id: 'declarations',   label: 'Déclarations' },
     { id: 'extras',         label: 'Extras'        },
-    { id: 'configurations', label: 'Configurations'},
+    { id: 'configurations', label: 'Config.'        },
     { id: 'prize-pool',     label: 'Prize Pool'    },
     { id: 'leaderboard',    label: 'Leaderboard'   },
   ];
@@ -292,13 +350,25 @@
   // ── Chargement ───────────────────────────────────────
   async function loadAndRender() {
     try {
-      const users = await SB.listUsers();
+      const [users, roles] = await Promise.all([SB.listUsers(), SB.getRoles()]);
+      _allRoles = roles;
       renderList(users);
-      renderAccessTable(users);
     } catch(e) {
       showErr('Erreur de chargement : ' + e.message);
       document.getElementById('accounts-list').innerHTML = '';
     }
+  }
+
+  function chipClass(role) {
+    if (role === 'admin') return 'chip-admin';
+    if (role === 'mcd')   return 'chip-mcd';
+    if (role === 'floor') return 'chip-floor';
+    return 'chip-custom';
+  }
+
+  function roleLabel(role) {
+    const found = _allRoles.find(r => r.slug === role);
+    return found ? found.label : role;
   }
 
   function renderList(users) {
@@ -308,10 +378,9 @@
       return;
     }
 
-    // Tri : admin → mcd → floor, puis alphabétique
-    const order = { admin: 0, mcd: 1, floor: 2 };
+    const roleOrder = { admin: 0, mcd: 1, floor: 2 };
     users.sort(function(a, b) {
-      const ro = (order[a.role] ?? 3) - (order[b.role] ?? 3);
+      const ro = (roleOrder[a.role] ?? 9) - (roleOrder[b.role] ?? 9);
       return ro !== 0 ? ro : a.email.localeCompare(b.email);
     });
 
@@ -319,11 +388,11 @@
       const lastSeen = u.lastSignIn
         ? new Date(u.lastSignIn).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'2-digit' })
         : 'jamais';
-      const chipClass = u.role === 'admin' ? 'chip-admin' : (u.role === 'mcd' ? 'chip-mcd' : 'chip-floor');
-      const roleLabel = u.role === 'admin' ? 'Admin' : (u.role === 'mcd' ? 'MCD' : 'Floor');
+      const lbl = roleLabel(u.role);
+      const cls = chipClass(u.role);
       return '<div class="account-card">'
         + '<span class="account-email">' + u.email + '</span>'
-        + '<span class="role-chip ' + chipClass + '">' + roleLabel + '</span>'
+        + '<span class="role-chip ' + cls + '">' + lbl + '</span>'
         + '<span class="account-last">' + lastSeen + '</span>'
         + '<div class="account-actions">'
         + '<button class="btn-edit" onclick="editAccount(\'' + u.id + '\',\'' + u.email.replace(/'/g, '') + '\',\'' + u.role + '\')">✎</button>'
@@ -333,66 +402,156 @@
     }).join('');
   }
 
-  // ── Tableau des accès ────────────────────────────────
-  function renderAccessTable(users) {
-    const order = { admin: 0, mcd: 1, floor: 2 };
-    const sorted = [...users].sort(function(a, b) {
-      const ro = (order[a.role] ?? 3) - (order[b.role] ?? 3);
-      return ro !== 0 ? ro : a.email.localeCompare(b.email);
-    });
+  // ── Panneau Permissions ──────────────────────────────
+  function togglePermissions() {
+    const panel = document.getElementById('perm-panel');
+    const btn   = document.getElementById('btn-perm');
+    const isHidden = panel.classList.contains('hidden');
+    if (isHidden) {
+      renderPermissionsPanel();
+      panel.classList.remove('hidden');
+      btn.classList.add('active');
+    } else {
+      panel.classList.add('hidden');
+      btn.classList.remove('active');
+    }
+  }
 
-    const tbody = document.getElementById('access-table-body');
-    tbody.innerHTML = sorted.map(function(u) {
-      const isAdmin    = u.role === 'admin';
-      const chipClass  = isAdmin ? 'chip-admin' : (u.role === 'mcd' ? 'chip-mcd' : 'chip-floor');
-      const roleLabel  = isAdmin ? 'Admin' : (u.role === 'mcd' ? 'MCD' : 'Floor');
-      const shortEmail = u.email.split('@')[0];
+  function renderPermissionsPanel() {
+    const tbody = document.getElementById('perm-table-body');
+    tbody.innerHTML = _allRoles.map(function(role) {
+      const isAdmin = role.slug === 'admin';
+      const isBuiltin = ['admin','mcd','floor'].includes(role.slug);
 
       const cells = PANELS.map(function(p) {
         if (isAdmin) {
-          return '<td><span class="access-admin-dot" title="Accès total"></span></td>';
+          return '<td><span class="perm-admin-dot" title="Accès total"></span></td>';
         }
-        const checked = (u.panels || []).includes(p.id) ? 'checked' : '';
-        return '<td><input type="checkbox" class="access-cb" data-uid="' + u.id + '" data-panel="' + p.id + '" ' + checked + '></td>';
+        const checked = (role.panels || []).includes(p.id) ? 'checked' : '';
+        return '<td><input type="checkbox" class="perm-cb" data-slug="' + role.slug + '" data-panel="' + p.id + '" ' + checked + '></td>';
       }).join('');
 
-      return '<tr>'
-        + '<td class="col-user">' + shortEmail + '<span class="role-chip ' + chipClass + '">' + roleLabel + '</span></td>'
+      const delBtn = (!isBuiltin)
+        ? '<button class="btn-del-role" onclick="deleteRoleRow(\'' + role.slug + '\')" title="Supprimer ce rôle">✕</button>'
+        : '';
+
+      return '<tr data-slug="' + role.slug + '">'
+        + '<td class="col-role">' + role.label + (isAdmin ? '<span class="role-locked">toujours</span>' : '') + '</td>'
         + cells
+        + '<td class="col-del">' + delBtn + '</td>'
         + '</tr>';
     }).join('');
   }
 
-  async function saveAccess() {
-    const btn = document.getElementById('access-save-btn');
-    const msg = document.getElementById('access-msg');
-    msg.style.display = 'none';
+  async function savePermissions() {
+    const btn = document.getElementById('perm-save-btn');
+    const msg = document.getElementById('perm-msg');
+    msg.textContent = ''; msg.className = 'perm-msg';
     btn.disabled = true;
 
     try {
-      const checkboxes = document.querySelectorAll('.access-cb');
-      const byUser = {};
-      checkboxes.forEach(function(cb) {
-        const uid = cb.dataset.uid;
-        if (!byUser[uid]) byUser[uid] = [];
-        if (cb.checked) byUser[uid].push(cb.dataset.panel);
+      const byRole = {};
+      document.querySelectorAll('.perm-cb').forEach(function(cb) {
+        const slug = cb.dataset.slug;
+        if (!byRole[slug]) byRole[slug] = [];
+        if (cb.checked) byRole[slug].push(cb.dataset.panel);
       });
 
-      await Promise.all(Object.entries(byUser).map(function([id, panels]) {
-        return SB.updateUser(id, { panels });
-      }));
+      await Promise.all(_allRoles
+        .filter(r => r.slug !== 'admin')
+        .map(r => SB.upsertRole(r.slug, r.label, byRole[r.slug] || [])));
 
-      msg.textContent = 'Accès enregistrés ✓';
-      msg.className = 'access-msg ok';
-      msg.style.display = 'inline';
-      setTimeout(function() { msg.style.display = 'none'; }, 3000);
+      AUTH.clearRolesCache();
+
+      // Mettre à jour le cache local
+      _allRoles = _allRoles.map(function(r) {
+        if (r.slug === 'admin') return r;
+        return Object.assign({}, r, { panels: byRole[r.slug] || [] });
+      });
+
+      msg.textContent = 'Enregistré ✓';
+      msg.className = 'perm-msg ok';
+      setTimeout(function() { msg.textContent = ''; msg.className = 'perm-msg'; }, 3000);
     } catch(e) {
       msg.textContent = 'Erreur : ' + e.message;
-      msg.className = 'access-msg err';
-      msg.style.display = 'inline';
+      msg.className = 'perm-msg err';
     } finally {
       btn.disabled = false;
     }
+  }
+
+  // ── Nouveau rôle ─────────────────────────────────────
+  function showNewRoleRow() {
+    document.getElementById('new-role-row').classList.remove('hidden');
+    document.getElementById('btn-add-role').style.display = 'none';
+    document.getElementById('new-role-label').value = '';
+    document.getElementById('new-role-slug-preview').innerHTML = '';
+    document.getElementById('new-role-label').focus();
+  }
+
+  function cancelNewRole() {
+    document.getElementById('new-role-row').classList.add('hidden');
+    document.getElementById('btn-add-role').style.display = '';
+  }
+
+  function onNewRoleInput(val) {
+    const slug = slugify(val);
+    const preview = document.getElementById('new-role-slug-preview');
+    preview.innerHTML = slug ? 'Slug : <span>' + slug + '</span>' : '';
+  }
+
+  async function confirmNewRole() {
+    const label = document.getElementById('new-role-label').value.trim();
+    if (!label) return;
+    const slug = slugify(label);
+    if (!slug) { return; }
+
+    if (_allRoles.find(r => r.slug === slug)) {
+      alert('Un rôle avec le slug « ' + slug + ' » existe déjà.');
+      return;
+    }
+
+    try {
+      await SB.upsertRole(slug, label, []);
+      _allRoles.push({ slug, label, panels: [] });
+      cancelNewRole();
+      renderPermissionsPanel();
+      populateRoleSelect();
+    } catch(e) {
+      alert('Erreur : ' + e.message);
+    }
+  }
+
+  async function deleteRoleRow(slug) {
+    const role = _allRoles.find(r => r.slug === slug);
+    if (!role) return;
+    if (!confirm('Supprimer le rôle « ' + role.label + ' » ?\n\nLes utilisateurs ayant ce rôle ne pourront plus accéder aux panneaux associés.')) return;
+    try {
+      await SB.deleteRole(slug);
+      AUTH.clearRolesCache();
+      _allRoles = _allRoles.filter(r => r.slug !== slug);
+      renderPermissionsPanel();
+      populateRoleSelect();
+    } catch(e) {
+      alert('Erreur : ' + e.message);
+    }
+  }
+
+  function slugify(str) {
+    return str.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  // ── Select rôle dans le formulaire ──────────────────
+  function populateRoleSelect() {
+    const sel = document.getElementById('inp-role');
+    const cur = sel.value;
+    sel.innerHTML = _allRoles.map(r =>
+      '<option value="' + r.slug + '">' + r.label + '</option>'
+    ).join('');
+    if (cur && _allRoles.find(r => r.slug === cur)) sel.value = cur;
   }
 
   // ── Formulaire ───────────────────────────────────────
@@ -402,11 +561,12 @@
     document.getElementById('form-hint').textContent  = 'Le compte est créé immédiatement et actif.';
     document.getElementById('inp-email').value    = '';
     document.getElementById('inp-password').value = '';
-    document.getElementById('inp-role').value     = 'floor';
     document.getElementById('inp-email').disabled = false;
     document.getElementById('fg-password').style.display = '';
     document.getElementById('pwd-hint').style.display    = 'none';
     document.getElementById('btn-save').textContent = 'Créer le compte →';
+    populateRoleSelect();
+    document.getElementById('inp-role').value = 'floor';
     document.getElementById('form-panel').classList.remove('hidden');
     document.getElementById('inp-email').focus();
     hideAlerts();
@@ -418,11 +578,12 @@
     document.getElementById('form-hint').textContent  = email;
     document.getElementById('inp-email').value    = email;
     document.getElementById('inp-password').value = '';
-    document.getElementById('inp-role').value     = role;
     document.getElementById('inp-email').disabled = true;
     document.getElementById('fg-password').style.display = '';
     document.getElementById('pwd-hint').style.display    = '';
     document.getElementById('btn-save').textContent = 'Enregistrer →';
+    populateRoleSelect();
+    document.getElementById('inp-role').value = role;
     document.getElementById('form-panel').classList.remove('hidden');
     document.getElementById('inp-role').focus();
     hideAlerts();

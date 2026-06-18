@@ -3,6 +3,20 @@
 //  Doit être chargé APRÈS supabase.js
 // ══════════════════════════════════════════════════════
 
+let _rolePanelsCache = null;
+
+async function _loadRolePanels() {
+  if (_rolePanelsCache) return _rolePanelsCache;
+  try {
+    const roles = await SB.getRoles();
+    _rolePanelsCache = {};
+    roles.forEach(r => { _rolePanelsCache[r.slug] = r.panels || []; });
+  } catch {
+    _rolePanelsCache = {};
+  }
+  return _rolePanelsCache;
+}
+
 const AUTH = {
 
   /**
@@ -25,9 +39,8 @@ const AUTH = {
       return null;
     }
 
-    const userRole   = session.user.user_metadata?.role   || 'floor';
-    const userPanels = session.user.user_metadata?.panels || [];
-    const isAdmin    = userRole === 'admin';
+    const userRole = session.user.user_metadata?.role || 'floor';
+    const isAdmin  = userRole === 'admin';
 
     const depth = (loginUrl.match(/\.\.\//g) || []).length;
     const root  = depth > 0 ? '../'.repeat(depth) : './';
@@ -41,11 +54,12 @@ const AUTH = {
       }
     }
 
-    // Vérification du panel — les admins ont accès à tout
+    // Vérification du panel via la table app_roles — les admins passent toujours
     if (panel !== null && !isAdmin) {
-      const required = Array.isArray(panel) ? panel : [panel];
-      const hasAccess = required.some(p => userPanels.includes(p));
-      if (!hasAccess) {
+      const rolePanels = await _loadRolePanels();
+      const allowed    = rolePanels[userRole] || [];
+      const required   = Array.isArray(panel) ? panel : [panel];
+      if (!required.some(p => allowed.includes(p))) {
         window.location.replace(root + 'index.html');
         return null;
       }
@@ -123,6 +137,10 @@ const AUTH = {
     if (!overlay) return;
     document.removeEventListener('keydown', overlay._keyHandler);
     overlay.remove();
+  },
+
+  clearRolesCache() {
+    _rolePanelsCache = null;
   },
 
   async _saveNewPwd() {
