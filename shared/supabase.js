@@ -219,6 +219,24 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Rôles & Permissions ────────────────────────────
+  async getRoles() {
+    const { data, error } = await _sb.from('app_roles').select('*').order('slug');
+    if (error) throw error;
+    return data || [];
+  },
+
+  async upsertRole(slug, label, panels) {
+    const { error } = await _sb.from('app_roles')
+      .upsert({ slug, label, panels }, { onConflict: 'slug' });
+    if (error) throw error;
+  },
+
+  async deleteRole(slug) {
+    const { error } = await _sb.from('app_roles').delete().eq('slug', slug);
+    if (error) throw error;
+  },
+
   // ── Gestion des comptes (Edge Function) ───────────
   async _callUsers(method, body) {
     const session = await this.getSession();

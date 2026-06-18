@@ -3,15 +3,30 @@
 //  Doit être chargé APRÈS supabase.js
 // ══════════════════════════════════════════════════════
 
+let _rolePanelsCache = null;
+
+async function _loadRolePanels() {
+  if (_rolePanelsCache) return _rolePanelsCache;
+  try {
+    const roles = await SB.getRoles();
+    _rolePanelsCache = {};
+    roles.forEach(r => { _rolePanelsCache[r.slug] = r.panels || []; });
+  } catch {
+    _rolePanelsCache = {};
+  }
+  return _rolePanelsCache;
+}
+
 const AUTH = {
 
   /**
    * À appeler sur chaque page protégée.
    * @param {object} opts
-   *   loginUrl    {string}            — chemin relatif vers login.html depuis cette page
+   *   loginUrl    {string}              — chemin relatif vers login.html depuis cette page
    *   role        {string|string[]|null} — 'admin', ['admin','mcd'], ou null = tout connecté
+   *   panel       {string|string[]|null} — panel(s) requis ; les admins passent toujours
    */
-  async guard({ loginUrl = 'login.html', role = null } = {}) {
+  async guard({ loginUrl = 'login.html', role = null, panel = null } = {}) {
     // Overlay immédiat pour éviter le flash de contenu
     const overlay = document.createElement('div');
     overlay.id = 'auth-overlay';
@@ -25,13 +40,26 @@ const AUTH = {
     }
 
     const userRole = session.user.user_metadata?.role || 'floor';
+    const isAdmin  = userRole === 'admin';
+
+    const depth = (loginUrl.match(/\.\.\//g) || []).length;
+    const root  = depth > 0 ? '../'.repeat(depth) : './';
 
     // Vérification du rôle (string ou tableau)
     if (role !== null) {
       const allowed = Array.isArray(role) ? role : [role];
       if (!allowed.includes(userRole)) {
-        const depth = (loginUrl.match(/\.\.\//g) || []).length;
-        const root  = depth > 0 ? '../'.repeat(depth) : './';
+        window.location.replace(root + 'index.html');
+        return null;
+      }
+    }
+
+    // Vérification du panel via la table app_roles — les admins passent toujours
+    if (panel !== null && !isAdmin) {
+      const rolePanels = await _loadRolePanels();
+      const allowed    = rolePanels[userRole] || [];
+      const required   = Array.isArray(panel) ? panel : [panel];
+      if (!required.some(p => allowed.includes(p))) {
         window.location.replace(root + 'index.html');
         return null;
       }
@@ -109,6 +137,10 @@ const AUTH = {
     if (!overlay) return;
     document.removeEventListener('keydown', overlay._keyHandler);
     overlay.remove();
+  },
+
+  clearRolesCache() {
+    _rolePanelsCache = null;
   },
 
   async _saveNewPwd() {

@@ -268,7 +268,7 @@
 <script src="../shared/tournaments.js"></script>
 <script src="../shared/auth.js"></script>
 <script>
-AUTH.guard({ loginUrl: '../login.html', role: 'admin' }).then(function(user) {
+AUTH.guard({ loginUrl: '../login.html', panel: 'configurations' }).then(function(user) {
   if (!user) return;
   loadAndRender();
 });
