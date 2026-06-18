@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.14.0', date: '2026-06-18', message: 'Gestion des accès par panel — système de rôles via table Supabase app_roles, permissions par panel configurables par rôle, modals de création/édition comptes et permissions dans Admin ; Ranking — logos Barrière Casino regroupés dans shared/logos/, polices Bebas Neue + Barlow Condensed, mise en page A4 pleine largeur, montant en italique' },
   { version: 'v1.13.0', date: '2026-06-18', message: 'Navigation admin restructurée en 2 sections (Déclarations · Configurations) ; nouvelle carte Courriers PN ; page courriers redessinée avec onglet Annulation de tournoi (SIPJ 33) ; renommage Config Comptes' },
   { version: 'v1.12.0', date: '2026-06-18', message: 'Nettoyage codebase — suppression dossier data/ et bloc BarriereFS (~100 lignes) ; CSS tool-card centralisé dans barriere.css ; textarea ajouté au sélecteur global ; variables CSS incorrectes corrigées dans comptes.html' },
   { version: 'v1.11.1', date: '2026-06-11', message: 'Accès MCD — Leaderboard et Prize Pool accessibles aux MCD ; grilles de navigation auto-centrées (index + admin)' },
