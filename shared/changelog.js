@@ -2,6 +2,7 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.12.0', date: '2026-06-18', message: 'Nettoyage codebase — suppression dossier data/ et bloc BarriereFS (~100 lignes) ; CSS tool-card centralisé dans barriere.css ; textarea ajouté au sélecteur global ; variables CSS incorrectes corrigées dans comptes.html' },
   { version: 'v1.11.1', date: '2026-06-11', message: 'Accès MCD — Leaderboard et Prize Pool accessibles aux MCD ; grilles de navigation auto-centrées (index + admin)' },
   { version: 'v1.11.0', date: '2026-06-10', message: 'Gestion des comptes — page dédiée dans Admin ; création/édition/suppression de comptes (Admin, MCD, Floor) via Edge Function Supabase sécurisée' },
   { version: 'v1.10.0', date: '2026-06-10', message: 'Config Tournois — page dédiée dans Admin avec semainier par jour (cartes edit/delete) ; auto-sélection du tournoi du jour dans Saisir ; suggestion dorée si plusieurs tournois le même jour' },
