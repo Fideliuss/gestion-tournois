@@ -14,6 +14,38 @@
 .period-row .fg-date { flex: 2; min-width: 220px; max-width: 340px; }
 .period-row .btn { flex-shrink: 0; align-self: flex-end; }
 
+/* ── Sélecteur de type de document ── */
+.doc-type-bar {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 20px;
+}
+.doc-type-btn {
+  flex: 1;
+  padding: 14px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--bg-card);
+  border: 1px solid rgba(196,160,74,.14);
+  border-radius: 3px;
+  font-family: var(--f-ui);
+  cursor: pointer;
+  transition: all .18s;
+  text-align: center;
+}
+.doc-type-btn:hover:not(.active) { color: var(--text); border-color: rgba(196,160,74,.35); }
+.doc-type-btn.active {
+  background: rgba(196,160,74,.13);
+  color: var(--gold);
+  border: 1px solid rgba(196,160,74,.38);
+}
+body.light .doc-type-btn { background: rgba(255,252,244,.97); }
+
 /* ── Sélecteur de courrier ── */
 .tabs-bar {
   display: flex;
