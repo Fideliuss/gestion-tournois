@@ -740,7 +740,7 @@ async function printClassement() {
   const html = `
     <div class="cp-header">
       <div>
-        <div class="cp-logo">Casino Barrière · Bordeaux</div>
+        <div class="cp-logo">Barrière Casino · Bordeaux</div>
         <div class="cp-title">Classement Challenge 2025 / 2026</div>
       </div>
       <div class="cp-meta">Au ${today}<br>${sorted.length} joueur${sorted.length>1?'s':''}</div>
