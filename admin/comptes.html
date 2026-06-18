@@ -18,13 +18,13 @@
     .btn-new {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 9px 20px; border-radius: 3px; border: none; cursor: pointer;
-      font-size: 13px; font-weight: 600; font-family: var(--f-body);
-      background: rgba(var(--gold-rgb),.12); color: var(--gold);
-      border: 1px solid rgba(var(--gold-rgb),.28);
+      font-size: 13px; font-weight: 600; font-family: var(--f-ui);
+      background: rgba(196,160,74,.12); color: var(--gold);
+      border: 1px solid rgba(196,160,74,.28);
       transition: background .2s, border-color .2s;
       margin-bottom: 28px;
     }
-    .btn-new:hover { background: rgba(var(--gold-rgb),.2); border-color: rgba(var(--gold-rgb),.5); }
+    .btn-new:hover { background: rgba(196,160,74,.2); border-color: rgba(196,160,74,.5); }
 
     /* ── Liste des comptes ── */
     .accounts-list { display: flex; flex-direction: column; gap: 10px; }
@@ -38,7 +38,7 @@
     }
     .account-card:hover { border-color: rgba(255,255,255,.12); }
 
-    .account-email { flex: 1; font-size: 14px; color: var(--cream); font-family: var(--f-body); }
+    .account-email { flex: 1; font-size: 14px; color: var(--cream); font-family: var(--f-ui); }
 
     .role-chip {
       font-size: 10px; font-weight: 700; letter-spacing: .1em;
@@ -54,7 +54,7 @@
     .account-actions { display: flex; gap: 8px; }
     .btn-edit, .btn-del {
       border: none; border-radius: 2px; cursor: pointer; padding: 5px 12px;
-      font-size: 12px; font-family: var(--f-body); transition: background .15s;
+      font-size: 12px; font-family: var(--f-ui); transition: background .15s;
     }
     .btn-edit { background: rgba(255,255,255,.07); color: var(--text-muted); }
     .btn-edit:hover { background: rgba(255,255,255,.12); color: var(--cream); }
@@ -66,7 +66,7 @@
     /* ── Panneau formulaire ── */
     .form-panel {
       background: var(--bg-card);
-      border: 1px solid rgba(var(--gold-rgb),.2);
+      border: 1px solid rgba(196,160,74,.2);
       border-radius: 3px; padding: 24px; margin-bottom: 28px;
     }
     .form-panel.hidden { display: none; }
@@ -79,11 +79,11 @@
     .fg input, .fg select {
       width: 100%; padding: 9px 12px; border-radius: 2px;
       background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
-      color: var(--cream); font-size: 13px; font-family: var(--f-body);
+      color: var(--cream); font-size: 13px; font-family: var(--f-ui);
       box-sizing: border-box;
     }
     .fg input:focus, .fg select:focus {
-      outline: none; border-color: rgba(var(--gold-rgb),.5);
+      outline: none; border-color: rgba(196,160,74,.5);
     }
     .fg select option { background: #1a1610; }
 
@@ -97,17 +97,17 @@
     .form-actions { display: flex; gap: 10px; margin-top: 20px; }
     .btn-save {
       padding: 9px 22px; border-radius: 2px; border: none; cursor: pointer;
-      background: rgba(var(--gold-rgb),.18); color: var(--gold);
-      border: 1px solid rgba(var(--gold-rgb),.35);
-      font-size: 13px; font-weight: 600; font-family: var(--f-body);
+      background: rgba(196,160,74,.18); color: var(--gold);
+      border: 1px solid rgba(196,160,74,.35);
+      font-size: 13px; font-weight: 600; font-family: var(--f-ui);
       transition: background .2s;
     }
-    .btn-save:hover { background: rgba(var(--gold-rgb),.28); }
+    .btn-save:hover { background: rgba(196,160,74,.28); }
     .btn-save:disabled { opacity: .5; cursor: not-allowed; }
     .btn-cancel {
       padding: 9px 16px; border-radius: 2px; border: 1px solid rgba(255,255,255,.1);
       background: transparent; color: var(--text-muted); cursor: pointer;
-      font-size: 13px; font-family: var(--f-body); transition: border-color .15s;
+      font-size: 13px; font-family: var(--f-ui); transition: border-color .15s;
     }
     .btn-cancel:hover { border-color: rgba(255,255,255,.2); color: var(--cream); }
 
