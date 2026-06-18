@@ -10,11 +10,15 @@
     .hdr { margin-bottom: 52px; }
 
     /* ── Couleurs par carte ── */
-    .tool-card             { --accent: 128,108,196; } /* indigo  */
-    .tool-card.c-rose      { --accent: 196,105,90;  } /* corail  */
+    .tool-card               { --accent: 128,108,196; } /* indigo  */
+    .tool-card.c-rose        { --accent: 196,105,90;  } /* corail  */
+    .tool-card.c-amber       { --accent: 196,148,62;  } /* ambre   */
+
+    /* ── Sections ── */
+    .admin-section { width: 100%; margin-bottom: 36px; }
 
     .footer {
-      margin-top: 52px; text-align: center;
+      margin-top: 16px; text-align: center;
       font-size: 10px; letter-spacing: .14em; color: var(--text-muted);
     }
 
@@ -31,31 +35,48 @@
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
     <div class="hdr-title">Gestion <em>Administrative</em></div>
-    <div class="hdr-sub">Déclarations mensuelles — Service Course et Jeux · Police Judiciaire</div>
+    <div class="hdr-sub">Déclarations · Courriers · Configurations</div>
   </div>
 
-  <div class="grid">
+  <!-- ── Déclarations ── -->
+  <div class="admin-section">
+    <div class="sec">Déclarations</div>
+    <div class="grid">
 
-    <a href="declaration/declaration.html" class="tool-card">
-      <div class="tool-badge">📋</div>
-      <div class="tool-name">Déclaration <em>Tournois</em></div>
-    </a>
+      <a href="declaration/declaration.html" class="tool-card">
+        <div class="tool-badge">📋</div>
+        <div class="tool-name">Déclaration <em>Tournois</em></div>
+      </a>
 
-    <a href="extras/extras.html" class="tool-card c-rose">
-      <div class="tool-badge">👥</div>
-      <div class="tool-name">Déclaration <em>Extras</em></div>
-    </a>
+      <a href="extras/extras.html" class="tool-card c-rose">
+        <div class="tool-badge">👥</div>
+        <div class="tool-name">Déclaration <em>Extras</em></div>
+      </a>
 
-    <a href="admin/tournois.html" class="tool-card" style="--accent:196,160,74">
-      <div class="tool-badge">🎴</div>
-      <div class="tool-name">Config <em>Tournois</em></div>
-    </a>
+      <a href="declaration/courriers.html" class="tool-card c-amber">
+        <div class="tool-badge">✉</div>
+        <div class="tool-name">Courriers <em>PN</em></div>
+      </a>
 
-    <a href="admin/comptes.html" class="tool-card" style="--accent:80,160,200">
-      <div class="tool-badge">🔑</div>
-      <div class="tool-name">Gestion <em>Comptes</em></div>
-    </a>
+    </div>
+  </div>
 
+  <!-- ── Configurations ── -->
+  <div class="admin-section">
+    <div class="sec">Configurations</div>
+    <div class="grid">
+
+      <a href="admin/tournois.html" class="tool-card" style="--accent:196,160,74">
+        <div class="tool-badge">🎴</div>
+        <div class="tool-name">Config <em>Tournois</em></div>
+      </a>
+
+      <a href="admin/comptes.html" class="tool-card" style="--accent:80,160,200">
+        <div class="tool-badge">🔑</div>
+        <div class="tool-name">Config <em>Comptes</em></div>
+      </a>
+
+    </div>
   </div>
 
   <div class="footer">Casino Barrière Bordeaux · Outils internes tournois</div>

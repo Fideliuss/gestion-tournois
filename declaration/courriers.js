@@ -142,6 +142,7 @@ const TEMPLATES_DEFAULT = {
 let currentTab    = 'ministre';
 let currentTplTab = 'ministre';
 let templates;
+let docType = 'mensuel';
 
 /* ── Persistance des templates ── */
 function loadTemplates() {
@@ -303,6 +304,18 @@ document.addEventListener('DOMContentLoaded', () => {
     selDateM.appendChild(o);
   });
 
+  // Peuple le select mois de la date du courrier annulation
+  const annulDateM = document.getElementById('annul-date-m');
+  MOIS_LETTRE.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1;
+    o.textContent = m;
+    annulDateM.appendChild(o);
+  });
+  document.getElementById('annul-date-d').value = now.getDate();
+  document.getElementById('annul-date-m').value = now.getMonth() + 1;
+  document.getElementById('annul-date-y').value = now.getFullYear();
+
   loadTemplates();
   renderTplEditor('ministre');
   onPeriodChange(); // auto-remplit date courrier + hint + renderAll
@@ -318,6 +331,7 @@ function selectTab(tabId) {
 
 /* ── Rendu principal ── */
 function renderAll() {
+  if (docType === 'annulation') { renderAnnulation(); return; }
   const month = getMonth();
   const year  = getYear();
   const rows  = buildRows(month, year);
@@ -403,4 +417,88 @@ function generateLetterHtml(tpl, rows, month, year) {
 /* ── Impression ── */
 function printCurrent() {
   window.print();
+}
+
+/* ── Sélecteur de type de document ── */
+function selectDocType(type) {
+  docType = type;
+  document.getElementById('section-mensuel').style.display    = type === 'mensuel'    ? '' : 'none';
+  document.getElementById('section-annulation').style.display = type === 'annulation' ? '' : 'none';
+  document.getElementById('dtype-mensuel').classList.toggle('active',    type === 'mensuel');
+  document.getElementById('dtype-annulation').classList.toggle('active', type === 'annulation');
+  renderAll();
+}
+
+/* ── Annulation de tournoi ── */
+function formatAnnulLetterDate() {
+  const d = +document.getElementById('annul-date-d').value || 0;
+  const m = +document.getElementById('annul-date-m').value || 0;
+  const y = +document.getElementById('annul-date-y').value || 0;
+  if (!d || !m || !y) return '—';
+  return `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
+}
+
+function renderAnnulation() {
+  const dateStr     = formatAnnulLetterDate();
+  const tournoiDate = document.getElementById('annul-tournoi-date')?.value || '';
+  const tournoiNom  = document.getElementById('annul-tournoi-nom')?.value  || '';
+  const motif       = document.getElementById('annul-motif')?.value        || '';
+  document.getElementById('letter-output').innerHTML =
+    generateAnnulationHtml(templates.sipj, tournoiDate, tournoiNom, motif, dateStr);
+}
+
+function generateAnnulationHtml(tpl, tournoiDate, tournoiNom, motif, dateStr) {
+  const recipientHtml = tpl.recipient.map(esc).join('<br>');
+
+  let tournoiDateStr = '—';
+  if (tournoiDate) {
+    const [y, m, d] = tournoiDate.split('-');
+    tournoiDateStr = `${d} ${MOIS_LETTRE[+m - 1]} ${y}`;
+  }
+
+  const nomStr    = tournoiNom.trim() || '—';
+  const motifPara = motif.trim()
+    ? `<p>En effet, ${esc(motif.trim())}.</p>`
+    : '';
+
+  return `
+<div class="letter">
+
+  <div class="letter-header">
+    <div class="letter-header-left">
+      <img class="letter-logo-img" src="../shared/logo.png" alt="Casino Barrière Bordeaux">
+    </div>
+    <div class="letter-header-right">
+      <div class="letter-recipient">${recipientHtml}</div>
+      <div class="letter-date">Bordeaux, le ${esc(dateStr)}</div>
+    </div>
+  </div>
+
+  <div class="letter-objet">
+    <span class="letter-objet-lbl">Objet&nbsp;:</span> Annulation du tournoi ${esc(nomStr)} du ${esc(tournoiDateStr)}.
+  </div>
+
+  <div class="letter-body">
+    <p>J'ai l'honneur de vous informer de l'annulation du tournoi de Texas Hold'em Poker intitulé « ${esc(nomStr)} », prévu le ${esc(tournoiDateStr)}.</p>
+    ${motifPara}
+    <p>${esc(tpl.closingFormula)}</p>
+  </div>
+
+  <div class="letter-signature-space"></div>
+  <div class="letter-signature">
+    <div class="letter-signature-inner">
+      ${esc(tpl.sigName)}<br>
+      Directeur Responsable
+    </div>
+  </div>
+
+  <div class="letter-spacer"></div>
+
+  <div class="letter-footer">
+    Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
+    Casino Barrière Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
+    Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
+  </div>
+
+</div>`;
 }
