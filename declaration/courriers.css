@@ -378,7 +378,7 @@ body.light .tabs-bar { background: rgba(200,185,150,.25); border-color: rgba(138
 }
 
 /* ── Espaceur flexible ── */
-.letter-spacer { flex: 1; max-height: 4mm; }
+.letter-spacer { flex: 1; }
 
 /* ── Pied de page ── */
 .letter-footer {
