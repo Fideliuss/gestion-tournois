@@ -111,6 +111,65 @@
     }
     .btn-cancel:hover { border-color: rgba(255,255,255,.2); color: var(--cream); }
 
+    /* ── Gestion des accès ── */
+    .access-section { margin-top: 40px; }
+    .access-section-title {
+      font-family: var(--f-display); font-size: 16px; font-weight: 600;
+      color: var(--cream); margin-bottom: 6px;
+    }
+    .access-section-sub {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 20px;
+      letter-spacing: .04em;
+    }
+    .access-table-wrap { overflow-x: auto; }
+    .access-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 12px; font-family: var(--f-ui);
+    }
+    .access-table th {
+      padding: 8px 12px; text-align: center;
+      font-size: 10px; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-muted);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .access-table th.col-user { text-align: left; min-width: 180px; }
+    .access-table td {
+      padding: 10px 12px; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      vertical-align: middle;
+    }
+    .access-table td.col-user {
+      text-align: left; color: var(--cream);
+      font-size: 12px;
+    }
+    .access-table td.col-user .role-chip { margin-left: 8px; }
+    .access-table tr:last-child td { border-bottom: none; }
+    .access-table tr:hover td { background: rgba(255,255,255,.02); }
+
+    .access-cb {
+      width: 16px; height: 16px; cursor: pointer;
+      accent-color: var(--gold);
+    }
+    .access-cb:disabled { opacity: .35; cursor: not-allowed; }
+    .access-admin-dot {
+      display: inline-block; width: 10px; height: 10px;
+      border-radius: 50%; background: rgba(196,160,74,.35);
+      border: 1px solid rgba(196,160,74,.5);
+    }
+    .access-save-row {
+      margin-top: 20px; display: flex; align-items: center; gap: 14px;
+    }
+    .access-msg {
+      font-size: 12px; display: none;
+    }
+    .access-msg.ok  { color: rgb(120,200,120); }
+    .access-msg.err { color: rgb(220,120,120); }
+
+    body.light .access-table th { border-bottom-color: rgba(0,0,0,.1); }
+    body.light .access-table td { border-bottom-color: rgba(0,0,0,.05); }
+    body.light .access-table td.col-user { color: #1a1610; }
+    body.light .access-table tr:hover td { background: rgba(0,0,0,.02); }
+
     /* ── Alertes ── */
     .alert { padding: 10px 14px; border-radius: 2px; font-size: 13px;
       margin-bottom: 16px; display: none; }
@@ -183,6 +242,34 @@
   <div id="accounts-list" class="accounts-list">
     <div class="loader">Chargement…</div>
   </div>
+
+  <!-- Gestion des accès -->
+  <div class="access-section">
+    <div class="access-section-title">Gestion des accès</div>
+    <div class="access-section-sub">Définissez quels panneaux sont accessibles pour chaque compte. Les admins ont accès à tout.</div>
+    <div class="access-table-wrap">
+      <table class="access-table">
+        <thead>
+          <tr>
+            <th class="col-user">Compte</th>
+            <th>Déclarations</th>
+            <th>Extras</th>
+            <th>Configurations</th>
+            <th>Prize Pool</th>
+            <th>Leaderboard</th>
+          </tr>
+        </thead>
+        <tbody id="access-table-body">
+          <tr><td colspan="6" class="loader">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="access-save-row">
+      <button class="btn-save" id="access-save-btn" onclick="saveAccess()">Enregistrer les accès →</button>
+      <span class="access-msg" id="access-msg"></span>
+    </div>
+  </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -194,11 +281,20 @@
 
   let _editId = null;
 
+  const PANELS = [
+    { id: 'declarations',   label: 'Déclarations' },
+    { id: 'extras',         label: 'Extras'        },
+    { id: 'configurations', label: 'Configurations'},
+    { id: 'prize-pool',     label: 'Prize Pool'    },
+    { id: 'leaderboard',    label: 'Leaderboard'   },
+  ];
+
   // ── Chargement ───────────────────────────────────────
   async function loadAndRender() {
     try {
       const users = await SB.listUsers();
       renderList(users);
+      renderAccessTable(users);
     } catch(e) {
       showErr('Erreur de chargement : ' + e.message);
       document.getElementById('accounts-list').innerHTML = '';
@@ -235,6 +331,68 @@
         + '</div>'
         + '</div>';
     }).join('');
+  }
+
+  // ── Tableau des accès ────────────────────────────────
+  function renderAccessTable(users) {
+    const order = { admin: 0, mcd: 1, floor: 2 };
+    const sorted = [...users].sort(function(a, b) {
+      const ro = (order[a.role] ?? 3) - (order[b.role] ?? 3);
+      return ro !== 0 ? ro : a.email.localeCompare(b.email);
+    });
+
+    const tbody = document.getElementById('access-table-body');
+    tbody.innerHTML = sorted.map(function(u) {
+      const isAdmin    = u.role === 'admin';
+      const chipClass  = isAdmin ? 'chip-admin' : (u.role === 'mcd' ? 'chip-mcd' : 'chip-floor');
+      const roleLabel  = isAdmin ? 'Admin' : (u.role === 'mcd' ? 'MCD' : 'Floor');
+      const shortEmail = u.email.split('@')[0];
+
+      const cells = PANELS.map(function(p) {
+        if (isAdmin) {
+          return '<td><span class="access-admin-dot" title="Accès total"></span></td>';
+        }
+        const checked = (u.panels || []).includes(p.id) ? 'checked' : '';
+        return '<td><input type="checkbox" class="access-cb" data-uid="' + u.id + '" data-panel="' + p.id + '" ' + checked + '></td>';
+      }).join('');
+
+      return '<tr>'
+        + '<td class="col-user">' + shortEmail + '<span class="role-chip ' + chipClass + '">' + roleLabel + '</span></td>'
+        + cells
+        + '</tr>';
+    }).join('');
+  }
+
+  async function saveAccess() {
+    const btn = document.getElementById('access-save-btn');
+    const msg = document.getElementById('access-msg');
+    msg.style.display = 'none';
+    btn.disabled = true;
+
+    try {
+      const checkboxes = document.querySelectorAll('.access-cb');
+      const byUser = {};
+      checkboxes.forEach(function(cb) {
+        const uid = cb.dataset.uid;
+        if (!byUser[uid]) byUser[uid] = [];
+        if (cb.checked) byUser[uid].push(cb.dataset.panel);
+      });
+
+      await Promise.all(Object.entries(byUser).map(function([id, panels]) {
+        return SB.updateUser(id, { panels });
+      }));
+
+      msg.textContent = 'Accès enregistrés ✓';
+      msg.className = 'access-msg ok';
+      msg.style.display = 'inline';
+      setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    } catch(e) {
+      msg.textContent = 'Erreur : ' + e.message;
+      msg.className = 'access-msg err';
+      msg.style.display = 'inline';
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   // ── Formulaire ───────────────────────────────────────

@@ -49,7 +49,8 @@ Deno.serve(async (req) => {
       const users = data.users.map((u) => ({
         id:         u.id,
         email:      u.email,
-        role:       u.user_metadata?.role || 'floor',
+        role:       u.user_metadata?.role   || 'floor',
+        panels:     u.user_metadata?.panels || [],
         createdAt:  u.created_at,
         lastSignIn: u.last_sign_in_at,
       }));
@@ -58,28 +59,31 @@ Deno.serve(async (req) => {
 
     // ── POST — créer un utilisateur ───────────────────
     if (req.method === 'POST') {
-      const { email, password, role } = await req.json();
+      const { email, password, role, panels } = await req.json();
       if (!email || !password || !role) {
         return json({ error: 'email, password et role sont requis' }, 400);
       }
       const { data, error } = await admin.auth.admin.createUser({
         email,
         password,
-        user_metadata: { role },
+        user_metadata: { role, panels: panels || [] },
         email_confirm: true,
       });
       if (error) throw error;
-      return json({ user: { id: data.user.id, email: data.user.email, role } }, 201);
+      return json({ user: { id: data.user.id, email: data.user.email, role, panels: panels || [] } }, 201);
     }
 
     // ── PATCH — modifier rôle et/ou mot de passe ──────
     if (req.method === 'PATCH') {
       const body = await req.json();
-      const { id, role, password } = body;
+      const { id, role, password, panels } = body;
       if (!id) return json({ error: 'id est requis' }, 400);
 
       const updates: Record<string, unknown> = {};
-      if (role)     updates.user_metadata = { role };
+      const meta: Record<string, unknown> = {};
+      if (role     !== undefined) meta.role   = role;
+      if (panels   !== undefined) meta.panels = panels;
+      if (Object.keys(meta).length > 0) updates.user_metadata = meta;
       if (password) updates.password = password;
 
       const { error } = await admin.auth.admin.updateUserById(id, updates);

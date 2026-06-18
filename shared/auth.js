@@ -8,10 +8,11 @@ const AUTH = {
   /**
    * À appeler sur chaque page protégée.
    * @param {object} opts
-   *   loginUrl    {string}            — chemin relatif vers login.html depuis cette page
+   *   loginUrl    {string}              — chemin relatif vers login.html depuis cette page
    *   role        {string|string[]|null} — 'admin', ['admin','mcd'], ou null = tout connecté
+   *   panel       {string|string[]|null} — panel(s) requis ; les admins passent toujours
    */
-  async guard({ loginUrl = 'login.html', role = null } = {}) {
+  async guard({ loginUrl = 'login.html', role = null, panel = null } = {}) {
     // Overlay immédiat pour éviter le flash de contenu
     const overlay = document.createElement('div');
     overlay.id = 'auth-overlay';
@@ -24,14 +25,27 @@ const AUTH = {
       return null;
     }
 
-    const userRole = session.user.user_metadata?.role || 'floor';
+    const userRole   = session.user.user_metadata?.role   || 'floor';
+    const userPanels = session.user.user_metadata?.panels || [];
+    const isAdmin    = userRole === 'admin';
+
+    const depth = (loginUrl.match(/\.\.\//g) || []).length;
+    const root  = depth > 0 ? '../'.repeat(depth) : './';
 
     // Vérification du rôle (string ou tableau)
     if (role !== null) {
       const allowed = Array.isArray(role) ? role : [role];
       if (!allowed.includes(userRole)) {
-        const depth = (loginUrl.match(/\.\.\//g) || []).length;
-        const root  = depth > 0 ? '../'.repeat(depth) : './';
+        window.location.replace(root + 'index.html');
+        return null;
+      }
+    }
+
+    // Vérification du panel — les admins ont accès à tout
+    if (panel !== null && !isAdmin) {
+      const required = Array.isArray(panel) ? panel : [panel];
+      const hasAccess = required.some(p => userPanels.includes(p));
+      if (!hasAccess) {
         window.location.replace(root + 'index.html');
         return null;
       }
