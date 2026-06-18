@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestion Administrative — Casino Barrière Bordeaux</title>
+  <title>Déclarations — Casino Barrière Bordeaux</title>
   <link rel="stylesheet" href="shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
 
-    .tool-card               { --accent: 128,108,196; } /* indigo  */
-    .tool-card.c-gold        { --accent: 196,160,74;  } /* or      */
+    .tool-card           { --accent: 128,108,196; } /* indigo */
+    .tool-card.c-rose    { --accent: 196,105,90;  } /* corail */
 
     .footer {
       margin-top: 52px; text-align: center;
@@ -24,24 +24,24 @@
 </button>
 
 <div class="app">
-  <a href="index.html" class="back">← Menu</a>
+  <a href="admin.html" class="back">← Administration</a>
 
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
-    <div class="hdr-title">Gestion <em>Administrative</em></div>
-    <div class="hdr-sub">Déclarations · Configurations</div>
+    <div class="hdr-title">Espace <em>Déclarations</em></div>
+    <div class="hdr-sub">Déclarations mensuelles — Service Course et Jeux · Police Judiciaire</div>
   </div>
 
   <div class="grid">
 
-    <a href="declarations.html" class="tool-card">
+    <a href="declaration/declaration.html" class="tool-card">
       <div class="tool-badge">📋</div>
-      <div class="tool-name">Espace <em>Déclarations</em></div>
+      <div class="tool-name">Déclaration <em>Tournois</em></div>
     </a>
 
-    <a href="configurations.html" class="tool-card c-gold">
-      <div class="tool-badge">🔧</div>
-      <div class="tool-name">Espace <em>Configurations</em></div>
+    <a href="extras/extras.html" class="tool-card c-rose">
+      <div class="tool-badge">👥</div>
+      <div class="tool-name">Déclaration <em>Extras</em></div>
     </a>
 
   </div>

@@ -142,6 +142,8 @@ const TEMPLATES_DEFAULT = {
 let currentTab    = 'ministre';
 let currentTplTab = 'ministre';
 let templates;
+let docType    = 'mensuel';
+let annulDates = [];
 
 /* ── Persistance des templates ── */
 function loadTemplates() {
@@ -303,8 +305,21 @@ document.addEventListener('DOMContentLoaded', () => {
     selDateM.appendChild(o);
   });
 
+  // Peuple le select mois de la date du courrier annulation
+  const annulDateM = document.getElementById('annul-date-m');
+  MOIS_LETTRE.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1;
+    o.textContent = m;
+    annulDateM.appendChild(o);
+  });
+  document.getElementById('annul-date-d').value = now.getDate();
+  document.getElementById('annul-date-m').value = now.getMonth() + 1;
+  document.getElementById('annul-date-y').value = now.getFullYear();
+
   loadTemplates();
   renderTplEditor('ministre');
+  renderAnnulDateList();
   onPeriodChange(); // auto-remplit date courrier + hint + renderAll
 });
 
@@ -318,6 +333,7 @@ function selectTab(tabId) {
 
 /* ── Rendu principal ── */
 function renderAll() {
+  if (docType === 'annulation') { renderAnnulation(); return; }
   const month = getMonth();
   const year  = getYear();
   const rows  = buildRows(month, year);
@@ -403,4 +419,186 @@ function generateLetterHtml(tpl, rows, month, year) {
 /* ── Impression ── */
 function printCurrent() {
   window.print();
+}
+
+/* ── Sélecteur de type de document ── */
+function selectDocType(type) {
+  docType = type;
+  document.getElementById('section-mensuel').style.display    = type === 'mensuel'    ? '' : 'none';
+  document.getElementById('section-annulation').style.display = type === 'annulation' ? '' : 'none';
+  document.getElementById('dtype-mensuel').classList.toggle('active',    type === 'mensuel');
+  document.getElementById('dtype-annulation').classList.toggle('active', type === 'annulation');
+  renderAll();
+}
+
+/* ── Annulation : gestion multi-dates ── */
+function addAnnulDate() {
+  const input = document.getElementById('annul-date-input');
+  const val   = input.value;
+  if (!val) return;
+  if (annulDates.includes(val)) { input.value = ''; return; }
+  annulDates.push(val);
+  annulDates.sort();
+  input.value = '';
+  renderAnnulDateList();
+  renderAnnulation();
+}
+
+function removeAnnulDate(idx) {
+  annulDates.splice(idx, 1);
+  renderAnnulDateList();
+  renderAnnulation();
+}
+
+function renderAnnulDateList() {
+  const container = document.getElementById('annul-date-list');
+  const objetEl   = document.getElementById('annul-objet-preview');
+  if (!annulDates.length) {
+    container.innerHTML = '<div class="annul-empty-hint">Aucune date ajoutée.</div>';
+    if (objetEl) objetEl.textContent = '—';
+    return;
+  }
+  container.innerHTML = annulDates.map((d, i) => {
+    const [y, m, day] = d.split('-').map(Number);
+    const dow   = new Date(y, m - 1, day).getDay();
+    const label = `${JOURS_LETTRE[dow]} ${String(day).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
+    return `<div class="annul-date-chip">${esc(label)}<button class="chip-remove" onclick="removeAnnulDate(${i})" title="Supprimer">✕</button></div>`;
+  }).join('');
+  if (objetEl) objetEl.textContent = formatAnnulObjet(annulDates);
+}
+
+/* ── Formatage des dates d'annulation ── */
+function _buildDateStr(dates) {
+  const sorted = [...dates].sort();
+  const parsed = sorted.map(d => {
+    const [y, m, day] = d.split('-').map(Number);
+    return { y, m, day };
+  });
+
+  if (parsed.length === 1) {
+    const { day, m, y } = parsed[0];
+    return { core: `${String(day).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`, range: false };
+  }
+
+  if (parsed.length >= 3) {
+    const isConsecutive = parsed.every((d, i) => {
+      if (i === 0) return true;
+      const prev = parsed[i - 1];
+      return (new Date(d.y, d.m - 1, d.day) - new Date(prev.y, prev.m - 1, prev.day)) === 86400000;
+    });
+    if (isConsecutive) {
+      const first = parsed[0];
+      const last  = parsed[parsed.length - 1];
+      if (first.m === last.m && first.y === last.y) {
+        return { core: `${String(first.day).padStart(2, '0')} au ${String(last.day).padStart(2, '0')} ${MOIS_LETTRE[first.m - 1]} ${first.y} inclus`, range: true };
+      }
+      return { core: `${String(first.day).padStart(2, '0')} ${MOIS_LETTRE[first.m - 1]} au ${String(last.day).padStart(2, '0')} ${MOIS_LETTRE[last.m - 1]} ${last.y} inclus`, range: true };
+    }
+  }
+
+  const allSameMonth = parsed.every(d => d.m === parsed[0].m && d.y === parsed[0].y);
+  if (allSameMonth) {
+    const { m, y } = parsed[0];
+    const days   = parsed.map(d => String(d.day).padStart(2, '0'));
+    const last   = days[days.length - 1];
+    const others = days.slice(0, -1);
+    return { core: `${others.join(', ')} et ${last} ${MOIS_LETTRE[m - 1]} ${y}`, range: false };
+  }
+
+  const full   = parsed.map(({ day, m, y }) => `${String(day).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`);
+  const last   = full[full.length - 1];
+  const others = full.slice(0, -1);
+  return { core: `${others.join(', ')} et ${last}`, range: false };
+}
+
+function formatAnnulDatesObjet(dates) {
+  if (!dates.length) return null;
+  const { core } = _buildDateStr(dates);
+  return `du ${core}`;
+}
+
+function formatAnnulDatesBody(dates) {
+  if (!dates.length) return null;
+  const { core, range } = _buildDateStr(dates);
+  return range ? `du ${core}` : `le ${core}`;
+}
+
+function formatAnnulObjet(dates) {
+  const dateStr = formatAnnulDatesObjet(dates);
+  if (!dateStr) return '—';
+  const plural = dates.length > 1;
+  return `Annulation ${plural ? 'des tournois' : 'du tournoi'} de Texas Hold'em Poker ${dateStr}.`;
+}
+
+/* ── Annulation de tournoi ── */
+function formatAnnulLetterDate() {
+  const d = +document.getElementById('annul-date-d').value || 0;
+  const m = +document.getElementById('annul-date-m').value || 0;
+  const y = +document.getElementById('annul-date-y').value || 0;
+  if (!d || !m || !y) return '—';
+  return `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
+}
+
+function renderAnnulation() {
+  const dateStr = formatAnnulLetterDate();
+  const motif   = document.getElementById('annul-motif')?.value || '';
+  document.getElementById('letter-output').innerHTML =
+    generateAnnulationHtml(templates.sipj, annulDates, motif, dateStr);
+}
+
+function generateAnnulationHtml(tpl, dates, motif, dateStr) {
+  const recipientHtml = tpl.recipient.map(esc).join('<br>');
+  const plural        = dates.length > 1;
+  const objetStr      = formatAnnulObjet(dates);
+  const bodyDatesStr  = formatAnnulDatesBody(dates) || '—';
+
+  const motifPara = motif.trim()
+    ? `<p>Cette annulation est rendue nécessaire en raison ${esc(motif.trim())}.</p>`
+    : '';
+
+  const closingFormula = 'Je vous prie d\'agréer, Monsieur le Commissaire Divisionnaire, l\'expression de ma très haute considération.';
+
+  return `
+<div class="letter">
+
+  <div class="letter-header">
+    <div class="letter-header-left">
+      <img class="letter-logo-img" src="../shared/logo.png" alt="Casino Barrière Bordeaux">
+    </div>
+    <div class="letter-header-right">
+      <div class="letter-recipient">${recipientHtml}</div>
+      <div class="letter-date">Bordeaux, le ${esc(dateStr)}</div>
+    </div>
+  </div>
+
+  <div class="letter-objet">
+    <span class="letter-objet-lbl">Objet&nbsp;:</span> ${esc(objetStr)}
+  </div>
+
+  <div class="letter-salut">Monsieur le Commissaire Divisionnaire,</div>
+
+  <div class="letter-body">
+    <p>Conform&eacute;ment &agrave; l&rsquo;article 57-8 de l&rsquo;arr&ecirc;t&eacute; du 14 mai 2007, j&rsquo;ai l&rsquo;honneur de vous informer de l&rsquo;annulation ${plural ? 'des tournois' : 'du tournoi'} de Texas Hold&rsquo;em Poker ${plural ? 'qui devaient se tenir' : 'qui devait se tenir'} ${esc(bodyDatesStr)}.</p>
+    ${motifPara}
+    <p>Nous vous prions de bien vouloir prendre acte de cette information.</p>
+    <p>${esc(closingFormula)}</p>
+  </div>
+
+  <div class="letter-signature-space"></div>
+  <div class="letter-signature">
+    <div class="letter-signature-inner">
+      ${esc(tpl.sigName)}<br>
+      Directeur Responsable
+    </div>
+  </div>
+
+  <div class="letter-spacer"></div>
+
+  <div class="letter-footer">
+    Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
+    Casino Barrière Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
+    Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
+  </div>
+
+</div>`;
 }
