@@ -482,10 +482,10 @@
     .ranking-doc .rp-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; padding-top: 16px; }
     .ranking-doc .rp-logo   { height: 48px; width: auto; display: block; margin: 0 auto; }
     .ranking-doc .rp-hr     { height: 2px; background: #C4A04A; margin: 16px 0; border: none; }
-    .ranking-doc .rp-main-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: .08em; color: #8A6E30; margin-bottom: 4px; }
-    .ranking-doc .rp-challenge  { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; color: #888; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 4px; }
-    .ranking-doc .rp-date       { font-family: 'Barlow Condensed', sans-serif; font-style: italic; font-size: 13px; color: #666; }
-    .ranking-doc .rp-amount { font-family: 'Bebas Neue', sans-serif; font-size: 72px; line-height: 1; margin-bottom: 18px; color: #111; letter-spacing: .02em; }
+    .ranking-doc .rp-main-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .08em; color: #8A6E30; margin-bottom: 4px; }
+    .ranking-doc .rp-challenge  { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #888; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 4px; }
+    .ranking-doc .rp-date       { font-family: 'Barlow Condensed', sans-serif; font-style: italic; font-size: 17px; color: #666; }
+    .ranking-doc .rp-amount { font-family: 'Bebas Neue', sans-serif; font-style: italic; font-size: 72px; line-height: 1; margin-bottom: 18px; color: #111; letter-spacing: .02em; }
     .ranking-doc .rp-prizes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
     .ranking-doc .rp-prize  { border-radius: 4px; padding: 12px 14px; }
     .ranking-doc .rp-gold   { background: #C4A04A; color: #fff; }
@@ -609,20 +609,21 @@
       }
       .rp-main-title {
         font-family: 'Bebas Neue', sans-serif;
-        font-size: 32pt; letter-spacing: .1em;
+        font-size: 40pt; letter-spacing: .1em;
         color: #8A6E30; margin-bottom: 4pt;
       }
       .rp-challenge {
         font-family: 'Barlow Condensed', sans-serif;
-        font-size: 10pt; font-weight: 600; letter-spacing: .2em;
+        font-size: 14pt; font-weight: 600; letter-spacing: .2em;
         text-transform: uppercase; color: #888; margin-bottom: 4pt;
       }
       .rp-date {
         font-family: 'Barlow Condensed', sans-serif;
-        font-style: italic; font-size: 13pt; color: #555;
+        font-style: italic; font-size: 17pt; color: #555;
       }
       .rp-amount {
         font-family: 'Bebas Neue', sans-serif;
+        font-style: italic;
         font-size: 108pt; line-height: 1;
         letter-spacing: .03em;
         margin-bottom: 20pt; color: #111;
