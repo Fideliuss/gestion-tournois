@@ -553,7 +553,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
   const bodyDatesStr  = formatAnnulDatesBody(dates) || '—';
 
   const motifPara = motif.trim()
-    ? `<p>Cette annulation est rendue nécessaire en raison de ${esc(motif.trim())}.</p>`
+    ? `<p>Cette annulation est rendue nécessaire en raison ${esc(motif.trim())}.</p>`
     : '';
 
   const closingFormula = 'Je vous prie d\'agréer, Monsieur le Commissaire Divisionnaire, l\'expression de ma très haute considération.';
