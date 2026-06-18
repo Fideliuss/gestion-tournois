@@ -363,7 +363,7 @@ function generateLetterHtml(tpl, rows, month, year) {
   <!-- En-tête -->
   <div class="letter-header">
     <div class="letter-header-left">
-      <img class="letter-logo-img" src="../shared/logo.png" alt="Casino Barrière Bordeaux">
+      <img class="letter-logo-img" src="../shared/logos/logo.png" alt="Casino Barrière Bordeaux">
     </div>
     <div class="letter-header-right">
       <div class="letter-recipient">${recipientHtml}</div>
@@ -563,7 +563,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
 
   <div class="letter-header">
     <div class="letter-header-left">
-      <img class="letter-logo-img" src="../shared/logo.png" alt="Casino Barrière Bordeaux">
+      <img class="letter-logo-img" src="../shared/logos/logo.png" alt="Casino Barrière Bordeaux">
     </div>
     <div class="letter-header-right">
       <div class="letter-recipient">${recipientHtml}</div>

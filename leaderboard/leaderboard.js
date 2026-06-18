@@ -659,9 +659,7 @@ async function renderRankingDoc() {
 
   const inner = `
     <div class="rp-header">
-      <div class="rp-casino-lbl">Casino</div>
-      <div class="rp-brand">Barrière</div>
-      <div class="rp-city">Bordeaux</div>
+      <img class="rp-logo" src="../shared/logos/barriere_casino-logo-black.svg" alt="Casino Barrière Bordeaux" />
     </div>
     <div class="rp-hr"></div>
     <div class="rp-main-title">Montant du Ranking</div>
@@ -740,7 +738,7 @@ async function printClassement() {
   const html = `
     <div class="cp-header">
       <div>
-        <div class="cp-logo">Casino Barrière · Bordeaux</div>
+        <img class="cp-logo" src="../shared/logos/barriere_casino-logo-black.svg" alt="Casino Barrière Bordeaux" />
         <div class="cp-title">Classement Challenge 2025 / 2026</div>
       </div>
       <div class="cp-meta">Au ${today}<br>${sorted.length} joueur${sorted.length>1?'s':''}</div>
