@@ -658,28 +658,28 @@ async function renderRankingDoc() {
   const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 
   const inner = `
-    <div class="rp-header">
-      <div class="rp-casino-lbl">Casino</div>
-      <div class="rp-brand">Barrière</div>
-      <div class="rp-city">Bordeaux</div>
+    <div class="rp-top">
+      <img class="rp-logo" src="../shared/logos/barriere_casino-logo-black.svg" alt="Casino Barrière Bordeaux" />
+      <div class="rp-hr"></div>
+      <div class="rp-main-title">Montant du Ranking</div>
+      <div class="rp-challenge">Challenge Saisonnier · 2025 / 2026</div>
+      <div class="rp-date">Au ${todayCap}</div>
     </div>
-    <div class="rp-hr"></div>
-    <div class="rp-main-title">Montant du Ranking</div>
-    <div class="rp-challenge">Challenge Saisonnier · 2025 / 2026</div>
-    <div class="rp-date">Au ${todayCap}</div>
-    <div class="rp-amount">${total.toLocaleString('fr-FR')} €</div>
-    <div class="rp-prizes">
-      <div class="rp-prize rp-gold">
-        <div class="rp-p-medal">🥇</div>
-        <div class="rp-p-rank">1<sup>er</sup></div>
-        <div class="rp-p-amt">${fmtEur(prize1)}</div>
-        <div class="rp-p-pct">10% de la cagnotte</div>
-      </div>
-      <div class="rp-prize rp-silver">
-        <div class="rp-p-medal">🥈</div>
-        <div class="rp-p-rank">2<sup>ème</sup></div>
-        <div class="rp-p-amt">${fmtEur(prize2)}</div>
-        <div class="rp-p-pct">5% de la cagnotte</div>
+    <div class="rp-center">
+      <div class="rp-amount">${total.toLocaleString('fr-FR')} €</div>
+      <div class="rp-prizes">
+        <div class="rp-prize rp-gold">
+          <div class="rp-p-medal">🥇</div>
+          <div class="rp-p-rank">1<sup>er</sup></div>
+          <div class="rp-p-amt">${fmtEur(prize1)}</div>
+          <div class="rp-p-pct">10% de la cagnotte</div>
+        </div>
+        <div class="rp-prize rp-silver">
+          <div class="rp-p-medal">🥈</div>
+          <div class="rp-p-rank">2<sup>ème</sup></div>
+          <div class="rp-p-amt">${fmtEur(prize2)}</div>
+          <div class="rp-p-pct">5% de la cagnotte</div>
+        </div>
       </div>
     </div>
   `;
@@ -740,7 +740,7 @@ async function printClassement() {
   const html = `
     <div class="cp-header">
       <div>
-        <div class="cp-logo">Casino Barrière · Bordeaux</div>
+        <div class="cp-logo">Barrière Casino · Bordeaux</div>
         <div class="cp-title">Classement Challenge 2025 / 2026</div>
       </div>
       <div class="cp-meta">Au ${today}<br>${sorted.length} joueur${sorted.length>1?'s':''}</div>
