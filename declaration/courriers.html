@@ -106,25 +106,35 @@
   ══════════════════════════════ -->
   <div id="section-annulation" style="display:none">
 
-    <!-- Tournoi annulé -->
+    <!-- Tournois annulés -->
     <div class="card" style="max-width:1000px;width:100%">
-      <div class="sec">Tournoi annulé</div>
-      <div class="period-row" style="margin-bottom:20px">
-        <div class="fg">
-          <label class="fl">Date du tournoi</label>
-          <input type="date" id="annul-tournoi-date" onchange="renderAnnulation()"/>
+      <div class="sec">Dates des tournois annulés</div>
+
+      <div id="annul-date-list" class="annul-date-list"></div>
+
+      <div class="period-row" style="margin-top:8px;margin-bottom:0">
+        <div class="fg" style="max-width:220px">
+          <label class="fl">Ajouter une date</label>
+          <input type="date" id="annul-date-input"/>
         </div>
-        <div class="fg" style="flex:2;min-width:200px">
-          <label class="fl">Intitulé du tournoi</label>
-          <input type="text" id="annul-tournoi-nom" placeholder="ex : Monday Night Poker" oninput="renderAnnulation()"/>
-        </div>
-      </div>
-      <div class="fg">
-        <label class="fl">Motif de l'annulation (optionnel)</label>
-        <textarea id="annul-motif" rows="2" placeholder="ex : maintenance de la salle, événement exceptionnel…" oninput="renderAnnulation()"></textarea>
+        <button class="btn btn-gold" onclick="addAnnulDate()" style="align-self:flex-end">+ Ajouter</button>
       </div>
 
-      <div class="div" style="margin-top:20px"></div>
+      <div class="fg" style="margin-top:16px">
+        <label class="fl">Objet généré</label>
+        <div class="annul-objet-preview" id="annul-objet-preview">—</div>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sec">Motif de l'annulation <span class="sec-opt">(facultatif)</span></div>
+      <div class="fg">
+        <label class="fl">Raison</label>
+        <textarea id="annul-motif" rows="2" placeholder="ex : travaux prévus dans la salle de poker" oninput="renderAnnulation()"></textarea>
+        <div class="deadline-hint">→ Inséré dans : « Cette annulation est rendue nécessaire en raison de… »</div>
+      </div>
+
+      <div class="div"></div>
 
       <div class="sec">Date du courrier</div>
       <div class="period-row">
