@@ -69,7 +69,7 @@
       <div class="tool-name">Challenge <em>Saisonnier</em></div>
     </a>
 
-    <a href="admin/admin_tournois.html" class="tool-card c-teal" data-role="admin">
+    <a href="admin/admin_tournois.html" class="tool-card c-teal" data-panel="admin-tournois">
       <div class="tool-badge">📁</div>
       <div class="tool-name">Administration <em>Tournois</em></div>
     </a>
@@ -93,7 +93,7 @@
 <script src="shared/supabase.js"></script>
 <script src="shared/auth.js"></script>
 <script>
-AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
+AUTH.guard({ loginUrl: 'login.html', panel: 'tournois' }).then(async function(user) {
   if (!user) return;
   const role = user.user_metadata?.role || 'floor';
   const isAdmin = role === 'admin';
