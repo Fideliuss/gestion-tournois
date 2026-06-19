@@ -18,6 +18,7 @@ var CHANGELOG = [
   { version: 'v1.9.6', date: '2026-06-09', message: 'Import — inserts résultats découpés en chunks de 500 (fix dates à 0 résultats) ; countRows pour vérification ; détection ex-æquo dans import.html' },
   { version: 'v1.9.5', date: '2026-06-09', message: 'Fix leaderboard — clic session n\'ouvrait pas le panneau détail (type mismatch bigint Supabase string vs JS number)' },
   { version: 'v1.9.4', date: '2026-06-09', message: 'Audit — suppression des derniers vestiges BarriereFS (tournaments.js, barriere.js, barriere.css) ; cohérence AUTH.guard admin.html' },
+  { version: 'v1.9.3', date: '2026-06-09', message: 'Prize Pool — suppression du bouton "Données" survivant après migration Supabase' },
   { version: 'v1.9.2', date: '2026-06-09', message: 'Auth — changement de mot de passe in-app (modal 🔑 dans le badge utilisateur)' },
   { version: 'v1.9.1', date: '2026-06-09', message: 'Auth — passage mot de passe (email + password) + réinitialisation par lien e-mail ; suppression magic link' },
   { version: 'v1.9.0', date: '2026-06-09', message: 'Authentification magic link — accès sécurisé par e-mail, rôles admin/floor, badge utilisateur, déconnexion' },
