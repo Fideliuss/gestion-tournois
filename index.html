@@ -65,7 +65,7 @@
       <div class="tool-name">Prize Pool <em>Builder</em></div>
     </a>
 
-    <a href="leaderboard/leaderboard.html" class="tool-card c-blue" data-role="admin">
+    <a href="leaderboard/leaderboard.html" class="tool-card c-blue" data-panel="leaderboard">
       <div class="tool-badge">🏆</div>
       <div class="tool-name">Challenge <em>Saisonnier</em></div>
     </a>
@@ -94,12 +94,31 @@
 <script src="shared/supabase.js"></script>
 <script src="shared/auth.js"></script>
 <script>
-AUTH.guard({ loginUrl: 'login.html' }).then(function(user) {
+AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
   if (!user) return;
-  if ((user.user_metadata?.role || 'floor') !== 'admin') {
+  const role = user.user_metadata?.role || 'floor';
+  const isAdmin = role === 'admin';
+
+  // Cartes réservées aux admins (hub admin)
+  if (!isAdmin) {
     document.querySelectorAll('[data-role="admin"]').forEach(function(el) {
       el.style.display = 'none';
     });
+  }
+
+  // Cartes filtrées par panel — admins voient tout, les autres selon app_roles
+  const panelCards = document.querySelectorAll('[data-panel]');
+  if (panelCards.length && !isAdmin) {
+    try {
+      const roles = await SB.getRoles();
+      const entry  = roles.find(function(r) { return r.slug === role; });
+      const allowed = (entry && entry.panels) || [];
+      panelCards.forEach(function(el) {
+        if (!allowed.includes(el.getAttribute('data-panel'))) el.style.display = 'none';
+      });
+    } catch(e) {
+      panelCards.forEach(function(el) { el.style.display = 'none'; });
+    }
   }
 });
 (function () {
