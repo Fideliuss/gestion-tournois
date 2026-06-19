@@ -2,6 +2,9 @@
 // var (not const) so window.CHANGELOG is accessible across scripts
 
 var CHANGELOG = [
+  { version: 'v1.14.0', date: '2026-06-18', message: 'Gestion des accès par panel — table Supabase app_roles, permissions par rôle configurables, modals création compte + permissions dans Admin, guard panel-based avec cache dans auth.js, Edge Function simplifiée ; Ranking — logos Barrière Casino dans shared/logos/, polices Bebas Neue + Barlow Condensed, mise en page A4 pleine largeur, montant en italique, en-tête classement corrigé' },
+  { version: 'v1.13.2', date: '2026-06-18', message: 'Courrier annulation multi-dates — sélecteur chips ajoutables/supprimables, objet auto-généré (singulier/pluriel, plage "du X au Z" ou liste), texte réglementaire figé (réf. art. 57-8 arrêté 14 mai 2007), motif optionnel ; corrections footer, lien retour vers declarations.html, logo Configurations' },
+  { version: 'v1.13.1', date: '2026-06-18', message: 'Sous-menus Déclarations et Configurations — pages intermédiaires dédiées (declarations.html, configurations.html) ; admin.html restructuré en 2 cartes ; back-links mis à jour sur toutes les pages' },
   { version: 'v1.13.0', date: '2026-06-18', message: 'Navigation admin restructurée en 2 sections (Déclarations · Configurations) ; nouvelle carte Courriers PN ; page courriers redessinée avec onglet Annulation de tournoi (SIPJ 33) ; renommage Config Comptes' },
   { version: 'v1.12.0', date: '2026-06-18', message: 'Nettoyage codebase — suppression dossier data/ et bloc BarriereFS (~100 lignes) ; CSS tool-card centralisé dans barriere.css ; textarea ajouté au sélecteur global ; variables CSS incorrectes corrigées dans comptes.html' },
   { version: 'v1.11.1', date: '2026-06-11', message: 'Accès MCD — Leaderboard et Prize Pool accessibles aux MCD ; grilles de navigation auto-centrées (index + admin)' },
