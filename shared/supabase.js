@@ -226,9 +226,9 @@ const SB = {
     return data || [];
   },
 
-  async upsertRole(slug, label, panels) {
+  async upsertRole(slug, label, panels, color = null) {
     const { error } = await _sb.from('app_roles')
-      .upsert({ slug, label, panels }, { onConflict: 'slug' });
+      .upsert({ slug, label, panels, color }, { onConflict: 'slug' });
     if (error) throw error;
   },
 

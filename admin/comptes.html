@@ -12,17 +12,64 @@
     /* ── Actions haut de page ── */
     .top-actions { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
 
+    /* ── Stats ── */
+    #stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px; margin-bottom: 20px;
+      width: 100%; max-width: 860px;
+    }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--gold-bd);
+      border-radius: 4px; padding: 14px 16px;
+    }
+    .stat-label {
+      font-size: 10px; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--gold-dim);
+      margin-bottom: 4px; font-family: var(--f-ui);
+    }
+    .stat-value { font-size: 22px; font-weight: 500; color: var(--cream); font-family: var(--f-num); }
+
+    /* ── Sections par rôle ── */
+    .role-section + .role-section { border-top: 1px solid rgba(196,160,74,.07); }
+    .role-section-header {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 0 6px;
+    }
+    .role-section-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .role-section-name {
+      font-size: 9px; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--text-dim); font-family: var(--f-ui);
+    }
+    .role-section-count { font-size: 10px; color: var(--text-muted); font-family: var(--f-num); }
+
     /* ── Liste des comptes ── */
     .account-row {
-      display: grid;
-      grid-template-columns: 1fr auto auto auto;
-      align-items: center; gap: 14px;
-      padding: 13px 0;
-      border-bottom: 1px solid rgba(196,160,74,.07);
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(196,160,74,.04);
     }
     .account-row:last-child { border-bottom: none; }
-    .account-email { font-size: 13px; color: var(--cream); font-family: var(--f-ui); }
+    .account-info { flex: 1; min-width: 0; }
+    .account-email {
+      font-size: 13px; color: var(--cream); font-family: var(--f-ui);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .account-date { font-size: 10px; color: var(--text-muted); font-family: var(--f-num); margin-top: 2px; }
 
+    /* ── Avatar initiales ── */
+    .account-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .account-avatar.chip-admin  { background: rgba(196,160,74,.15); color: var(--gold); }
+    .account-avatar.chip-mcd    { background: rgba(128,108,196,.15); color: #b0a0e0; }
+    .account-avatar.chip-floor  { background: rgba(255,255,255,.06); color: var(--text-dim); }
+    .account-avatar.chip-custom { background: rgba(80,160,200,.10); color: #7ab8d8; }
+
+    /* ── Chips (rôle select + perm table) ── */
     .role-chip {
       font-size: 9px; font-weight: 700; letter-spacing: .12em;
       text-transform: uppercase; padding: 3px 9px; border-radius: 2px;
@@ -37,10 +84,6 @@
     .chip-custom { background: rgba(80,160,200,.08); color: #7ab8d8;
       border: 1px solid rgba(80,160,200,.22); }
 
-    .account-last {
-      font-size: 10px; color: var(--text-muted); font-family: var(--f-num);
-      white-space: nowrap;
-    }
     .account-actions { display: flex; gap: 4px; }
 
     /* ── Modals ── */
@@ -136,13 +179,24 @@
     /* ── Formulaire champs ── */
     .form-field { margin-bottom: 16px; }
     .form-field:last-of-type { margin-bottom: 20px; }
-    .form-actions { display: flex; gap: 8px; }
+    .form-actions { display: flex; gap: 8px; align-items: center; }
+
+    /* ── Nuancier ── */
+    .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 0; }
+    .color-swatch {
+      width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: border-color .12s, transform .1s;
+      flex-shrink: 0;
+    }
+    .color-swatch:hover    { transform: scale(1.15); }
+    .color-swatch.selected { border-color: var(--cream); }
 
     /* Light mode */
-    body.light .account-row    { border-bottom-color: rgba(0,0,0,.06); }
-    body.light .perm-table td  { border-top-color: rgba(0,0,0,.05); }
-    body.light .perm-actions   { border-top-color: rgba(0,0,0,.07); }
-    body.light .new-role-row   { border-top-color: rgba(0,0,0,.07); }
+    body.light .account-row             { border-bottom-color: rgba(0,0,0,.04); }
+    body.light .role-section + .role-section { border-top-color: rgba(0,0,0,.06); }
+    body.light .perm-table td           { border-top-color: rgba(0,0,0,.05); }
+    body.light .perm-actions            { border-top-color: rgba(0,0,0,.07); }
+    body.light .new-role-row            { border-top-color: rgba(0,0,0,.07); }
 
   </style>
 </head>
@@ -166,13 +220,15 @@
   <!-- Actions -->
   <div class="top-actions">
     <button class="btn btn-gold"  onclick="openForm()">＋ Nouveau compte</button>
-    <button class="btn btn-ghost" onclick="openPermissions()">⚙ Permissions</button>
+    <button class="btn btn-ghost" onclick="openNewRoleModal()">＋ Nouveau rôle</button>
   </div>
+
+  <!-- Stats -->
+  <div id="stats-row"></div>
 
   <!-- Liste des comptes -->
   <div class="card">
-    <div class="sec">Comptes</div>
-    <div id="accounts-list" style="color:var(--text-muted);font-size:13px">Chargement…</div>
+    <div id="accounts-list" style="color:var(--text-muted);font-size:13px;padding:16px 0">Chargement…</div>
   </div>
 
 </div>
@@ -250,6 +306,62 @@
   </div>
 </div>
 
+<!-- ══ Modal : Nouveau rôle ══ -->
+<div id="modal-new-role" class="modal-overlay" onclick="onOverlayClick(event,'modal-new-role')">
+  <div class="modal-box">
+    <div class="sec" style="margin-bottom:20px">Nouveau rôle</div>
+
+    <div class="fg form-field">
+      <div class="fl">Nom du rôle</div>
+      <input type="text" id="new-role-name" placeholder="Ex : Superviseur"
+             oninput="onNewRoleNameInput(this.value)"
+             onkeydown="if(event.key==='Enter') createRole()" />
+      <div class="fsub" id="new-role-slug-display"></div>
+    </div>
+
+    <div class="fg form-field">
+      <div class="fl">Couleur</div>
+      <div id="new-role-colors" class="color-swatches"></div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-gold"  onclick="createRole()">Créer le rôle →</button>
+      <button class="btn btn-ghost" onclick="closeNewRoleModal()">Annuler</button>
+    </div>
+    <div id="new-role-err" style="margin-top:10px;font-size:11px;font-family:var(--f-ui);color:#e07a68"></div>
+  </div>
+</div>
+
+<!-- ══ Modal : Édition rôle ══ -->
+<div id="modal-role" class="modal-overlay" onclick="onOverlayClick(event,'modal-role')">
+  <div class="modal-box">
+    <div class="sec" id="role-edit-title" style="margin-bottom:20px">Modifier le rôle</div>
+
+    <div class="fg form-field">
+      <div class="fl">Nom du rôle</div>
+      <input type="text" id="role-edit-label"
+             onkeydown="if(event.key==='Enter') saveRoleEdit()" />
+    </div>
+
+    <div class="fg form-field">
+      <div class="fl">Couleur</div>
+      <div id="role-edit-colors" class="color-swatches"></div>
+    </div>
+
+    <div class="fg form-field">
+      <div class="fl">Accès panels</div>
+      <div id="role-edit-panels" style="display:flex;flex-direction:column;gap:8px;padding-top:4px"></div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-gold"  onclick="saveRoleEdit()">Enregistrer →</button>
+      <button class="btn btn-ghost" onclick="closeRoleEdit()">Annuler</button>
+      <button class="btn btn-red"   id="role-edit-delete" style="margin-left:auto" onclick="deleteRoleFromEdit()">Supprimer</button>
+    </div>
+    <div id="role-edit-msg" style="margin-top:10px;font-size:11px;font-family:var(--f-ui)"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../shared/barriere.js"></script>
 <script src="../shared/supabase.js"></script>
@@ -257,8 +369,9 @@
 <script>
   AUTH.guard({ loginUrl: '../login.html', role: 'admin' });
 
-  let _editId   = null;
-  let _allRoles = [];
+  let _editId       = null;
+  let _editRoleSlug = null;
+  let _allRoles     = [];
 
   const PANELS = [
     { id: 'declarations',   label: 'Déclarations' },
@@ -268,18 +381,34 @@
     { id: 'leaderboard',    label: 'Leaderboard'   },
   ];
 
+  const ROLE_COLORS = [
+    { hex: '#c4a04a', label: 'Or'     },
+    { hex: '#8070c4', label: 'Violet' },
+    { hex: '#5294d2', label: 'Bleu'   },
+    { hex: '#48af96', label: 'Teal'   },
+    { hex: '#c45278', label: 'Rose'   },
+    { hex: '#6dcc8e', label: 'Vert'   },
+    { hex: '#e09050', label: 'Orange' },
+    { hex: '#888888', label: 'Gris'   },
+  ];
+
+  const DEFAULT_COLORS = { admin: '#c4a04a', mcd: '#8070c4', floor: '#888888' };
+
   // ── Escape pour fermer ────────────────────────────────
   document.addEventListener('keydown', function(e) {
     if (e.key !== 'Escape') return;
-    if (document.getElementById('modal-form').classList.contains('open')) { closeForm(); return; }
-    if (document.getElementById('modal-perm').classList.contains('open')) { closePermissions(); }
+    if (document.getElementById('modal-form').classList.contains('open'))     { closeForm(); return; }
+    if (document.getElementById('modal-new-role').classList.contains('open')) { closeNewRoleModal(); return; }
+    if (document.getElementById('modal-role').classList.contains('open'))     { closeRoleEdit(); return; }
+    if (document.getElementById('modal-perm').classList.contains('open'))     { closePermissions(); }
   });
 
   function onOverlayClick(e, id) {
-    if (e.target === document.getElementById(id)) {
-      if (id === 'modal-form') closeForm();
-      else closePermissions();
-    }
+    if (e.target !== document.getElementById(id)) return;
+    if      (id === 'modal-form')     closeForm();
+    else if (id === 'modal-new-role') closeNewRoleModal();
+    else if (id === 'modal-role')     closeRoleEdit();
+    else                              closePermissions();
   }
 
   // ── Chargement ───────────────────────────────────────
@@ -305,33 +434,137 @@
     return r ? r.label : slug;
   }
 
+  function getInitials(email) {
+    const local = email.split('@')[0];
+    const parts = local.split('.');
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return local.slice(0, 2).toUpperCase();
+  }
+
+  function roleColor(slug) {
+    const r = _allRoles.find(function(r) { return r.slug === slug; });
+    return (r && r.color) || DEFAULT_COLORS[slug] || '#5294d2';
+  }
+
+  function dotColor(slug) { return roleColor(slug); }
+
   function renderList(users) {
-    const el = document.getElementById('accounts-list');
+    const statsEl = document.getElementById('stats-row');
+    const listEl  = document.getElementById('accounts-list');
+
     if (!users.length) {
-      el.innerHTML = '<div style="padding:20px 0;color:var(--text-muted)">Aucun compte.</div>';
+      statsEl.innerHTML = '';
+      listEl.innerHTML = '<div style="padding:20px 0;color:var(--text-muted)">Aucun compte.</div>';
       return;
     }
 
-    const order = { admin: 0, mcd: 1, floor: 2 };
-    users.sort(function(a, b) {
-      const ro = (order[a.role] ?? 9) - (order[b.role] ?? 9);
-      return ro !== 0 ? ro : a.email.localeCompare(b.email);
+    const roleOrder = { admin: 0, mcd: 1, floor: 2 };
+
+    const sortedRoles = _allRoles.slice().sort(function(a, b) {
+      const oa = roleOrder[a.slug] ?? 9, ob = roleOrder[b.slug] ?? 9;
+      return oa !== ob ? oa - ob : a.label.localeCompare(b.label);
     });
 
-    el.innerHTML = users.map(function(u) {
-      const last = u.lastSignIn
-        ? new Date(u.lastSignIn).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'2-digit' })
-        : '—';
-      return '<div class="account-row">'
-        + '<span class="account-email">' + u.email + '</span>'
-        + '<span class="role-chip ' + chipClass(u.role) + '">' + roleLabel(u.role) + '</span>'
-        + '<span class="account-last">' + last + '</span>'
-        + '<div class="account-actions">'
-        + '<button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="editAccount(\'' + u.id + '\',\'' + u.email.replace(/'/g,'') + '\',\'' + u.role + '\')">✎</button>'
-        + '<button class="btn btn-red"   style="padding:5px 10px;font-size:11px" onclick="deleteAccount(\'' + u.id + '\',\'' + u.email.replace(/'/g,'') + '\')">✕</button>'
+    // Stats
+    statsEl.innerHTML = '<div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">' + users.length + '</div></div>'
+      + sortedRoles.map(function(role) {
+          const count = users.filter(function(u) { return u.role === role.slug; }).length;
+          return '<div class="stat-card">'
+            + '<div class="stat-label">' + role.label + '</div>'
+            + '<div class="stat-value">' + count + '</div>'
+            + '</div>';
+        }).join('');
+
+    // Liste — tous les rôles, même vides
+    listEl.innerHTML = sortedRoles.map(function(role) {
+      const slug       = role.slug;
+      const roleUsers  = users.filter(function(u) { return u.role === slug; })
+                              .sort(function(a, b) { return a.email.localeCompare(b.email); });
+      const count      = roleUsers.length;
+      const c          = roleColor(slug);
+
+      const rows = count === 0
+        ? '<div style="padding:8px 0 4px;font-size:11px;color:var(--text-muted)">Aucun compte</div>'
+        : roleUsers.map(function(u) {
+            const last = u.lastSignIn
+              ? 'Dernière connexion · ' + new Date(u.lastSignIn).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'2-digit' })
+              : 'Jamais connecté';
+            const safeEmail = u.email.replace(/'/g, '');
+            return '<div class="account-row">'
+              + '<div class="account-avatar" style="background:' + c + '22;color:' + c + '">' + getInitials(u.email) + '</div>'
+              + '<div class="account-info">'
+              + '<div class="account-email">' + u.email + '</div>'
+              + '<div class="account-date">' + last + '</div>'
+              + '</div>'
+              + '<div class="account-actions">'
+              + '<button class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="editAccount(\'' + u.id + '\',\'' + safeEmail + '\',\'' + slug + '\')">✎</button>'
+              + '<button class="btn btn-red"   style="padding:5px 10px;font-size:11px" onclick="deleteAccount(\'' + u.id + '\',\'' + safeEmail + '\')">✕</button>'
+              + '</div>'
+              + '</div>';
+          }).join('');
+
+      return '<div class="role-section">'
+        + '<div class="role-section-header">'
+        + '<span class="role-section-dot" style="background:' + c + '"></span>'
+        + '<span class="role-section-name">' + role.label + '</span>'
+        + '<span class="role-section-count">' + (count ? count + ' compte' + (count > 1 ? 's' : '') : 'vide') + '</span>'
+        + '<button class="btn btn-ghost" style="padding:3px 8px;font-size:11px;margin-left:auto;opacity:.6" onclick="openRoleEdit(\'' + slug + '\')" title="Modifier ce rôle">⚙</button>'
         + '</div>'
+        + rows
         + '</div>';
     }).join('');
+  }
+
+  // ── Modal Nouveau rôle ───────────────────────────────
+  function openNewRoleModal() {
+    document.getElementById('new-role-name').value = '';
+    document.getElementById('new-role-slug-display').innerHTML = '';
+    document.getElementById('new-role-err').textContent = '';
+    document.getElementById('new-role-colors').innerHTML = ROLE_COLORS.map(function(c, i) {
+      return '<span class="color-swatch' + (i === 2 ? ' selected' : '') + '" '
+        + 'style="background:' + c.hex + '" data-color="' + c.hex + '" '
+        + 'onclick="selectNewRoleColor(this)" title="' + c.label + '"></span>';
+    }).join('');
+    document.getElementById('modal-new-role').classList.add('open');
+    setTimeout(function() { document.getElementById('new-role-name').focus(); }, 50);
+  }
+
+  function closeNewRoleModal() {
+    document.getElementById('modal-new-role').classList.remove('open');
+  }
+
+  function selectNewRoleColor(el) {
+    document.querySelectorAll('#new-role-colors .color-swatch').forEach(function(s) {
+      s.classList.remove('selected');
+    });
+    el.classList.add('selected');
+  }
+
+  function onNewRoleNameInput(val) {
+    const slug = slugify(val);
+    document.getElementById('new-role-slug-display').innerHTML = slug ? 'slug : <b>' + slug + '</b>' : '';
+  }
+
+  async function createRole() {
+    const label = document.getElementById('new-role-name').value.trim();
+    const err   = document.getElementById('new-role-err');
+    err.textContent = '';
+    if (!label) return;
+    const slug = slugify(label);
+    if (!slug) { err.textContent = 'Label invalide.'; return; }
+    if (_allRoles.find(function(r) { return r.slug === slug; })) {
+      err.textContent = 'Ce slug existe déjà.'; return;
+    }
+    const sel   = document.querySelector('#new-role-colors .color-swatch.selected');
+    const color = sel ? sel.dataset.color : '#5294d2';
+    try {
+      await SB.upsertRole(slug, label, [], color);
+      AUTH.clearRolesCache();
+      _allRoles.push({ slug, label, panels: [], color });
+      closeNewRoleModal();
+      await loadAndRender();
+      populateRoleSelect();
+    } catch(e) { err.textContent = 'Erreur : ' + e.message; }
   }
 
   // ── Modal Permissions ────────────────────────────────
@@ -345,11 +578,104 @@
     document.getElementById('modal-perm').classList.remove('open');
   }
 
+  // ── Modal Édition rôle ───────────────────────────────
+  function openRoleEdit(slug) {
+    const role = _allRoles.find(function(r) { return r.slug === slug; });
+    if (!role) return;
+    _editRoleSlug = slug;
+    const isAdmin = slug === 'admin';
+    const color   = role.color || DEFAULT_COLORS[slug] || '#5294d2';
+
+    document.getElementById('role-edit-title').textContent = role.label;
+    const inp = document.getElementById('role-edit-label');
+    inp.value    = role.label;
+    inp.disabled = isAdmin;
+
+    document.getElementById('role-edit-colors').innerHTML = ROLE_COLORS.map(function(c) {
+      return '<span class="color-swatch' + (c.hex === color ? ' selected' : '') + '" '
+        + 'style="background:' + c.hex + '" data-color="' + c.hex + '" '
+        + 'onclick="selectRoleColor(this)" title="' + c.label + '"></span>';
+    }).join('');
+
+    document.getElementById('role-edit-panels').innerHTML = isAdmin
+      ? '<span style="font-size:12px;color:var(--text-muted)">Accès total (non configurable)</span>'
+      : PANELS.map(function(p) {
+          const checked = (role.panels || []).includes(p.id) ? 'checked' : '';
+          return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--cream);cursor:pointer">'
+            + '<input type="checkbox" class="perm-cb" data-panel="' + p.id + '" ' + checked + '>'
+            + p.label + '</label>';
+        }).join('');
+
+    document.getElementById('role-edit-delete').style.display = isAdmin ? 'none' : '';
+    document.getElementById('role-edit-msg').textContent = '';
+    document.getElementById('modal-role').classList.add('open');
+    if (!isAdmin) setTimeout(function() { document.getElementById('role-edit-label').focus(); }, 50);
+  }
+
+  function closeRoleEdit() {
+    document.getElementById('modal-role').classList.remove('open');
+    _editRoleSlug = null;
+  }
+
+  function selectRoleColor(el) {
+    document.querySelectorAll('#role-edit-colors .color-swatch').forEach(function(s) {
+      s.classList.remove('selected');
+    });
+    el.classList.add('selected');
+  }
+
+  async function saveRoleEdit() {
+    const slug = _editRoleSlug;
+    const role = _allRoles.find(function(r) { return r.slug === slug; });
+    if (!role) return;
+
+    const newLabel = document.getElementById('role-edit-label').value.trim();
+    if (!newLabel) return;
+
+    const sel   = document.querySelector('#role-edit-colors .color-swatch.selected');
+    const color = sel ? sel.dataset.color : (role.color || null);
+
+    const panels = slug === 'admin' ? (role.panels || [])
+      : Array.from(document.querySelectorAll('#role-edit-panels .perm-cb'))
+          .filter(function(cb) { return cb.checked; })
+          .map(function(cb) { return cb.dataset.panel; });
+
+    const msg = document.getElementById('role-edit-msg');
+    try {
+      await SB.upsertRole(slug, newLabel, panels, color);
+      AUTH.clearRolesCache();
+      Object.assign(role, { label: newLabel, panels, color });
+      closeRoleEdit();
+      await loadAndRender();
+      populateRoleSelect();
+    } catch(e) {
+      msg.textContent = 'Erreur : ' + e.message;
+      msg.style.color = '#e07a68';
+    }
+  }
+
+  async function deleteRoleFromEdit() {
+    const slug = _editRoleSlug;
+    const role = _allRoles.find(function(r) { return r.slug === slug; });
+    if (!role || !confirm('Supprimer le rôle « ' + role.label + ' » ?')) return;
+    try {
+      await SB.deleteRole(slug);
+      AUTH.clearRolesCache();
+      _allRoles = _allRoles.filter(function(r) { return r.slug !== slug; });
+      closeRoleEdit();
+      await loadAndRender();
+      populateRoleSelect();
+    } catch(e) {
+      const msg = document.getElementById('role-edit-msg');
+      msg.textContent = 'Erreur : ' + e.message;
+      msg.style.color = '#e07a68';
+    }
+  }
+
   function renderPermissionsPanel() {
     const tbody = document.getElementById('perm-table-body');
     tbody.innerHTML = _allRoles.map(function(role) {
-      const isAdmin   = role.slug === 'admin';
-      const isBuiltin = ['admin','mcd','floor'].includes(role.slug);
+      const isAdmin = role.slug === 'admin';
 
       const cells = PANELS.map(function(p) {
         if (isAdmin) return '<td><span class="perm-dot"></span></td>';
@@ -357,13 +683,52 @@
         return '<td><input type="checkbox" class="perm-cb" data-slug="' + role.slug + '" data-panel="' + p.id + '" ' + checked + '></td>';
       }).join('');
 
-      const delBtn = isBuiltin ? '<td></td>'
+      const roleCell = isAdmin
+        ? '<td class="col-role">' + role.label + '</td>'
+        : '<td class="col-role" id="role-cell-' + role.slug + '">'
+          + '<span>' + role.label + '</span>'
+          + '<button class="btn btn-ghost" style="padding:2px 6px;font-size:10px;margin-left:6px;opacity:.6" onclick="startRenameRole(\'' + role.slug + '\')" title="Renommer">✎</button>'
+          + '</td>';
+
+      const delBtn = isAdmin ? '<td></td>'
         : '<td><button class="btn btn-red" style="padding:4px 8px;font-size:11px" onclick="deleteRoleRow(\'' + role.slug + '\')" title="Supprimer">✕</button></td>';
 
       return '<tr data-slug="' + role.slug + '">'
-        + '<td class="col-role">' + role.label + '</td>'
-        + cells + delBtn + '</tr>';
+        + roleCell + cells + delBtn + '</tr>';
     }).join('');
+  }
+
+  function startRenameRole(slug) {
+    const role = _allRoles.find(function(r) { return r.slug === slug; });
+    if (!role) return;
+    const cell = document.getElementById('role-cell-' + slug);
+    if (!cell) return;
+    cell.innerHTML = '<input type="text" id="rename-inp-' + slug + '" value="' + role.label.replace(/"/g, '&quot;') + '" '
+      + 'style="width:120px;font-size:12px" '
+      + 'onkeydown="if(event.key===\'Enter\')confirmRenameRole(\'' + slug + '\');else if(event.key===\'Escape\')renderPermissionsPanel()">'
+      + '<button class="btn btn-gold" style="padding:2px 7px;font-size:10px;margin-left:4px" onclick="confirmRenameRole(\'' + slug + '\')">✓</button>'
+      + '<button class="btn btn-ghost" style="padding:2px 6px;font-size:10px;margin-left:2px" onclick="renderPermissionsPanel()">✕</button>';
+    setTimeout(function() {
+      const inp = document.getElementById('rename-inp-' + slug);
+      if (inp) { inp.focus(); inp.select(); }
+    }, 30);
+  }
+
+  async function confirmRenameRole(slug) {
+    const inp = document.getElementById('rename-inp-' + slug);
+    if (!inp) return;
+    const newLabel = inp.value.trim();
+    if (!newLabel) return;
+    const role = _allRoles.find(function(r) { return r.slug === slug; });
+    if (!role) return;
+    if (newLabel === role.label) { renderPermissionsPanel(); return; }
+    try {
+      await SB.upsertRole(slug, newLabel, role.panels || [], role.color || null);
+      AUTH.clearRolesCache();
+      role.label = newLabel;
+      renderPermissionsPanel();
+      populateRoleSelect();
+    } catch(e) { alert('Erreur : ' + e.message); }
   }
 
   async function savePermissions() {
@@ -382,7 +747,7 @@
 
       await Promise.all(_allRoles
         .filter(r => r.slug !== 'admin')
-        .map(r => SB.upsertRole(r.slug, r.label, byRole[r.slug] || [])));
+        .map(r => SB.upsertRole(r.slug, r.label, byRole[r.slug] || [], r.color || null)));
 
       AUTH.clearRolesCache();
       _allRoles = _allRoles.map(r =>
