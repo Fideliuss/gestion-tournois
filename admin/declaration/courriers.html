@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Courriers PN — Casino Barrière Bordeaux</title>
-  <link rel="stylesheet" href="../shared/barriere.css"/>
+  <link rel="stylesheet" href="../../shared/barriere.css"/>
   <link rel="stylesheet" href="courriers.css"/>
 </head>
 <body>
@@ -167,10 +167,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared/barriere.js"></script>
-<script src="../shared/supabase.js"></script>
-<script src="../shared/auth.js"></script>
+<script src="../../shared/barriere.js"></script>
+<script src="../../shared/supabase.js"></script>
+<script src="../../shared/auth.js"></script>
 <script src="courriers.js"></script>
-<script>AUTH.guard({ loginUrl: '../login.html', panel: 'declarations' });</script>
+<script>AUTH.guard({ loginUrl: '../../login.html', role: 'admin' });</script>
 </body>
 </html>

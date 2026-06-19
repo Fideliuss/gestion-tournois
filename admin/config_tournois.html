@@ -187,7 +187,7 @@
 </button>
 
 <div class="app">
-  <a href="../configurations.html" class="back">← Configurations</a>
+  <a href="admin_tournois.html" class="back">← Administration</a>
 
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
@@ -265,7 +265,7 @@
 <script src="../shared/tournaments.js"></script>
 <script src="../shared/auth.js"></script>
 <script>
-AUTH.guard({ loginUrl: '../login.html', panel: 'configurations' }).then(function(user) {
+AUTH.guard({ loginUrl: '../login.html', role: 'admin' }).then(function(user) {
   if (!user) return;
   loadAndRender();
 });
