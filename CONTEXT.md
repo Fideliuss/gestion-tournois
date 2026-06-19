@@ -26,10 +26,13 @@ shared/
   barriere.css      Styles partagés (thème, composants communs, styles auth : #auth-overlay, #auth-badge, .auth-chip-*)
   barriere.js       Scripts partagés (toggle jour/nuit, favicon, BarriereFS — couche de persistance File System Access API + IndexedDB pour extras uniquement)
   tournaments.js    Référentiel tournois centralisé : TOURNAMENT_DEFAULTS (leaderboard le lit comme fallback)
-  supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats, sessions, tournois, extras + auth)
-  auth.js           Garde d'accès auth : AUTH.guard(), AUTH.signOut(), AUTH._addBadge() — chargé après supabase.js
+  supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats, sessions, tournois, extras, app_roles + auth)
+  auth.js           Garde d'accès auth : AUTH.guard(), AUTH.signOut(), AUTH._addBadge(), AUTH.clearRolesCache() — chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
-  logo.png          Logo officiel utilisé dans les courriers
+  logos/
+    barriere_casino-logo.svg        Logo blanc — fond sombre (usage écran)
+    barriere_casino-logo-black.svg  Logo noir — fond blanc (usage impression)
+    logo.png                        Logo PNG officiel utilisé dans les courriers
   favicon/          Favicon et icônes PWA (ico, svg, png, apple-touch, manifest)
 
 leaderboard/
@@ -72,14 +75,13 @@ extras/
   - **RLS** : politique `authenticated` sur les 4 tables — accès réservé aux utilisateurs connectés
 - **Auth magic link** (Supabase Auth) :
   - `login.html` : page de connexion (magic link, redirect par rôle après authentification)
-  - `shared/auth.js` : `AUTH.guard({ loginUrl, role })` — overlay spinner, vérif session, vérif rôle, badge utilisateur
-  - Rôles : `admin` (accès total) et `floor` (prize pool uniquement) — stockés dans `auth.users.raw_user_meta_data.role`
+  - `shared/auth.js` : `AUTH.guard({ loginUrl, role, panel })` — overlay spinner, vérif session, vérif rôle, vérif panel, badge utilisateur
+  - Rôles : `admin` (accès total), `mcd`, `floor` — stockés dans `auth.users.raw_user_meta_data.role`
   - Default rôle : `floor` si aucune métadonnée définie
+  - **Permissions par panel** : table Supabase `app_roles` (slug PK, label, panels jsonb) — chaque rôle a une liste de panels autorisés. `AUTH.guard({ panel: 'leaderboard' })` redirige vers `index.html` si le rôle n'a pas accès. Cache `_rolePanelsCache` évite les requêtes répétées. `AUTH.clearRolesCache()` invalide après modification.
+  - Gestion des rôles et permissions : `admin/comptes.html` — modals création/édition compte + tableau rôle × panel
   - Persistance session : JWT 7 jours (604800s) via localStorage (géré par supabase-js)
   - Redirect magic link : `https://fideliuss.github.io/gestion-tournois/login.html`
-  - Pages admin-only : `admin.html`, `leaderboard/leaderboard.html`, `declaration/declaration.html`, `declaration/courriers.html`, `extras/extras.html`
-  - Pages authentifiées (tous rôles) : `index.html`, `prize-pool/prize-pool.html`
-  - Sur `index.html` : les cartes Challenge Saisonnier et Gestion Administrative ont `data-role="admin"` et sont masquées pour les utilisateurs `floor`
 - File System Access API — **plus utilisée** (BarriereFS toujours défini dans `shared/barriere.js` mais aucun module ne l'appelle)
 - localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_*`, `courriers_tpl`)
 - Indicateur de connexion FS (`.fs-indicator`) toujours défini dans `shared/barriere.css` mais retiré de toutes les pages
@@ -102,15 +104,20 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 5. **Ouvrir une PR** `feature/nom-feature → develop` sur GitHub
 6. Relecture + merge de la PR (pas de merge local direct)
 
+**Flux feature → develop :**
+1. Ouvrir une PR `feature/x → develop` sur GitHub
+2. **NE PAS merger** — annoncer la PR au user et attendre sa validation
+3. Ajuster si nécessaire, puis merger une fois le user satisfait
+
 **Flux release (develop → main) :**
-1. Mettre à jour `shared/changelog.js` sur `develop` : ajouter l'entrée `{ version, date, message }` en tête du tableau — le message = titre de la PR à venir
-2. Mettre à jour `CONTEXT.md` et `README.md` si nécessaire
+1. Mettre à jour `shared/changelog.js` : ajouter l'entrée `{ version, date, message }` en tête du tableau
+2. Mettre à jour `CONTEXT.md` et `README.md` pour refléter les changements
 3. Push `develop`, ouvrir une PR `develop → main` sur GitHub
-4. Merger la PR
+4. Attendre validation du user, puis merger la PR **sans `--subject`** (le message "Merge pull request #XX from Fideliuss/develop" doit rester intact)
 5. Taguer le merge commit (tag léger — hérite du "Verified" GitHub) :
    ```
    git checkout main && git pull
-   git tag vX.Y.Z
+   git tag vX.Y.Z <sha>
    git push origin vX.Y.Z
    ```
 

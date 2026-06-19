@@ -70,12 +70,13 @@ Gestion des croupiers extras — déclaration mensuelle DTPJ et feuilles d'émar
 
 ## Accès et authentification
 
-L'application est sécurisée par **magic link** (Supabase Auth). Deux rôles :
+L'application est sécurisée par **magic link** (Supabase Auth). Les rôles et leurs accès sont configurables depuis l'interface Admin.
 
-| Rôle | Accès |
-|------|-------|
-| **Admin** | Accès total (hub complet, leaderboard, déclaration, extras) |
-| **Floor** | Prize Pool Builder uniquement |
+| Rôle | Description |
+|------|-------------|
+| **Admin** | Accès total + gestion des comptes et des permissions |
+| **MCD** | Accès configurable par panel |
+| **Floor** | Accès configurable par panel |
 
 ### Connexion
 1. Ouvrir https://fideliuss.github.io/gestion-tournois/
@@ -83,10 +84,10 @@ L'application est sécurisée par **magic link** (Supabase Auth). Deux rôles :
 3. Cliquer sur le lien reçu par e-mail
 4. Redirection automatique selon le rôle — session valable **7 jours**
 
-### Gestion des rôles (admin Supabase requis)
-Supabase Dashboard → Authentication → Users → Edit user → `raw_user_meta_data` :
-- Admin : `{ "role": "admin" }`
-- Floor : `{ "role": "floor" }` (ou laisser vide — floor par défaut)
+### Gestion des comptes et permissions
+Accessible depuis **Admin → Comptes** (réservé aux admins) :
+- Création / édition / suppression de comptes
+- Configuration des panels accessibles par rôle (table `app_roles` Supabase)
 
 ---
 
@@ -110,10 +111,13 @@ Toutes les données (leaderboard, extras) sont stockées dans **Supabase** (clou
 │   ├── barriere.css        — Styles partagés (thème, composants, styles auth)
 │   ├── barriere.js         — Scripts partagés (thème, favicon, BarriereFS)
 │   ├── tournaments.js      — TOURNAMENT_DEFAULTS (fallback leaderboard)
-│   ├── supabase.js         — Client Supabase + objet SB (CRUD complet + auth + mappers)
-│   ├── auth.js             — AUTH.guard(), AUTH.signOut(), badge utilisateur
+│   ├── supabase.js         — Client Supabase + objet SB (CRUD complet + auth + app_roles + mappers)
+│   ├── auth.js             — AUTH.guard(), AUTH.signOut(), badge utilisateur, cache panels
 │   ├── changelog.js        — Mis à jour manuellement avant chaque PR de release
-│   └── logo.png            — Logo Casino Barrière Bordeaux
+│   └── logos/
+│       ├── barriere_casino-logo.svg        — Logo blanc (écran)
+│       ├── barriere_casino-logo-black.svg  — Logo noir (impression)
+│       └── logo.png                        — Logo PNG (courriers)
 │
 ├── leaderboard/
 │   ├── leaderboard.html    — Challenge Saisonnier
