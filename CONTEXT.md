@@ -73,15 +73,15 @@ extras/
   - `shared/supabase.js` : objet `SB` avec CRUD complet (résultats, sessions, tournois, extras) + méthodes auth (`sendMagicLink`, `signOut`, `getSession`, `onAuthStateChange`) + mappers camelCase↔snake_case
   - Tables : `results`, `sessions`, `tournaments` (ids bigint auto-incrémentés) + `extras` (id texte généré côté client)
   - **RLS** : politique `authenticated` sur les 4 tables — accès réservé aux utilisateurs connectés
-- **Auth magic link** (Supabase Auth) :
-  - `login.html` : page de connexion (magic link, redirect par rôle après authentification)
+- **Auth email + mot de passe** (Supabase Auth) :
+  - `login.html` : page de connexion (email + password, redirect par rôle après authentification)
   - `shared/auth.js` : `AUTH.guard({ loginUrl, role, panel })` — overlay spinner, vérif session, vérif rôle, vérif panel, badge utilisateur
   - Rôles : `admin` (accès total), `mcd`, `floor` — stockés dans `auth.users.raw_user_meta_data.role`
   - Default rôle : `floor` si aucune métadonnée définie
   - **Permissions par panel** : table Supabase `app_roles` (slug PK, label, panels jsonb) — chaque rôle a une liste de panels autorisés. `AUTH.guard({ panel: 'leaderboard' })` redirige vers `index.html` si le rôle n'a pas accès. Cache `_rolePanelsCache` évite les requêtes répétées. `AUTH.clearRolesCache()` invalide après modification.
   - Gestion des rôles et permissions : `admin/comptes.html` — modals création/édition compte + tableau rôle × panel
+  - Changement de mot de passe : modal 🔑 dans le badge utilisateur (`AUTH._openChangePwd()`)
   - Persistance session : JWT 7 jours (604800s) via localStorage (géré par supabase-js)
-  - Redirect magic link : `https://fideliuss.github.io/gestion-tournois/login.html`
 - File System Access API — **plus utilisée** (BarriereFS toujours défini dans `shared/barriere.js` mais aucun module ne l'appelle)
 - localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_*`, `courriers_tpl`)
 - Indicateur de connexion FS (`.fs-indicator`) toujours défini dans `shared/barriere.css` mais retiré de toutes les pages

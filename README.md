@@ -70,7 +70,7 @@ Gestion des croupiers extras — déclaration mensuelle DTPJ et feuilles d'émar
 
 ## Accès et authentification
 
-L'application est sécurisée par **magic link** (Supabase Auth). Les rôles et leurs accès sont configurables depuis l'interface Admin.
+L'application est sécurisée par **email + mot de passe** (Supabase Auth). Les rôles et leurs accès sont configurables depuis l'interface Admin.
 
 | Rôle | Description |
 |------|-------------|
@@ -80,9 +80,9 @@ L'application est sécurisée par **magic link** (Supabase Auth). Les rôles et 
 
 ### Connexion
 1. Ouvrir https://fideliuss.github.io/gestion-tournois/
-2. Saisir son adresse e-mail professionnelle
-3. Cliquer sur le lien reçu par e-mail
-4. Redirection automatique selon le rôle — session valable **7 jours**
+2. Saisir son adresse e-mail et son mot de passe
+3. Redirection automatique selon le rôle — session valable **7 jours**
+4. Changement de mot de passe disponible depuis le badge utilisateur (icône 🔑)
 
 ### Gestion des comptes et permissions
 Accessible depuis **Admin → Comptes** (réservé aux admins) :
