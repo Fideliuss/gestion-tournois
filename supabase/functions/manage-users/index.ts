@@ -79,7 +79,9 @@ Deno.serve(async (req) => {
       if (!id) return json({ error: 'id est requis' }, 400);
 
       const updates: Record<string, unknown> = {};
-      if (role)     updates.user_metadata = { role };
+      const meta: Record<string, unknown> = {};
+      if (role !== undefined) meta.role = role;
+      if (Object.keys(meta).length > 0) updates.user_metadata = meta;
       if (password) updates.password = password;
 
       const { error } = await admin.auth.admin.updateUserById(id, updates);
