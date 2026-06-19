@@ -10,7 +10,9 @@ async function _loadRolePanels() {
   try {
     const roles = await SB.getRoles();
     _rolePanelsCache = {};
-    roles.forEach(r => { _rolePanelsCache[r.slug] = r.panels || []; });
+    roles.forEach(r => {
+      _rolePanelsCache[r.slug] = { panels: r.panels || [], color: r.color || null };
+    });
   } catch {
     _rolePanelsCache = {};
   }
@@ -54,11 +56,14 @@ const AUTH = {
       }
     }
 
+    // Chargement des rôles (panels + couleurs) — pour tous, badge inclus
+    await _loadRolePanels();
+
     // Vérification du panel via la table app_roles — les admins passent toujours
     if (panel !== null && !isAdmin) {
-      const rolePanels = await _loadRolePanels();
-      const allowed    = rolePanels[userRole] || [];
-      const required   = Array.isArray(panel) ? panel : [panel];
+      const entry   = (_rolePanelsCache[userRole] || {});
+      const allowed = entry.panels || [];
+      const required = Array.isArray(panel) ? panel : [panel];
       if (!required.some(p => allowed.includes(p))) {
         window.location.replace(root + 'index.html');
         return null;
@@ -79,13 +84,15 @@ const AUTH = {
   _addBadge(loginUrl, email, role) {
     const badge = document.createElement('div');
     badge.id = 'auth-badge';
-    const short     = email.split('@')[0];
-    const roleLabel = role === 'admin' ? 'Admin' : role === 'mcd' ? 'MCD' : role === 'floor' ? 'Floor'
-                    : role.charAt(0).toUpperCase() + role.slice(1);
-    const roleClass = role === 'admin' ? 'auth-chip-admin' : role === 'mcd' ? 'auth-chip-mcd' : 'auth-chip-floor';
+    const short      = email.split('@')[0];
+    const roleLabel  = role === 'admin' ? 'Admin' : role === 'mcd' ? 'MCD' : role === 'floor' ? 'Floor'
+                     : role.charAt(0).toUpperCase() + role.slice(1);
+    const defaults   = { admin: '#c4a04a', mcd: '#8070c4', floor: '#888888' };
+    const cached     = _rolePanelsCache && _rolePanelsCache[role];
+    const color      = (cached && cached.color) || defaults[role] || '#5294d2';
     badge.innerHTML = `
       <span class="auth-email">${short}</span>
-      <span class="auth-chip ${roleClass}">${roleLabel}</span>
+      <span class="auth-chip" style="background:${color}28;color:${color}">${roleLabel}</span>
       <button class="auth-pwd-btn" onclick="AUTH._openChangePwd()" title="Changer le mot de passe">🔑</button>
       <button class="auth-logout" onclick="AUTH.signOut('${loginUrl}')">Déconnexion</button>`;
     document.body.appendChild(badge);
