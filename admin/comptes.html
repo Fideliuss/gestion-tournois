@@ -348,8 +348,7 @@
   function renderPermissionsPanel() {
     const tbody = document.getElementById('perm-table-body');
     tbody.innerHTML = _allRoles.map(function(role) {
-      const isAdmin   = role.slug === 'admin';
-      const isBuiltin = ['admin','mcd','floor'].includes(role.slug);
+      const isAdmin = role.slug === 'admin';
 
       const cells = PANELS.map(function(p) {
         if (isAdmin) return '<td><span class="perm-dot"></span></td>';
@@ -357,13 +356,52 @@
         return '<td><input type="checkbox" class="perm-cb" data-slug="' + role.slug + '" data-panel="' + p.id + '" ' + checked + '></td>';
       }).join('');
 
-      const delBtn = isBuiltin ? '<td></td>'
+      const roleCell = isAdmin
+        ? '<td class="col-role">' + role.label + '</td>'
+        : '<td class="col-role" id="role-cell-' + role.slug + '">'
+          + '<span>' + role.label + '</span>'
+          + '<button class="btn btn-ghost" style="padding:2px 6px;font-size:10px;margin-left:6px;opacity:.6" onclick="startRenameRole(\'' + role.slug + '\')" title="Renommer">✎</button>'
+          + '</td>';
+
+      const delBtn = isAdmin ? '<td></td>'
         : '<td><button class="btn btn-red" style="padding:4px 8px;font-size:11px" onclick="deleteRoleRow(\'' + role.slug + '\')" title="Supprimer">✕</button></td>';
 
       return '<tr data-slug="' + role.slug + '">'
-        + '<td class="col-role">' + role.label + '</td>'
-        + cells + delBtn + '</tr>';
+        + roleCell + cells + delBtn + '</tr>';
     }).join('');
+  }
+
+  function startRenameRole(slug) {
+    const role = _allRoles.find(function(r) { return r.slug === slug; });
+    if (!role) return;
+    const cell = document.getElementById('role-cell-' + slug);
+    if (!cell) return;
+    cell.innerHTML = '<input type="text" id="rename-inp-' + slug + '" value="' + role.label.replace(/"/g, '&quot;') + '" '
+      + 'style="width:120px;font-size:12px" '
+      + 'onkeydown="if(event.key===\'Enter\')confirmRenameRole(\'' + slug + '\');else if(event.key===\'Escape\')renderPermissionsPanel()">'
+      + '<button class="btn btn-gold" style="padding:2px 7px;font-size:10px;margin-left:4px" onclick="confirmRenameRole(\'' + slug + '\')">✓</button>'
+      + '<button class="btn btn-ghost" style="padding:2px 6px;font-size:10px;margin-left:2px" onclick="renderPermissionsPanel()">✕</button>';
+    setTimeout(function() {
+      const inp = document.getElementById('rename-inp-' + slug);
+      if (inp) { inp.focus(); inp.select(); }
+    }, 30);
+  }
+
+  async function confirmRenameRole(slug) {
+    const inp = document.getElementById('rename-inp-' + slug);
+    if (!inp) return;
+    const newLabel = inp.value.trim();
+    if (!newLabel) return;
+    const role = _allRoles.find(function(r) { return r.slug === slug; });
+    if (!role) return;
+    if (newLabel === role.label) { renderPermissionsPanel(); return; }
+    try {
+      await SB.upsertRole(slug, newLabel, role.panels || []);
+      AUTH.clearRolesCache();
+      role.label = newLabel;
+      renderPermissionsPanel();
+      populateRoleSelect();
+    } catch(e) { alert('Erreur : ' + e.message); }
   }
 
   async function savePermissions() {
