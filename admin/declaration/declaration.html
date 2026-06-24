@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Déclaration DTPJ — Casino Barrière Bordeaux</title>
-  <link rel="stylesheet" href="../shared/barriere.css"/>
+  <link rel="stylesheet" href="../../shared/barriere.css"/>
   <link rel="stylesheet" href="declaration.css"/>
 </head>
 <body>
@@ -13,7 +13,7 @@
 </button>
 
 <div class="app">
-  <a href="../declarations.html" class="back">← Déclarations</a>
+  <a href="../admin_tournois.html" class="back">← Administration</a>
 
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
@@ -215,10 +215,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared/barriere.js"></script>
-<script src="../shared/supabase.js"></script>
-<script src="../shared/auth.js"></script>
+<script src="../../shared/barriere.js"></script>
+<script src="../../shared/supabase.js"></script>
+<script src="../../shared/auth.js"></script>
 <script src="declaration.js"></script>
-<script>AUTH.guard({ loginUrl: '../login.html', panel: 'declarations' });</script>
+<script>AUTH.guard({ loginUrl: '../../login.html', role: 'admin' });</script>
 </body>
 </html>

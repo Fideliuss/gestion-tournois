@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outils Tournois — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="shared/barriere.css" />
+  <style>
+    .app { padding: 64px 20px 80px; }
+    .hdr { margin-bottom: 52px; }
+
+    .tool-card               { --accent: 196,160,74;  }
+    .tool-card.c-blue        { --accent: 82,148,210;  }
+    .tool-card.c-teal        { --accent: 72,175,150;  }
+
+    .footer {
+      margin-top: 52px; text-align: center;
+      font-size: 10px; letter-spacing: .14em; color: var(--text-muted);
+    }
+    .footer-version {
+      display: inline-block; margin-top: 6px;
+      font-family: var(--f-num); font-size: 9px;
+      color: var(--text-muted); letter-spacing: .12em; opacity: .55;
+    }
+    details.changelog {
+      margin-top: 10px; display: inline-block;
+      font-family: var(--f-ui); font-size: 10px;
+      color: var(--text-muted); letter-spacing: 0; text-align: left;
+    }
+    details.changelog summary {
+      cursor: pointer; letter-spacing: .12em; list-style: none; outline: none;
+      color: var(--text-muted); transition: color .18s;
+    }
+    details.changelog summary::-webkit-details-marker { display: none; }
+    details.changelog summary:hover { color: var(--gold-dim); }
+    details.changelog[open] summary { color: var(--gold-dim); margin-bottom: 10px; }
+    .cl-list {
+      border-left: 1px solid rgba(196,160,74,.18);
+      padding-left: 14px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .cl-version { font-family: var(--f-num); font-size: 9px; color: var(--gold-dim); margin-bottom: 3px; }
+    .cl-entries { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+    .cl-entries li { font-size: 10px; color: var(--text-muted); }
+    .cl-entries li::before { content: '· '; color: var(--gold-dim); }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="index.html" class="back">← Menu</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Outils <em>Tournois</em></div>
+  </div>
+
+  <div class="grid">
+
+    <a href="prize_pool/prize_pool.html" class="tool-card" data-panel="prize-pool">
+      <div class="tool-badge">🎯</div>
+      <div class="tool-name">Prize Pool <em>Builder</em></div>
+    </a>
+
+    <a href="leaderboard/leaderboard.html" class="tool-card c-blue" data-panel="leaderboard">
+      <div class="tool-badge">🏆</div>
+      <div class="tool-name">Challenge <em>Saisonnier</em></div>
+    </a>
+
+    <a href="admin/admin_tournois.html" class="tool-card c-teal" data-panel="admin-tournois">
+      <div class="tool-badge">📁</div>
+      <div class="tool-name">Administration <em>Tournois</em></div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    Casino Barrière Bordeaux · Outils internes tournois
+    <br><span class="footer-version" id="app-version"></span>
+    <br>
+    <details class="changelog">
+      <summary>Changelog ▾</summary>
+      <div class="cl-list" id="cl-list"></div>
+    </details>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared/changelog.js"></script>
+<script src="shared/barriere.js"></script>
+<script src="shared/supabase.js"></script>
+<script src="shared/auth.js"></script>
+<script>
+AUTH.guard({ loginUrl: 'login.html', panel: 'tournois' }).then(async function(user) {
+  if (!user) return;
+  const role = user.user_metadata?.role || 'floor';
+  const isAdmin = role === 'admin';
+
+  if (!isAdmin) {
+    document.querySelectorAll('[data-role="admin"]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+  }
+
+  const panelCards = document.querySelectorAll('[data-panel]');
+  if (panelCards.length && !isAdmin) {
+    try {
+      const roles = await SB.getRoles();
+      const entry  = roles.find(function(r) { return r.slug === role; });
+      const allowed = (entry && entry.panels) || [];
+      panelCards.forEach(function(el) {
+        if (!allowed.includes(el.getAttribute('data-panel'))) el.style.display = 'none';
+      });
+    } catch(e) {
+      panelCards.forEach(function(el) { el.style.display = 'none'; });
+    }
+  }
+});
+(function () {
+  if (!window.CHANGELOG || !CHANGELOG.length) return;
+  var ver = document.getElementById('app-version');
+  if (ver) ver.textContent = CHANGELOG[0].version;
+  var list = document.getElementById('cl-list');
+  if (!list) return;
+  list.innerHTML = CHANGELOG.map(function (e) {
+    return '<div>'
+      + '<div class="cl-version">' + e.version + ' &mdash; ' + e.date + '</div>'
+      + '<ul class="cl-entries"><li>' + e.message + '</li></ul>'
+      + '</div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

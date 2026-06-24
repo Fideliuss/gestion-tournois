@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Déclarations — Casino Barrière Bordeaux</title>
-  <link rel="stylesheet" href="shared/barriere.css" />
+  <title>Administration Tournois — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
 
-    .tool-card           { --accent: 128,108,196; } /* indigo */
-    .tool-card.c-rose    { --accent: 196,105,90;  } /* corail */
+    .tool-card         { --accent: 128,108,196; } /* indigo  */
+    .tool-card.c-gold  { --accent: 196,160,74;  } /* or      */
+    .tool-card.c-teal  { --accent: 72,175,150;  } /* teal    */
 
     .footer {
       margin-top: 52px; text-align: center;
@@ -24,24 +25,28 @@
 </button>
 
 <div class="app">
-  <a href="admin.html" class="back">← Administration</a>
+  <a href="../outils_tournois.html" class="back">← Menu</a>
 
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
-    <div class="hdr-title">Espace <em>Déclarations</em></div>
-
+    <div class="hdr-title">Administration <em>Tournois</em></div>
   </div>
 
   <div class="grid">
 
     <a href="declaration/declaration.html" class="tool-card">
       <div class="tool-badge">📋</div>
-      <div class="tool-name">Déclaration <em>Tournois</em></div>
+      <div class="tool-name">Déclaration <em>DTPJ</em></div>
     </a>
 
-    <a href="extras/extras.html" class="tool-card c-rose">
+    <a href="extras/extras.html" class="tool-card c-teal">
       <div class="tool-badge">👥</div>
       <div class="tool-name">Déclaration <em>Extras</em></div>
+    </a>
+
+    <a href="config_tournois.html" class="tool-card c-gold">
+      <div class="tool-badge">🔧</div>
+      <div class="tool-name">Config <em>Tournois</em></div>
     </a>
 
   </div>
@@ -50,9 +55,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="shared/barriere.js"></script>
-<script src="shared/supabase.js"></script>
-<script src="shared/auth.js"></script>
-<script>AUTH.guard({ loginUrl: 'login.html', panel: ['declarations', 'extras'] });</script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'admin-tournois' });</script>
 </body>
 </html>

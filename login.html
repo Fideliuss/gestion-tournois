@@ -236,8 +236,7 @@ SB.onAuthStateChange((event, session) => {
 })();
 
 function _redirect(session) {
-  const role = session.user.user_metadata?.role || 'floor';
-  window.location.replace(role === 'admin' ? 'index.html' : 'prize-pool/prize-pool.html');
+  window.location.replace('index.html');
 }
 
 // ── Navigation entre états ──

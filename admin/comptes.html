@@ -181,6 +181,14 @@
     .form-field:last-of-type { margin-bottom: 20px; }
     .form-actions { display: flex; gap: 8px; align-items: center; }
 
+    /* ── Panels hiérarchiques ── */
+    .panel-children {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 8px 0 4px 20px;
+      border-left: 1px solid rgba(196,160,74,.12);
+      margin: 6px 0 2px 7px;
+    }
+
     /* ── Nuancier ── */
     .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 0; }
     .color-swatch {
@@ -206,7 +214,7 @@
 </button>
 
 <div class="app">
-  <a href="../configurations.html" class="back">← Configurations</a>
+  <a href="../index.html" class="back">← Menu</a>
 
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
@@ -271,11 +279,11 @@
         <thead>
           <tr>
             <th class="col-role">Rôle</th>
-            <th>Déclarations</th>
-            <th>Extras</th>
-            <th>Config.</th>
+            <th>Tournois</th>
             <th>Prize Pool</th>
             <th>Leaderboard</th>
+            <th>Admin Tournois</th>
+            <th>Training</th>
             <th class="col-del"></th>
           </tr>
         </thead>
@@ -374,11 +382,12 @@
   let _allRoles     = [];
 
   const PANELS = [
-    { id: 'declarations',   label: 'Déclarations' },
-    { id: 'extras',         label: 'Extras'        },
-    { id: 'configurations', label: 'Config.'        },
-    { id: 'prize-pool',     label: 'Prize Pool'    },
-    { id: 'leaderboard',    label: 'Leaderboard'   },
+    { id: 'tournois', label: 'Outils Tournois', children: [
+      { id: 'prize-pool',     label: 'Prize Pool'              },
+      { id: 'leaderboard',    label: 'Leaderboard'             },
+      { id: 'admin-tournois', label: 'Administration Tournois' },
+    ]},
+    { id: 'training', label: 'Training Croupier', children: [] },
   ];
 
   const ROLE_COLORS = [
@@ -600,16 +609,47 @@
     document.getElementById('role-edit-panels').innerHTML = isAdmin
       ? '<span style="font-size:12px;color:var(--text-muted)">Accès total (non configurable)</span>'
       : PANELS.map(function(p) {
-          const checked = (role.panels || []).includes(p.id) ? 'checked' : '';
-          return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--cream);cursor:pointer">'
-            + '<input type="checkbox" class="perm-cb" data-panel="' + p.id + '" ' + checked + '>'
-            + p.label + '</label>';
+          const rolePanels   = role.panels || [];
+          const parentChecked = rolePanels.includes(p.id);
+          const childrenHtml  = p.children && p.children.length
+            ? '<div class="panel-children" id="pce-' + p.id + '" style="' + (parentChecked ? '' : 'display:none') + '">'
+              + p.children.map(function(c) {
+                  return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);cursor:pointer">'
+                    + '<input type="checkbox" class="perm-cb" data-panel="' + c.id + '" ' + (rolePanels.includes(c.id) ? 'checked' : '') + '>'
+                    + c.label + '</label>';
+                }).join('')
+              + '</div>'
+            : '';
+          return '<div style="margin-bottom:4px">'
+            + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--cream);cursor:pointer">'
+            + '<input type="checkbox" class="perm-cb perm-parent" data-panel="' + p.id + '" data-children-id="pce-' + p.id + '" '
+            + (parentChecked ? 'checked' : '') + ' onchange="onParentPanelChange(this)">'
+            + p.label + '</label>'
+            + childrenHtml + '</div>';
         }).join('');
 
     document.getElementById('role-edit-delete').style.display = isAdmin ? 'none' : '';
     document.getElementById('role-edit-msg').textContent = '';
     document.getElementById('modal-role').classList.add('open');
     if (!isAdmin) setTimeout(function() { document.getElementById('role-edit-label').focus(); }, 50);
+  }
+
+  function onParentPanelChange(el) {
+    const childrenDiv = document.getElementById(el.dataset.childrenId);
+    if (!childrenDiv) return;
+    childrenDiv.style.display = el.checked ? '' : 'none';
+    if (!el.checked) {
+      childrenDiv.querySelectorAll('.perm-cb').forEach(function(cb) { cb.checked = false; });
+    }
+  }
+
+  function flatPanels() {
+    const out = [];
+    PANELS.forEach(function(p) {
+      out.push(p);
+      if (p.children) p.children.forEach(function(c) { out.push(c); });
+    });
+    return out;
   }
 
   function closeRoleEdit() {
@@ -677,7 +717,7 @@
     tbody.innerHTML = _allRoles.map(function(role) {
       const isAdmin = role.slug === 'admin';
 
-      const cells = PANELS.map(function(p) {
+      const cells = flatPanels().map(function(p) {
         if (isAdmin) return '<td><span class="perm-dot"></span></td>';
         const checked = (role.panels || []).includes(p.id) ? 'checked' : '';
         return '<td><input type="checkbox" class="perm-cb" data-slug="' + role.slug + '" data-panel="' + p.id + '" ' + checked + '></td>';
