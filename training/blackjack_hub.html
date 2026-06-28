@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Blackjack — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="training.css" />
+  <style>
+    .app { padding: 64px 20px 80px; }
+    .hdr { margin-bottom: 52px; }
+    .footer { margin-top: 52px; text-align: center; font-size: 10px; letter-spacing: .14em; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="training.html" class="back">← Training</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Training <em>Blackjack</em></div>
+  </div>
+
+  <div class="training-grid" style="max-width:500px">
+
+    <a href="blackjack.html" class="game-card">
+      <div class="game-card-badge">💰</div>
+      <div class="game-card-name">BJ <em>Paiement</em></div>
+    </a>
+
+    <a href="blackjack_score.html" class="game-card">
+      <div class="game-card-badge">🃏</div>
+      <div class="game-card-name">BJ <em>Score</em></div>
+    </a>
+
+  </div>
+
+  <div class="footer">Casino Barrière Bordeaux · Training Blackjack</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'training' });</script>
+</body>
+</html>

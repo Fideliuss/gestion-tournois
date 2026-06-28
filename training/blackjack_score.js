@@ -2,9 +2,10 @@
 //  BLACKJACK SCORE — lecture de points avec timer
 // ══════════════════════════════════════════════════════
 
-const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const SUITS = ['♠','♥','♦','♣'];
-const RED   = ['♥','♦'];
+const RANKS  = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const SUITS  = ['♠','♥','♦','♣'];
+const RED    = ['♥','♦'];
+const TEN_VAL = ['10','J','Q','K'];
 
 const TIMER_SECONDS      = 10;
 const QUESTIONS_PER_SESSION = 10;
@@ -31,17 +32,40 @@ async function initScore() {
   nextQuestion();
 }
 
-// ── Génération main ───────────────────────────────────
+// ── Génération main (règles banque : tire ≤16, laisse ≥17) ──
+function randomCard() {
+  return {
+    rank: RANKS[Math.floor(Math.random() * RANKS.length)],
+    suit: SUITS[Math.floor(Math.random() * SUITS.length)],
+  };
+}
+
+function isBJ(hand) {
+  if (hand.length !== 2) return false;
+  const hasAce = hand.some(function(c) { return c.rank === 'A'; });
+  const hasTen = hand.some(function(c) { return TEN_VAL.includes(c.rank); });
+  return hasAce && hasTen;
+}
+
 function generateHand() {
-  const n = Math.floor(Math.random() * 4) + 2; // 2 à 5 cartes
-  const hand = [];
-  for (let i = 0; i < n; i++) {
-    hand.push({
-      rank: RANKS[Math.floor(Math.random() * RANKS.length)],
-      suit: SUITS[Math.floor(Math.random() * SUITS.length)],
-    });
+  const hand = [randomCard(), randomCard()];
+
+  // BJ immédiat : As + buche en 2 cartes
+  if (isBJ(hand)) return hand;
+
+  // Le dealer tire tant que le total est inférieur à 17
+  while (calcTotal(hand) < 17) {
+    hand.push(randomCard());
   }
+
   return hand;
+}
+
+function handLabel(hand) {
+  const total = calcTotal(hand);
+  if (isBJ(hand))   return 'Blackjack';
+  if (total > 21)   return 'Bust — ' + total;
+  return String(total);
 }
 
 function cardValue(rank) {
@@ -120,7 +144,7 @@ function timeOut() {
 
   const fb = document.getElementById('feedback-bar');
   fb.className = 'feedback-bar wrong';
-  fb.textContent = '⏱ Temps écoulé — La bonne réponse était ' + _validTotals.join(' ou ') + ' point' + (_validTotals[0] > 1 ? 's' : '');
+  fb.textContent = '⏱ Temps écoulé — ' + handLabel(_hand) + ' (' + _validTotals.join(' ou ') + ')';
 
   _qIndex++;
   updateProgress();
@@ -171,13 +195,14 @@ async function submitAnswer() {
   const isCorrect = _validTotals.includes(val);
   if (isCorrect) _correct++;
 
-  const fb = document.getElementById('feedback-bar');
+  const label = handLabel(_hand);
+  const fb    = document.getElementById('feedback-bar');
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ ' + val + ' point' + (val > 1 ? 's' : '') + ' — Correct !';
+    fb.textContent = '✓ ' + label + ' — Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
-    fb.textContent = '✕ Incorrect — La bonne réponse était ' + _validTotals.join(' ou ') + ' point' + (_validTotals[0] > 1 ? 's' : '');
+    fb.textContent = '✕ Incorrect — ' + label + ' (' + _validTotals.join(' ou ') + ')';
   }
 
   try {

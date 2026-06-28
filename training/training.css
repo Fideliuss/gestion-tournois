@@ -185,19 +185,28 @@
 
 /* ── Cartes à jouer ── */
 .cards-zone {
-  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  display: flex; justify-content: center; flex-wrap: nowrap;
   margin: 24px 0 28px;
+  padding: 0 32px;
 }
 
 .playing-card {
   width: 64px; height: 90px;
   background: #fff; border-radius: 6px;
   border: 1px solid rgba(0,0,0,.15);
-  box-shadow: 0 3px 10px rgba(0,0,0,.35);
+  box-shadow: 2px 4px 12px rgba(0,0,0,.4);
   position: relative; color: #1a1a1a;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  margin-left: -18px;
+  transition: transform .1s;
 }
+.playing-card:first-child { margin-left: 0; }
+.playing-card:nth-child(1) { z-index: 1; }
+.playing-card:nth-child(2) { z-index: 2; }
+.playing-card:nth-child(3) { z-index: 3; }
+.playing-card:nth-child(4) { z-index: 4; }
+.playing-card:nth-child(5) { z-index: 5; }
 .playing-card.red { color: #c0392b; }
 
 .card-tl, .card-br {
