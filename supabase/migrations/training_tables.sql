@@ -8,7 +8,12 @@ CREATE TABLE training_config (
   value jsonb   NOT NULL
 );
 INSERT INTO training_config (key, value) VALUES
-  ('blackjack', '{"min_bet": 10, "max_bet": 1000, "bet_step": 10}');
+  ('blackjack', '{
+    "ranges": [
+      { "min": 10,  "max": 100,  "step": 10,  "weight": 80 },
+      { "min": 200, "max": 1000, "step": 100, "weight": 20 }
+    ]
+  }');
 
 ALTER TABLE training_config ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "training_config_read" ON training_config

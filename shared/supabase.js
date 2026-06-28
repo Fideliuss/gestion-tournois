@@ -279,6 +279,12 @@ const SB = {
     return data.value;
   },
 
+  async updateTrainingConfig(game, value) {
+    const { error } = await _sb.from('training_config')
+      .upsert({ key: game, value }, { onConflict: 'key' });
+    if (error) throw error;
+  },
+
   async startTrainingSession(game) {
     const session = await this.getSession();
     if (!session) throw new Error('Non authentifié');

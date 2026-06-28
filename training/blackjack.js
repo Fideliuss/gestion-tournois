@@ -31,7 +31,7 @@ const SITUATIONS = [
 
 const QUESTIONS_PER_SESSION = 10;
 
-let _config    = { min_bet: 10, max_bet: 1000, bet_step: 10 };
+let _config    = { ranges: [{ min: 10, max: 100, step: 10, weight: 80 }, { min: 200, max: 1000, step: 100, weight: 20 }] };
 let _sessionId = null;
 let _userId    = null;
 let _current   = null;
@@ -61,10 +61,23 @@ async function initBlackjack() {
 }
 
 // ── Génération scénario ───────────────────────────────
+function pickBet() {
+  const ranges  = (_config.ranges && _config.ranges.length)
+    ? _config.ranges
+    : [{ min: 10, max: 100, step: 10, weight: 100 }];
+  const total   = ranges.reduce(function(s, r) { return s + (r.weight || 1); }, 0);
+  let   rand    = Math.random() * total;
+  let   chosen  = ranges[ranges.length - 1];
+  for (var i = 0; i < ranges.length; i++) {
+    rand -= (ranges[i].weight || 1);
+    if (rand <= 0) { chosen = ranges[i]; break; }
+  }
+  const steps = Math.floor((chosen.max - chosen.min) / chosen.step);
+  return chosen.min + Math.floor(Math.random() * (steps + 1)) * chosen.step;
+}
+
 function generateScenario() {
-  const { min_bet, max_bet, bet_step } = _config;
-  const steps = Math.floor((max_bet - min_bet) / bet_step);
-  const bet   = min_bet + Math.floor(Math.random() * (steps + 1)) * bet_step;
+  const bet = pickBet();
 
   const sit = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
 
