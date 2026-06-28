@@ -32,7 +32,11 @@ Deno.serve(async (req) => {
 
   const { data: { user }, error: userErr } = await userClient.auth.getUser();
   if (userErr || !user) return json({ error: 'Non authentifié' }, 401);
-  if (user.user_metadata?.role !== 'admin') return json({ error: 'Accès réservé aux admins' }, 403);
+
+  // Vérification admin via app_metadata (non modifiable côté client)
+  // Fallback sur user_metadata pour la période de migration
+  const callerRole = user.app_metadata?.role || user.user_metadata?.role;
+  if (callerRole !== 'admin') return json({ error: 'Accès réservé aux admins' }, 403);
 
   // Client admin (service role)
   const admin = createClient(
@@ -49,7 +53,7 @@ Deno.serve(async (req) => {
       const users = data.users.map((u) => ({
         id:         u.id,
         email:      u.email,
-        role:       u.user_metadata?.role || 'floor',
+        role:       u.app_metadata?.role || u.user_metadata?.role || 'floor',
         createdAt:  u.created_at,
         lastSignIn: u.last_sign_in_at,
       }));
@@ -66,6 +70,7 @@ Deno.serve(async (req) => {
         email,
         password,
         user_metadata: { role },
+        app_metadata:  { role },
         email_confirm: true,
       });
       if (error) throw error;
@@ -79,9 +84,10 @@ Deno.serve(async (req) => {
       if (!id) return json({ error: 'id est requis' }, 400);
 
       const updates: Record<string, unknown> = {};
-      const meta: Record<string, unknown> = {};
-      if (role !== undefined) meta.role = role;
-      if (Object.keys(meta).length > 0) updates.user_metadata = meta;
+      if (role !== undefined) {
+        updates.user_metadata = { role };
+        updates.app_metadata  = { role };
+      }
       if (password) updates.password = password;
 
       const { error } = await admin.auth.admin.updateUserById(id, updates);

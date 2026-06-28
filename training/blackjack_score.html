@@ -12,6 +12,45 @@
       display: flex; flex-direction: column; align-items: center;
     }
     .hdr { margin-bottom: 40px; text-align: center; }
+
+    /* ── Sélection de niveau ── */
+    .level-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 14px; width: 100%; max-width: 480px; margin-top: 8px;
+    }
+    .level-card {
+      background: var(--bg-card); border: 1px solid var(--gold-bd);
+      border-radius: 4px; padding: 24px 16px; text-align: center;
+      cursor: pointer; transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .level-card::before, .level-card::after {
+      content: ''; position: absolute;
+      width: 8px; height: 8px;
+      border-color: var(--gold); border-style: solid; opacity: .2;
+    }
+    .level-card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+    .level-card::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+    .level-card:hover { border-color: rgba(196,160,74,.5); background: rgba(196,160,74,.04); }
+    .level-card:hover::before, .level-card:hover::after { opacity: .5; }
+
+    .level-name {
+      font-size: 11px; font-weight: 700; letter-spacing: .18em;
+      text-transform: uppercase; font-family: var(--f-ui);
+      margin-bottom: 10px;
+    }
+    .level-name.facile { color: #6dcc8e; }
+    .level-name.medium { color: var(--gold); }
+    .level-name.expert { color: #e07a68; }
+
+    .level-timer {
+      font-family: var(--f-num); font-size: 32px; font-weight: 700;
+      color: var(--cream); line-height: 1;
+    }
+    .level-unit {
+      font-size: 11px; color: var(--text-muted); margin-top: 4px;
+      font-family: var(--f-ui); letter-spacing: .08em;
+    }
   </style>
 </head>
 <body>
@@ -27,10 +66,33 @@
     <div class="hdr-title">BJ <em>Score</em></div>
   </div>
 
-  <!-- ══ Écran entraînement ══ -->
-  <div id="training-screen">
+  <!-- ══ Sélection de niveau ══ -->
+  <div id="level-screen">
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
+      Choisissez votre niveau
+    </div>
+    <div class="level-grid">
+      <div class="level-card" onclick="startWithLevel('facile')">
+        <div class="level-name facile">Facile</div>
+        <div class="level-timer" id="timer-facile">15</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startWithLevel('medium')">
+        <div class="level-name medium">Médium</div>
+        <div class="level-timer" id="timer-medium">10</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startWithLevel('expert')">
+        <div class="level-name expert">Expert</div>
+        <div class="level-timer" id="timer-expert">5</div>
+        <div class="level-unit">secondes</div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Progress -->
+  <!-- ══ Écran entraînement ══ -->
+  <div id="training-screen" style="display:none">
+
     <div class="training-header">
       <span class="training-progress" id="progress-text">Question 1 / 10</span>
       <span class="training-score"    id="score-text">Score : 0 / 0</span>
@@ -39,7 +101,6 @@
       <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
     </div>
 
-    <!-- Timer -->
     <div class="timer-wrap">
       <span class="timer-label">Temps</span>
       <span class="timer-display" id="timer-display">10</span>
@@ -49,10 +110,8 @@
       <div class="timer-bar-fill" id="timer-bar" style="width:100%"></div>
     </div>
 
-    <!-- Cartes -->
     <div class="cards-zone" id="cards-zone"></div>
 
-    <!-- Réponse -->
     <div class="answer-zone">
       <div class="answer-question">Quelle est la valeur de cette main ?</div>
       <div class="answer-row" style="margin-top:12px">
@@ -65,7 +124,6 @@
       </div>
     </div>
 
-    <!-- Feedback -->
     <div class="feedback-bar empty" id="feedback-bar"></div>
 
   </div>
@@ -73,14 +131,17 @@
   <!-- ══ Écran résumé ══ -->
   <div id="summary-screen" style="display:none">
     <div class="session-summary">
-      <div class="summary-score-big"  id="summary-score">8/10</div>
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
+           id="summary-level"></div>
+      <div class="summary-score-big"   id="summary-score">8/10</div>
       <div class="summary-score-label" id="summary-pct">80%</div>
-      <div class="summary-verdict"    id="summary-verdict">Excellent !</div>
+      <div class="summary-verdict"     id="summary-verdict">Excellent !</div>
       <div class="summary-actions">
         <button class="btn btn-gold"  onclick="restartSession()"
-                style="padding:12px 28px;font-size:13px">↺ Nouvelle session</button>
-        <a href="training.html" class="btn btn-ghost"
-           style="padding:12px 28px;font-size:13px;text-decoration:none">← Training</a>
+                style="padding:12px 28px;font-size:13px">↺ Rejouer</button>
+        <a href="blackjack_hub.html" class="btn btn-ghost"
+           style="padding:12px 28px;font-size:13px;text-decoration:none">← Blackjack</a>
       </div>
     </div>
   </div>

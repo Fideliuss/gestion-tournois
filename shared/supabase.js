@@ -288,12 +288,22 @@ const SB = {
   async startTrainingSession(game) {
     const session = await this.getSession();
     if (!session) throw new Error('Non authentifié');
-    // Supprime les sessions incomplètes existantes (même user + même jeu)
-    await _sb.from('training_sessions')
-      .delete()
+
+    // Récupère les sessions incomplètes à nettoyer
+    const { data: oldSessions } = await _sb.from('training_sessions')
+      .select('id')
       .eq('user_id', session.user.id)
       .eq('game', game)
       .is('ended_at', null);
+
+    if (oldSessions && oldSessions.length) {
+      const ids = oldSessions.map(function(s) { return s.id; });
+      // Supprime d'abord les résultats liés (évite les conflits RLS sur CASCADE)
+      await _sb.from('training_results').delete().in('session_id', ids);
+      // Puis les sessions
+      await _sb.from('training_sessions').delete().in('id', ids);
+    }
+
     const { data, error } = await _sb.from('training_sessions')
       .insert({ user_id: session.user.id, game }).select().single();
     if (error) throw error;

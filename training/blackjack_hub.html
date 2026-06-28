@@ -85,9 +85,11 @@
 <!-- Modal config mises -->
 <div id="modal-cfg" class="modal-overlay" onclick="if(event.target===this)closeConfig()">
   <div class="modal-box">
-    <div class="sec" style="margin-bottom:20px">Config Blackjack — Plages de mises</div>
+    <div class="sec" style="margin-bottom:20px">Config Blackjack</div>
+
+    <div class="fl" style="margin-bottom:8px">Plages de mises</div>
     <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px">
-      Définissez les plages de mises et leur probabilité d'apparition (poids relatifs).
+      Poids relatifs — Ex : 80/20 → 80% des mises dans la 1ère plage.
     </p>
     <table class="range-table">
       <thead>
@@ -108,9 +110,29 @@
         </tr>
       </tbody>
     </table>
-    <div style="font-size:11px;color:var(--text-muted);margin-bottom:16px">
-      Poids relatifs. Ex : 80 / 20 → 80% des mises dans la 1ère plage.
+
+    <div class="fl" style="margin:16px 0 10px">Timers par niveau (secondes, min 3s)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+      <div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-align:center">Facile</div>
+        <input type="number" id="lvl-facile" value="15" min="3" max="60" step="1"
+               style="width:100%;padding:8px;text-align:center;font-family:var(--f-num);font-size:16px;
+                      background:var(--bg-card);border:1px solid var(--gold-bd);border-radius:3px;color:var(--cream)" />
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-align:center">Médium</div>
+        <input type="number" id="lvl-medium" value="10" min="3" max="60" step="1"
+               style="width:100%;padding:8px;text-align:center;font-family:var(--f-num);font-size:16px;
+                      background:var(--bg-card);border:1px solid var(--gold-bd);border-radius:3px;color:var(--cream)" />
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-align:center">Expert</div>
+        <input type="number" id="lvl-expert" value="5" min="3" max="60" step="1"
+               style="width:100%;padding:8px;text-align:center;font-family:var(--f-num);font-size:16px;
+                      background:var(--bg-card);border:1px solid var(--gold-bd);border-radius:3px;color:var(--cream)" />
+      </div>
     </div>
+
     <div style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-gold"  onclick="saveConfig()">Enregistrer →</button>
       <button class="btn btn-ghost" onclick="closeConfig()">Annuler</button>
@@ -139,9 +161,16 @@ document.addEventListener('keydown', function(e) {
 async function loadConfig() {
   try {
     const cfg = await SB.getTrainingConfig('blackjack');
-    if (!cfg || !cfg.ranges) return;
-    if (cfg.ranges[0]) setRow(1, cfg.ranges[0]);
-    if (cfg.ranges[1]) setRow(2, cfg.ranges[1]);
+    if (!cfg) return;
+    if (cfg.ranges) {
+      if (cfg.ranges[0]) setRow(1, cfg.ranges[0]);
+      if (cfg.ranges[1]) setRow(2, cfg.ranges[1]);
+    }
+    if (cfg.levels) {
+      if (cfg.levels.facile) document.getElementById('lvl-facile').value = cfg.levels.facile;
+      if (cfg.levels.medium) document.getElementById('lvl-medium').value = cfg.levels.medium;
+      if (cfg.levels.expert) document.getElementById('lvl-expert').value = cfg.levels.expert;
+    }
   } catch(e) {}
 }
 
@@ -164,6 +193,7 @@ function closeConfig() { document.getElementById('modal-cfg').classList.remove('
 async function saveConfig() {
   const msg = document.getElementById('cfg-msg');
   msg.textContent = ''; msg.className = 'cfg-msg';
+
   const r1 = getRow(1), r2 = getRow(2);
   if (r1.min <= 0 || r1.max <= r1.min || r1.step <= 0 || r1.weight <= 0) {
     msg.textContent = 'Plage 1 invalide.'; msg.className = 'cfg-msg err'; return;
@@ -175,8 +205,14 @@ async function saveConfig() {
     }
     ranges.push(r2);
   }
+
+  const lvlFacile = Math.max(3, parseInt(document.getElementById('lvl-facile').value) || 15);
+  const lvlMedium = Math.max(3, parseInt(document.getElementById('lvl-medium').value) || 10);
+  const lvlExpert = Math.max(3, parseInt(document.getElementById('lvl-expert').value) || 5);
+  const levels = { facile: lvlFacile, medium: lvlMedium, expert: lvlExpert };
+
   try {
-    await SB.updateTrainingConfig('blackjack', { ranges });
+    await SB.updateTrainingConfig('blackjack', { ranges, levels });
     msg.textContent = 'Enregistré ✓'; msg.className = 'cfg-msg ok';
     setTimeout(function() { msg.textContent = ''; msg.className = 'cfg-msg'; }, 2000);
   } catch(e) {

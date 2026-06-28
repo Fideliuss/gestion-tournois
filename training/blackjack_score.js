@@ -1,24 +1,29 @@
 // ══════════════════════════════════════════════════════
-//  BLACKJACK SCORE — lecture de points avec timer
+//  BLACKJACK SCORE — lecture de points avec timer + niveaux
 // ══════════════════════════════════════════════════════
 
-const RANKS  = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-const SUITS  = ['♠','♥','♦','♣'];
-const RED    = ['♥','♦'];
+const RANKS   = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const SUITS   = ['♠','♥','♦','♣'];
+const RED     = ['♥','♦'];
 const TEN_VAL = ['10','J','Q','K'];
 
-const TIMER_SECONDS      = 10;
 const QUESTIONS_PER_SESSION = 10;
 
-let _sessionId  = null;
-let _userId     = null;
-let _qIndex     = 0;
-let _correct    = 0;
-let _answered   = false;
-let _hand       = [];
+const LEVEL_LABELS = { facile: 'Facile', medium: 'Médium', expert: 'Expert' };
+const DEFAULT_TIMERS = { facile: 15, medium: 10, expert: 5 };
+
+let _config      = { levels: DEFAULT_TIMERS };
+let _sessionId   = null;
+let _userId      = null;
+let _level       = null;
+let _timerSecs   = 10;
+let _qIndex      = 0;
+let _correct     = 0;
+let _answered    = false;
+let _hand        = [];
 let _validTotals = [];
 let _timerHandle = null;
-let _timeLeft   = TIMER_SECONDS;
+let _timeLeft    = 10;
 
 // ── Init ─────────────────────────────────────────────
 async function initScore() {
@@ -26,9 +31,35 @@ async function initScore() {
     const session = await SB.getSession();
     if (!session) return;
     _userId = session.user.id;
+    const cfg = await SB.getTrainingConfig('blackjack');
+    if (cfg) {
+      _config = cfg;
+      // Mettre à jour les timers affichés sur l'écran de sélection
+      const levels = cfg.levels || DEFAULT_TIMERS;
+      ['facile','medium','expert'].forEach(function(k) {
+        const el = document.getElementById('timer-' + k);
+        if (el && levels[k]) el.textContent = levels[k];
+      });
+    }
+  } catch(e) {}
+}
+
+// ── Sélection de niveau ───────────────────────────────
+async function startWithLevel(level) {
+  _level     = level;
+  _timerSecs = ((_config.levels || DEFAULT_TIMERS)[level]) || DEFAULT_TIMERS[level];
+  _qIndex    = 0;
+  _correct   = 0;
+  _answered  = false;
+
+  document.getElementById('level-screen').style.display   = 'none';
+  document.getElementById('training-screen').style.display = '';
+
+  try {
     const s = await SB.startTrainingSession('blackjack-score');
     _sessionId = s.id;
   } catch(e) {}
+
   nextQuestion();
 }
 
@@ -47,30 +78,9 @@ function isBJ(hand) {
   return hasAce && hasTen;
 }
 
-function generateHand() {
-  const hand = [randomCard(), randomCard()];
-
-  // BJ immédiat : As + buche en 2 cartes
-  if (isBJ(hand)) return hand;
-
-  // Le dealer tire tant que le total est inférieur à 17
-  while (calcTotal(hand) < 17) {
-    hand.push(randomCard());
-  }
-
-  return hand;
-}
-
-function handLabel(hand) {
-  const total = calcTotal(hand);
-  if (isBJ(hand))   return 'Blackjack';
-  if (total > 21)   return 'Bust — ' + total;
-  return String(total);
-}
-
 function cardValue(rank) {
   if (rank === 'A') return 11;
-  if (['J','Q','K'].includes(rank)) return 10;
+  if (TEN_VAL.includes(rank)) return 10;
   return parseInt(rank);
 }
 
@@ -95,7 +105,21 @@ function getValidTotals(hand) {
   return totals;
 }
 
-// ── Affichage ─────────────────────────────────────────
+function generateHand() {
+  const hand = [randomCard(), randomCard()];
+  if (isBJ(hand)) return hand;
+  while (calcTotal(hand) < 17) hand.push(randomCard());
+  return hand;
+}
+
+function handLabel(hand) {
+  const total = calcTotal(hand);
+  if (isBJ(hand)) return 'Blackjack';
+  if (total > 21)  return 'Bust — ' + total;
+  return String(total);
+}
+
+// ── Affichage cartes ──────────────────────────────────
 function renderCards(hand) {
   const zone = document.getElementById('cards-zone');
   zone.innerHTML = hand.map(function(c) {
@@ -110,42 +134,34 @@ function renderCards(hand) {
 
 // ── Timer ─────────────────────────────────────────────
 function startTimer() {
-  _timeLeft = TIMER_SECONDS;
+  _timeLeft = _timerSecs;
   updateTimerDisplay();
   _timerHandle = setInterval(function() {
     _timeLeft--;
     updateTimerDisplay();
-    if (_timeLeft <= 0) {
-      clearInterval(_timerHandle);
-      if (!_answered) timeOut();
-    }
+    if (_timeLeft <= 0) { clearInterval(_timerHandle); if (!_answered) timeOut(); }
   }, 1000);
 }
 
-function stopTimer() {
-  clearInterval(_timerHandle);
-}
+function stopTimer() { clearInterval(_timerHandle); }
 
 function updateTimerDisplay() {
   const el  = document.getElementById('timer-display');
   const bar = document.getElementById('timer-bar');
-  const cls = _timeLeft <= 3 ? ' danger' : _timeLeft <= 5 ? ' warning' : '';
-  el.textContent = _timeLeft;
-  el.className   = 'timer-display' + cls;
-  const pct = (_timeLeft / TIMER_SECONDS) * 100;
-  bar.style.width     = pct + '%';
-  bar.className       = 'timer-bar-fill' + cls;
+  const cls = _timeLeft <= 3 ? ' danger' : _timeLeft <= Math.ceil(_timerSecs * 0.3) ? ' warning' : '';
+  el.textContent   = _timeLeft;
+  el.className     = 'timer-display' + cls;
+  bar.style.width  = ((_timeLeft / _timerSecs) * 100) + '%';
+  bar.className    = 'timer-bar-fill' + cls;
 }
 
 function timeOut() {
   _answered = true;
   document.getElementById('answer-input').disabled = true;
-  document.getElementById('submit-btn').disabled = true;
-
+  document.getElementById('submit-btn').disabled   = true;
   const fb = document.getElementById('feedback-bar');
-  fb.className = 'feedback-bar wrong';
+  fb.className   = 'feedback-bar wrong';
   fb.textContent = '⏱ Temps écoulé — ' + handLabel(_hand) + ' (' + _validTotals.join(' ou ') + ')';
-
   _qIndex++;
   updateProgress();
   scheduleNext();
@@ -154,9 +170,8 @@ function timeOut() {
 // ── Question ──────────────────────────────────────────
 function nextQuestion() {
   if (_qIndex >= QUESTIONS_PER_SESSION) { showSummary(); return; }
-
-  _answered   = false;
-  _hand       = generateHand();
+  _answered    = false;
+  _hand        = generateHand();
   _validTotals = getValidTotals(_hand);
 
   renderCards(_hand);
@@ -164,10 +179,9 @@ function nextQuestion() {
 
   const inp = document.getElementById('answer-input');
   inp.value = ''; inp.disabled = false;
-
-  document.getElementById('feedback-bar').className = 'feedback-bar empty';
+  document.getElementById('feedback-bar').className   = 'feedback-bar empty';
   document.getElementById('feedback-bar').textContent = '';
-  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('submit-btn').disabled      = false;
 
   startTimer();
   setTimeout(function() { inp.focus(); }, 50);
@@ -176,8 +190,7 @@ function nextQuestion() {
 function updateProgress() {
   document.getElementById('progress-text').textContent = 'Question ' + (_qIndex + 1) + ' / ' + QUESTIONS_PER_SESSION;
   document.getElementById('score-text').textContent    = 'Score : ' + _correct + ' / ' + _qIndex;
-  const pct = (_qIndex / QUESTIONS_PER_SESSION) * 100;
-  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-fill').style.width = ((_qIndex / QUESTIONS_PER_SESSION) * 100) + '%';
 }
 
 // ── Validation ────────────────────────────────────────
@@ -195,21 +208,20 @@ async function submitAnswer() {
   const isCorrect = _validTotals.includes(val);
   if (isCorrect) _correct++;
 
-  const label = handLabel(_hand);
-  const fb    = document.getElementById('feedback-bar');
+  const fb = document.getElementById('feedback-bar');
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ ' + label + ' — Correct !';
+    fb.textContent = '✓ ' + handLabel(_hand) + ' — Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
-    fb.textContent = '✕ Incorrect — ' + label + ' (' + _validTotals.join(' ou ') + ')';
+    fb.textContent = '✕ Incorrect — ' + handLabel(_hand) + ' (' + _validTotals.join(' ou ') + ')';
   }
 
   try {
     if (_sessionId && _userId) {
       await SB.addTrainingResult(
         _sessionId, _userId, 'blackjack-score',
-        { hand: _hand, valid_totals: _validTotals },
+        { hand: _hand, valid_totals: _validTotals, level: _level },
         _validTotals[0], val, isCorrect
       );
     }
@@ -237,8 +249,9 @@ async function showSummary() {
   document.getElementById('summary-screen').style.display  = '';
 
   const pct = Math.round((_correct / QUESTIONS_PER_SESSION) * 100);
-  document.getElementById('summary-score').textContent  = _correct + '/' + QUESTIONS_PER_SESSION;
-  document.getElementById('summary-pct').textContent    = pct + '%';
+  document.getElementById('summary-level').textContent   = LEVEL_LABELS[_level] + ' · ' + _timerSecs + 's';
+  document.getElementById('summary-score').textContent   = _correct + '/' + QUESTIONS_PER_SESSION;
+  document.getElementById('summary-pct').textContent     = pct + '%';
   document.getElementById('summary-verdict').textContent = verdict(_correct);
 }
 
@@ -252,15 +265,13 @@ function verdict(n) {
 
 function restartSession() {
   stopTimer();
-  _sessionId = null; _qIndex = 0; _correct = 0; _answered = false;
-
+  _sessionId = null; _qIndex = 0; _correct = 0; _answered = false; _level = null;
   document.getElementById('summary-screen').style.display  = 'none';
-  document.getElementById('training-screen').style.display = '';
-
-  SB.startTrainingSession('blackjack-score').then(function(s) { _sessionId = s.id; }).catch(function() {});
-  nextQuestion();
+  document.getElementById('level-screen').style.display    = '';
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') submitAnswer();
+  if (e.key === 'Enter' && document.getElementById('training-screen').style.display !== 'none') {
+    submitAnswer();
+  }
 });
