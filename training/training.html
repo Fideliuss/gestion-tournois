@@ -148,7 +148,7 @@ AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(async function
   if (!user) return;
   const role = user.user_metadata?.role || 'floor';
   if (role === 'admin') {
-    document.getElementById('admin-cfg-btn').style.display = '';
+    document.getElementById('admin-cfg-btn').style.display = 'block';
     await loadConfig();
   }
 });

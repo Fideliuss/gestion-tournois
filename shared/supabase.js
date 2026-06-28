@@ -288,6 +288,12 @@ const SB = {
   async startTrainingSession(game) {
     const session = await this.getSession();
     if (!session) throw new Error('Non authentifié');
+    // Supprime les sessions incomplètes existantes (même user + même jeu)
+    await _sb.from('training_sessions')
+      .delete()
+      .eq('user_id', session.user.id)
+      .eq('game', game)
+      .is('ended_at', null);
     const { data, error } = await _sb.from('training_sessions')
       .insert({ user_id: session.user.id, game }).select().single();
     if (error) throw error;
