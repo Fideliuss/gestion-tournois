@@ -10,6 +10,41 @@
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
     .footer { margin-top: 52px; text-align: center; font-size: 10px; letter-spacing: .14em; color: var(--text-muted); }
+
+    .admin-config-btn {
+      display: none; position: fixed; bottom: 20px; right: 20px; z-index: 100;
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity .18s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      width: 100%; max-width: 480px; background: var(--bg-card);
+      border: 1px solid var(--gold-bd); border-radius: 4px; padding: 36px 32px 28px;
+      position: relative; transform: translateY(10px); transition: transform .18s;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+
+    .range-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    .range-table th {
+      text-align: left; padding: 6px 8px 10px; font-size: 9px; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--gold-dim);
+    }
+    .range-table td { padding: 6px 8px; vertical-align: middle; }
+    .range-table td input {
+      width: 70px; padding: 6px 8px; font-family: var(--f-num); font-size: 13px;
+      background: var(--bg-card); border: 1px solid var(--gold-bd);
+      border-radius: 3px; color: var(--cream); text-align: center; outline: none;
+    }
+    .range-table td input:focus { border-color: rgba(196,160,74,.5); }
+
+    .cfg-msg { font-size: 11px; font-family: var(--f-ui); margin-top: 12px; }
+    .cfg-msg.ok  { color: #6dcc8e; }
+    .cfg-msg.err { color: #e07a68; }
   </style>
 </head>
 <body>
@@ -42,10 +77,112 @@
   <div class="footer">Casino Barrière Bordeaux · Training Blackjack</div>
 </div>
 
+<!-- Bouton config admin -->
+<button class="btn btn-ghost admin-config-btn" id="admin-cfg-btn" onclick="openConfig()">
+  ⚙ Config Blackjack
+</button>
+
+<!-- Modal config mises -->
+<div id="modal-cfg" class="modal-overlay" onclick="if(event.target===this)closeConfig()">
+  <div class="modal-box">
+    <div class="sec" style="margin-bottom:20px">Config Blackjack — Plages de mises</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px">
+      Définissez les plages de mises et leur probabilité d'apparition (poids relatifs).
+    </p>
+    <table class="range-table">
+      <thead>
+        <tr><th>Min (€)</th><th>Max (€)</th><th>Pas (€)</th><th>Poids</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="number" id="r1-min"    value="10"   min="1" step="1" /></td>
+          <td><input type="number" id="r1-max"    value="100"  min="1" step="1" /></td>
+          <td><input type="number" id="r1-step"   value="10"   min="1" step="1" /></td>
+          <td><input type="number" id="r1-weight" value="80"   min="1" step="1" /></td>
+        </tr>
+        <tr>
+          <td><input type="number" id="r2-min"    value="200"  min="1" step="1" /></td>
+          <td><input type="number" id="r2-max"    value="1000" min="1" step="1" /></td>
+          <td><input type="number" id="r2-step"   value="100"  min="1" step="1" /></td>
+          <td><input type="number" id="r2-weight" value="20"   min="0" step="1" /></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:16px">
+      Poids relatifs. Ex : 80 / 20 → 80% des mises dans la 1ère plage.
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-gold"  onclick="saveConfig()">Enregistrer →</button>
+      <button class="btn btn-ghost" onclick="closeConfig()">Annuler</button>
+      <span class="cfg-msg" id="cfg-msg"></span>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../shared/barriere.js"></script>
 <script src="../shared/supabase.js"></script>
 <script src="../shared/auth.js"></script>
-<script>AUTH.guard({ loginUrl: '../login.html', panel: 'training' });</script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(async function(user) {
+  if (!user) return;
+  if ((user.user_metadata?.role || '') === 'admin') {
+    document.getElementById('admin-cfg-btn').style.display = 'block';
+    await loadConfig();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeConfig();
+});
+
+async function loadConfig() {
+  try {
+    const cfg = await SB.getTrainingConfig('blackjack');
+    if (!cfg || !cfg.ranges) return;
+    if (cfg.ranges[0]) setRow(1, cfg.ranges[0]);
+    if (cfg.ranges[1]) setRow(2, cfg.ranges[1]);
+  } catch(e) {}
+}
+
+function setRow(n, r) {
+  ['min','max','step','weight'].forEach(function(k) {
+    document.getElementById('r' + n + '-' + k).value = r[k] || '';
+  });
+}
+
+function getRow(n) {
+  return ['min','max','step','weight'].reduce(function(o, k) {
+    o[k] = parseInt(document.getElementById('r' + n + '-' + k).value) || 0;
+    return o;
+  }, {});
+}
+
+function openConfig()  { document.getElementById('modal-cfg').classList.add('open'); }
+function closeConfig() { document.getElementById('modal-cfg').classList.remove('open'); }
+
+async function saveConfig() {
+  const msg = document.getElementById('cfg-msg');
+  msg.textContent = ''; msg.className = 'cfg-msg';
+  const r1 = getRow(1), r2 = getRow(2);
+  if (r1.min <= 0 || r1.max <= r1.min || r1.step <= 0 || r1.weight <= 0) {
+    msg.textContent = 'Plage 1 invalide.'; msg.className = 'cfg-msg err'; return;
+  }
+  const ranges = [r1];
+  if (r2.weight > 0) {
+    if (r2.max <= r2.min || r2.step <= 0) {
+      msg.textContent = 'Plage 2 invalide.'; msg.className = 'cfg-msg err'; return;
+    }
+    ranges.push(r2);
+  }
+  try {
+    await SB.updateTrainingConfig('blackjack', { ranges });
+    msg.textContent = 'Enregistré ✓'; msg.className = 'cfg-msg ok';
+    setTimeout(function() { msg.textContent = ''; msg.className = 'cfg-msg'; }, 2000);
+  } catch(e) {
+    msg.textContent = 'Erreur : ' + e.message; msg.className = 'cfg-msg err';
+  }
+}
+</script>
 </body>
 </html>
