@@ -18,6 +18,10 @@ INSERT INTO training_config (key, value) VALUES
 ALTER TABLE training_config ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "training_config_read" ON training_config
   FOR SELECT TO authenticated USING (true);
+CREATE POLICY "training_config_admin_write" ON training_config
+  FOR ALL TO authenticated
+  USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin')
+  WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Sessions d'entraînement
 CREATE TABLE training_sessions (
