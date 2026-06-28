@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training BJ Score — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="training.css" />
+  <style>
+    .app {
+      padding: 64px 20px 80px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .hdr { margin-bottom: 40px; text-align: center; }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="training.html" class="back">← Training</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">BJ <em>Score</em></div>
+  </div>
+
+  <!-- ══ Écran entraînement ══ -->
+  <div id="training-screen">
+
+    <!-- Progress -->
+    <div class="training-header">
+      <span class="training-progress" id="progress-text">Question 1 / 10</span>
+      <span class="training-score"    id="score-text">Score : 0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-wrap">
+      <span class="timer-label">Temps</span>
+      <span class="timer-display" id="timer-display">10</span>
+      <span class="timer-label">s</span>
+    </div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="timer-bar" style="width:100%"></div>
+    </div>
+
+    <!-- Cartes -->
+    <div class="cards-zone" id="cards-zone"></div>
+
+    <!-- Réponse -->
+    <div class="answer-zone">
+      <div class="answer-question">Quelle est la valeur de cette main ?</div>
+      <div class="answer-row" style="margin-top:12px">
+        <input type="number" id="answer-input" class="answer-input"
+               placeholder="0" min="1" max="30" step="1"
+               onkeydown="if(event.key==='Enter')submitAnswer()" />
+        <span class="answer-currency" style="font-size:16px;color:var(--text-dim)">pts</span>
+        <button class="btn btn-gold" id="submit-btn" onclick="submitAnswer()"
+                style="padding:10px 20px;font-size:13px">→</button>
+      </div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="feedback-bar empty" id="feedback-bar"></div>
+
+  </div>
+
+  <!-- ══ Écran résumé ══ -->
+  <div id="summary-screen" style="display:none">
+    <div class="session-summary">
+      <div class="summary-score-big"  id="summary-score">8/10</div>
+      <div class="summary-score-label" id="summary-pct">80%</div>
+      <div class="summary-verdict"    id="summary-verdict">Excellent !</div>
+      <div class="summary-actions">
+        <button class="btn btn-gold"  onclick="restartSession()"
+                style="padding:12px 28px;font-size:13px">↺ Nouvelle session</button>
+        <a href="training.html" class="btn btn-ghost"
+           style="padding:12px 28px;font-size:13px;text-decoration:none">← Training</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="blackjack_score.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(function(user) {
+  if (!user) return;
+  initScore();
+});
+</script>
+</body>
+</html>

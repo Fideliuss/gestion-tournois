@@ -183,6 +183,63 @@
 }
 .summary-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
+/* ── Cartes à jouer ── */
+.cards-zone {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  margin: 24px 0 28px;
+}
+
+.playing-card {
+  width: 64px; height: 90px;
+  background: #fff; border-radius: 6px;
+  border: 1px solid rgba(0,0,0,.15);
+  box-shadow: 0 3px 10px rgba(0,0,0,.35);
+  position: relative; color: #1a1a1a;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.playing-card.red { color: #c0392b; }
+
+.card-tl, .card-br {
+  position: absolute; display: flex; flex-direction: column; align-items: center;
+  line-height: 1;
+}
+.card-tl { top: 5px; left: 6px; }
+.card-br { bottom: 5px; right: 6px; transform: rotate(180deg); }
+
+.card-rank { font-size: 14px; font-weight: 700; font-family: Arial, sans-serif; }
+.card-suit  { font-size: 11px; }
+
+.card-center { font-size: 26px; }
+
+/* ── Timer ── */
+.timer-wrap {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.timer-label {
+  font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--text-muted); font-family: var(--f-ui);
+}
+.timer-display {
+  font-family: var(--f-num); font-size: 40px; font-weight: 700;
+  color: var(--gold); line-height: 1; min-width: 48px; text-align: center;
+  transition: color .2s;
+}
+.timer-display.warning { color: #e09050; }
+.timer-display.danger  { color: #e07a68; }
+
+.timer-bar-wrap {
+  width: 100%; max-width: 560px; margin: 0 auto 24px;
+  height: 3px; background: rgba(196,160,74,.1); border-radius: 2px;
+}
+.timer-bar-fill {
+  height: 100%; background: var(--gold-dim); border-radius: 2px;
+  transition: width 1s linear, background .2s;
+}
+.timer-bar-fill.warning { background: #e09050; }
+.timer-bar-fill.danger  { background: #e07a68; }
+
 /* ── Light mode ── */
 body.light .tapis { border-color: rgba(138,104,32,.35); }
 body.light .tapis::before { border-color: rgba(138,104,32,.15); }

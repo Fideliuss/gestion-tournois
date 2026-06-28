@@ -4,28 +4,12 @@
 
 const SITUATIONS = [
   {
-    id:          'win',
-    label:       'VICTOIRE',
-    badgeClass:  'win',
-    ratio:       1,
-    hint:        '1 pour 1',
-    question:    'Combien payez-vous ?',
-  },
-  {
-    id:          'blackjack',
-    label:       'BLACKJACK',
-    badgeClass:  'blackjack',
-    ratio:       1.5,
-    hint:        '3 pour 2',
-    question:    'Combien payez-vous le blackjack ?',
-  },
-  {
-    id:          'insurance',
-    label:       'ASSURANCE',
-    badgeClass:  'insurance',
-    ratio:       2,
-    hint:        '2 pour 1',
-    question:    "Combien payez-vous l'assurance ?",
+    id:         'blackjack',
+    label:      'BLACKJACK',
+    badgeClass: 'blackjack',
+    ratio:      1.5,
+    hint:       '3 pour 2',
+    question:   'Combien payez-vous le blackjack ?',
   },
 ];
 
