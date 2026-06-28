@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════
    semainier.js — Sélecteur de tournoi par jour
    Casino Barrière Bordeaux · Outils Tournois
-   Utilisé par : leaderboard.html · prize-pool.html
+   Utilisé par : leaderboard/leaderboard.html · prize_pool/prize_pool.html
 ═══════════════════════════════════════════════════════ */
 
 const SEMAINIER_DAYS       = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];

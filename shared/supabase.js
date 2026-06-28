@@ -271,6 +271,72 @@ const SB = {
     return this._callUsers('DELETE', { id });
   },
 
+  // ── Training ───────────────────────────────────────
+  async getTrainingConfig(game) {
+    const { data, error } = await _sb.from('training_config')
+      .select('value').eq('key', game).single();
+    if (error) throw error;
+    return data.value;
+  },
+
+  async updateTrainingConfig(game, value) {
+    const { error } = await _sb.from('training_config')
+      .upsert({ key: game, value }, { onConflict: 'key' });
+    if (error) throw error;
+  },
+
+  async startTrainingSession(game) {
+    const session = await this.getSession();
+    if (!session) throw new Error('Non authentifié');
+
+    // Récupère les sessions incomplètes à nettoyer
+    const { data: oldSessions } = await _sb.from('training_sessions')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('game', game)
+      .is('ended_at', null);
+
+    if (oldSessions && oldSessions.length) {
+      const ids = oldSessions.map(function(s) { return s.id; });
+      // Supprime d'abord les résultats liés (évite les conflits RLS sur CASCADE)
+      await _sb.from('training_results').delete().in('session_id', ids);
+      // Puis les sessions
+      await _sb.from('training_sessions').delete().in('id', ids);
+    }
+
+    const { data, error } = await _sb.from('training_sessions')
+      .insert({ user_id: session.user.id, game }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async endTrainingSession(sessionId, total, correct) {
+    const { error } = await _sb.from('training_sessions')
+      .update({ ended_at: new Date().toISOString(), total, correct })
+      .eq('id', sessionId);
+    if (error) throw error;
+  },
+
+  async addTrainingResult(sessionId, userId, game, scenario, correctAnswer, userAnswer, isCorrect) {
+    const { error } = await _sb.from('training_results').insert({
+      session_id: sessionId, user_id: userId, game, scenario,
+      correct_answer: correctAnswer, user_answer: userAnswer, is_correct: isCorrect
+    });
+    if (error) throw error;
+  },
+
+  async getMyTrainingSessions(game) {
+    const session = await this.getSession();
+    if (!session) throw new Error('Non authentifié');
+    const q = _sb.from('training_sessions')
+      .select('*').eq('user_id', session.user.id).not('ended_at', 'is', null)
+      .order('started_at', { ascending: false });
+    if (game) q.eq('game', game);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data || [];
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);

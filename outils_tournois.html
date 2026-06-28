@@ -17,31 +17,6 @@
       margin-top: 52px; text-align: center;
       font-size: 10px; letter-spacing: .14em; color: var(--text-muted);
     }
-    .footer-version {
-      display: inline-block; margin-top: 6px;
-      font-family: var(--f-num); font-size: 9px;
-      color: var(--text-muted); letter-spacing: .12em; opacity: .55;
-    }
-    details.changelog {
-      margin-top: 10px; display: inline-block;
-      font-family: var(--f-ui); font-size: 10px;
-      color: var(--text-muted); letter-spacing: 0; text-align: left;
-    }
-    details.changelog summary {
-      cursor: pointer; letter-spacing: .12em; list-style: none; outline: none;
-      color: var(--text-muted); transition: color .18s;
-    }
-    details.changelog summary::-webkit-details-marker { display: none; }
-    details.changelog summary:hover { color: var(--gold-dim); }
-    details.changelog[open] summary { color: var(--gold-dim); margin-bottom: 10px; }
-    .cl-list {
-      border-left: 1px solid rgba(196,160,74,.18);
-      padding-left: 14px; display: flex; flex-direction: column; gap: 10px;
-    }
-    .cl-version { font-family: var(--f-num); font-size: 9px; color: var(--gold-dim); margin-bottom: 3px; }
-    .cl-entries { list-style: none; display: flex; flex-direction: column; gap: 3px; }
-    .cl-entries li { font-size: 10px; color: var(--text-muted); }
-    .cl-entries li::before { content: '· '; color: var(--gold-dim); }
   </style>
 </head>
 <body>
@@ -76,19 +51,10 @@
 
   </div>
 
-  <div class="footer">
-    Casino Barrière Bordeaux · Outils internes tournois
-    <br><span class="footer-version" id="app-version"></span>
-    <br>
-    <details class="changelog">
-      <summary>Changelog ▾</summary>
-      <div class="cl-list" id="cl-list"></div>
-    </details>
-  </div>
+  <div class="footer">Casino Barrière Bordeaux · Outils internes tournois</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="shared/changelog.js"></script>
 <script src="shared/barriere.js"></script>
 <script src="shared/supabase.js"></script>
 <script src="shared/auth.js"></script>
@@ -97,12 +63,6 @@ AUTH.guard({ loginUrl: 'login.html', panel: 'tournois' }).then(async function(us
   if (!user) return;
   const role = user.user_metadata?.role || 'floor';
   const isAdmin = role === 'admin';
-
-  if (!isAdmin) {
-    document.querySelectorAll('[data-role="admin"]').forEach(function(el) {
-      el.style.display = 'none';
-    });
-  }
 
   const panelCards = document.querySelectorAll('[data-panel]');
   if (panelCards.length && !isAdmin) {
@@ -118,19 +78,6 @@ AUTH.guard({ loginUrl: 'login.html', panel: 'tournois' }).then(async function(us
     }
   }
 });
-(function () {
-  if (!window.CHANGELOG || !CHANGELOG.length) return;
-  var ver = document.getElementById('app-version');
-  if (ver) ver.textContent = CHANGELOG[0].version;
-  var list = document.getElementById('cl-list');
-  if (!list) return;
-  list.innerHTML = CHANGELOG.map(function (e) {
-    return '<div>'
-      + '<div class="cl-version">' + e.version + ' &mdash; ' + e.date + '</div>'
-      + '<ul class="cl-entries"><li>' + e.message + '</li></ul>'
-      + '</div>';
-  }).join('');
-})();
 </script>
 </body>
 </html>
