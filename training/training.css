@@ -252,7 +252,7 @@
 /* ── Sélecteur de niveau (partagé) ── */
 .level-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 14px; width: 100%; max-width: 480px; margin-top: 8px;
+  gap: 14px; width: 100%; max-width: 480px; margin: 8px auto 0;
 }
 .level-card {
   background: var(--bg-card); border: 1px solid var(--gold-bd);
