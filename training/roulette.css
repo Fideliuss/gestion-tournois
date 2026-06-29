@@ -81,10 +81,8 @@
   font-family: var(--f-num); font-size: 96px; font-weight: 700;
   line-height: 1; text-align: center; min-width: 160px;
   text-shadow: 0 4px 16px rgba(0,0,0,.6);
+  color: var(--cream);
 }
-.couleur-number.red   { color: #e05050; }
-.couleur-number.black { color: var(--cream); }
-.couleur-number.green { color: #6dcc8e; }
 
 .couleur-btns {
   display: flex; gap: 14px; justify-content: center; margin-top: 32px; flex-wrap: wrap;

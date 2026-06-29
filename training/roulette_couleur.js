@@ -66,7 +66,7 @@ function nextCouleur() {
   // Affiche le numéro
   const el = document.getElementById('col-number');
   el.textContent = _colNumber;
-  el.className   = 'couleur-number ' + color;
+  el.className   = 'couleur-number';
 
   // Feedback vide
   document.getElementById('col-feedback').className   = 'feedback-bar empty';
