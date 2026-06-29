@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Roulette Couleur — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="training.css" />
+  <link rel="stylesheet" href="roulette.css" />
+  <style>
+    .app {
+      padding: 64px 20px 80px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .hdr { margin-bottom: 40px; text-align: center; }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="roulette_hub.html" class="back">← Roulette</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Roulette <em>Couleur</em></div>
+  </div>
+
+  <!-- ══ Sélection niveau ══ -->
+  <div id="col-level-screen">
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
+      Choisissez votre niveau
+    </div>
+    <div class="level-grid" style="max-width:440px">
+      <div class="level-card" onclick="startCouleurLevel('facile')">
+        <div class="level-name facile">Facile</div>
+        <div class="level-timer" id="col-timer-facile">5</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startCouleurLevel('medium')">
+        <div class="level-name medium">Médium</div>
+        <div class="level-timer" id="col-timer-medium">3</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startCouleurLevel('expert')">
+        <div class="level-name expert">Expert</div>
+        <div class="level-timer" id="col-timer-expert">2</div>
+        <div class="level-unit">secondes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Écran entraînement ══ -->
+  <div id="col-training-screen" style="display:none;width:100%;max-width:560px">
+
+    <div class="training-header">
+      <span class="training-progress" id="col-progress">Question 1 / 15</span>
+      <span class="training-score"    id="col-score">Score : 0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="col-progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="timer-wrap">
+      <span class="timer-label">Temps</span>
+      <span class="timer-display" id="col-timer-display">5</span>
+      <span class="timer-label">s</span>
+    </div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="col-timer-bar" style="width:100%"></div>
+    </div>
+
+    <!-- Numéro affiché -->
+    <div style="text-align:center;padding:28px 0 8px">
+      <span class="couleur-number red" id="col-number">7</span>
+    </div>
+
+    <!-- Boutons de réponse -->
+    <div class="couleur-btns">
+      <button class="couleur-btn rouge" onclick="answerCouleur('red')">Rouge</button>
+      <button class="couleur-btn noir"  onclick="answerCouleur('black')">Noir</button>
+      <button class="couleur-btn zero"  onclick="answerCouleur('green')">Zéro</button>
+    </div>
+
+    <div class="feedback-bar empty" id="col-feedback"></div>
+
+  </div>
+
+  <!-- ══ Résumé ══ -->
+  <div id="col-summary-screen" style="display:none">
+    <div class="session-summary">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
+           id="col-summary-level"></div>
+      <div class="summary-score-big"   id="col-summary-score">12/15</div>
+      <div class="summary-score-label" id="col-summary-pct">80%</div>
+      <div class="summary-verdict"     id="col-summary-verdict">Bien</div>
+      <div class="summary-actions">
+        <button class="btn btn-gold"  onclick="restartCouleur()"
+                style="padding:12px 28px;font-size:13px">↺ Rejouer</button>
+        <a href="roulette_hub.html" class="btn btn-ghost"
+           style="padding:12px 28px;font-size:13px;text-decoration:none">← Roulette</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="roulette_tapis.js"></script>
+<script src="roulette_couleur.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(function(user) {
+  if (!user) return;
+  initCouleur();
+});
+</script>
+</body>
+</html>

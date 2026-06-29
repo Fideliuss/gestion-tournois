@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Roulette — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="training.css" />
+  <style>
+    .app { padding: 64px 20px 80px; }
+    .hdr { margin-bottom: 52px; }
+    .footer { margin-top: 52px; text-align: center; font-size: 10px; letter-spacing: .14em; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="training.html" class="back">← Training</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Training <em>Roulette</em></div>
+  </div>
+
+  <div class="training-grid">
+
+    <a href="roulette_paiement.html" class="game-card disabled">
+      <div class="game-card-badge">🎰</div>
+      <div class="game-card-name">Calcul <em>Paiement</em></div>
+      <div class="game-card-soon">Bientôt disponible</div>
+    </a>
+
+    <a href="roulette_conversion.html" class="game-card disabled">
+      <div class="game-card-badge">💱</div>
+      <div class="game-card-name">Conversion <em>Pièces</em></div>
+      <div class="game-card-soon">Bientôt disponible</div>
+    </a>
+
+    <a href="roulette_ordre.html" class="game-card disabled">
+      <div class="game-card-badge">📋</div>
+      <div class="game-card-name">Ordre <em>Paiement</em></div>
+      <div class="game-card-soon">Bientôt disponible</div>
+    </a>
+
+    <a href="roulette_pointage.html" class="game-card disabled">
+      <div class="game-card-badge">🎯</div>
+      <div class="game-card-name">Pointage <em>Numéro</em></div>
+      <div class="game-card-soon">Bientôt disponible</div>
+    </a>
+
+    <a href="roulette_couleur.html" class="game-card">
+      <div class="game-card-badge">🔴</div>
+      <div class="game-card-name">Couleur <em>Numéro</em></div>
+    </a>
+
+  </div>
+
+  <div class="footer">Casino Barrière Bordeaux · Training Roulette</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'training' });</script>
+</body>
+</html>
