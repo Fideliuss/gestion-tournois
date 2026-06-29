@@ -8,6 +8,9 @@ CREATE TABLE training_config (
   value jsonb   NOT NULL
 );
 INSERT INTO training_config (key, value) VALUES
+  ('roulette', '{
+    "couleur": { "levels": { "facile": 5, "medium": 3, "expert": 2 } }
+  }'),
   ('blackjack', '{
     "ranges": [
       { "min": 10,  "max": 100,  "step": 10,  "weight": 80 },

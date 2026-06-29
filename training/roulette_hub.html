@@ -10,6 +10,43 @@
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
     .footer { margin-top: 52px; text-align: center; font-size: 10px; letter-spacing: .14em; color: var(--text-muted); }
+
+    .admin-config-btn { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 100; }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity .18s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      width: 100%; max-width: 420px; background: var(--bg-card);
+      border: 1px solid var(--gold-bd); border-radius: 4px; padding: 36px 32px 28px;
+      position: relative; transform: translateY(10px); transition: transform .18s;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+
+    .cfg-module-title {
+      font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold-dim); font-family: var(--f-ui); margin: 16px 0 10px;
+    }
+    .cfg-module-title:first-of-type { margin-top: 4px; }
+    .cfg-timers {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;
+    }
+    .cfg-timer-cell { text-align: center; }
+    .cfg-timer-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-family: var(--f-ui); }
+    .cfg-timer-input {
+      width: 100%; padding: 8px; text-align: center; font-family: var(--f-num); font-size: 16px;
+      background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 3px;
+      color: var(--cream); outline: none;
+    }
+    .cfg-timer-input:focus { border-color: rgba(196,160,74,.5); }
+    .cfg-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; }
+    .cfg-msg { font-size: 11px; font-family: var(--f-ui); }
+    .cfg-msg.ok  { color: #6dcc8e; }
+    .cfg-msg.err { color: #e07a68; }
   </style>
 </head>
 <body>
@@ -61,10 +98,87 @@
   <div class="footer">Casino Barrière Bordeaux · Training Roulette</div>
 </div>
 
+<!-- Bouton config admin -->
+<button class="btn btn-ghost admin-config-btn" id="admin-cfg-btn" onclick="openConfig()">
+  ⚙ Config Roulette
+</button>
+
+<!-- Modal config -->
+<div id="modal-cfg" class="modal-overlay" onclick="if(event.target===this)closeConfig()">
+  <div class="modal-box">
+    <div class="sec" style="margin-bottom:16px">Config Roulette</div>
+
+    <div class="cfg-module-title">Couleur du numéro — Timers (s, min 2s)</div>
+    <div class="cfg-timers">
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:#6dcc8e">Facile</div>
+        <input type="number" class="cfg-timer-input" id="col-facile" value="5" min="2" max="30" step="1" />
+      </div>
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:var(--gold)">Médium</div>
+        <input type="number" class="cfg-timer-input" id="col-medium" value="3" min="2" max="30" step="1" />
+      </div>
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:#e07a68">Expert</div>
+        <input type="number" class="cfg-timer-input" id="col-expert" value="2" min="2" max="30" step="1" />
+      </div>
+    </div>
+    <div class="cfg-hint">Les timers s'appliquent à la prochaine session.</div>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+      <button class="btn btn-gold"  onclick="saveConfig()">Enregistrer →</button>
+      <button class="btn btn-ghost" onclick="closeConfig()">Annuler</button>
+      <span class="cfg-msg" id="cfg-msg"></span>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../shared/barriere.js"></script>
 <script src="../shared/supabase.js"></script>
 <script src="../shared/auth.js"></script>
-<script>AUTH.guard({ loginUrl: '../login.html', panel: 'training' });</script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(async function(user) {
+  if (!user) return;
+  if ((user.user_metadata?.role || '') === 'admin') {
+    document.getElementById('admin-cfg-btn').style.display = 'block';
+    await loadConfig();
+  }
+});
+
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeConfig(); });
+
+async function loadConfig() {
+  try {
+    const cfg = await SB.getTrainingConfig('roulette');
+    if (!cfg) return;
+    if (cfg.couleur && cfg.couleur.levels) {
+      const l = cfg.couleur.levels;
+      if (l.facile) document.getElementById('col-facile').value = l.facile;
+      if (l.medium) document.getElementById('col-medium').value = l.medium;
+      if (l.expert) document.getElementById('col-expert').value = l.expert;
+    }
+  } catch(e) {}
+}
+
+function openConfig()  { document.getElementById('modal-cfg').classList.add('open'); }
+function closeConfig() { document.getElementById('modal-cfg').classList.remove('open'); }
+
+async function saveConfig() {
+  const msg = document.getElementById('cfg-msg');
+  msg.textContent = ''; msg.className = 'cfg-msg';
+  const get = function(id) { return Math.max(2, parseInt(document.getElementById(id).value) || 2); };
+  const cfg = {
+    couleur: { levels: { facile: get('col-facile'), medium: get('col-medium'), expert: get('col-expert') } }
+  };
+  try {
+    await SB.updateTrainingConfig('roulette', cfg);
+    msg.textContent = 'Enregistré ✓'; msg.className = 'cfg-msg ok';
+    setTimeout(function() { msg.textContent = ''; msg.className = 'cfg-msg'; }, 2000);
+  } catch(e) {
+    msg.textContent = 'Erreur : ' + e.message; msg.className = 'cfg-msg err';
+  }
+}
+</script>
 </body>
 </html>
