@@ -79,10 +79,11 @@ function nextPointage() {
     hideNumbers: true,
   });
 
-  // Feedback vide
+  // Feedback vide + bouton caché
   const fb = document.getElementById('pt-feedback');
   fb.className   = 'feedback-bar empty';
   fb.textContent = '';
+  document.getElementById('pt-next-btn').style.display = 'none';
 
   updatePointageProgress();
   startPtTimer();
@@ -125,10 +126,11 @@ function ptTimeout() {
   fb.textContent = '⏱ Temps écoulé — le ' + _ptNumber + ' est ' + positionLabel(_ptNumber);
   _ptQIndex++;
   updatePointageProgress();
-  setTimeout(function() {
-    if (_ptQIndex >= PT_QUESTIONS) showPointageSummary();
-    else nextPointage();
-  }, 1800);
+  if (_ptQIndex >= PT_QUESTIONS) {
+    setTimeout(showPointageSummary, 1800);
+  } else {
+    document.getElementById('pt-next-btn').style.display = '';
+  }
 }
 
 // ── Clic sur le tapis ─────────────────────────────────
@@ -141,12 +143,12 @@ async function clickPointage(n) {
   if (isCorrect) _ptCorrect++;
 
   const fb = document.getElementById('pt-feedback');
+  highlightCorrect();
+
   if (isCorrect) {
-    highlightCorrect();
     fb.className   = 'feedback-bar correct';
     fb.textContent = '✓ Correct — le ' + _ptNumber;
   } else {
-    highlightCorrect();
     fb.className   = 'feedback-bar wrong';
     fb.textContent = '✕ Incorrect — le ' + _ptNumber + ' est ' + positionLabel(_ptNumber);
   }
@@ -163,10 +165,16 @@ async function clickPointage(n) {
 
   _ptQIndex++;
   updatePointageProgress();
-  setTimeout(function() {
-    if (_ptQIndex >= PT_QUESTIONS) showPointageSummary();
-    else nextPointage();
-  }, isCorrect ? 800 : 1800);
+
+  if (isCorrect) {
+    setTimeout(function() {
+      if (_ptQIndex >= PT_QUESTIONS) showPointageSummary();
+      else nextPointage();
+    }, 800);
+  } else {
+    if (_ptQIndex >= PT_QUESTIONS) setTimeout(showPointageSummary, 1800);
+    else document.getElementById('pt-next-btn').style.display = '';
+  }
 }
 
 function highlightCorrect() {
@@ -177,6 +185,12 @@ function highlightCorrect() {
   });
 }
 
+
+function manualNext() {
+  document.getElementById('pt-next-btn').style.display = 'none';
+  if (_ptQIndex >= PT_QUESTIONS) showPointageSummary();
+  else nextPointage();
+}
 
 function positionLabel(n) {
   if (n === 0) return 'le zéro';
