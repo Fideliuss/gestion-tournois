@@ -70,12 +70,13 @@ function nextPointage() {
   numEl.textContent = _ptNumber;
   numEl.className   = 'pt-ball ' + R_COLORS[_ptNumber];
 
-  // Re-rendu du tapis cliquable sans surbrillance
+  // Tapis cliquable — numéros masqués (test de mémoire)
   renderTapis(document.getElementById('pt-tapis'), {
-    maxNum:    36,
-    clickable: true,
-    onClickNum: true,
-    clickFn:   'clickPointage',
+    maxNum:      36,
+    clickable:   true,
+    onClickNum:  true,
+    clickFn:     'clickPointage',
+    hideNumbers: true,
   });
 
   // Feedback vide
@@ -169,11 +170,13 @@ async function clickPointage(n) {
 }
 
 function highlightCorrect() {
+  // Révélation : numéros visibles + surbrillance du bon numéro
   renderTapis(document.getElementById('pt-tapis'), {
     maxNum:    36,
     highlight: [_ptNumber],
   });
 }
+
 
 function positionLabel(n) {
   if (n === 0) return 'le zéro';

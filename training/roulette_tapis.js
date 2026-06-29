@@ -44,9 +44,10 @@ const STACK_SIZE = 20; // fixe, non modifiable
 function renderTapis(container, opts) {
   opts = opts || {};
   const maxNum    = opts.maxNum    || 36;
-  const clickable = opts.clickable || false;
-  const highlight = opts.highlight || [];  // numéros à mettre en évidence
-  const onClick   = opts.onClickNum || null;
+  const clickable    = opts.clickable    || false;
+  const highlight    = opts.highlight    || [];
+  const onClick      = opts.onClickNum   || null;
+  const hideNumbers  = opts.hideNumbers  || false;
 
   const numCols = Math.ceil(maxNum / 3); // 4 pour 1ère douzaine, 12 pour tout
 
@@ -55,7 +56,7 @@ function renderTapis(container, opts) {
   // Cellule 0
   html += '<div class="rt-cell rt-zero' + (clickable ? ' rt-clickable' : '') + '"'
         + (onClick ? ' onclick="' + opts.clickFn + '(0)"' : '') + '>'
-        + '<span class="rt-num">0</span></div>';
+        + (hideNumbers ? '' : '<span class="rt-num">0</span>') + '</div>';
 
   // Numéros 1 à maxNum, par rangée (top=3,6,... mid=2,5,... bot=1,4,...)
   for (var row = 1; row <= 3; row++) {
@@ -72,7 +73,7 @@ function renderTapis(container, opts) {
             + (clickable ? ' rt-clickable' : '') + '"'
             + (onClick ? ' onclick="' + opts.clickFn + '(' + n + ')"' : '')
             + ' data-num="' + n + '">'
-            + '<span class="rt-num">' + n + '</span></div>';
+            + (hideNumbers ? '' : '<span class="rt-num">' + n + '</span>') + '</div>';
     }
   }
 
