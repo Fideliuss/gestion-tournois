@@ -64,10 +64,9 @@
 
   <div class="training-grid">
 
-    <a href="roulette_paiement.html" class="game-card disabled">
+    <a href="roulette_paiement.html" class="game-card">
       <div class="game-card-badge">🎰</div>
       <div class="game-card-name">Calcul <em>Paiement</em></div>
-      <div class="game-card-soon">Bientôt disponible</div>
     </a>
 
     <a href="roulette_conversion.html" class="game-card">
@@ -106,6 +105,21 @@
   <div class="modal-box">
     <div class="sec" style="margin-bottom:16px">Config Roulette</div>
 
+    <div class="cfg-module-title" style="margin-top:4px">Calcul Paiement — Timers (s, min 2s)</div>
+    <div class="cfg-timers">
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:#6dcc8e">Facile</div>
+        <input type="number" class="cfg-timer-input" id="rp-facile" value="15" min="2" max="60" step="1" />
+      </div>
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:var(--gold)">Médium</div>
+        <input type="number" class="cfg-timer-input" id="rp-medium" value="10" min="2" max="60" step="1" />
+      </div>
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:#e07a68">Expert</div>
+        <input type="number" class="cfg-timer-input" id="rp-expert" value="6" min="2" max="60" step="1" />
+      </div>
+    </div>
     <div class="cfg-module-title">Couleur du numéro — Timers (s, min 2s)</div>
     <div class="cfg-timers">
       <div class="cfg-timer-cell">
@@ -201,6 +215,12 @@ async function loadConfig() {
   try {
     const cfg = await SB.getTrainingConfig('roulette');
     if (!cfg) return;
+    if (cfg.paiement && cfg.paiement.levels) {
+      const l = cfg.paiement.levels;
+      if (l.facile) document.getElementById('rp-facile').value = l.facile;
+      if (l.medium) document.getElementById('rp-medium').value = l.medium;
+      if (l.expert) document.getElementById('rp-expert').value = l.expert;
+    }
     if (cfg.couleur && cfg.couleur.levels) {
       const l = cfg.couleur.levels;
       if (l.facile) document.getElementById('col-facile').value = l.facile;
@@ -243,6 +263,7 @@ async function saveConfig() {
   }
 
   const cfg = {
+    paiement:   { levels: { facile: get('rp-facile'),  medium: get('rp-medium'),  expert: get('rp-expert')  } },
     couleur:    { levels: { facile: get('col-facile'), medium: get('col-medium'), expert: get('col-expert') } },
     pointage:   { levels: { facile: get('pt-facile'),  medium: get('pt-medium'),  expert: get('pt-expert')  } },
     conversion: { levels: { facile: get('cv-facile'),  medium: get('cv-medium'),  expert: get('cv-expert')  }, chip_values: chipValues },

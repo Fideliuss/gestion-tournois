@@ -9,6 +9,7 @@ CREATE TABLE training_config (
 );
 INSERT INTO training_config (key, value) VALUES
   ('roulette', '{
+    "paiement":   { "levels": { "facile": 15, "medium": 10, "expert": 6 } },
     "couleur":    { "levels": { "facile": 5,  "medium": 3, "expert": 2 } },
     "pointage":   { "levels": { "facile": 10, "medium": 6, "expert": 3 } },
     "conversion": { "levels": { "facile": 12, "medium": 8, "expert": 4 }, "chip_values": [2.5, 5, 10, 20, 50] }

@@ -184,6 +184,63 @@ function pickNumbers(typeId) {
   }
 }
 
+// ── Position du chip selon le type de mise ───────────
+// numbers : numéros couverts par la mise (peut inclure 0)
+// numCols : nombre de colonnes du tapis affiché (4 pour 1ère douzaine)
+// Retourne { x, y } en % du conteneur
+function getChipPosition(numbers, numCols) {
+  const totalW = 2 + numCols; // 2 unités pour le 0 + numCols unités
+
+  if (numbers.indexOf(0) >= 0) {
+    const others = numbers.filter(function(n) { return n !== 0; });
+    const rows = others.map(rRow);
+    const minRow = Math.min.apply(null, rows), maxRow = Math.max.apply(null, rows);
+    const x = 2 / totalW * 100; // bord zéro / colonne 1
+    var y;
+    if (others.length === 1)      y = (minRow - 1 + 0.5) / 3 * 100;       // cheval 0-N
+    else if (others.length === 3) y = 50;                                  // carré 0-1-2-3
+    else                            y = ((minRow - 1) + maxRow) / 2 / 3 * 100; // transversale 0-1-2 / 0-2-3
+    return { x: x, y: y };
+  }
+
+  const cols = numbers.map(rCol);
+  const rows = numbers.map(rRow);
+  const minCol = Math.min.apply(null, cols), maxCol = Math.max.apply(null, cols);
+  const minRow = Math.min.apply(null, rows), maxRow = Math.max.apply(null, rows);
+
+  if (numbers.length === 1) {
+    return { x: (2 + (minCol - 1) + 0.5) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
+  }
+  if (numbers.length === 2 && minCol === maxCol) {
+    // Cheval vertical : bord horizontal partagé
+    return { x: (2 + (minCol - 1) + 0.5) / totalW * 100, y: minRow / 3 * 100 };
+  }
+  if (numbers.length === 2) {
+    // Cheval horizontal : bord vertical partagé
+    return { x: (2 + minCol) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
+  }
+  if (numbers.length === 3) {
+    // Transversale : bord gauche de la colonne, centré verticalement
+    return { x: (2 + (minCol - 1)) / totalW * 100, y: 50 };
+  }
+  if (numbers.length === 4) {
+    // Carré : intersection des 4 cellules
+    return { x: (2 + minCol) / totalW * 100, y: minRow / 3 * 100 };
+  }
+  if (numbers.length === 6) {
+    // Sixain : bord gauche du groupe de 2 colonnes, centré verticalement
+    return { x: (2 + (minCol - 1)) / totalW * 100, y: 50 };
+  }
+  return { x: 50, y: 50 };
+}
+
+// ── Rendu du chip sur le tapis ────────────────────────
+function renderChip(container, numbers, chips, numCols) {
+  const pos = getChipPosition(numbers, numCols);
+  container.innerHTML = '<div class="rt-chip" style="left:' + pos.x + '%;top:' + pos.y + '%">'
+    + chips + '</div>';
+}
+
 // ── Utilitaires ───────────────────────────────────────
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;

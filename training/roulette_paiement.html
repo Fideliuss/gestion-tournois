@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Roulette Paiement — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="training.css" />
+  <link rel="stylesheet" href="roulette.css" />
+  <style>
+    .app {
+      padding: 64px 20px 80px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .hdr { margin-bottom: 40px; text-align: center; }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="roulette_hub.html" class="back">← Roulette</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Roulette <em>Paiement</em></div>
+  </div>
+
+  <!-- ══ Sélection niveau ══ -->
+  <div id="rp-level-screen" style="width:100%;max-width:480px">
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
+      Choisissez votre niveau
+    </div>
+    <div class="level-grid">
+      <div class="level-card" onclick="startPaiementLevel('facile')">
+        <div class="level-name facile">Facile</div>
+        <div class="level-timer" id="rp-timer-facile">15</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startPaiementLevel('medium')">
+        <div class="level-name medium">Médium</div>
+        <div class="level-timer" id="rp-timer-medium">10</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startPaiementLevel('expert')">
+        <div class="level-name expert">Expert</div>
+        <div class="level-timer" id="rp-timer-expert">6</div>
+        <div class="level-unit">secondes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Écran entraînement ══ -->
+  <div id="rp-training-screen" style="display:none;width:100%;max-width:760px">
+
+    <div class="training-header" style="max-width:560px;margin-left:auto;margin-right:auto">
+      <span class="training-progress" id="rp-progress">Question 1 / 10</span>
+      <span class="training-score"    id="rp-score">Score : 0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap" style="max-width:560px">
+      <div class="progress-bar-fill" id="rp-progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="timer-wrap">
+      <span class="timer-label">Temps</span>
+      <span class="timer-display" id="rp-timer-display">15</span>
+      <span class="timer-label">s</span>
+    </div>
+    <div class="timer-bar-wrap" style="max-width:560px">
+      <div class="timer-bar-fill" id="rp-timer-bar" style="width:100%"></div>
+    </div>
+
+    <!-- Badge type de mise -->
+    <div style="text-align:center;margin-bottom:8px">
+      <span class="rp-bet-badge" id="rp-bet-label">Plein</span>
+    </div>
+
+    <!-- Tapis + chip -->
+    <div class="rp-tapis-wrap">
+      <div id="rp-tapis"></div>
+      <div id="rp-chip-overlay" class="rp-chip-overlay"></div>
+    </div>
+
+    <!-- Réponse -->
+    <div class="answer-zone" style="margin-top:24px">
+      <div class="answer-question">Combien de pièces payez-vous ?</div>
+      <div class="answer-row" style="margin-top:12px">
+        <input type="number" id="rp-answer-input" class="answer-input"
+               placeholder="0" min="0" step="1"
+               onkeydown="if(event.key==='Enter')submitPaiement()" />
+        <span class="answer-currency" style="font-size:16px;color:var(--text-dim)">pièces</span>
+        <button class="btn btn-gold" id="rp-submit-btn" onclick="submitPaiement()"
+                style="padding:10px 20px;font-size:13px">→</button>
+      </div>
+    </div>
+
+    <div class="feedback-bar empty" id="rp-feedback" style="max-width:560px;margin-left:auto;margin-right:auto"></div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn btn-gold" id="rp-next-btn" onclick="manualNextPaiement()"
+              style="display:none;padding:10px 28px;font-size:13px">
+        Question suivante →
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ══ Résumé ══ -->
+  <div id="rp-summary-screen" style="display:none">
+    <div class="session-summary">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
+           id="rp-summary-level"></div>
+      <div class="summary-score-big"   id="rp-summary-score">8/10</div>
+      <div class="summary-score-label" id="rp-summary-pct">80%</div>
+      <div class="summary-verdict"     id="rp-summary-verdict">Bien</div>
+      <div class="summary-actions">
+        <button class="btn btn-gold"  onclick="restartPaiement()"
+                style="padding:12px 28px;font-size:13px">↺ Rejouer</button>
+        <a href="roulette_hub.html" class="btn btn-ghost"
+           style="padding:12px 28px;font-size:13px;text-decoration:none">← Roulette</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="roulette_tapis.js"></script>
+<script src="roulette_paiement.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(function(user) {
+  if (!user) return;
+  initPaiement();
+});
+</script>
+</body>
+</html>
