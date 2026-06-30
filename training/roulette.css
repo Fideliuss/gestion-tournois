@@ -28,6 +28,10 @@
   font-weight: 700;
 }
 
+/* ── Séparateur de douzaine ── */
+.rt-dozen-r { border-right: 3px solid rgba(196,160,74,.65); }
+.rt-dozen-l { border-left:  3px solid rgba(196,160,74,.65); }
+
 .rt-red   { background: #8b1a1a; }
 .rt-black { background: #111114; }
 .rt-green { background: #0a5c1e; }

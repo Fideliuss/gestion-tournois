@@ -79,7 +79,12 @@ function renderTapis(container, opts) {
       }
       var color = R_COLORS[n];
       var isHighlight = highlight.indexOf(n) >= 0;
-      html += '<div class="rt-cell rt-' + color
+      // Séparateur de douzaine (tapis complet uniquement) — suit le sens du miroir
+      var dozenBorder = '';
+      if (numCols === 12 && (col === 4 || col === 8)) {
+        dozenBorder = mirror ? ' rt-dozen-l' : ' rt-dozen-r';
+      }
+      html += '<div class="rt-cell rt-' + color + dozenBorder
             + (isHighlight ? ' rt-highlight' : '')
             + (clickable ? ' rt-clickable' : '') + '"'
             + ' style="' + cellStyle + '"'
