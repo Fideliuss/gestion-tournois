@@ -54,22 +54,16 @@ function renderTapis(container, opts) {
 
   // En mode miroir, le 0 passe à droite et l'ordre des colonnes s'inverse
   const gridCols = mirror
-    ? 'repeat(' + numCols + ', 1fr) 1.4fr'
-    : '1.4fr repeat(' + numCols + ', 1fr)';
+    ? 'repeat(' + numCols + ', 1fr) 2fr'
+    : '2fr repeat(' + numCols + ', 1fr)';
 
   let html = '<div class="rt-grid" style="grid-template-columns: ' + gridCols + '">';
 
   // Cellule 0 — placement explicite (col 1 normal, col numCols+1 en miroir)
-  // Pentagone en SVG : pointe toujours dirigée vers le cylindre (extérieur du tapis)
   const zeroCol = mirror ? (numCols + 1) : 1;
-  const zeroPoints = mirror
-    ? '0,0 72,0 100,50 72,100 0,100'
-    : '100,0 28,0 0,50 28,100 100,100';
   html += '<div class="rt-cell rt-zero' + (clickable ? ' rt-clickable' : '') + '"'
         + ' style="grid-column:' + zeroCol + ';grid-row:1 / span 3"'
         + (onClick ? ' onclick="' + opts.clickFn + '(0)"' : '') + '>'
-        + '<svg class="rt-zero-svg" viewBox="0 0 100 100" preserveAspectRatio="none">'
-        + '<polygon points="' + zeroPoints + '" /></svg>'
         + (hideNumbers ? '' : '<span class="rt-num">0</span>') + '</div>';
 
   // Numéros 1 à maxNum, par rangée (top=3,6,... mid=2,5,... bot=1,4,...)
