@@ -40,21 +40,29 @@ const STACK_SIZE = 20; // fixe, non modifiable
 
 // ── Rendu de la grille tapis ─────────────────────────
 // container : élément DOM cible
-// opts : { maxNum, clickable, onClickNum, highlightNums, showLabel }
+// opts : { maxNum, clickable, onClickNum, highlight, hideNumbers, mirror }
 function renderTapis(container, opts) {
   opts = opts || {};
-  const maxNum    = opts.maxNum    || 36;
+  const maxNum      = opts.maxNum      || 36;
   const clickable    = opts.clickable    || false;
   const highlight    = opts.highlight    || [];
   const onClick      = opts.onClickNum   || null;
   const hideNumbers  = opts.hideNumbers  || false;
+  const mirror       = opts.mirror       || false;
 
   const numCols = Math.ceil(maxNum / 3); // 4 pour 1ère douzaine, 12 pour tout
 
-  let html = '<div class="rt-grid" style="grid-template-columns: 2fr repeat(' + numCols + ', 1fr)">';
+  // En mode miroir, le 0 passe à droite et l'ordre des colonnes s'inverse
+  const gridCols = mirror
+    ? 'repeat(' + numCols + ', 1fr) 2fr'
+    : '2fr repeat(' + numCols + ', 1fr)';
 
-  // Cellule 0
+  let html = '<div class="rt-grid" style="grid-template-columns: ' + gridCols + '">';
+
+  // Cellule 0 — placement explicite (col 1 normal, col numCols+1 en miroir)
+  const zeroCol = mirror ? (numCols + 1) : 1;
   html += '<div class="rt-cell rt-zero' + (clickable ? ' rt-clickable' : '') + '"'
+        + ' style="grid-column:' + zeroCol + ';grid-row:1 / span 3"'
         + (onClick ? ' onclick="' + opts.clickFn + '(0)"' : '') + '>'
         + (hideNumbers ? '' : '<span class="rt-num">0</span>') + '</div>';
 
@@ -62,8 +70,11 @@ function renderTapis(container, opts) {
   for (var row = 1; row <= 3; row++) {
     for (var col = 1; col <= numCols; col++) {
       var n = (col - 1) * 3 + (row === 1 ? 3 : row === 2 ? 2 : 1);
+      // Position en grille : normal = col+1 (après le 0) ; miroir = colonnes inversées
+      var gridCol = mirror ? (numCols - col + 1) : (col + 1);
+      var cellStyle = 'grid-column:' + gridCol + ';grid-row:' + row;
       if (n > maxNum) {
-        html += '<div class="rt-cell rt-empty"></div>';
+        html += '<div class="rt-cell rt-empty" style="' + cellStyle + '"></div>';
         continue;
       }
       var color = R_COLORS[n];
@@ -71,6 +82,7 @@ function renderTapis(container, opts) {
       html += '<div class="rt-cell rt-' + color
             + (isHighlight ? ' rt-highlight' : '')
             + (clickable ? ' rt-clickable' : '') + '"'
+            + ' style="' + cellStyle + '"'
             + (onClick ? ' onclick="' + opts.clickFn + '(' + n + ')"' : '')
             + ' data-num="' + n + '">'
             + (hideNumbers ? '' : '<span class="rt-num">' + n + '</span>') + '</div>';

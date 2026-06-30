@@ -17,6 +17,7 @@ let _ptAnswered  = false;
 let _ptNumber    = 0;
 let _ptHandle    = null;
 let _ptTimeLeft  = 10;
+let _ptMirror    = false;
 
 // ── Init ─────────────────────────────────────────────
 async function initPointage() {
@@ -64,19 +65,21 @@ function nextPointage() {
 
   _ptAnswered = false;
   _ptNumber   = Math.floor(Math.random() * 37); // 0-36
+  _ptMirror   = Math.random() < 0.5; // sens de table aléatoire (le 0 détermine le sens)
 
   // Affiche le numéro dans le cylindre
   const numEl = document.getElementById('pt-announced');
   numEl.textContent = _ptNumber;
   numEl.className   = 'pt-ball ' + R_COLORS[_ptNumber];
 
-  // Tapis cliquable — numéros masqués (test de mémoire)
+  // Tapis cliquable — numéros masqués (test de mémoire), sens aléatoire
   renderTapis(document.getElementById('pt-tapis'), {
     maxNum:      36,
     clickable:   true,
     onClickNum:  true,
     clickFn:     'clickPointage',
     hideNumbers: true,
+    mirror:      _ptMirror,
   });
 
   // Feedback vide + bouton caché
@@ -178,10 +181,11 @@ async function clickPointage(n) {
 }
 
 function highlightCorrect() {
-  // Révélation : numéros visibles + surbrillance du bon numéro
+  // Révélation : numéros visibles + surbrillance du bon numéro (même sens que la question)
   renderTapis(document.getElementById('pt-tapis'), {
     maxNum:    36,
     highlight: [_ptNumber],
+    mirror:    _ptMirror,
   });
 }
 
