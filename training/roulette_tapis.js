@@ -70,9 +70,10 @@ function renderTapis(container, opts) {
   for (var row = 1; row <= 3; row++) {
     for (var col = 1; col <= numCols; col++) {
       var n = (col - 1) * 3 + (row === 1 ? 3 : row === 2 ? 2 : 1);
-      // Position en grille : normal = col+1 (après le 0) ; miroir = colonnes inversées
+      // Symétrie centrale 180° : colonnes ET rangées inversées (le 0 pivote, lui occupe déjà les 3 rangées)
       var gridCol = mirror ? (numCols - col + 1) : (col + 1);
-      var cellStyle = 'grid-column:' + gridCol + ';grid-row:' + row;
+      var gridRow = mirror ? (4 - row) : row;
+      var cellStyle = 'grid-column:' + gridCol + ';grid-row:' + gridRow;
       if (n > maxNum) {
         html += '<div class="rt-cell rt-empty" style="' + cellStyle + '"></div>';
         continue;
