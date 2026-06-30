@@ -197,10 +197,10 @@ function manualNext() {
 }
 
 function positionLabel(n) {
-  if (n === 0) return 'le zéro';
-  const col = Math.ceil(n / 3);
-  const row = n % 3 === 0 ? 'haut' : n % 3 === 2 ? 'milieu' : 'bas';
-  return 'colonne ' + col + ', ' + row;
+  if (n === 0) return '0';
+  if (n <= 12) return 'P12';
+  if (n <= 24) return 'M12';
+  return 'D12';
 }
 
 // ── Résumé ────────────────────────────────────────────
