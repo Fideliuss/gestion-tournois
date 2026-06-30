@@ -63,8 +63,8 @@ function renderTapis(container, opts) {
   // Pentagone en SVG : pointe toujours dirigée vers le cylindre (extérieur du tapis)
   const zeroCol = mirror ? (numCols + 1) : 1;
   const zeroPoints = mirror
-    ? '100,0 28,0 0,50 28,100 100,100'
-    : '0,0 72,0 100,50 72,100 0,100';
+    ? '0,0 72,0 100,50 72,100 0,100'
+    : '100,0 28,0 0,50 28,100 100,100';
   html += '<div class="rt-cell rt-zero' + (clickable ? ' rt-clickable' : '') + '"'
         + ' style="grid-column:' + zeroCol + ';grid-row:1 / span 3"'
         + (onClick ? ' onclick="' + opts.clickFn + '(0)"' : '') + '>'
