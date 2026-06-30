@@ -123,7 +123,7 @@
 .pt-ball.red   { background: radial-gradient(circle at 35% 35%, #c0392b, #7b1111); }
 .pt-ball.black { background: radial-gradient(circle at 35% 35%, #444, #111); }
 .pt-ball.green { background: radial-gradient(circle at 35% 35%, #1a9a3a, #0a5c1e); }
-.pt-ball.neutral { background: radial-gradient(circle at 35% 35%, #6b6b6b, #2a2a2a); }
+.pt-ball.neutral { background: radial-gradient(circle at 35% 35%, #fffdf2, #d8d0b8); color: #2a2418; }
 
 .pt-tapis-wrap { width: 100%; max-width: 820px; margin: 0 auto; overflow-x: auto; }
 
