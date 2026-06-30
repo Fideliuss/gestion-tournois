@@ -70,10 +70,9 @@
       <div class="game-card-soon">Bientôt disponible</div>
     </a>
 
-    <a href="roulette_conversion.html" class="game-card disabled">
+    <a href="roulette_conversion.html" class="game-card">
       <div class="game-card-badge">💱</div>
       <div class="game-card-name">Conversion <em>Pièces</em></div>
-      <div class="game-card-soon">Bientôt disponible</div>
     </a>
 
     <a href="roulette_ordre.html" class="game-card disabled">
@@ -137,6 +136,21 @@
         <input type="number" class="cfg-timer-input" id="pt-expert" value="3" min="2" max="60" step="1" />
       </div>
     </div>
+    <div class="cfg-module-title">Conversion pièces — Timers (s, min 2s)</div>
+    <div class="cfg-timers">
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:#6dcc8e">Facile</div>
+        <input type="number" class="cfg-timer-input" id="cv-facile" value="12" min="2" max="60" step="1" />
+      </div>
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:var(--gold)">Médium</div>
+        <input type="number" class="cfg-timer-input" id="cv-medium" value="8" min="2" max="60" step="1" />
+      </div>
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label" style="color:#e07a68">Expert</div>
+        <input type="number" class="cfg-timer-input" id="cv-expert" value="4" min="2" max="60" step="1" />
+      </div>
+    </div>
     <div class="cfg-hint">Les timers s'appliquent à la prochaine session.</div>
 
     <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
@@ -178,6 +192,12 @@ async function loadConfig() {
       if (l.medium) document.getElementById('pt-medium').value = l.medium;
       if (l.expert) document.getElementById('pt-expert').value = l.expert;
     }
+    if (cfg.conversion && cfg.conversion.levels) {
+      const l = cfg.conversion.levels;
+      if (l.facile) document.getElementById('cv-facile').value = l.facile;
+      if (l.medium) document.getElementById('cv-medium').value = l.medium;
+      if (l.expert) document.getElementById('cv-expert').value = l.expert;
+    }
   } catch(e) {}
 }
 
@@ -189,8 +209,9 @@ async function saveConfig() {
   msg.textContent = ''; msg.className = 'cfg-msg';
   const get = function(id) { return Math.max(2, parseInt(document.getElementById(id).value) || 2); };
   const cfg = {
-    couleur:  { levels: { facile: get('col-facile'), medium: get('col-medium'), expert: get('col-expert') } },
-    pointage: { levels: { facile: get('pt-facile'),  medium: get('pt-medium'),  expert: get('pt-expert')  } },
+    couleur:    { levels: { facile: get('col-facile'), medium: get('col-medium'), expert: get('col-expert') } },
+    pointage:   { levels: { facile: get('pt-facile'),  medium: get('pt-medium'),  expert: get('pt-expert')  } },
+    conversion: { levels: { facile: get('cv-facile'),  medium: get('cv-medium'),  expert: get('cv-expert')  } },
   };
   try {
     await SB.updateTrainingConfig('roulette', cfg);
