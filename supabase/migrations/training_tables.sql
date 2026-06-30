@@ -11,7 +11,7 @@ INSERT INTO training_config (key, value) VALUES
   ('roulette', '{
     "couleur":    { "levels": { "facile": 5,  "medium": 3, "expert": 2 } },
     "pointage":   { "levels": { "facile": 10, "medium": 6, "expert": 3 } },
-    "conversion": { "levels": { "facile": 12, "medium": 8, "expert": 4 } }
+    "conversion": { "levels": { "facile": 12, "medium": 8, "expert": 4 }, "chip_values": [2.5, 5, 10, 20, 50] }
   }'),
   ('blackjack', '{
     "ranges": [

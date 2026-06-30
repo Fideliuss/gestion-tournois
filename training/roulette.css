@@ -142,6 +142,24 @@
   font-size: 17px; font-weight: 700;
 }
 
+/* ── Sélection valeur de pièce ── */
+.chipval-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 14px; width: 100%; margin-top: 8px;
+}
+.chipval-card {
+  background: var(--bg-card); border: 1px solid var(--gold-bd);
+  border-radius: 50%; aspect-ratio: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: border-color .15s, background .15s, transform .1s;
+}
+.chipval-card:hover {
+  border-color: rgba(196,160,74,.6); background: rgba(196,160,74,.06);
+  transform: scale(1.06);
+}
+.chipval-amount { font-family: var(--f-num); font-size: 22px; font-weight: 700; color: var(--cream); }
+.chipval-unit   { font-size: 11px; color: var(--text-muted); }
+
 /* ── Light mode ── */
 body.light .rt-cell { border-color: rgba(0,0,0,.15); }
 body.light .rt-red   { background: #a02020; }

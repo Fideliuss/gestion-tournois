@@ -151,6 +151,24 @@
         <input type="number" class="cfg-timer-input" id="cv-expert" value="4" min="2" max="60" step="1" />
       </div>
     </div>
+    <div class="cfg-hint" style="margin-bottom:6px">Valeurs de pièces proposées au choix :</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);cursor:pointer">
+        <input type="checkbox" class="perm-cb" id="cv-val-2.5" checked> 2.5€
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);cursor:pointer">
+        <input type="checkbox" class="perm-cb" id="cv-val-5" checked> 5€
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);cursor:pointer">
+        <input type="checkbox" class="perm-cb" id="cv-val-10" checked> 10€
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);cursor:pointer">
+        <input type="checkbox" class="perm-cb" id="cv-val-20" checked> 20€
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--cream);cursor:pointer">
+        <input type="checkbox" class="perm-cb" id="cv-val-50" checked> 50€
+      </label>
+    </div>
     <div class="cfg-hint">Les timers s'appliquent à la prochaine session.</div>
 
     <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
@@ -198,6 +216,12 @@ async function loadConfig() {
       if (l.medium) document.getElementById('cv-medium').value = l.medium;
       if (l.expert) document.getElementById('cv-expert').value = l.expert;
     }
+    if (cfg.conversion && cfg.conversion.chip_values) {
+      const all = ['2.5','5','10','20','50'];
+      all.forEach(function(v) {
+        document.getElementById('cv-val-' + v).checked = cfg.conversion.chip_values.indexOf(parseFloat(v)) >= 0;
+      });
+    }
   } catch(e) {}
 }
 
@@ -208,10 +232,17 @@ async function saveConfig() {
   const msg = document.getElementById('cfg-msg');
   msg.textContent = ''; msg.className = 'cfg-msg';
   const get = function(id) { return Math.max(2, parseInt(document.getElementById(id).value) || 2); };
+  const chipValues = ['2.5','5','10','20','50']
+    .filter(function(v) { return document.getElementById('cv-val-' + v).checked; })
+    .map(function(v) { return parseFloat(v); });
+  if (!chipValues.length) {
+    msg.textContent = 'Sélectionne au moins une valeur de pièce.'; msg.className = 'cfg-msg err'; return;
+  }
+
   const cfg = {
     couleur:    { levels: { facile: get('col-facile'), medium: get('col-medium'), expert: get('col-expert') } },
     pointage:   { levels: { facile: get('pt-facile'),  medium: get('pt-medium'),  expert: get('pt-expert')  } },
-    conversion: { levels: { facile: get('cv-facile'),  medium: get('cv-medium'),  expert: get('cv-expert')  } },
+    conversion: { levels: { facile: get('cv-facile'),  medium: get('cv-medium'),  expert: get('cv-expert')  }, chip_values: chipValues },
   };
   try {
     await SB.updateTrainingConfig('roulette', cfg);
