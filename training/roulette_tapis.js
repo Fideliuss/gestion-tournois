@@ -54,8 +54,8 @@ function renderTapis(container, opts) {
 
   // En mode miroir, le 0 passe à droite et l'ordre des colonnes s'inverse
   const gridCols = mirror
-    ? 'repeat(' + numCols + ', 1fr) 2fr'
-    : '2fr repeat(' + numCols + ', 1fr)';
+    ? 'repeat(' + numCols + ', 1fr) 1.4fr'
+    : '1.4fr repeat(' + numCols + ', 1fr)';
 
   let html = '<div class="rt-grid" style="grid-template-columns: ' + gridCols + '">';
 
