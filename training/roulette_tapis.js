@@ -37,6 +37,14 @@ const BET_TYPES = [
 ];
 
 const STACK_SIZE = 20; // fixe, non modifiable
+const ZERO_W = 1.3; // largeur de la colonne 0 — doit correspondre au 1.3fr dans renderTapis
+
+// Pondération des types de mise par niveau (probabilité relative)
+const BET_TYPE_WEIGHTS = {
+  facile: { plein: 35, cheval: 35, transversale: 15, carre: 10, sixain: 5  },
+  medium: { plein: 25, cheval: 25, transversale: 20, carre: 15, sixain: 15 },
+  expert: { plein: 20, cheval: 20, transversale: 20, carre: 20, sixain: 20 },
+};
 
 // ── Rendu de la grille tapis ─────────────────────────
 // container : élément DOM cible
@@ -102,8 +110,8 @@ function renderTapis(container, opts) {
 // ── Génération d'une mise aléatoire (module 1) ───────
 // level : 'facile' | 'medium' | 'expert'
 function generateBet(level) {
-  // Choisit un type aléatoire
-  const type = BET_TYPES[Math.floor(Math.random() * BET_TYPES.length)];
+  // Choisit un type pondéré selon le niveau (facile = surtout plein/cheval, expert = équilibré)
+  const type = pickBetType(level);
 
   // Nombre de pièces selon le niveau
   const maxChips = type.covered * STACK_SIZE;
@@ -121,6 +129,17 @@ function generateBet(level) {
     numbers: numbers,
     payout:  chips * type.ratio,
   };
+}
+
+function pickBetType(level) {
+  const weights = BET_TYPE_WEIGHTS[level] || BET_TYPE_WEIGHTS.expert;
+  const total = BET_TYPES.reduce(function(s, t) { return s + (weights[t.id] || 1); }, 0);
+  var rand = Math.random() * total;
+  for (var i = 0; i < BET_TYPES.length; i++) {
+    rand -= (weights[BET_TYPES[i].id] || 1);
+    if (rand <= 0) return BET_TYPES[i];
+  }
+  return BET_TYPES[BET_TYPES.length - 1];
 }
 
 function pickNumbers(typeId) {
@@ -189,13 +208,13 @@ function pickNumbers(typeId) {
 // numCols : nombre de colonnes du tapis affiché (4 pour 1ère douzaine)
 // Retourne { x, y } en % du conteneur
 function getChipPosition(numbers, numCols) {
-  const totalW = 2 + numCols; // 2 unités pour le 0 + numCols unités
+  const totalW = ZERO_W + numCols;
 
   if (numbers.indexOf(0) >= 0) {
     const others = numbers.filter(function(n) { return n !== 0; });
     const rows = others.map(rRow);
     const minRow = Math.min.apply(null, rows), maxRow = Math.max.apply(null, rows);
-    const x = 2 / totalW * 100; // bord zéro / colonne 1
+    const x = ZERO_W / totalW * 100; // bord zéro / colonne 1
     var y;
     if (others.length === 1)      y = (minRow - 1 + 0.5) / 3 * 100;       // cheval 0-N
     else if (others.length === 3) y = 50;                                  // carré 0-1-2-3
@@ -209,27 +228,27 @@ function getChipPosition(numbers, numCols) {
   const minRow = Math.min.apply(null, rows), maxRow = Math.max.apply(null, rows);
 
   if (numbers.length === 1) {
-    return { x: (2 + (minCol - 1) + 0.5) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
+    return { x: (ZERO_W + (minCol - 1) + 0.5) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
   }
   if (numbers.length === 2 && minCol === maxCol) {
     // Cheval vertical : bord horizontal partagé
-    return { x: (2 + (minCol - 1) + 0.5) / totalW * 100, y: minRow / 3 * 100 };
+    return { x: (ZERO_W + (minCol - 1) + 0.5) / totalW * 100, y: minRow / 3 * 100 };
   }
   if (numbers.length === 2) {
     // Cheval horizontal : bord vertical partagé
-    return { x: (2 + minCol) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
+    return { x: (ZERO_W + minCol) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
   }
   if (numbers.length === 3) {
     // Transversale (sans 0) : bout de tapis (bord supérieur), centré sur la colonne
-    return { x: (1.5 + minCol) / totalW * 100, y: 0 };
+    return { x: (ZERO_W + (minCol - 1) + 0.5) / totalW * 100, y: 0 };
   }
   if (numbers.length === 4) {
     // Carré : intersection des 4 cellules
-    return { x: (2 + minCol) / totalW * 100, y: minRow / 3 * 100 };
+    return { x: (ZERO_W + minCol) / totalW * 100, y: minRow / 3 * 100 };
   }
   if (numbers.length === 6) {
     // Sixain : bout de tapis (bord supérieur), centré sur les 2 colonnes
-    return { x: (2 + minCol) / totalW * 100, y: 0 };
+    return { x: (ZERO_W + minCol) / totalW * 100, y: 0 };
   }
   return { x: 50, y: 50 };
 }
