@@ -67,10 +67,10 @@ function nextPointage() {
   _ptNumber   = Math.floor(Math.random() * 37); // 0-36
   _ptMirror   = Math.random() < 0.5; // sens de table aléatoire (le 0 détermine le sens)
 
-  // Affiche le numéro dans le cylindre
+  // Affiche le numéro dans le cylindre — couleur masquée jusqu'à la réponse
   const numEl = document.getElementById('pt-announced');
   numEl.textContent = _ptNumber;
-  numEl.className   = 'pt-ball ' + R_COLORS[_ptNumber];
+  numEl.className   = 'pt-ball neutral';
 
   // Tapis cliquable — numéros masqués (test de mémoire), sens aléatoire
   renderTapis(document.getElementById('pt-tapis'), {
@@ -123,6 +123,7 @@ function updatePtTimerDisplay() {
 
 function ptTimeout() {
   _ptAnswered = true;
+  document.getElementById('pt-announced').className = 'pt-ball ' + R_COLORS[_ptNumber];
   highlightCorrect();
   const fb = document.getElementById('pt-feedback');
   fb.className   = 'feedback-bar wrong';
@@ -141,6 +142,7 @@ async function clickPointage(n) {
   if (_ptAnswered) return;
   stopPtTimer();
   _ptAnswered = true;
+  document.getElementById('pt-announced').className = 'pt-ball ' + R_COLORS[_ptNumber];
 
   const isCorrect = n === _ptNumber;
   if (isCorrect) _ptCorrect++;

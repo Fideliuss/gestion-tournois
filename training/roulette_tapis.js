@@ -60,8 +60,10 @@ function renderTapis(container, opts) {
   let html = '<div class="rt-grid" style="grid-template-columns: ' + gridCols + '">';
 
   // Cellule 0 — placement explicite (col 1 normal, col numCols+1 en miroir)
+  // Forme pentagone, pointe toujours dirigée vers les numéros
   const zeroCol = mirror ? (numCols + 1) : 1;
-  html += '<div class="rt-cell rt-zero' + (clickable ? ' rt-clickable' : '') + '"'
+  const zeroPointClass = mirror ? ' rt-zero-l' : ' rt-zero-r';
+  html += '<div class="rt-cell rt-zero' + zeroPointClass + (clickable ? ' rt-clickable' : '') + '"'
         + ' style="grid-column:' + zeroCol + ';grid-row:1 / span 3"'
         + (onClick ? ' onclick="' + opts.clickFn + '(0)"' : '') + '>'
         + (hideNumbers ? '' : '<span class="rt-num">0</span>') + '</div>';
