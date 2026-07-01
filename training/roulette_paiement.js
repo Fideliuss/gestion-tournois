@@ -12,7 +12,7 @@ let _rpLevel     = null;
 let _rpQIndex    = 0;
 let _rpCorrect   = 0;
 let _rpAnswered  = false;
-let _rpBet       = null;
+let _rpQuestion  = null;
 
 // ── Init ─────────────────────────────────────────────
 async function initPaiement() {
@@ -49,12 +49,15 @@ function nextPaiement() {
   if (_rpQIndex >= RP_QUESTIONS) { showPaiementSummary(); return; }
 
   _rpAnswered = false;
-  _rpBet = generateBet(_rpLevel);
+  _rpQuestion = generateQuestion(_rpLevel);
 
   renderTapis(document.getElementById('rp-tapis'), { maxNum: 12 });
-  renderChip(document.getElementById('rp-chip-overlay'), _rpBet.numbers, _rpBet.chips, 4);
+  renderChips(document.getElementById('rp-chip-overlay'), _rpQuestion.bets, 4);
 
-  document.getElementById('rp-bet-label').textContent = _rpBet.type.label;
+  var labelsHtml = _rpQuestion.bets.map(function(b) {
+    return '<span class="rp-bet-badge">' + b.type.label + '</span>';
+  }).join('');
+  document.getElementById('rp-bet-labels').innerHTML = labelsHtml;
 
   const inp = document.getElementById('rp-answer-input');
   inp.value = ''; inp.disabled = false;
@@ -85,24 +88,27 @@ async function submitPaiement() {
   inp.disabled = true;
   document.getElementById('rp-submit-btn').disabled = true;
 
-  const isCorrect = val === _rpBet.payout;
+  const isCorrect = val === _rpQuestion.totalPayout;
   if (isCorrect) _rpCorrect++;
 
   const fb = document.getElementById('rp-feedback');
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ ' + _rpBet.payout + ' pièces — Correct !';
+    fb.textContent = '✓ ' + _rpQuestion.totalPayout + ' pièces — Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
-    fb.textContent = '✕ Incorrect — ' + _rpBet.payout + ' pièces';
+    var detail = _rpQuestion.bets.map(function(b) {
+      return b.type.label + ' ' + b.chips + '×' + b.type.ratio + '=' + b.payout;
+    }).join(' · ');
+    fb.textContent = '✕ Incorrect — ' + _rpQuestion.totalPayout + ' pièces (' + detail + ')';
   }
 
   try {
     if (_rpSessionId && _rpUserId) {
       await SB.addTrainingResult(
         _rpSessionId, _rpUserId, 'roulette-paiement',
-        { type: _rpBet.type.id, numbers: _rpBet.numbers, chips: _rpBet.chips, level: _rpLevel },
-        _rpBet.payout, val, isCorrect
+        { bets: _rpQuestion.bets.map(function(b) { return { type: b.type.id, numbers: b.numbers, chips: b.chips }; }), level: _rpLevel },
+        _rpQuestion.totalPayout, val, isCorrect
       );
     }
   } catch(e) {}
@@ -152,7 +158,7 @@ function rpVerdict(n) {
 
 function restartPaiement() {
   _rpSessionId = null; _rpQIndex = 0; _rpCorrect = 0;
-  _rpAnswered = false; _rpLevel = null;
+  _rpAnswered = false; _rpLevel = null; _rpQuestion = null;
   document.getElementById('rp-summary-screen').style.display  = 'none';
   document.getElementById('rp-level-screen').style.display    = '';
 }

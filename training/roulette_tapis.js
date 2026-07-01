@@ -260,6 +260,47 @@ function renderChip(container, numbers, chips, numCols) {
     + chips + '</div>';
 }
 
+// ── Génération d'une question multi-mise ──────────────
+// Retourne { bets: [...], totalPayout: N }
+// Facile=2 mises, Médium=3, Expert=4-5
+function generateQuestion(level) {
+  var numBets;
+  if (level === 'facile')      numBets = 2;
+  else if (level === 'medium') numBets = 3;
+  else                          numBets = randInt(4, 5);
+
+  var bets = [];
+  var used = [];
+
+  for (var i = 0; i < numBets; i++) {
+    var type, tries = 0;
+    do { type = pickBetType(level); tries++; }
+    while (used.indexOf(type.id) >= 0 && tries < 40);
+    if (used.indexOf(type.id) >= 0) break; // tous les types déjà utilisés
+    used.push(type.id);
+
+    var maxChips = type.covered * STACK_SIZE;
+    var chips;
+    if (level === 'facile')      chips = randInt(1, Math.min(3, maxChips));
+    else if (level === 'medium') chips = randInt(1, Math.min(10, maxChips));
+    else                          chips = randInt(1, maxChips);
+
+    bets.push({ type: type, chips: chips, numbers: pickNumbers(type.id), payout: chips * type.ratio });
+  }
+
+  return { bets: bets, totalPayout: bets.reduce(function(s, b) { return s + b.payout; }, 0) };
+}
+
+// ── Rendu de plusieurs chips sur le tapis ─────────────
+function renderChips(container, bets, numCols) {
+  var html = '';
+  bets.forEach(function(bet) {
+    var pos = getChipPosition(bet.numbers, numCols);
+    html += '<div class="rt-chip" style="left:' + pos.x + '%;top:' + pos.y + '%">' + bet.chips + '</div>';
+  });
+  container.innerHTML = html;
+}
+
 // ── Utilitaires ───────────────────────────────────────
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;

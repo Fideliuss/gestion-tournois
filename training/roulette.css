@@ -168,8 +168,9 @@
   display: inline-block; padding: 6px 20px; border-radius: 2px;
   font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
   font-family: var(--f-ui); background: rgba(196,160,74,.15); color: var(--gold);
-  border: 1px solid rgba(196,160,74,.3); margin-bottom: 18px;
+  border: 1px solid rgba(196,160,74,.3);
 }
+#rp-bet-labels { margin-bottom: 18px; }
 
 /* ── Light mode ── */
 body.light .rt-cell { border-color: rgba(0,0,0,.15); }
