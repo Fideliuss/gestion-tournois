@@ -239,16 +239,16 @@ function getChipPosition(numbers, numCols) {
     return { x: (ZERO_W + minCol) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
   }
   if (numbers.length === 3) {
-    // Transversale : bord gauche de la colonne, centré verticalement
-    return { x: (ZERO_W + (minCol - 1)) / totalW * 100, y: 50 };
+    // Transversale : bord supérieur, centré sur la colonne (côté cylindre)
+    return { x: (ZERO_W + (minCol - 1) + 0.5) / totalW * 100, y: 0 };
   }
   if (numbers.length === 4) {
     // Carré : intersection des 4 cellules
     return { x: (ZERO_W + minCol) / totalW * 100, y: minRow / 3 * 100 };
   }
   if (numbers.length === 6) {
-    // Sixain : entre les 2 colonnes couvertes, centré verticalement
-    return { x: (ZERO_W + minCol) / totalW * 100, y: 50 };
+    // Sixain : bord supérieur, à la jonction des 2 colonnes
+    return { x: (ZERO_W + minCol) / totalW * 100, y: 0 };
   }
   return { x: 50, y: 50 };
 }
