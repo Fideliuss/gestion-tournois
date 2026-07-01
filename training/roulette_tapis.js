@@ -239,16 +239,16 @@ function getChipPosition(numbers, numCols) {
     return { x: (ZERO_W + minCol) / totalW * 100, y: (minRow - 1 + 0.5) / 3 * 100 };
   }
   if (numbers.length === 3) {
-    // Transversale (sans 0) : bout de tapis (bord supérieur), centré sur la colonne
-    return { x: (ZERO_W + (minCol - 1) + 0.5) / totalW * 100, y: 0 };
+    // Transversale : bord gauche de la colonne, centré verticalement
+    return { x: (ZERO_W + (minCol - 1)) / totalW * 100, y: 50 };
   }
   if (numbers.length === 4) {
     // Carré : intersection des 4 cellules
     return { x: (ZERO_W + minCol) / totalW * 100, y: minRow / 3 * 100 };
   }
   if (numbers.length === 6) {
-    // Sixain : bout de tapis (bord supérieur), centré sur les 2 colonnes
-    return { x: (ZERO_W + minCol) / totalW * 100, y: 0 };
+    // Sixain : entre les 2 colonnes couvertes, centré verticalement
+    return { x: (ZERO_W + minCol) / totalW * 100, y: 50 };
   }
   return { x: 50, y: 50 };
 }
@@ -260,15 +260,67 @@ function renderChip(container, numbers, chips, numCols) {
     + chips + '</div>';
 }
 
+// ── Numéros couvrant un numéro gagnant donné ─────────
+// Génère des numéros valides pour un type de mise qui INCLUENT winN
+function pickNumbersCovering(typeId, winN, numCols) {
+  var col = rCol(winN), row = rRow(winN);
+  function numAt(c, r) { return (c - 1) * 3 + (r === 1 ? 3 : r === 2 ? 2 : 1); }
+  var opts, base, c1, r1, c2, r2, dc, dr;
+
+  switch (typeId) {
+    case 'plein': return [winN];
+
+    case 'cheval':
+      opts = [];
+      if (row > 1)       opts.push([numAt(col, row-1), winN].sort(function(a,b){return a-b;}));
+      if (row < 3)       opts.push([winN, numAt(col, row+1)].sort(function(a,b){return a-b;}));
+      if (col > 1)       opts.push([numAt(col-1, row), winN].sort(function(a,b){return a-b;}));
+      if (col < numCols) opts.push([winN, numAt(col+1, row)].sort(function(a,b){return a-b;}));
+      return opts[randInt(0, opts.length - 1)];
+
+    case 'transversale':
+      base = (col - 1) * 3 + 1;
+      return [base, base + 1, base + 2];
+
+    case 'carre':
+      opts = [];
+      for (dc = 0; dc <= 1; dc++) {
+        for (dr = 0; dr <= 1; dr++) {
+          c1 = col - dc; r1 = row - dr; c2 = c1 + 1; r2 = r1 + 1;
+          if (c1 >= 1 && c2 <= numCols && r1 >= 1 && r2 <= 3) {
+            opts.push([numAt(c1,r1), numAt(c1,r2), numAt(c2,r1), numAt(c2,r2)].sort(function(a,b){return a-b;}));
+          }
+        }
+      }
+      return opts[randInt(0, opts.length - 1)];
+
+    case 'sixain':
+      opts = [];
+      if (col > 1) {
+        base = (col - 2) * 3 + 1;
+        if (base + 5 <= numCols * 3) opts.push([base, base+1, base+2, base+3, base+4, base+5]);
+      }
+      if (col < numCols) {
+        base = (col - 1) * 3 + 1;
+        if (base + 5 <= numCols * 3) opts.push([base, base+1, base+2, base+3, base+4, base+5]);
+      }
+      if (!opts.length) return pickNumbersCovering('transversale', winN, numCols);
+      return opts[randInt(0, opts.length - 1)];
+
+    default: return [winN];
+  }
+}
+
 // ── Génération d'une question multi-mise ──────────────
-// Retourne { bets: [...], totalPayout: N }
-// Facile=2 mises, Médium=3, Expert=4-5
+// Toutes les mises couvrent le même numéro gagnant
+// Retourne { bets, totalPayout, winningNumber }
 function generateQuestion(level) {
   var numBets;
   if (level === 'facile')      numBets = 2;
   else if (level === 'medium') numBets = 3;
   else                          numBets = randInt(4, 5);
 
+  var winN = randInt(1, 12);
   var bets = [];
   var used = [];
 
@@ -276,7 +328,7 @@ function generateQuestion(level) {
     var type, tries = 0;
     do { type = pickBetType(level); tries++; }
     while (used.indexOf(type.id) >= 0 && tries < 40);
-    if (used.indexOf(type.id) >= 0) break; // tous les types déjà utilisés
+    if (used.indexOf(type.id) >= 0) break;
     used.push(type.id);
 
     var maxChips = type.covered * STACK_SIZE;
@@ -285,10 +337,10 @@ function generateQuestion(level) {
     else if (level === 'medium') chips = randInt(1, Math.min(10, maxChips));
     else                          chips = randInt(1, maxChips);
 
-    bets.push({ type: type, chips: chips, numbers: pickNumbers(type.id), payout: chips * type.ratio });
+    bets.push({ type: type, chips: chips, numbers: pickNumbersCovering(type.id, winN, 4), payout: chips * type.ratio });
   }
 
-  return { bets: bets, totalPayout: bets.reduce(function(s, b) { return s + b.payout; }, 0) };
+  return { bets: bets, totalPayout: bets.reduce(function(s, b) { return s + b.payout; }, 0), winningNumber: winN };
 }
 
 // ── Rendu de plusieurs chips sur le tapis ─────────────
@@ -296,7 +348,7 @@ function renderChips(container, bets, numCols) {
   var html = '';
   bets.forEach(function(bet) {
     var pos = getChipPosition(bet.numbers, numCols);
-    html += '<div class="rt-chip" style="left:' + pos.x + '%;top:' + pos.y + '%">' + bet.chips + '</div>';
+    html += '<div class="rt-chip rt-chip-' + bet.type.id + '" style="left:' + pos.x + '%;top:' + pos.y + '%">' + bet.chips + '</div>';
   });
   container.innerHTML = html;
 }

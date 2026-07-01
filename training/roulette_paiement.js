@@ -51,11 +51,13 @@ function nextPaiement() {
   _rpAnswered = false;
   _rpQuestion = generateQuestion(_rpLevel);
 
-  renderTapis(document.getElementById('rp-tapis'), { maxNum: 12 });
+  renderTapis(document.getElementById('rp-tapis'), { maxNum: 12, highlight: [_rpQuestion.winningNumber] });
   renderChips(document.getElementById('rp-chip-overlay'), _rpQuestion.bets, 4);
 
+  document.getElementById('rp-winning-num').textContent = _rpQuestion.winningNumber;
+
   var labelsHtml = _rpQuestion.bets.map(function(b) {
-    return '<span class="rp-bet-badge">' + b.type.label + '</span>';
+    return '<span class="rp-bet-badge rp-badge-' + b.type.id + '">' + b.type.label + '</span>';
   }).join('');
   document.getElementById('rp-bet-labels').innerHTML = labelsHtml;
 

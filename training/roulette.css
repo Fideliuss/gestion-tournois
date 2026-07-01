@@ -160,17 +160,42 @@
 .chipval-amount { font-family: var(--f-num); font-size: 22px; font-weight: 700; color: var(--cream); }
 .chipval-unit   { font-size: 11px; color: var(--text-muted); }
 
+/* ── Couleurs chip par type de mise ── */
+.rt-chip-plein        { /* gold = défaut */ }
+.rt-chip-cheval       { background: radial-gradient(circle at 35% 35%, #e8e8e8, #b0b0b0, #707070); color: #111; }
+.rt-chip-transversale { background: radial-gradient(circle at 35% 35%, #e8b870, #c47830, #8a4a10); color: #1a0a00; }
+.rt-chip-carre        { background: radial-gradient(circle at 35% 35%, #70d8d8, #30a8a8, #0a6060); color: #001a1a; }
+.rt-chip-sixain       { background: radial-gradient(circle at 35% 35%, #70d898, #30a860, #0a6030); color: #001a0a; }
+
 /* ── Module Calcul Paiement ── */
 .rp-tapis-wrap { width: 100%; max-width: 760px; margin: 0 auto; position: relative; }
 .rp-chip-overlay { position: absolute; inset: 0; pointer-events: none; }
 
 .rp-bet-badge {
-  display: inline-block; padding: 6px 20px; border-radius: 2px;
-  font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
-  font-family: var(--f-ui); background: rgba(196,160,74,.15); color: var(--gold);
+  display: inline-block; padding: 5px 14px; border-radius: 2px;
+  font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  font-family: var(--f-ui); background: transparent;
   border: 1px solid rgba(196,160,74,.3);
 }
-#rp-bet-labels { margin-bottom: 18px; }
+#rp-bet-labels { margin-bottom: 8px; }
+
+/* Couleurs badges = couleurs chips */
+.rp-badge-plein        { color: #c4a04a; border-color: rgba(196,160,74,.4); }
+.rp-badge-cheval       { color: #c0c0c0; border-color: rgba(192,192,192,.4); }
+.rp-badge-transversale { color: #d08040; border-color: rgba(196,120,48,.4); }
+.rp-badge-carre        { color: #40b0b0; border-color: rgba(48,168,168,.4); }
+.rp-badge-sixain       { color: #40b070; border-color: rgba(48,168,100,.4); }
+
+/* Numéro gagnant */
+.rp-winning-display {
+  text-align: center; margin-bottom: 14px;
+  font-family: var(--f-ui); font-size: 10px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.rp-winning-display strong {
+  font-family: var(--f-num); font-size: 28px; font-weight: 700;
+  color: var(--gold); letter-spacing: 0; margin-left: 6px;
+}
 
 /* ── Light mode ── */
 body.light .rt-cell { border-color: rgba(0,0,0,.15); }
