@@ -57,6 +57,7 @@ function nextPaiement() {
   document.getElementById('rp-winning-num').textContent = _rpQuestion.winningNumber;
 
   document.getElementById('rp-bet-labels').innerHTML = '';
+  document.getElementById('rp-chip-overlay').classList.remove('rp-revealed');
 
   const inp = document.getElementById('rp-answer-input');
   inp.value = ''; inp.disabled = false;
@@ -96,6 +97,7 @@ async function submitPaiement() {
     fb.textContent = '✓ ' + _rpQuestion.totalPayout + ' pièces — Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
+    document.getElementById('rp-chip-overlay').classList.add('rp-revealed');
     var detail = _rpQuestion.bets.map(function(b) {
       return '<span class="rp-bet-badge rp-badge-' + b.type.id + '">'
         + b.type.label + ' ' + b.chips + '×' + b.type.ratio + '=' + b.payout
