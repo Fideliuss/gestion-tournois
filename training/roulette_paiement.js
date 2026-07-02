@@ -98,9 +98,17 @@ async function submitPaiement() {
   } else {
     fb.className   = 'feedback-bar wrong';
     document.getElementById('rp-chip-overlay').classList.add('rp-revealed');
-    var detail = _rpQuestion.bets.map(function(b) {
-      return '<span class="rp-bet-badge rp-badge-' + b.type.id + '">'
-        + b.type.label + ' ' + b.chips + '×' + b.type.ratio + '=' + b.payout
+    var byType = {};
+    var order  = [];
+    _rpQuestion.bets.forEach(function(b) {
+      if (!byType[b.type.id]) { byType[b.type.id] = { type: b.type, chips: 0, payout: 0 }; order.push(b.type.id); }
+      byType[b.type.id].chips  += b.chips;
+      byType[b.type.id].payout += b.payout;
+    });
+    var detail = order.map(function(id) {
+      var g = byType[id];
+      return '<span class="rp-bet-badge rp-badge-' + g.type.id + '">'
+        + g.type.label + ' ' + g.chips + '×' + g.type.ratio + '=' + g.payout
         + '</span>';
     }).join('');
     fb.innerHTML = '✕ ' + _rpQuestion.totalPayout + ' pièces — ' + detail;
