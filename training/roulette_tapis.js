@@ -69,8 +69,10 @@ function renderTapis(container, opts) {
 
   // Cellule 0 — placement explicite (col 1 normal, col numCols+1 en miroir)
   const zeroCol = mirror ? (numCols + 1) : 1;
-  html += '<div class="rt-cell rt-zero' + (clickable ? ' rt-clickable' : '') + '"'
+  const isZeroHighlight = highlight.indexOf(0) >= 0;
+  html += '<div class="rt-cell rt-zero' + (isZeroHighlight ? ' rt-highlight' : '') + (clickable ? ' rt-clickable' : '') + '"'
         + ' style="grid-column:' + zeroCol + ';grid-row:1 / span 3"'
+        + ' data-num="0"'
         + (onClick ? ' onclick="' + opts.clickFn + '(0)"' : '') + '>'
         + (hideNumbers ? '' : '<span class="rt-num">0</span>') + '</div>';
 
@@ -263,15 +265,28 @@ function renderChip(container, numbers, chips, numCols) {
 // ── Pool de toutes les mises possibles couvrant winN ──
 // Retourne TOUTES les positions valides (même type autorisé à plusieurs positions)
 function buildBetPool(winN, numCols) {
-  var col = rCol(winN), row = rRow(winN);
   var pool = [];
   function numAt(c, r) { return (c-1)*3 + (r===1?3:r===2?2:1); }
   function t(id) { for(var i=0;i<BET_TYPES.length;i++){if(BET_TYPES[i].id===id)return BET_TYPES[i];} }
 
+  // ── Cas spécial : numéro gagnant = 0 ────────────────
+  if (winN === 0) {
+    pool.push({ type: t('plein'),        numbers: [0] });
+    pool.push({ type: t('cheval'),       numbers: [0, 1] });
+    pool.push({ type: t('cheval'),       numbers: [0, 2] });
+    pool.push({ type: t('cheval'),       numbers: [0, 3] });
+    pool.push({ type: t('transversale'), numbers: [0, 1, 2] });
+    pool.push({ type: t('transversale'), numbers: [0, 2, 3] });
+    pool.push({ type: t('carre'),        numbers: [0, 1, 2, 3] });
+    return pool;
+  }
+
+  var col = rCol(winN), row = rRow(winN);
+
   // Plein (1 position)
   pool.push({ type: t('plein'), numbers: [winN] });
 
-  // Chevaux (jusqu'à 4 positions différentes)
+  // Chevaux standard (jusqu'à 4 positions)
   if (row > 1)       pool.push({ type: t('cheval'), numbers: [numAt(col,row-1), winN].sort(function(a,b){return a-b;}) });
   if (row < 3)       pool.push({ type: t('cheval'), numbers: [winN, numAt(col,row+1)].sort(function(a,b){return a-b;}) });
   if (col > 1)       pool.push({ type: t('cheval'), numbers: [numAt(col-1,row), winN].sort(function(a,b){return a-b;}) });
@@ -281,7 +296,7 @@ function buildBetPool(winN, numCols) {
   var base = (col-1)*3+1;
   pool.push({ type: t('transversale'), numbers: [base, base+1, base+2] });
 
-  // Carrés (jusqu'à 4 positions différentes)
+  // Carrés standard (jusqu'à 4 positions)
   var dc, dr, c1, r1, c2, r2;
   for (dc = 0; dc <= 1; dc++) {
     for (dr = 0; dr <= 1; dr++) {
@@ -292,7 +307,7 @@ function buildBetPool(winN, numCols) {
     }
   }
 
-  // Sixains (jusqu'à 2 positions différentes)
+  // Sixains (jusqu'à 2 positions)
   if (col > 1) {
     base = (col-2)*3+1;
     if (base+5 <= numCols*3) pool.push({ type: t('sixain'), numbers: [base,base+1,base+2,base+3,base+4,base+5] });
@@ -300,6 +315,14 @@ function buildBetPool(winN, numCols) {
   if (col < numCols) {
     base = (col-1)*3+1;
     if (base+5 <= numCols*3) pool.push({ type: t('sixain'), numbers: [base,base+1,base+2,base+3,base+4,base+5] });
+  }
+
+  // ── Mises avec le 0 (uniquement pour winN = 1, 2 ou 3) ─
+  if (col === 1) {
+    pool.push({ type: t('cheval'), numbers: [0, winN] });
+    if (winN === 1 || winN === 2) pool.push({ type: t('transversale'), numbers: [0, 1, 2] });
+    if (winN === 2 || winN === 3) pool.push({ type: t('transversale'), numbers: [0, 2, 3] });
+    pool.push({ type: t('carre'), numbers: [0, 1, 2, 3] });
   }
 
   return pool;
@@ -334,7 +357,7 @@ function generateQuestion(level) {
   else if (level === 'medium') numBets = randInt(3, 4);
   else                          numBets = randInt(4, 6);
 
-  var winN  = randInt(1, 12);
+  var winN  = randInt(0, 12);
   var pool  = buildBetPool(winN, 4);
   var picks = weightedPickPool(pool, level, Math.min(numBets, pool.length));
 
@@ -352,6 +375,45 @@ function generateQuestion(level) {
 
 // ── Position chip via getBoundingClientRect ───────────
 function chipPosFromDOM(numbers, tapEl, overlayRect) {
+  // ── Bets incluant le 0 : logique spécifique ──────────
+  if (numbers.indexOf(0) >= 0) {
+    var zeroEl = tapEl.querySelector('[data-num="0"]');
+    if (!zeroEl) return { x: 50, y: 50 };
+    var zeroRect = zeroEl.getBoundingClientRect();
+    var nonZero  = numbers.filter(function(n){ return n !== 0; });
+    var nzCells  = nonZero.map(function(n){
+      var el = tapEl.querySelector('[data-num="' + n + '"]');
+      return el ? el.getBoundingClientRect() : null;
+    }).filter(Boolean);
+
+    var px = zeroRect.right; // bord commun zéro / col1
+    var py;
+    if (numbers.length === 1) {
+      // Plein [0] : centre de la cellule zéro
+      return {
+        x: ((zeroRect.left + zeroRect.right) / 2 - overlayRect.left) / overlayRect.width  * 100,
+        y: ((zeroRect.top  + zeroRect.bottom) / 2 - overlayRect.top)  / overlayRect.height * 100
+      };
+    } else if (numbers.length === 2) {
+      // Cheval [0,N] : centre vertical de la cellule N
+      py = nzCells.length ? (nzCells[0].top + nzCells[0].bottom) / 2
+                          : (zeroRect.top + zeroRect.bottom) / 2;
+    } else if (numbers.length === 3) {
+      // Transversale [0,1,2] ou [0,2,3] : bord entre les 2 numéros non-zéro
+      py = nzCells.length === 2
+        ? Math.min.apply(null, nzCells.map(function(c){ return c.bottom; }))
+        : zeroRect.top;
+    } else {
+      // Carré [0,1,2,3] : centre de la hauteur du zéro
+      py = (zeroRect.top + zeroRect.bottom) / 2;
+    }
+    return {
+      x: (px - overlayRect.left) / overlayRect.width  * 100,
+      y: (py - overlayRect.top)  / overlayRect.height * 100
+    };
+  }
+
+  // ── Bets standards (sans 0) ───────────────────────────
   var cells = [];
   numbers.forEach(function(n) {
     var el = tapEl.querySelector('[data-num="' + n + '"]');
