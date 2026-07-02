@@ -56,10 +56,7 @@ function nextPaiement() {
 
   document.getElementById('rp-winning-num').textContent = _rpQuestion.winningNumber;
 
-  var labelsHtml = _rpQuestion.bets.map(function(b) {
-    return '<span class="rp-bet-badge rp-badge-' + b.type.id + '">' + b.type.label + '</span>';
-  }).join('');
-  document.getElementById('rp-bet-labels').innerHTML = labelsHtml;
+  document.getElementById('rp-bet-labels').innerHTML = '';
 
   const inp = document.getElementById('rp-answer-input');
   inp.value = ''; inp.disabled = false;
@@ -100,9 +97,11 @@ async function submitPaiement() {
   } else {
     fb.className   = 'feedback-bar wrong';
     var detail = _rpQuestion.bets.map(function(b) {
-      return b.type.label + ' ' + b.chips + '×' + b.type.ratio + '=' + b.payout;
-    }).join(' · ');
-    fb.textContent = '✕ Incorrect — ' + _rpQuestion.totalPayout + ' pièces (' + detail + ')';
+      return '<span class="rp-bet-badge rp-badge-' + b.type.id + '">'
+        + b.type.label + ' ' + b.chips + '×' + b.type.ratio + '=' + b.payout
+        + '</span>';
+    }).join('');
+    fb.innerHTML = '✕ ' + _rpQuestion.totalPayout + ' pièces — ' + detail;
   }
 
   try {
