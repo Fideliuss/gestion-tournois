@@ -404,8 +404,8 @@ function chipPosFromDOM(numbers, tapEl, overlayRect) {
         ? Math.min.apply(null, nzCells.map(function(c){ return c.bottom; }))
         : zeroRect.top;
     } else {
-      // Carré [0,1,2,3] : centre de la hauteur du zéro
-      py = (zeroRect.top + zeroRect.bottom) / 2;
+      // Carré [0,1,2,3] : coin supérieur, bord 0/col1 × bord supérieur du tapis
+      py = zeroRect.top;
     }
     return {
       x: (px - overlayRect.left) / overlayRect.width  * 100,
