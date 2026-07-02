@@ -52,7 +52,7 @@ function nextPaiement() {
   _rpQuestion = generateQuestion(_rpLevel);
 
   renderTapis(document.getElementById('rp-tapis'), { maxNum: 12, highlight: [_rpQuestion.winningNumber] });
-  renderChips(document.getElementById('rp-chip-overlay'), _rpQuestion.bets, 4);
+  renderChips(document.getElementById('rp-chip-overlay'), _rpQuestion.bets, document.getElementById('rp-tapis'));
 
   document.getElementById('rp-winning-num').textContent = _rpQuestion.winningNumber;
 

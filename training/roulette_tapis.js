@@ -260,55 +260,69 @@ function renderChip(container, numbers, chips, numCols) {
     + chips + '</div>';
 }
 
-// ── Numéros couvrant un numéro gagnant donné ─────────
-// Génère des numéros valides pour un type de mise qui INCLUENT winN
-function pickNumbersCovering(typeId, winN, numCols) {
+// ── Pool de toutes les mises possibles couvrant winN ──
+// Retourne TOUTES les positions valides (même type autorisé à plusieurs positions)
+function buildBetPool(winN, numCols) {
   var col = rCol(winN), row = rRow(winN);
-  function numAt(c, r) { return (c - 1) * 3 + (r === 1 ? 3 : r === 2 ? 2 : 1); }
-  var opts, base, c1, r1, c2, r2, dc, dr;
+  var pool = [];
+  function numAt(c, r) { return (c-1)*3 + (r===1?3:r===2?2:1); }
+  function t(id) { for(var i=0;i<BET_TYPES.length;i++){if(BET_TYPES[i].id===id)return BET_TYPES[i];} }
 
-  switch (typeId) {
-    case 'plein': return [winN];
+  // Plein (1 position)
+  pool.push({ type: t('plein'), numbers: [winN] });
 
-    case 'cheval':
-      opts = [];
-      if (row > 1)       opts.push([numAt(col, row-1), winN].sort(function(a,b){return a-b;}));
-      if (row < 3)       opts.push([winN, numAt(col, row+1)].sort(function(a,b){return a-b;}));
-      if (col > 1)       opts.push([numAt(col-1, row), winN].sort(function(a,b){return a-b;}));
-      if (col < numCols) opts.push([winN, numAt(col+1, row)].sort(function(a,b){return a-b;}));
-      return opts[randInt(0, opts.length - 1)];
+  // Chevaux (jusqu'à 4 positions différentes)
+  if (row > 1)       pool.push({ type: t('cheval'), numbers: [numAt(col,row-1), winN].sort(function(a,b){return a-b;}) });
+  if (row < 3)       pool.push({ type: t('cheval'), numbers: [winN, numAt(col,row+1)].sort(function(a,b){return a-b;}) });
+  if (col > 1)       pool.push({ type: t('cheval'), numbers: [numAt(col-1,row), winN].sort(function(a,b){return a-b;}) });
+  if (col < numCols) pool.push({ type: t('cheval'), numbers: [winN, numAt(col+1,row)].sort(function(a,b){return a-b;}) });
 
-    case 'transversale':
-      base = (col - 1) * 3 + 1;
-      return [base, base + 1, base + 2];
+  // Transversale (1 position)
+  var base = (col-1)*3+1;
+  pool.push({ type: t('transversale'), numbers: [base, base+1, base+2] });
 
-    case 'carre':
-      opts = [];
-      for (dc = 0; dc <= 1; dc++) {
-        for (dr = 0; dr <= 1; dr++) {
-          c1 = col - dc; r1 = row - dr; c2 = c1 + 1; r2 = r1 + 1;
-          if (c1 >= 1 && c2 <= numCols && r1 >= 1 && r2 <= 3) {
-            opts.push([numAt(c1,r1), numAt(c1,r2), numAt(c2,r1), numAt(c2,r2)].sort(function(a,b){return a-b;}));
-          }
-        }
+  // Carrés (jusqu'à 4 positions différentes)
+  var dc, dr, c1, r1, c2, r2;
+  for (dc = 0; dc <= 1; dc++) {
+    for (dr = 0; dr <= 1; dr++) {
+      c1 = col-dc; r1 = row-dr; c2 = c1+1; r2 = r1+1;
+      if (c1>=1 && c2<=numCols && r1>=1 && r2<=3) {
+        pool.push({ type: t('carre'), numbers: [numAt(c1,r1), numAt(c1,r2), numAt(c2,r1), numAt(c2,r2)].sort(function(a,b){return a-b;}) });
       }
-      return opts[randInt(0, opts.length - 1)];
-
-    case 'sixain':
-      opts = [];
-      if (col > 1) {
-        base = (col - 2) * 3 + 1;
-        if (base + 5 <= numCols * 3) opts.push([base, base+1, base+2, base+3, base+4, base+5]);
-      }
-      if (col < numCols) {
-        base = (col - 1) * 3 + 1;
-        if (base + 5 <= numCols * 3) opts.push([base, base+1, base+2, base+3, base+4, base+5]);
-      }
-      if (!opts.length) return pickNumbersCovering('transversale', winN, numCols);
-      return opts[randInt(0, opts.length - 1)];
-
-    default: return [winN];
+    }
   }
+
+  // Sixains (jusqu'à 2 positions différentes)
+  if (col > 1) {
+    base = (col-2)*3+1;
+    if (base+5 <= numCols*3) pool.push({ type: t('sixain'), numbers: [base,base+1,base+2,base+3,base+4,base+5] });
+  }
+  if (col < numCols) {
+    base = (col-1)*3+1;
+    if (base+5 <= numCols*3) pool.push({ type: t('sixain'), numbers: [base,base+1,base+2,base+3,base+4,base+5] });
+  }
+
+  return pool;
+}
+
+// ── Sélection pondérée sans remise dans le pool ───────
+// Permet le même type à plusieurs positions (ex : 2 chevaux sur [2,5] et [5,8])
+function weightedPickPool(pool, level, n) {
+  var remaining = pool.slice();
+  var result = [];
+  var w = BET_TYPE_WEIGHTS[level] || BET_TYPE_WEIGHTS.expert;
+  while (result.length < n && remaining.length > 0) {
+    var total = remaining.reduce(function(s,item){ return s + (w[item.type.id] || 1); }, 0);
+    var rand = Math.random() * total;
+    var chosen = remaining.length - 1;
+    for (var i = 0; i < remaining.length; i++) {
+      rand -= (w[remaining[i].type.id] || 1);
+      if (rand <= 0) { chosen = i; break; }
+    }
+    result.push(remaining[chosen]);
+    remaining.splice(chosen, 1);
+  }
+  return result;
 }
 
 // ── Génération d'une question multi-mise ──────────────
@@ -317,40 +331,62 @@ function pickNumbersCovering(typeId, winN, numCols) {
 function generateQuestion(level) {
   var numBets;
   if (level === 'facile')      numBets = 2;
-  else if (level === 'medium') numBets = 3;
-  else                          numBets = randInt(4, 5);
+  else if (level === 'medium') numBets = randInt(3, 4);
+  else                          numBets = randInt(4, 6);
 
-  var winN = randInt(1, 12);
-  var bets = [];
-  var used = [];
+  var winN  = randInt(1, 12);
+  var pool  = buildBetPool(winN, 4);
+  var picks = weightedPickPool(pool, level, Math.min(numBets, pool.length));
 
-  for (var i = 0; i < numBets; i++) {
-    var type, tries = 0;
-    do { type = pickBetType(level); tries++; }
-    while (used.indexOf(type.id) >= 0 && tries < 40);
-    if (used.indexOf(type.id) >= 0) break;
-    used.push(type.id);
-
-    var maxChips = type.covered * STACK_SIZE;
+  var bets = picks.map(function(pick) {
+    var maxChips = pick.type.covered * STACK_SIZE;
     var chips;
     if (level === 'facile')      chips = randInt(1, Math.min(3, maxChips));
     else if (level === 'medium') chips = randInt(1, Math.min(10, maxChips));
     else                          chips = randInt(1, maxChips);
+    return { type: pick.type, chips: chips, numbers: pick.numbers, payout: chips * pick.type.ratio };
+  });
 
-    bets.push({ type: type, chips: chips, numbers: pickNumbersCovering(type.id, winN, 4), payout: chips * type.ratio });
-  }
-
-  return { bets: bets, totalPayout: bets.reduce(function(s, b) { return s + b.payout; }, 0), winningNumber: winN };
+  return { bets: bets, totalPayout: bets.reduce(function(s,b){ return s + b.payout; }, 0), winningNumber: winN };
 }
 
-// ── Rendu de plusieurs chips sur le tapis ─────────────
-function renderChips(container, bets, numCols) {
-  var html = '';
-  bets.forEach(function(bet) {
-    var pos = getChipPosition(bet.numbers, numCols);
-    html += '<div class="rt-chip rt-chip-' + bet.type.id + '" style="left:' + pos.x + '%;top:' + pos.y + '%">' + bet.chips + '</div>';
+// ── Position chip via getBoundingClientRect ───────────
+function chipPosFromDOM(numbers, tapEl, overlayRect) {
+  var cells = [];
+  numbers.forEach(function(n) {
+    var el = tapEl.querySelector('[data-num="' + n + '"]');
+    if (el) cells.push(el.getBoundingClientRect());
   });
-  container.innerHTML = html;
+  if (!cells.length) return { x: 50, y: 50 };
+
+  var L = Math.min.apply(null, cells.map(function(c){ return c.left;   }));
+  var R = Math.max.apply(null, cells.map(function(c){ return c.right;  }));
+  var T = Math.min.apply(null, cells.map(function(c){ return c.top;    }));
+  var B = Math.max.apply(null, cells.map(function(c){ return c.bottom; }));
+
+  // Transversale (3 nums) et sixain (6 nums) → bord supérieur du groupe
+  var py = (numbers.length === 3 || numbers.length === 6) ? T : (T + B) / 2;
+
+  return {
+    x: ((L + R) / 2 - overlayRect.left) / overlayRect.width  * 100,
+    y: (py            - overlayRect.top)  / overlayRect.height * 100
+  };
+}
+
+// ── Rendu des chips via le DOM ────────────────────────
+// tapEl = élément DOM du tapis (contient les [data-num="N"])
+function renderChips(overlayEl, bets, tapEl) {
+  overlayEl.innerHTML = '';
+  var overlayRect = overlayEl.getBoundingClientRect();
+  bets.forEach(function(bet) {
+    var pos  = chipPosFromDOM(bet.numbers, tapEl, overlayRect);
+    var chip = document.createElement('div');
+    chip.className   = 'rt-chip rt-chip-' + bet.type.id;
+    chip.style.left  = pos.x + '%';
+    chip.style.top   = pos.y + '%';
+    chip.textContent = bet.chips;
+    overlayEl.appendChild(chip);
+  });
 }
 
 // ── Utilitaires ───────────────────────────────────────
