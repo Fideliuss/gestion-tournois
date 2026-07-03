@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Roulette Tables — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../../shared/barriere.css" />
+  <link rel="stylesheet" href="../training.css" />
+  <link rel="stylesheet" href="roulette.css" />
+  <style>
+    .app {
+      padding: 64px 20px 80px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .hdr { margin-bottom: 40px; text-align: center; }
+    .tb-question {
+      text-align: center; padding: 36px 0 8px;
+      font-family: var(--f-num); font-size: 56px; font-weight: 700;
+      color: var(--cream); text-shadow: 0 4px 16px rgba(0,0,0,.6);
+    }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="roulette_hub.html" class="back">← Roulette</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Roulette <em>Tables</em></div>
+  </div>
+
+  <!-- ══ Sélection niveau ══ -->
+  <div id="tb-level-screen" style="width:100%;max-width:480px">
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
+      Choisissez votre niveau
+    </div>
+    <div class="level-grid" style="max-width:440px">
+      <div class="level-card" onclick="startTablesLevel('facile')">
+        <div class="level-name facile">Facile</div>
+        <div class="level-timer" id="tb-timer-facile">8</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startTablesLevel('medium')">
+        <div class="level-name medium">Médium</div>
+        <div class="level-timer" id="tb-timer-medium">5</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startTablesLevel('expert')">
+        <div class="level-name expert">Expert</div>
+        <div class="level-timer" id="tb-timer-expert">3</div>
+        <div class="level-unit">secondes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Écran entraînement ══ -->
+  <div id="tb-training-screen" style="display:none;width:100%;max-width:480px">
+
+    <div class="training-header">
+      <span class="training-progress" id="tb-progress">Question 1 / 15</span>
+      <span class="training-score"    id="tb-score">Score : 0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="tb-progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="timer-wrap">
+      <span class="timer-label">Temps</span>
+      <span class="timer-display" id="tb-timer-display">8</span>
+      <span class="timer-label">s</span>
+    </div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="tb-timer-bar" style="width:100%"></div>
+    </div>
+
+    <div class="tb-question" id="tb-question">35 × 7</div>
+
+    <div class="answer-zone" style="margin-top:8px">
+      <div class="answer-row">
+        <input type="number" id="tb-answer-input" class="answer-input"
+               placeholder="0" min="0" step="1"
+               onkeydown="if(event.key==='Enter')submitTables()" />
+        <button class="btn btn-gold" id="tb-submit-btn" onclick="submitTables()"
+                style="padding:10px 20px;font-size:13px">→</button>
+      </div>
+    </div>
+
+    <div class="feedback-bar empty" id="tb-feedback"></div>
+
+  </div>
+
+  <!-- ══ Résumé ══ -->
+  <div id="tb-summary-screen" style="display:none">
+    <div class="session-summary">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
+           id="tb-summary-level"></div>
+      <div class="summary-score-big"   id="tb-summary-score">12/15</div>
+      <div class="summary-score-label" id="tb-summary-pct">80%</div>
+      <div class="summary-verdict"     id="tb-summary-verdict">Bien</div>
+      <div class="summary-actions">
+        <button class="btn btn-gold"  onclick="restartTables()"
+                style="padding:12px 28px;font-size:13px">↺ Rejouer</button>
+        <a href="roulette_hub.html" class="btn btn-ghost"
+           style="padding:12px 28px;font-size:13px;text-decoration:none">← Roulette</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../shared/barriere.js"></script>
+<script src="../../shared/supabase.js"></script>
+<script src="../../shared/auth.js"></script>
+<script src="roulette_tables.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../../login.html', panel: 'training' }).then(function(user) {
+  if (!user) return;
+  initTables();
+});
+</script>
+</body>
+</html>
