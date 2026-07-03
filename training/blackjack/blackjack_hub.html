@@ -133,7 +133,37 @@
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;align-items:center">
+    <div class="fl" style="margin:16px 0 4px">Nombre de cartes par niveau (BJ Score)</div>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px">
+      Seuil d'arrêt : 17 = règle banque (tire &lt;17), 20 = règle client (tire &lt;20). Max 0 = illimité (borné par le bust).
+    </p>
+    <table class="range-table">
+      <thead>
+        <tr><th>Niveau</th><th>Min</th><th>Max (0=illimité)</th><th>Seuil arrêt</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Facile</td>
+          <td><input type="number" id="cards-facile-min"  value="2" min="2" max="10" step="1" /></td>
+          <td><input type="number" id="cards-facile-max"  value="3" min="0" max="10" step="1" /></td>
+          <td><input type="number" id="cards-facile-stop" value="17" min="12" max="21" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Médium</td>
+          <td><input type="number" id="cards-medium-min"  value="3" min="2" max="10" step="1" /></td>
+          <td><input type="number" id="cards-medium-max"  value="5" min="0" max="10" step="1" /></td>
+          <td><input type="number" id="cards-medium-stop" value="17" min="12" max="21" step="1" /></td>
+        </tr>
+        <tr>
+          <td>Expert</td>
+          <td><input type="number" id="cards-expert-min"  value="4" min="2" max="10" step="1" /></td>
+          <td><input type="number" id="cards-expert-max"  value="0" min="0" max="10" step="1" /></td>
+          <td><input type="number" id="cards-expert-stop" value="20" min="12" max="21" step="1" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
       <button class="btn btn-gold"  onclick="saveConfig()">Enregistrer →</button>
       <button class="btn btn-ghost" onclick="closeConfig()">Annuler</button>
       <span class="cfg-msg" id="cfg-msg"></span>
@@ -170,6 +200,15 @@ async function loadConfig() {
       if (cfg.levels.facile) document.getElementById('lvl-facile').value = cfg.levels.facile;
       if (cfg.levels.medium) document.getElementById('lvl-medium').value = cfg.levels.medium;
       if (cfg.levels.expert) document.getElementById('lvl-expert').value = cfg.levels.expert;
+    }
+    if (cfg.cards) {
+      ['facile','medium','expert'].forEach(function(lvl) {
+        var c = cfg.cards[lvl];
+        if (!c) return;
+        if (c.min       != null) document.getElementById('cards-' + lvl + '-min').value  = c.min;
+        if (c.max       != null) document.getElementById('cards-' + lvl + '-max').value  = c.max;
+        if (c.stopTotal != null) document.getElementById('cards-' + lvl + '-stop').value = c.stopTotal;
+      });
     }
   } catch(e) {}
 }
@@ -211,8 +250,20 @@ async function saveConfig() {
   const lvlExpert = Math.max(3, parseInt(document.getElementById('lvl-expert').value) || 5);
   const levels = { facile: lvlFacile, medium: lvlMedium, expert: lvlExpert };
 
+  const cards = {};
+  for (const lvl of ['facile','medium','expert']) {
+    const min  = Math.max(2, parseInt(document.getElementById('cards-' + lvl + '-min').value)  || 2);
+    const max  = Math.max(0, parseInt(document.getElementById('cards-' + lvl + '-max').value)  || 0);
+    const stop = Math.min(21, Math.max(12, parseInt(document.getElementById('cards-' + lvl + '-stop').value) || 17));
+    if (max > 0 && max < min) {
+      msg.textContent = 'Cartes ' + lvl + ' : max doit être ≥ min (ou 0 pour illimité).';
+      msg.className = 'cfg-msg err'; return;
+    }
+    cards[lvl] = { min, max, stopTotal: stop };
+  }
+
   try {
-    await SB.updateTrainingConfig('blackjack', { ranges, levels });
+    await SB.updateTrainingConfig('blackjack', { ranges, levels, cards });
     msg.textContent = 'Enregistré ✓'; msg.className = 'cfg-msg ok';
     setTimeout(function() { msg.textContent = ''; msg.className = 'cfg-msg'; }, 2000);
   } catch(e) {

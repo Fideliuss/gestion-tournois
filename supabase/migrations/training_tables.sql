@@ -18,7 +18,12 @@ INSERT INTO training_config (key, value) VALUES
       { "min": 10,  "max": 100,  "step": 10,  "weight": 80 },
       { "min": 200, "max": 1000, "step": 100, "weight": 20 }
     ],
-    "levels": { "facile": 15, "medium": 10, "expert": 5 }
+    "levels": { "facile": 15, "medium": 10, "expert": 5 },
+    "cards": {
+      "facile": { "min": 2, "max": 3, "stopTotal": 17 },
+      "medium": { "min": 3, "max": 5, "stopTotal": 17 },
+      "expert": { "min": 4, "max": 0, "stopTotal": 20 }
+    }
   }');
 
 ALTER TABLE training_config ENABLE ROW LEVEL SECURITY;
