@@ -71,7 +71,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 ### Roulette Anglaise
 - **Calcul Paiement** — un numéro gagnant tiré, plusieurs mises simultanées à calculer (plein, cheval, transversale, carré, sixain), y compris les mises couvrant le 0. Positionnement des chips sur le tapis calculé dynamiquement depuis le DOM réel (robuste à toute mise en page). Chips en couleur neutre pendant la question, révélation des couleurs + détail groupé par type de mise en cas d'erreur.
 - **Conversion Pièces** — conversion valeur de pièces, valeur fixée par session
-- **Pointage Numéro** — identification d'un numéro sur le tapis, orientation aléatoire (flip gauche-droite, comme une vraie table à double croupier)
+- **Pointage Numéro** — identification d'un numéro sur le tapis, orientation aléatoire (symétrie 180°, comme une vraie table à double croupier)
 - **Couleur Numéro** — identification rouge / noir / vert
 - **Tables de multiplication** — flashcard de calcul mental pur sur les 5 ratios de paiement (×35, ×17, ×11, ×8, ×5), sans tapis
 - **Ordre Paiement** — *bientôt disponible*
