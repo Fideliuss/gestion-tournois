@@ -80,10 +80,10 @@ function renderTapis(container, opts) {
   for (var row = 1; row <= 3; row++) {
     for (var col = 1; col <= numCols; col++) {
       var n = (col - 1) * 3 + (row === 1 ? 3 : row === 2 ? 2 : 1);
-      // Flip gauche-droite (comme une vraie table à double croupier) : seule la colonne
-      // s'inverse + le 0 change de côté. Les rangées (haut/milieu/bas) restent identiques.
+      // Symétrie centrale à 180° (confirmé par photos de la vraie table) : colonnes ET
+      // rangées inversées — la rangée proche du bord/labels devient la rangée proche du 0.
       var gridCol = mirror ? (numCols - col + 1) : (col + 1);
-      var gridRow = row;
+      var gridRow = mirror ? (4 - row) : row;
       var cellStyle = 'grid-column:' + gridCol + ';grid-row:' + gridRow;
       if (n > maxNum) {
         html += '<div class="rt-cell rt-empty" style="' + cellStyle + '"></div>';
