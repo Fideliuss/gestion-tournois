@@ -21,7 +21,7 @@ const TOURNAMENT_DEFAULTS = [
    Source de vérité : Supabase (SB.getTournaments)
    Fallback : TOURNAMENT_DEFAULTS si Supabase inaccessible
    La clé "points" est préservée lors des mises à jour
-   partielles (prize-pool ne la connaît pas).
+   partielles (prize_pool ne la connaît pas).
 ══════════════════════════════════════════════════════ */
 const TournamentsStore = {
 
@@ -34,7 +34,7 @@ const TournamentsStore = {
   },
 
   /* Mise à jour partielle : lit d'abord le tournoi complet depuis Supabase
-     pour préserver les champs non fournis (ex: points depuis le prize-pool) */
+     pour préserver les champs non fournis (ex: points depuis le prize_pool) */
   async update(id, changes) {
     const list    = await this.read();
     const current = list.find(t => t.id === id) || {};

@@ -1,0 +1,204 @@
+/* ══════════════════════════════════════════════════════
+   ROULETTE — styles partagés (tapis + modules)
+   ══════════════════════════════════════════════════════ */
+
+/* ── Grille tapis ── */
+.rt-grid {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%; max-width: 760px; margin: 0 auto;
+  border: 2px solid rgba(196,160,74,.5);
+  border-radius: 4px 4px 0 0;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
+  /* grid-template-columns set inline (depends on maxNum) */
+}
+
+.rt-cell {
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px 2px; min-height: 52px;
+  border: 1px solid rgba(255,255,255,.12);
+  position: relative; user-select: none;
+  transition: filter .1s;
+}
+
+.rt-zero {
+  grid-row: 1 / span 3;
+  background: #0a5c1e;
+  font-weight: 700;
+}
+
+/* ── Séparateur de douzaine ── */
+.rt-dozen-r { border-right: 3px solid rgba(196,160,74,.65); }
+.rt-dozen-l { border-left:  3px solid rgba(196,160,74,.65); }
+
+.rt-red   { background: #8b1a1a; }
+.rt-black { background: #111114; }
+.rt-green { background: #0a5c1e; }
+.rt-empty { background: transparent; border: none; }
+
+.rt-num {
+  font-family: var(--f-num); font-size: 15px; font-weight: 700;
+  color: #fff; line-height: 1; pointer-events: none;
+}
+
+.rt-clickable {
+  cursor: pointer;
+}
+.rt-clickable:hover { filter: brightness(1.4); }
+.rt-clickable:active { filter: brightness(1.8); }
+
+.rt-highlight {
+  filter: brightness(1.5);
+  box-shadow: inset 0 0 0 2px rgba(196,160,74,.9);
+}
+
+/* ── Chip sur le tapis ── */
+.rt-chip-zone {
+  width: 100%; max-width: 760px;
+  position: relative; height: 0;
+  /* hauteur calculée = même que la grille — positionné via margin-top négatif */
+}
+
+.rt-chip {
+  position: absolute;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f5e06b, #c4a04a 60%, #8b6914);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.6), inset 0 1px 2px rgba(255,255,255,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-num); font-size: 11px; font-weight: 700; color: #1a0f00;
+  transform: translate(-50%, -50%);
+  z-index: 10; pointer-events: none;
+}
+
+/* ── Hub roulette ── */
+.roulette-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  width: 100%; max-width: 760px;
+}
+
+/* ── Module couleur ── */
+.couleur-number {
+  font-family: var(--f-num); font-size: 96px; font-weight: 700;
+  line-height: 1; text-align: center; min-width: 160px;
+  text-shadow: 0 4px 16px rgba(0,0,0,.6);
+  color: var(--cream);
+}
+
+.couleur-btns {
+  display: flex; gap: 14px; justify-content: center; margin-top: 32px; flex-wrap: wrap;
+}
+.couleur-btn {
+  padding: 14px 32px; border-radius: 4px; font-size: 13px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; font-family: var(--f-ui);
+  cursor: pointer; transition: filter .12s, transform .1s;
+  border: 2px solid transparent;
+}
+.couleur-btn:active { transform: scale(.97); }
+.couleur-btn.rouge  { background: #8b1a1a; color: #fff; border-color: #c0392b; }
+.couleur-btn.noir   { background: #222226; color: #fff; border-color: #555; }
+.couleur-btn.zero   { background: #0a5c1e; color: #fff; border-color: #1a9a40; }
+.couleur-btn:hover  { filter: brightness(1.3); }
+
+/* ── Niveau selector (réutilisé depuis training.css) ── */
+.level-grid-3 {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; width: 100%; max-width: 440px; margin-top: 8px;
+}
+
+/* ── Pointage — balle cylindre ── */
+.pt-ball {
+  width: 90px; height: 90px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--f-num); font-size: 36px; font-weight: 700;
+  color: #fff; margin: 0 auto 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5), inset 0 2px 4px rgba(255,255,255,.15);
+}
+.pt-ball.red   { background: radial-gradient(circle at 35% 35%, #c0392b, #7b1111); }
+.pt-ball.black { background: radial-gradient(circle at 35% 35%, #444, #111); }
+.pt-ball.green { background: radial-gradient(circle at 35% 35%, #1a9a3a, #0a5c1e); }
+.pt-ball.neutral { background: radial-gradient(circle at 35% 35%, #fffdf2, #d8d0b8); color: #2a2418; }
+
+.pt-tapis-wrap { width: 100%; max-width: 820px; margin: 0 auto; overflow-x: auto; }
+
+/* ── Conversion — affichage pièces ── */
+.conv-display { text-align: center; margin: 28px 0 8px; }
+.conv-chips {
+  font-family: var(--f-num); font-size: 72px; font-weight: 700;
+  color: var(--cream); line-height: 1;
+  text-shadow: 0 2px 12px rgba(0,0,0,.5);
+}
+.conv-label {
+  font-size: 11px; color: var(--text-muted); letter-spacing: .14em;
+  text-transform: uppercase; font-family: var(--f-ui); margin-top: 6px;
+}
+.conv-value-badge {
+  display: inline-block; margin-top: 14px; padding: 7px 18px;
+  background: rgba(196,160,74,.12); border: 1px solid rgba(196,160,74,.3);
+  border-radius: 20px; color: var(--gold); font-family: var(--f-num);
+  font-size: 17px; font-weight: 700;
+}
+
+/* ── Sélection valeur de pièce ── */
+.chipval-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 14px; width: 100%; margin-top: 8px;
+}
+.chipval-card {
+  background: var(--bg-card); border: 1px solid var(--gold-bd);
+  border-radius: 50%; aspect-ratio: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: border-color .15s, background .15s, transform .1s;
+}
+.chipval-card:hover {
+  border-color: rgba(196,160,74,.6); background: rgba(196,160,74,.06);
+  transform: scale(1.06);
+}
+.chipval-amount { font-family: var(--f-num); font-size: 22px; font-weight: 700; color: var(--cream); }
+.chipval-unit   { font-size: 11px; color: var(--text-muted); }
+
+/* ── Couleurs chip par type de mise ── */
+.rt-chip-plein        { /* gold = défaut */ }
+.rt-chip-cheval       { background: radial-gradient(circle at 35% 35%, #e8e8e8, #b0b0b0, #707070); color: #111; }
+.rt-chip-transversale { background: radial-gradient(circle at 35% 35%, #e8b870, #c47830, #8a4a10); color: #1a0a00; }
+.rt-chip-carre        { background: radial-gradient(circle at 35% 35%, #70d8d8, #30a8a8, #0a6060); color: #001a1a; }
+.rt-chip-sixain       { background: radial-gradient(circle at 35% 35%, #70d898, #30a860, #0a6030); color: #001a0a; }
+
+/* ── Module Calcul Paiement ── */
+.rp-tapis-wrap { width: 100%; max-width: 760px; margin: 0 auto; position: relative; }
+.rp-chip-overlay { position: absolute; inset: 0; pointer-events: none; }
+
+.rp-bet-badge {
+  display: inline-block; padding: 5px 14px; border-radius: 2px;
+  font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  font-family: var(--f-ui); background: transparent;
+  border: 1px solid rgba(196,160,74,.3);
+}
+#rp-bet-labels { margin-bottom: 8px; }
+
+/* Couleurs badges = couleurs chips */
+.rp-badge-plein        { color: #c4a04a; border-color: rgba(196,160,74,.4); }
+.rp-badge-cheval       { color: #c0c0c0; border-color: rgba(192,192,192,.4); }
+.rp-badge-transversale { color: #d08040; border-color: rgba(196,120,48,.4); }
+.rp-badge-carre        { color: #40b0b0; border-color: rgba(48,168,168,.4); }
+.rp-badge-sixain       { color: #40b070; border-color: rgba(48,168,100,.4); }
+
+/* Numéro gagnant */
+.rp-winning-display {
+  text-align: center; margin-bottom: 14px;
+  font-family: var(--f-ui); font-size: 10px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.rp-winning-display strong {
+  font-family: var(--f-num); font-size: 28px; font-weight: 700;
+  color: var(--gold); letter-spacing: 0; margin-left: 6px;
+}
+
+/* ── Light mode ── */
+body.light .rt-cell { border-color: rgba(0,0,0,.15); }
+body.light .rt-red   { background: #a02020; }
+body.light .rt-black { background: #1a1a22; }
+body.light .rt-zero  { background: #0d7a2a; }

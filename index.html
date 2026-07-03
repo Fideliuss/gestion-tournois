@@ -3,18 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Outils Tournois — Casino Barrière Bordeaux</title>
+  <title>Service Jeux Traditionnels — Casino Barrière Bordeaux</title>
   <link rel="stylesheet" href="shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
 
-    /* ── Couleurs par carte ── */
-    .tool-card               { --accent: 196,160,74;  } /* or      */
-    .tool-card.c-blue        { --accent: 82,148,210;  } /* bleu    */
-    .tool-card.c-teal        { --accent: 72,175,150;  } /* teal    */
+    .tool-card              { --accent: 196,160,74;  }
+    .tool-card.c-blue       { --accent: 82,148,210;  }
+    .tool-card.c-purple     { --accent: 128,108,196; }
 
-    /* ── Footer ── */
     .footer {
       margin-top: 52px; text-align: center;
       font-size: 10px; letter-spacing: .14em; color: var(--text-muted);
@@ -54,32 +52,32 @@
 <div class="app">
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
-    <div class="hdr-title">Outils <em>Tournois</em></div>
-    <div class="hdr-sub">Gestion interne des tournois de poker</div>
+    <div class="hdr-title">Service <em>Jeux Traditionnels</em></div>
   </div>
 
   <div class="grid">
 
-    <a href="prize-pool/prize-pool.html" class="tool-card">
+    <a href="outils_tournois.html" class="tool-card" data-panel="tournois">
       <div class="tool-badge">🎯</div>
-      <div class="tool-name">Prize Pool <em>Builder</em></div>
+      <div class="tool-name">Outils <em>Tournois</em></div>
     </a>
 
-    <a href="leaderboard/leaderboard.html" class="tool-card c-blue" data-role="admin">
-      <div class="tool-badge">🏆</div>
-      <div class="tool-name">Challenge <em>Saisonnier</em></div>
+    <a href="training/training.html" class="tool-card c-blue" data-panel="training">
+      <div class="tool-badge">🎓</div>
+      <div class="tool-name">Training <em>Croupier</em></div>
     </a>
 
-    <a href="admin.html" class="tool-card c-teal" data-role="admin">
-      <div class="tool-badge">📁</div>
-      <div class="tool-name">Gestion <em>Administrative</em></div>
+    <a href="admin/comptes.html" class="tool-card c-purple" data-role="admin">
+      <div class="tool-badge">👤</div>
+      <div class="tool-name">Gestion <em>Comptes</em></div>
     </a>
 
   </div>
 
   <div class="footer">
-    Casino Barrière Bordeaux · Outils internes tournois
+    Casino Barrière Bordeaux · Service Jeux Traditionnels
     <br><span class="footer-version" id="app-version"></span>
+    <br><span style="opacity:.35;font-size:9px;letter-spacing:.08em">Conçu &amp; développé par B. Cuvelier · 2025–2026</span>
     <br>
     <details class="changelog">
       <summary>Changelog ▾</summary>
@@ -94,12 +92,29 @@
 <script src="shared/supabase.js"></script>
 <script src="shared/auth.js"></script>
 <script>
-AUTH.guard({ loginUrl: 'login.html' }).then(function(user) {
+AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
   if (!user) return;
-  if ((user.user_metadata?.role || 'floor') !== 'admin') {
+  const role = user.user_metadata?.role || 'floor';
+  const isAdmin = role === 'admin';
+
+  if (!isAdmin) {
     document.querySelectorAll('[data-role="admin"]').forEach(function(el) {
       el.style.display = 'none';
     });
+  }
+
+  const panelCards = document.querySelectorAll('[data-panel]');
+  if (panelCards.length && !isAdmin) {
+    try {
+      const roles = await SB.getRoles();
+      const entry  = roles.find(function(r) { return r.slug === role; });
+      const allowed = (entry && entry.panels) || [];
+      panelCards.forEach(function(el) {
+        if (!allowed.includes(el.getAttribute('data-panel'))) el.style.display = 'none';
+      });
+    } catch(e) {
+      panelCards.forEach(function(el) { el.style.display = 'none'; });
+    }
   }
 });
 (function () {

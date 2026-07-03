@@ -8,8 +8,6 @@
   <style>
     .app { padding: 64px 20px 80px; }
 
-    /* ── En-tête ── */
-    .hdr-sub { font-size: 11px; color: var(--text-muted); letter-spacing: .1em; margin-top: 6px; }
 
     /* ══════════════════════════════════════════════════════
        SEMAINIER ADMIN — grille par jour
@@ -189,12 +187,11 @@
 </button>
 
 <div class="app">
-  <a href="../configurations.html" class="back">← Configurations</a>
+  <a href="admin_tournois.html" class="back">← Administration</a>
 
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
     <div class="hdr-title">Config <em>Tournois</em></div>
-    <div class="hdr-sub">Barèmes de points · Buy-ins · Jours</div>
   </div>
 
   <div class="alert-ok" id="alert-ok"></div>
@@ -268,7 +265,7 @@
 <script src="../shared/tournaments.js"></script>
 <script src="../shared/auth.js"></script>
 <script>
-AUTH.guard({ loginUrl: '../login.html', panel: 'configurations' }).then(function(user) {
+AUTH.guard({ loginUrl: '../login.html', role: 'admin' }).then(function(user) {
   if (!user) return;
   loadAndRender();
 });
