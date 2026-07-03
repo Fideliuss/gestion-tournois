@@ -11,8 +11,14 @@ const QUESTIONS_PER_SESSION = 10;
 
 const LEVEL_LABELS = { facile: 'Facile', medium: 'Médium', expert: 'Expert' };
 const DEFAULT_TIMERS = { facile: 15, medium: 10, expert: 5 };
+// min/max cartes + seuil d'arrêt (règle banque <17 ou règle client <20) par niveau
+const DEFAULT_CARDS = {
+  facile: { min: 2, max: 3, stopTotal: 17 },
+  medium: { min: 3, max: 5, stopTotal: 17 },
+  expert: { min: 4, max: 0, stopTotal: 20 }, // max: 0 = illimité (borné par le bust)
+};
 
-let _config      = { levels: DEFAULT_TIMERS };
+let _config      = { levels: DEFAULT_TIMERS, cards: DEFAULT_CARDS };
 let _sessionId   = null;
 let _userId      = null;
 let _level       = null;
@@ -34,8 +40,15 @@ async function initScore() {
     const cfg = await SB.getTrainingConfig('blackjack');
     if (cfg) {
       _config = cfg;
+      // Complète les niveaux/cartes manquants avec les défauts (config partielle possible)
+      _config.levels = Object.assign({}, DEFAULT_TIMERS, cfg.levels);
+      _config.cards  = {
+        facile: Object.assign({}, DEFAULT_CARDS.facile, cfg.cards && cfg.cards.facile),
+        medium: Object.assign({}, DEFAULT_CARDS.medium, cfg.cards && cfg.cards.medium),
+        expert: Object.assign({}, DEFAULT_CARDS.expert, cfg.cards && cfg.cards.expert),
+      };
       // Mettre à jour les timers affichés sur l'écran de sélection
-      const levels = cfg.levels || DEFAULT_TIMERS;
+      const levels = _config.levels;
       ['facile','medium','expert'].forEach(function(k) {
         const el = document.getElementById('timer-' + k);
         if (el && levels[k]) el.textContent = levels[k];
@@ -105,10 +118,22 @@ function getValidTotals(hand) {
   return totals;
 }
 
-function generateHand() {
+function generateHand(level) {
   const hand = [randomCard(), randomCard()];
   if (isBJ(hand)) return hand;
-  while (calcTotal(hand) < 17) hand.push(randomCard());
+
+  const cfg      = (_config.cards && _config.cards[level]) || DEFAULT_CARDS[level] || DEFAULT_CARDS.medium;
+  const minCards = cfg.min || 2;
+  const maxCards = cfg.max > 0 ? cfg.max : Infinity;
+  const stopTotal = cfg.stopTotal || 17;
+
+  while (true) {
+    const total = calcTotal(hand);
+    if (total > 21) break;                                       // bust → arrêt immédiat
+    if (hand.length >= maxCards) break;                           // plafond du niveau
+    if (hand.length >= minCards && total >= stopTotal) break;     // minimum atteint + règle respectée
+    hand.push(randomCard());
+  }
   return hand;
 }
 
@@ -171,7 +196,7 @@ function timeOut() {
 function nextQuestion() {
   if (_qIndex >= QUESTIONS_PER_SESSION) { showSummary(); return; }
   _answered    = false;
-  _hand        = generateHand();
+  _hand        = generateHand(_level);
   _validTotals = getValidTotals(_hand);
 
   renderCards(_hand);
