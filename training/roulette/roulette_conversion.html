@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Training Roulette Conversion — Casino Barrière Bordeaux</title>
-  <link rel="stylesheet" href="../shared/barriere.css" />
-  <link rel="stylesheet" href="training.css" />
+  <link rel="stylesheet" href="../../shared/barriere.css" />
+  <link rel="stylesheet" href="../training.css" />
   <link rel="stylesheet" href="roulette.css" />
   <style>
     .app {
@@ -132,12 +132,12 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared/barriere.js"></script>
-<script src="../shared/supabase.js"></script>
-<script src="../shared/auth.js"></script>
+<script src="../../shared/barriere.js"></script>
+<script src="../../shared/supabase.js"></script>
+<script src="../../shared/auth.js"></script>
 <script src="roulette_conversion.js"></script>
 <script>
-AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(function(user) {
+AUTH.guard({ loginUrl: '../../login.html', panel: 'training' }).then(function(user) {
   if (!user) return;
   initConversion();
 });

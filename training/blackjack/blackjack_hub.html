@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Training Blackjack — Casino Barrière Bordeaux</title>
-  <link rel="stylesheet" href="../shared/barriere.css" />
-  <link rel="stylesheet" href="training.css" />
+  <link rel="stylesheet" href="../../shared/barriere.css" />
+  <link rel="stylesheet" href="../training.css" />
   <style>
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
@@ -53,7 +53,7 @@
 </button>
 
 <div class="app">
-  <a href="training.html" class="back">← Training</a>
+  <a href="../training.html" class="back">← Training</a>
 
   <div class="hdr">
     <span class="hdr-logo">Casino Barrière · Bordeaux</span>
@@ -142,11 +142,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../shared/barriere.js"></script>
-<script src="../shared/supabase.js"></script>
-<script src="../shared/auth.js"></script>
+<script src="../../shared/barriere.js"></script>
+<script src="../../shared/supabase.js"></script>
+<script src="../../shared/auth.js"></script>
 <script>
-AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(async function(user) {
+AUTH.guard({ loginUrl: '../../login.html', panel: 'training' }).then(async function(user) {
   if (!user) return;
   if ((user.user_metadata?.role || '') === 'admin') {
     document.getElementById('admin-cfg-btn').style.display = 'block';
