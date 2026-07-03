@@ -17,6 +17,18 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 
 ---
 
+## Roadmap phases
+
+- **Phase 0** — Restructuration : hub multi-panneaux, rôles/permissions par panel, licence propriétaire. Livrée.
+- **Phase 1** — Training Croupier : Blackjack (BJ Paiement, BJ Score). Livrée.
+- **Phase 2** — Training Croupier : Roulette Anglaise (Couleur, Pointage, Conversion, Calcul Paiement). Livrée, taguée `v2.0.0` (2026-07-03).
+- **Phase 3** — Suivi résultats : vue historique croupier + vue manager (tous les croupiers). À venir.
+- **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet. À venir.
+
+**Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
+
+---
+
 ## Architecture
 
 ```
@@ -61,22 +73,28 @@ admin/
 training/
   training.html          Sous-hub Training Croupier (Blackjack / Roulette / Ultimate Poker à venir)
   training.css            Styles partagés training (level-card, game-card, answer-zone, feedback-bar)
-  blackjack_hub.html      Sous-hub Blackjack + modal config admin (plages de mise, timers)
-  blackjack.html / .js    BJ Paiement
-  blackjack_score.html / .js  BJ Score
-  roulette_hub.html       Sous-hub Roulette + modal config admin (timers, valeurs de pièces par module)
-  roulette.css            Styles partagés tapis + chips + badges (tous modules roulette)
-  roulette_tapis.js       Composant partagé : renderTapis(), génération de mises (buildBetPool/weightedPickPool), positionnement DOM des chips (chipPosFromDOM), renderChips()
-  roulette_paiement.html / .js    Calcul Paiement
-  roulette_conversion.html / .js  Conversion Pièces
-  roulette_pointage.html / .js    Pointage Numéro
-  roulette_couleur.html / .js     Couleur Numéro
+  blackjack/
+    blackjack_hub.html      Sous-hub Blackjack + modal config admin (plages de mise, timers, cartes/niveau)
+    blackjack.html / .js    BJ Paiement
+    blackjack_score.html / .js  BJ Score
+  roulette/
+    roulette_hub.html       Sous-hub Roulette + modal config admin (timers, valeurs de pièces par module)
+    roulette.css            Styles partagés tapis + chips + badges (tous modules roulette)
+    roulette_tapis.js       Composant partagé : renderTapis(), génération de mises (buildBetPool/weightedPickPool), positionnement DOM des chips (chipPosFromDOM), renderChips()
+    roulette_paiement.html / .js    Calcul Paiement
+    roulette_conversion.html / .js  Conversion Pièces
+    roulette_pointage.html / .js    Pointage Numéro
+    roulette_couleur.html / .js     Couleur Numéro
+    roulette_tables.html / .js      Tables de multiplication (flashcard ×35/×17/×11/×8/×5)
+  resultats/               Phase 3 — pas encore créé (voir roadmap)
 
 supabase/
   functions/manage-users/index.ts   Edge Function Deno — CRUD comptes, vérif admin via app_metadata côté serveur
   migrations/
-    training_tables.sql       training_config, training_sessions, training_results (+ RLS)
-    fix_rls_app_metadata.sql  Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
+    training_tables.sql              training_config, training_sessions, training_results (+ RLS)
+    fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
+    add_blackjack_cards_config.sql   Ajoute la clé "cards" (nb cartes/niveau BJ Score) au training_config existant
+    add_roulette_tables_config.sql   Ajoute la clé "tables" (timers flashcard multiplication) au training_config existant
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
@@ -224,9 +242,9 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 
 **Blackjack**
 - BJ Paiement : calcul du paiement selon la mise, plages de mise pondérées configurables (poids relatifs par tranche), timer par niveau
-- BJ Score : entraînement calcul de score de main
+- BJ Score : entraînement calcul de score de main. `generateHand(level)` tire un nombre de cartes dépendant du niveau (configurable) : min/max cartes + seuil d'arrêt (règle banque `<17` ou règle client `<20`) par niveau — défauts Facile 2-3 cartes (banque), Médium 3-5 cartes (banque), Expert 4-max cartes (client, jusqu'à ~30 au bust). Le bust reste toujours prioritaire sur le minimum de cartes (une main qui dépasse 21 s'arrête immédiatement) et un blackjack naturel (2 cartes) reste à 2 cartes quel que soit le niveau
 
-**Roulette Anglaise** — composant tapis partagé (`roulette_tapis.js`) : grille CSS (0 en 1.3fr + colonnes 1fr), cellules `[data-num="N"]`, symétrie miroir 180° optionnelle (colonnes + rangées inversées), séparateurs de douzaine.
+**Roulette Anglaise** — composant tapis partagé (`roulette_tapis.js`) : grille CSS (0 en 1.3fr + colonnes 1fr), cellules `[data-num="N"]`, mode miroir optionnel (flip gauche-droite pur : colonnes inversées + le 0 change de côté, mais l'ordre des rangées haut/milieu/bas reste identique — comme une vraie table à double croupier, pas une rotation à 180°), séparateurs de douzaine.
 - **Calcul Paiement** :
   - Un seul numéro gagnant tiré par question ; toutes les mises générées le couvrent
   - Génération par pool de positions valides (`buildBetPool`) : pour un numéro donné, liste TOUTES les mises possibles (plein, chevaux, transversale, carrés, sixains, + variantes incluant le 0) puis sélection pondérée sans remise par position (`weightedPickPool`) — permet plusieurs mises du même type à des positions différentes dans une même question (ex: 2 chevaux)
@@ -235,6 +253,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Conversion Pièces** : valeur de pièce fixée par session, avance manuelle, valeurs configurables (2€ / 2.5€ / 5€ / 10€ / 20€ / 50€, cochables dans la config admin)
 - **Pointage Numéro** : orientation aléatoire du tapis (miroir gauche/droite déterminé par le 0), numéros masqués pendant la question puis révélés
 - **Couleur Numéro** : identification rouge/noir/vert, timer par niveau
+- **Tables de multiplication** : flashcard pur, sans tapis — drill sur les 5 ratios de paiement (×35/×17/×11/×8/×5) avec multiplicateur 1-20, timer par niveau
 - **Ordre Paiement** : non implémenté — carte "Bientôt disponible" dans le hub
 
 Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`.
@@ -264,7 +283,8 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - La vérification de rôle admin (RLS + Edge Function) se fait via `app_metadata`, **jamais** `user_metadata` (modifiable côté client) — cf. `fix_rls_app_metadata.sql`
 - Les rôles sont dynamiques (table `app_roles`) : ne pas coder en dur une liste fixe admin/mcd/floor dans une nouvelle feature, toujours passer par `SB.getRoles()` / `AUTH.guard({panel: ...})`
 - `AUTH.guard({ panel })` : les admins passent toujours, peu importe la config de panels
-- `training/roulette_tapis.js` est partagé par TOUS les modules roulette — toute modif de `renderTapis`, `renderChips`, `buildBetPool` impacte les 4 modules actifs (Paiement, Conversion, Pointage, Couleur)
+- `training/roulette/roulette_tapis.js` est partagé par TOUS les modules roulette qui affichent un tapis (Paiement, Pointage, Couleur) — toute modif de `renderTapis`, `renderChips`, `buildBetPool` les impacte tous. Conversion et Tables de multiplication ne l'utilisent pas (pas de tapis)
+- `training/` est organisé en sous-dossiers par jeu (`blackjack/`, `roulette/`) depuis juillet 2026 — seuls `training.html` et `training.css` restent à la racine (partagés). Prévoir `resultats/` (Phase 3) et `uth/` (Phase 4) sur le même modèle
 - Positionnement des chips roulette : approche **DOM-based** (`getBoundingClientRect`), pas de formule de grille — voir `chipPosFromDOM` dans `roulette_tapis.js`
 - Transitions de page (fade in/out) gérées dans `shared/barriere.js` — classe `is-leaving` sur `<body>`
 - Lien `.back` est `position:fixed` top-left sur toutes les pages

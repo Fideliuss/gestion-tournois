@@ -66,13 +66,14 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 
 ### Blackjack
 - **BJ Paiement** — calcul du paiement d'une main gagnante selon la mise (plages de mises configurables) et le timer par niveau
-- **BJ Score** — entraînement au calcul de score de main
+- **BJ Score** — entraînement au calcul de score de main. Le nombre de cartes de la main dépend du niveau (configurable) : Facile 2-3 cartes, Médium 3-5 cartes, Expert 4 cartes et plus (règle client, tire jusqu'à 20)
 
 ### Roulette Anglaise
 - **Calcul Paiement** — un numéro gagnant tiré, plusieurs mises simultanées à calculer (plein, cheval, transversale, carré, sixain), y compris les mises couvrant le 0. Positionnement des chips sur le tapis calculé dynamiquement depuis le DOM réel (robuste à toute mise en page). Chips en couleur neutre pendant la question, révélation des couleurs + détail groupé par type de mise en cas d'erreur.
 - **Conversion Pièces** — conversion valeur de pièces, valeur fixée par session
-- **Pointage Numéro** — identification d'un numéro sur le tapis, orientation aléatoire (miroir gauche/droite)
+- **Pointage Numéro** — identification d'un numéro sur le tapis, orientation aléatoire (flip gauche-droite, comme une vraie table à double croupier)
 - **Couleur Numéro** — identification rouge / noir / vert
+- **Tables de multiplication** — flashcard de calcul mental pur sur les 5 ratios de paiement (×35, ×17, ×11, ×8, ×5), sans tapis
 - **Ordre Paiement** — *bientôt disponible*
 
 ### Ultimate Poker — *bientôt disponible*
@@ -161,23 +162,28 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── training/
 │   ├── training.html              — Sous-hub Training Croupier
 │   ├── training.css               — Styles partagés training
-│   ├── blackjack_hub.html         — Sous-hub Blackjack + config admin
-│   ├── blackjack.html / .js       — BJ Paiement
-│   ├── blackjack_score.html / .js — BJ Score
-│   ├── roulette_hub.html          — Sous-hub Roulette + config admin
-│   ├── roulette.css               — Styles partagés roulette (tapis, chips, badges)
-│   ├── roulette_tapis.js          — Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
-│   ├── roulette_paiement.html / .js    — Calcul Paiement
-│   ├── roulette_conversion.html / .js  — Conversion Pièces
-│   ├── roulette_pointage.html / .js    — Pointage Numéro
-│   └── roulette_couleur.html / .js     — Couleur Numéro
+│   ├── blackjack/
+│   │   ├── blackjack_hub.html         — Sous-hub Blackjack + config admin
+│   │   ├── blackjack.html / .js       — BJ Paiement
+│   │   └── blackjack_score.html / .js — BJ Score
+│   └── roulette/
+│       ├── roulette_hub.html          — Sous-hub Roulette + config admin
+│       ├── roulette.css               — Styles partagés roulette (tapis, chips, badges)
+│       ├── roulette_tapis.js          — Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
+│       ├── roulette_paiement.html / .js    — Calcul Paiement
+│       ├── roulette_conversion.html / .js  — Conversion Pièces
+│       ├── roulette_pointage.html / .js    — Pointage Numéro
+│       ├── roulette_couleur.html / .js     — Couleur Numéro
+│       └── roulette_tables.html / .js      — Tables de multiplication
 │
 └── supabase/
     ├── functions/
     │   └── manage-users/index.ts  — Edge Function : CRUD comptes (admin only, vérifié côté serveur)
     └── migrations/
-        ├── training_tables.sql        — training_config, training_sessions, training_results
-        └── fix_rls_app_metadata.sql   — migration des policies vers app_metadata (rôle non modifiable client-side)
+        ├── training_tables.sql              — training_config, training_sessions, training_results
+        ├── fix_rls_app_metadata.sql         — migration des policies vers app_metadata (rôle non modifiable client-side)
+        ├── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
+        └── add_roulette_tables_config.sql   — config timers Tables de multiplication
 ```
 
 ---
