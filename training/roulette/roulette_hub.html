@@ -13,40 +13,10 @@
 
     .admin-config-btn { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 100; }
 
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 10000;
-      background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px; opacity: 0; pointer-events: none; transition: opacity .18s;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal-box {
-      width: 100%; max-width: 420px; background: var(--bg-card);
-      border: 1px solid var(--gold-bd); border-radius: 4px; padding: 36px 32px 28px;
-      position: relative; transform: translateY(10px); transition: transform .18s;
-    }
-    .modal-overlay.open .modal-box { transform: translateY(0); }
-
-    .cfg-module-title {
-      font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
-      color: var(--gold-dim); font-family: var(--f-ui); margin: 16px 0 10px;
-    }
-    .cfg-module-title:first-of-type { margin-top: 4px; }
-    .cfg-timers {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;
-    }
-    .cfg-timer-cell { text-align: center; }
-    .cfg-timer-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-family: var(--f-ui); }
-    .cfg-timer-input {
-      width: 100%; padding: 8px; text-align: center; font-family: var(--f-num); font-size: 16px;
-      background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 3px;
-      color: var(--cream); outline: none;
-    }
-    .cfg-timer-input:focus { border-color: rgba(196,160,74,.5); }
-    .cfg-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; }
-    .cfg-msg { font-size: 11px; font-family: var(--f-ui); }
-    .cfg-msg.ok  { color: #6dcc8e; }
-    .cfg-msg.err { color: #e07a68; }
+    .tool-card           { --accent: 196,160,74; }
+    .tool-card.c-blue    { --accent: 82,148,210; }
+    .tool-card.c-teal    { --accent: 72,175,150; }
+    .tool-card.c-purple  { --accent: 128,108,196; }
   </style>
 </head>
 <body>
@@ -62,37 +32,37 @@
     <div class="hdr-title">Training <em>Roulette</em></div>
   </div>
 
-  <div class="training-grid">
+  <div class="grid">
 
-    <a href="roulette_paiement.html" class="game-card">
-      <div class="game-card-badge">🎰</div>
-      <div class="game-card-name">Calcul <em>Paiement</em></div>
+    <a href="roulette_paiement.html" class="tool-card">
+      <div class="tool-badge">🎰</div>
+      <div class="tool-name">Calcul <em>Paiement</em></div>
     </a>
 
-    <a href="roulette_conversion.html" class="game-card">
-      <div class="game-card-badge">💱</div>
-      <div class="game-card-name">Conversion <em>Pièces</em></div>
+    <a href="roulette_conversion.html" class="tool-card c-blue">
+      <div class="tool-badge">💱</div>
+      <div class="tool-name">Conversion <em>Pièces</em></div>
     </a>
 
-    <a href="roulette_ordre.html" class="game-card disabled">
-      <div class="game-card-badge">📋</div>
-      <div class="game-card-name">Ordre <em>Paiement</em></div>
-      <div class="game-card-soon">Bientôt disponible</div>
+    <div class="tool-card c-purple disabled">
+      <div class="tool-badge">📋</div>
+      <div class="tool-name">Ordre <em>Paiement</em></div>
+      <div class="tool-soon">Bientôt disponible</div>
+    </div>
+
+    <a href="roulette_pointage.html" class="tool-card c-teal">
+      <div class="tool-badge">🎯</div>
+      <div class="tool-name">Pointage <em>Numéro</em></div>
     </a>
 
-    <a href="roulette_pointage.html" class="game-card">
-      <div class="game-card-badge">🎯</div>
-      <div class="game-card-name">Pointage <em>Numéro</em></div>
+    <a href="roulette_couleur.html" class="tool-card">
+      <div class="tool-badge">🔴</div>
+      <div class="tool-name">Couleur <em>Numéro</em></div>
     </a>
 
-    <a href="roulette_couleur.html" class="game-card">
-      <div class="game-card-badge">🔴</div>
-      <div class="game-card-name">Couleur <em>Numéro</em></div>
-    </a>
-
-    <a href="roulette_tables.html" class="game-card">
-      <div class="game-card-badge">✖️</div>
-      <div class="game-card-name">Tables <em>Multiplication</em></div>
+    <a href="roulette_tables.html" class="tool-card c-purple">
+      <div class="tool-badge">✖️</div>
+      <div class="tool-name">Tables <em>Multiplication</em></div>
     </a>
 
   </div>

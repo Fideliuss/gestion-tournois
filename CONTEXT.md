@@ -98,6 +98,12 @@ supabase/
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
 
+**Composants CSS partagés (ripolinage juillet 2026)** — training/ avait dérivé stylistiquement de l'app générale (réimplémentation parallèle des cartes de nav, modals dupliquées 3×, styles inline trop longs). Centralisés :
+- `.modal-overlay`/`.modal-box`/`.modal-wide` (avec coins dorés) → `shared/barriere.css`, utilisé par `admin/comptes.html` + tous les hubs training. Les modals plus larges utilisent un override scoped (`#modal-cfg .modal-box { max-width: ... }`) plutôt que de dupliquer le composant.
+- `.tool-card`/`.tool-badge`/`.tool-name` (cartes de navigation hub, avec `--accent` par carte) → seul composant de nav card dans toute l'app, y compris les hubs training (`training.html`, `blackjack_hub.html`, `roulette_hub.html`). Étendu avec `.tool-card.disabled` + `.tool-soon` pour les cartes "bientôt disponible". **Ne plus créer de variante `.game-card` ou équivalent** — toujours réutiliser `.tool-card`.
+- `.cfg-module-title`/`.cfg-timers`/`.cfg-timer-cell`/`.cfg-timer-label`/`.cfg-timer-input`/`.cfg-hint`/`.cfg-msg` (grille de config timers par niveau, modals admin des hubs training) → `training/training.css`
+- CSS spécifique à un module (ex : flip 3D des flashcards `.tb-card`/`.tb-face`) → dans le `.css` partagé du jeu concerné (`roulette.css`), pas inline dans la page, dès que ça dépasse quelques règles
+
 ---
 
 ## Stack technique

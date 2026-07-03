@@ -2,45 +2,6 @@
    TRAINING — styles partagés
    ══════════════════════════════════════════════════════ */
 
-/* ── Hub ── */
-.training-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  width: 100%; max-width: 860px;
-}
-
-.game-card {
-  background: var(--bg-card);
-  border: 1px solid var(--gold-bd);
-  border-radius: 4px;
-  padding: 32px 24px;
-  text-align: center;
-  text-decoration: none;
-  color: var(--cream);
-  transition: border-color .18s, background .18s;
-  position: relative;
-  cursor: pointer;
-}
-.game-card:hover { border-color: rgba(196,160,74,.5); background: rgba(196,160,74,.04); }
-.game-card.disabled { opacity: .35; pointer-events: none; cursor: default; }
-.game-card::before, .game-card::after {
-  content: ''; position: absolute;
-  width: 10px; height: 10px;
-  border-color: var(--gold); border-style: solid; opacity: .25;
-}
-.game-card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
-.game-card::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
-
-.game-card-badge { font-size: 32px; margin-bottom: 12px; }
-.game-card-name  { font-size: 16px; font-weight: 500; font-family: var(--f-display); }
-.game-card-name em { color: var(--gold); font-style: italic; }
-.game-card-soon  {
-  display: inline-block; margin-top: 8px;
-  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--text-muted); font-family: var(--f-ui);
-}
-
 /* ── Tapis commun ── */
 .tapis-wrap {
   width: 100%; max-width: 560px;
@@ -277,6 +238,28 @@
 .level-name.expert { color: #e07a68; }
 .level-timer { font-family: var(--f-num); font-size: 32px; font-weight: 700; color: var(--cream); line-height: 1; }
 .level-unit  { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: var(--f-ui); letter-spacing: .08em; }
+
+/* ── Config admin — grille timers par module/niveau (modals hub) ── */
+.cfg-module-title {
+  font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--gold-dim); font-family: var(--f-ui); margin: 16px 0 10px;
+}
+.cfg-module-title:first-of-type { margin-top: 4px; }
+.cfg-timers {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;
+}
+.cfg-timer-cell { text-align: center; }
+.cfg-timer-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-family: var(--f-ui); }
+.cfg-timer-input {
+  width: 100%; padding: 8px; text-align: center; font-family: var(--f-num); font-size: 16px;
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 3px;
+  color: var(--cream); outline: none;
+}
+.cfg-timer-input:focus { border-color: rgba(196,160,74,.5); }
+.cfg-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; }
+.cfg-msg { font-size: 11px; font-family: var(--f-ui); }
+.cfg-msg.ok  { color: #6dcc8e; }
+.cfg-msg.err { color: #e07a68; }
 
 /* ── Light mode ── */
 body.light .tapis { border-color: rgba(138,104,32,.35); }

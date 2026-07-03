@@ -15,19 +15,10 @@
       display: none; position: fixed; bottom: 20px; right: 20px; z-index: 100;
     }
 
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 10000;
-      background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px; opacity: 0; pointer-events: none; transition: opacity .18s;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal-box {
-      width: 100%; max-width: 480px; background: var(--bg-card);
-      border: 1px solid var(--gold-bd); border-radius: 4px; padding: 36px 32px 28px;
-      position: relative; transform: translateY(10px); transition: transform .18s;
-    }
-    .modal-overlay.open .modal-box { transform: translateY(0); }
+    #modal-cfg .modal-box { max-width: 480px; } /* un peu plus large : range-table 4 colonnes */
+
+    .tool-card         { --accent: 196,160,74; }
+    .tool-card.c-teal   { --accent: 72,175,150; }
 
     .range-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
     .range-table th {
@@ -41,10 +32,6 @@
       border-radius: 3px; color: var(--cream); text-align: center; outline: none;
     }
     .range-table td input:focus { border-color: rgba(196,160,74,.5); }
-
-    .cfg-msg { font-size: 11px; font-family: var(--f-ui); margin-top: 12px; }
-    .cfg-msg.ok  { color: #6dcc8e; }
-    .cfg-msg.err { color: #e07a68; }
   </style>
 </head>
 <body>
@@ -60,16 +47,16 @@
     <div class="hdr-title">Training <em>Blackjack</em></div>
   </div>
 
-  <div class="training-grid" style="max-width:500px">
+  <div class="grid" style="max-width:500px">
 
-    <a href="blackjack.html" class="game-card">
-      <div class="game-card-badge">💰</div>
-      <div class="game-card-name">BJ <em>Paiement</em></div>
+    <a href="blackjack.html" class="tool-card">
+      <div class="tool-badge">💰</div>
+      <div class="tool-name">BJ <em>Paiement</em></div>
     </a>
 
-    <a href="blackjack_score.html" class="game-card">
-      <div class="game-card-badge">🃏</div>
-      <div class="game-card-name">BJ <em>Score</em></div>
+    <a href="blackjack_score.html" class="tool-card c-teal">
+      <div class="tool-badge">🃏</div>
+      <div class="tool-name">BJ <em>Score</em></div>
     </a>
 
   </div>
@@ -111,25 +98,19 @@
       </tbody>
     </table>
 
-    <div class="fl" style="margin:16px 0 10px">Timers par niveau (secondes, min 3s)</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
-      <div>
-        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-align:center">Facile</div>
-        <input type="number" id="lvl-facile" value="15" min="3" max="60" step="1"
-               style="width:100%;padding:8px;text-align:center;font-family:var(--f-num);font-size:16px;
-                      background:var(--bg-card);border:1px solid var(--gold-bd);border-radius:3px;color:var(--cream)" />
+    <div class="cfg-module-title">Timers par niveau (secondes, min 3s)</div>
+    <div class="cfg-timers">
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label">Facile</div>
+        <input type="number" class="cfg-timer-input" id="lvl-facile" value="15" min="3" max="60" step="1" />
       </div>
-      <div>
-        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-align:center">Médium</div>
-        <input type="number" id="lvl-medium" value="10" min="3" max="60" step="1"
-               style="width:100%;padding:8px;text-align:center;font-family:var(--f-num);font-size:16px;
-                      background:var(--bg-card);border:1px solid var(--gold-bd);border-radius:3px;color:var(--cream)" />
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label">Médium</div>
+        <input type="number" class="cfg-timer-input" id="lvl-medium" value="10" min="3" max="60" step="1" />
       </div>
-      <div>
-        <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-align:center">Expert</div>
-        <input type="number" id="lvl-expert" value="5" min="3" max="60" step="1"
-               style="width:100%;padding:8px;text-align:center;font-family:var(--f-num);font-size:16px;
-                      background:var(--bg-card);border:1px solid var(--gold-bd);border-radius:3px;color:var(--cream)" />
+      <div class="cfg-timer-cell">
+        <div class="cfg-timer-label">Expert</div>
+        <input type="number" class="cfg-timer-input" id="lvl-expert" value="5" min="3" max="60" step="1" />
       </div>
     </div>
 
