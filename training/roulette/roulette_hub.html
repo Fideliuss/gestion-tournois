@@ -111,6 +111,7 @@
     <div class="sec" style="margin-bottom:16px">Config Roulette</div>
 
     <div class="cfg-hint" style="margin-top:4px">Calcul Paiement : pas de timer, difficulté définie par le nombre de pièces par niveau (non configurable).</div>
+    <div class="cfg-hint">Tables de multiplication : pas de niveau ni timer configurable — chronomètre libre sur les 20 cartes.</div>
 
     <div class="cfg-module-title">Couleur du numéro — Timers (s, min 2s)</div>
     <div class="cfg-timers">
@@ -155,21 +156,6 @@
       <div class="cfg-timer-cell">
         <div class="cfg-timer-label" style="color:#e07a68">Expert</div>
         <input type="number" class="cfg-timer-input" id="cv-expert" value="4" min="2" max="60" step="1" />
-      </div>
-    </div>
-    <div class="cfg-module-title">Tables de multiplication — Timers (s, min 2s)</div>
-    <div class="cfg-timers">
-      <div class="cfg-timer-cell">
-        <div class="cfg-timer-label" style="color:#6dcc8e">Facile</div>
-        <input type="number" class="cfg-timer-input" id="tb-facile" value="8" min="2" max="60" step="1" />
-      </div>
-      <div class="cfg-timer-cell">
-        <div class="cfg-timer-label" style="color:var(--gold)">Médium</div>
-        <input type="number" class="cfg-timer-input" id="tb-medium" value="5" min="2" max="60" step="1" />
-      </div>
-      <div class="cfg-timer-cell">
-        <div class="cfg-timer-label" style="color:#e07a68">Expert</div>
-        <input type="number" class="cfg-timer-input" id="tb-expert" value="3" min="2" max="60" step="1" />
       </div>
     </div>
     <div class="cfg-hint" style="margin-bottom:6px">Valeurs de pièces proposées au choix :</div>
@@ -246,12 +232,6 @@ async function loadConfig() {
         document.getElementById('cv-val-' + v).checked = cfg.conversion.chip_values.indexOf(parseFloat(v)) >= 0;
       });
     }
-    if (cfg.tables && cfg.tables.levels) {
-      const l = cfg.tables.levels;
-      if (l.facile) document.getElementById('tb-facile').value = l.facile;
-      if (l.medium) document.getElementById('tb-medium').value = l.medium;
-      if (l.expert) document.getElementById('tb-expert').value = l.expert;
-    }
   } catch(e) {}
 }
 
@@ -273,7 +253,6 @@ async function saveConfig() {
     couleur:    { levels: { facile: get('col-facile'), medium: get('col-medium'), expert: get('col-expert') } },
     pointage:   { levels: { facile: get('pt-facile'),  medium: get('pt-medium'),  expert: get('pt-expert')  } },
     conversion: { levels: { facile: get('cv-facile'),  medium: get('cv-medium'),  expert: get('cv-expert')  }, chip_values: chipValues },
-    tables:     { levels: { facile: get('tb-facile'),  medium: get('tb-medium'),  expert: get('tb-expert')  } },
   };
   try {
     await SB.updateTrainingConfig('roulette', cfg);

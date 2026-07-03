@@ -94,7 +94,6 @@ supabase/
     training_tables.sql              training_config, training_sessions, training_results (+ RLS)
     fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
     add_blackjack_cards_config.sql   Ajoute la clé "cards" (nb cartes/niveau BJ Score) au training_config existant
-    add_roulette_tables_config.sql   Ajoute la clé "tables" (timers flashcard multiplication) au training_config existant
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
@@ -253,7 +252,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Conversion Pièces** : valeur de pièce fixée par session, avance manuelle, valeurs configurables (2€ / 2.5€ / 5€ / 10€ / 20€ / 50€, cochables dans la config admin)
 - **Pointage Numéro** : orientation aléatoire du tapis (miroir gauche/droite déterminé par le 0), numéros masqués pendant la question puis révélés
 - **Couleur Numéro** : identification rouge/noir/vert, timer par niveau
-- **Tables de multiplication** : flashcard pur, sans tapis — drill sur les 5 ratios de paiement (×35/×17/×11/×8/×5) avec multiplicateur 1-20, timer par niveau
+- **Tables de multiplication** : vraies flashcards (carte 3D qui se retourne, `.tb-card.flipped`), sans tapis, sans niveau. Choix de la table (×35/×17/×11/×8/×5) puis 20 cartes = les 20 multiplications ×1 à ×20 mélangées (Fisher-Yates), chacune une seule fois. Pas de timer par question — un **chronomètre libre** tourne du début à la fin des 20 cartes (objectif : aller vite), affiché en direct et repris dans le résumé final. Taper la réponse retourne la carte pour révéler le résultat coloré (vert/rouge)
 - **Ordre Paiement** : non implémenté — carte "Bientôt disponible" dans le hub
 
 Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`.

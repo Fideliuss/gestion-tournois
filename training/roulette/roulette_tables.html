@@ -13,10 +13,71 @@
       display: flex; flex-direction: column; align-items: center;
     }
     .hdr { margin-bottom: 40px; text-align: center; }
+
+    /* ── Chronomètre ── */
+    .tb-stopwatch-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      margin-bottom: 8px;
+    }
+    .tb-stopwatch-label {
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-muted); font-family: var(--f-ui);
+    }
+    .tb-stopwatch-value {
+      font-family: var(--f-num); font-size: 34px; font-weight: 700;
+      color: var(--gold); line-height: 1;
+    }
+
+    /* ── Flashcard 3D flip ── */
+    .tb-card-wrap { perspective: 1400px; width: 100%; max-width: 380px; margin: 20px auto; }
+    .tb-card {
+      position: relative; width: 100%; height: 230px;
+      transition: transform .5s cubic-bezier(.4,.1,.2,1);
+      transform-style: preserve-3d;
+    }
+    .tb-card.flipped { transform: rotateY(180deg); }
+    .tb-face {
+      position: absolute; inset: 0; backface-visibility: hidden;
+      border-radius: 8px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      border: 1px solid var(--gold-bd); background: var(--bg-card);
+      box-shadow: 0 8px 28px rgba(0,0,0,.4);
+    }
+    .tb-face-back { transform: rotateY(180deg); }
+    .tb-card.correct .tb-face-back { border-color: rgba(109,204,142,.55); background: rgba(109,204,142,.08); }
+    .tb-card.wrong   .tb-face-back { border-color: rgba(224,122,104,.55); background: rgba(224,122,104,.08); }
+
     .tb-question {
-      text-align: center; padding: 36px 0 8px;
+      font-family: var(--f-num); font-size: 42px; font-weight: 700;
+      color: var(--cream); text-align: center;
+    }
+    .tb-face-back .tb-back-answer {
+      font-family: var(--f-num); font-size: 52px; font-weight: 700;
+      color: var(--cream); line-height: 1;
+    }
+    .tb-face-back .tb-back-detail {
+      font-size: 13px; font-family: var(--f-ui); color: var(--text-dim);
+    }
+    .tb-card.correct .tb-back-answer { color: #6dcc8e; }
+    .tb-card.wrong   .tb-back-answer { color: #e07a68; }
+
+    .tb-answer-row { display: flex; gap: 8px; align-items: center; }
+    .tb-answer-row input {
+      width: 120px; padding: 10px 12px; text-align: center;
+      font-family: var(--f-num); font-size: 22px; font-weight: 700;
+      background: rgba(10,9,7,.6); border: 1px solid var(--gold-bd);
+      border-radius: 4px; color: var(--cream); outline: none;
+    }
+    .tb-answer-row input:focus { border-color: rgba(196,160,74,.5); }
+
+    /* ── Résumé ── */
+    .tb-summary-time {
       font-family: var(--f-num); font-size: 56px; font-weight: 700;
-      color: var(--cream); text-shadow: 0 4px 16px rgba(0,0,0,.6);
+      color: var(--gold); text-align: center; line-height: 1; margin-bottom: 4px;
+    }
+    .tb-summary-time-label {
+      font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--text-muted); font-family: var(--f-ui); text-align: center; margin-bottom: 18px;
     }
   </style>
 </head>
@@ -33,74 +94,56 @@
     <div class="hdr-title">Roulette <em>Tables</em></div>
   </div>
 
-  <!-- ══ Sélection niveau ══ -->
-  <div id="tb-level-screen" style="width:100%;max-width:480px">
+  <!-- ══ Choix de la table ══ -->
+  <div id="tb-choice-screen" style="width:100%;max-width:560px">
     <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
-      Choisissez votre niveau
+      Choisissez la table à réviser
     </div>
-    <div class="level-grid" style="max-width:440px">
-      <div class="level-card" onclick="startTablesLevel('facile')">
-        <div class="level-name facile">Facile</div>
-        <div class="level-timer" id="tb-timer-facile">8</div>
-        <div class="level-unit">secondes</div>
-      </div>
-      <div class="level-card" onclick="startTablesLevel('medium')">
-        <div class="level-name medium">Médium</div>
-        <div class="level-timer" id="tb-timer-medium">5</div>
-        <div class="level-unit">secondes</div>
-      </div>
-      <div class="level-card" onclick="startTablesLevel('expert')">
-        <div class="level-name expert">Expert</div>
-        <div class="level-timer" id="tb-timer-expert">3</div>
-        <div class="level-unit">secondes</div>
-      </div>
-    </div>
+    <div class="chipval-grid" id="tb-choice-grid"></div>
   </div>
 
   <!-- ══ Écran entraînement ══ -->
   <div id="tb-training-screen" style="display:none;width:100%;max-width:480px">
 
     <div class="training-header">
-      <span class="training-progress" id="tb-progress">Question 1 / 15</span>
+      <span class="training-progress" id="tb-progress">Carte 1 / 20</span>
       <span class="training-score"    id="tb-score">Score : 0 / 0</span>
     </div>
     <div class="progress-bar-wrap">
       <div class="progress-bar-fill" id="tb-progress-fill" style="width:0%"></div>
     </div>
 
-    <div class="timer-wrap">
-      <span class="timer-label">Temps</span>
-      <span class="timer-display" id="tb-timer-display">8</span>
-      <span class="timer-label">s</span>
-    </div>
-    <div class="timer-bar-wrap">
-      <div class="timer-bar-fill" id="tb-timer-bar" style="width:100%"></div>
+    <div class="tb-stopwatch-wrap">
+      <span class="tb-stopwatch-label">Temps — table <span id="tb-table-badge">× 35</span></span>
+      <span class="tb-stopwatch-value" id="tb-stopwatch">0:00.0</span>
     </div>
 
-    <div class="tb-question" id="tb-question">35 × 7</div>
-
-    <div class="answer-zone" style="margin-top:8px">
-      <div class="answer-row">
-        <input type="number" id="tb-answer-input" class="answer-input"
-               placeholder="0" min="0" step="1"
-               onkeydown="if(event.key==='Enter')submitTables()" />
-        <button class="btn btn-gold" id="tb-submit-btn" onclick="submitTables()"
-                style="padding:10px 20px;font-size:13px">→</button>
+    <div class="tb-card-wrap">
+      <div class="tb-card" id="tb-card">
+        <div class="tb-face tb-face-front">
+          <div class="tb-question" id="tb-question">35 × 7</div>
+          <div class="tb-answer-row">
+            <input type="number" id="tb-answer-input" inputmode="numeric"
+                   onkeydown="if(event.key==='Enter')submitTables()" />
+            <button class="btn btn-gold" id="tb-submit-btn" onclick="submitTables()"
+                    style="padding:10px 16px;font-size:13px">→</button>
+          </div>
+        </div>
+        <div class="tb-face tb-face-back">
+          <div class="tb-back-answer" id="tb-back-answer">245</div>
+          <div class="tb-back-detail" id="tb-back-detail">✓ Correct</div>
+        </div>
       </div>
     </div>
-
-    <div class="feedback-bar empty" id="tb-feedback"></div>
 
   </div>
 
   <!-- ══ Résumé ══ -->
   <div id="tb-summary-screen" style="display:none">
     <div class="session-summary">
-      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
-           id="tb-summary-level"></div>
-      <div class="summary-score-big"   id="tb-summary-score">12/15</div>
-      <div class="summary-score-label" id="tb-summary-pct">80%</div>
+      <div class="tb-summary-time" id="tb-summary-time">0:00.0</div>
+      <div class="tb-summary-time-label">Temps — table <span id="tb-summary-table">× 35</span></div>
+      <div class="summary-score-big"   id="tb-summary-score">18/20</div>
       <div class="summary-verdict"     id="tb-summary-verdict">Bien</div>
       <div class="summary-actions">
         <button class="btn btn-gold"  onclick="restartTables()"

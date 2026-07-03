@@ -73,7 +73,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 - **Conversion Pièces** — conversion valeur de pièces, valeur fixée par session
 - **Pointage Numéro** — identification d'un numéro sur le tapis, orientation aléatoire (symétrie 180°, comme une vraie table à double croupier)
 - **Couleur Numéro** — identification rouge / noir / vert
-- **Tables de multiplication** — flashcard de calcul mental pur sur les 5 ratios de paiement (×35, ×17, ×11, ×8, ×5), sans tapis
+- **Tables de multiplication** — vraies flashcards qui se retournent pour révéler la réponse. Choix d'une table (×35, ×17, ×11, ×8, ×5), puis les 20 multiplications ×1 à ×20 mélangées. Pas de niveau ni de timer par carte : un chronomètre libre tourne sur l'ensemble des 20 cartes, l'objectif étant d'aller le plus vite possible
 - **Ordre Paiement** — *bientôt disponible*
 
 ### Ultimate Poker — *bientôt disponible*
@@ -182,8 +182,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     └── migrations/
         ├── training_tables.sql              — training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         — migration des policies vers app_metadata (rôle non modifiable client-side)
-        ├── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
-        └── add_roulette_tables_config.sql   — config timers Tables de multiplication
+        └── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
 ```
 
 ---
