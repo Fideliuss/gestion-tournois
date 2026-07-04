@@ -7,6 +7,11 @@
 const JOURS_LETTRE = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 const MOIS_LETTRE  = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
+/* Élision "de" → "d'" devant un mois commençant par une voyelle (Avril, Août, Octobre) */
+function deMois(month) {
+  return /^[aeiouyàâéèêëîïôöùûü]/i.test(MOIS_LETTRE[month - 1]) ? 'd\'' : 'de ';
+}
+
 const CFG_DEFAULT = {
   0: { actif: true,  heure: '17:00', cave: 78,  joueurs: 150, rachats: true,  bounty: 0, annexe: 'ANNEXE 4' },
   1: { actif: true,  heure: '21:00', cave: 60,  joueurs: 150, rachats: true,  bounty: 0, annexe: 'ANNEXE 5' },
@@ -373,14 +378,14 @@ function generateLetterHtml(tpl, rows, month, year) {
 
   <!-- Objet -->
   <div class="letter-objet">
-    <span class="letter-objet-lbl">Objet&nbsp;:</span> Tournois de Texas Holdem Poker du mois de ${esc(moisStr)}.
+    <span class="letter-objet-lbl">Objet&nbsp;:</span> Tournois de Texas Holdem Poker du mois ${deMois(month)}${esc(moisStr)}.
   </div>
 
   ${salutHtml}
 
   <!-- Corps -->
   <div class="letter-body">
-    <p>J'ai l'honneur de vous informer que le Casino Barrière Bordeaux organisera des Tournois Multi-tables de Texas Hold'em Poker au cours du mois de ${esc(moisStr)}, comme suit&nbsp;:</p>
+    <p>J'ai l'honneur de vous informer que le Casino Barrière Bordeaux organisera des Tournois Multi-tables de Texas Hold'em Poker au cours du mois ${deMois(month)}${esc(moisStr)}, comme suit&nbsp;:</p>
 
     <ul class="letter-days">${daysHtml}</ul>
 
