@@ -74,6 +74,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 - **Pointage Numéro** — identification d'un numéro sur le tapis, orientation aléatoire (symétrie 180°, comme une vraie table à double croupier)
 - **Couleur Numéro** — identification rouge / noir / vert
 - **Tables de multiplication** — vraies flashcards qui se retournent pour révéler la réponse. Choix d'une table (×35, ×17, ×11, ×8, ×5), puis les 20 multiplications ×1 à ×20 mélangées. Pas de niveau ni de timer par carte : un chronomètre libre tourne sur l'ensemble des 20 cartes, l'objectif étant d'aller le plus vite possible
+- **Paiement Mixte** — répartition d'un paiement entre pièces (valeur de jeu) et plaques (valeur ronde, pour le client qui repart). 3 types d'exercice au choix : le client demande un montant rond en plaques (trouver les pièces restantes), le client garde des pièces (décomposer le reste en plaques), ou répartition libre (proposer soi-même le mix) — toute répartition mathématiquement correcte est acceptée, pas de décomposition unique imposée
 - **Ordre Paiement** — *bientôt disponible*
 
 ### Ultimate Poker — *bientôt disponible*
@@ -174,7 +175,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │       ├── roulette_conversion.html / .js  — Conversion Pièces
 │       ├── roulette_pointage.html / .js    — Pointage Numéro
 │       ├── roulette_couleur.html / .js     — Couleur Numéro
-│       └── roulette_tables.html / .js      — Tables de multiplication
+│       ├── roulette_tables.html / .js      — Tables de multiplication
+│       └── roulette_mixte.html / .js       — Paiement Mixte
 │
 └── supabase/
     ├── functions/
@@ -182,7 +184,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     └── migrations/
         ├── training_tables.sql              — training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         — migration des policies vers app_metadata (rôle non modifiable client-side)
-        └── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
+        ├── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
+        └── add_roulette_mixte_config.sql    — config timers Paiement Mixte
 ```
 
 ---

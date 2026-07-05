@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Roulette Paiement Mixte — Casino Barrière Bordeaux</title>
+  <link rel="stylesheet" href="../../shared/barriere.css" />
+  <link rel="stylesheet" href="../training.css" />
+  <link rel="stylesheet" href="roulette.css" />
+  <style>
+    .app {
+      padding: 64px 20px 80px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .hdr { margin-bottom: 40px; text-align: center; }
+
+    .mx-type-title { font-family: var(--f-display); font-size: 16px; font-weight: 600; color: var(--cream); margin-bottom: 6px; }
+    .mx-type-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+    .mx-question-line {
+      text-align: center; margin: 24px 0 8px;
+      font-family: var(--f-ui); font-size: 15px; color: var(--cream);
+    }
+    .mx-question-line strong { font-family: var(--f-num); color: var(--gold); }
+    .mx-question-extra {
+      text-align: center; margin-bottom: 20px; max-width: 480px;
+      font-family: var(--f-ui); font-size: 13px; color: var(--text-dim); line-height: 1.5;
+    }
+
+    .mx-denom-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      width: 100%; max-width: 480px; margin: 0 auto 8px;
+    }
+    @media(max-width: 480px) { .mx-denom-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .mx-libre-row { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .mx-libre-field { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .mx-libre-field label { font-size: 11px; color: var(--text-muted); font-family: var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="roulette_hub.html" class="back">← Roulette</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <div class="hdr-title">Paiement <em>Mixte</em></div>
+  </div>
+
+  <!-- ══ Choix du type d'exercice ══ -->
+  <div id="mx-type-screen" style="width:100%;max-width:640px">
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
+      Choisissez le type d'exercice
+    </div>
+    <div class="level-grid" style="grid-template-columns:repeat(3,1fr);max-width:640px">
+      <div class="level-card" style="text-align:left;padding:20px 18px" onclick="selectMixType('rond')">
+        <div class="mx-type-title">1. Montant rond</div>
+        <div class="mx-type-desc">Le client demande un montant en plaques — trouvez les pièces restantes.</div>
+      </div>
+      <div class="level-card" style="text-align:left;padding:20px 18px" onclick="selectMixType('garde')">
+        <div class="mx-type-title">2. Garde des pièces</div>
+        <div class="mx-type-desc">Le client garde des pièces pour rejouer — décomposez le reste en plaques.</div>
+      </div>
+      <div class="level-card" style="text-align:left;padding:20px 18px" onclick="selectMixType('libre')">
+        <div class="mx-type-title">3. Mix libre</div>
+        <div class="mx-type-desc">Proposez librement une répartition plaques + pièces qui reconstitue le total.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Sélection niveau ══ -->
+  <div id="mx-level-screen" style="display:none;width:100%;max-width:480px">
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
+      Choisissez votre niveau
+    </div>
+    <div class="level-grid">
+      <div class="level-card" onclick="startMixLevel('facile')">
+        <div class="level-name facile">Facile</div>
+        <div class="level-timer" id="mx-timer-facile">30</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startMixLevel('medium')">
+        <div class="level-name medium">Médium</div>
+        <div class="level-timer" id="mx-timer-medium">20</div>
+        <div class="level-unit">secondes</div>
+      </div>
+      <div class="level-card" onclick="startMixLevel('expert')">
+        <div class="level-name expert">Expert</div>
+        <div class="level-timer" id="mx-timer-expert">12</div>
+        <div class="level-unit">secondes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Écran entraînement ══ -->
+  <div id="mx-training-screen" style="display:none;width:100%;max-width:560px">
+
+    <div class="training-header">
+      <span class="training-progress" id="mx-progress">Question 1 / 10</span>
+      <span class="training-score"    id="mx-score">Score : 0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="mx-progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="timer-wrap">
+      <span class="timer-label">Temps</span>
+      <span class="timer-display" id="mx-timer-display">30</span>
+      <span class="timer-label">s</span>
+    </div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-fill" id="mx-timer-bar" style="width:100%"></div>
+    </div>
+
+    <div class="mx-question-line">
+      Vous devez payer <strong id="mx-piece-count">0</strong> pièces à <strong id="mx-piece-value">0</strong> €
+    </div>
+    <div class="mx-question-extra" id="mx-question-extra"></div>
+
+    <!-- Type 1 : montant rond -->
+    <div id="mx-answer-rond" class="answer-zone" style="display:none">
+      <div class="answer-row">
+        <input type="number" id="mx-rond-input" class="answer-input"
+               placeholder="0" min="0" step="1"
+               onkeydown="if(event.key==='Enter')submitMixte()" />
+        <span class="answer-currency" style="font-size:16px;color:var(--text-dim)">pièces</span>
+      </div>
+    </div>
+
+    <!-- Type 2 : garde des pièces (grille dénominations) -->
+    <div id="mx-answer-garde" style="display:none">
+      <div class="mx-denom-grid" id="mx-denom-grid"></div>
+    </div>
+
+    <!-- Type 3 : mix libre -->
+    <div id="mx-answer-libre" style="display:none">
+      <div class="mx-libre-row">
+        <div class="mx-libre-field">
+          <label>Plaques (€)</label>
+          <input type="number" id="mx-libre-plaques" class="answer-input" style="width:140px"
+                 placeholder="0" min="0" step="0.5"
+                 onkeydown="if(event.key==='Enter')submitMixte()" />
+        </div>
+        <div class="mx-libre-field">
+          <label>Pièces restantes</label>
+          <input type="number" id="mx-libre-pieces" class="answer-input" style="width:140px"
+                 placeholder="0" min="0" step="1"
+                 onkeydown="if(event.key==='Enter')submitMixte()" />
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn btn-gold" id="mx-submit-btn" onclick="submitMixte()"
+              style="padding:10px 24px;font-size:13px">Valider →</button>
+    </div>
+
+    <div class="feedback-bar empty" id="mx-feedback" style="margin-top:16px"></div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn btn-gold" id="mx-next-btn" onclick="manualNextMixte()"
+              style="display:none;padding:10px 28px;font-size:13px">
+        Question suivante →
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ══ Résumé ══ -->
+  <div id="mx-summary-screen" style="display:none">
+    <div class="session-summary">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
+           id="mx-summary-level"></div>
+      <div class="summary-score-big"   id="mx-summary-score">8/10</div>
+      <div class="summary-score-label" id="mx-summary-pct">80%</div>
+      <div class="summary-verdict"     id="mx-summary-verdict">Bien</div>
+      <div class="summary-actions">
+        <button class="btn btn-gold"  onclick="restartMixte()"
+                style="padding:12px 28px;font-size:13px">↺ Rejouer</button>
+        <a href="roulette_hub.html" class="btn btn-ghost"
+           style="padding:12px 28px;font-size:13px;text-decoration:none">← Roulette</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../shared/barriere.js"></script>
+<script src="../../shared/supabase.js"></script>
+<script src="../../shared/auth.js"></script>
+<script src="roulette_mixte.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../../login.html', panel: 'training' }).then(function(user) {
+  if (!user) return;
+  initMixte();
+});
+</script>
+</body>
+</html>

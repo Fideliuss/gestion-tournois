@@ -86,6 +86,7 @@ training/
     roulette_pointage.html / .js    Pointage Numéro
     roulette_couleur.html / .js     Couleur Numéro
     roulette_tables.html / .js      Tables de multiplication (flashcard ×35/×17/×11/×8/×5)
+    roulette_mixte.html / .js       Paiement Mixte (répartition pièces / plaques, 3 types)
   resultats/               Phase 3 — pas encore créé (voir roadmap)
 
 supabase/
@@ -94,6 +95,7 @@ supabase/
     training_tables.sql              training_config, training_sessions, training_results (+ RLS)
     fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
     add_blackjack_cards_config.sql   Ajoute la clé "cards" (nb cartes/niveau BJ Score) au training_config existant
+    add_roulette_mixte_config.sql    Ajoute la clé "mixte" (timers Paiement Mixte) au training_config existant
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
@@ -259,6 +261,11 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Pointage Numéro** : orientation aléatoire du tapis (miroir gauche/droite déterminé par le 0), numéros masqués pendant la question puis révélés
 - **Couleur Numéro** : identification rouge/noir/vert, timer par niveau
 - **Tables de multiplication** : vraies flashcards (carte 3D qui se retourne, `.tb-card.flipped`), sans tapis, sans niveau. Choix de la table (×35/×17/×11/×8/×5) puis 20 cartes = les 20 multiplications ×1 à ×20 mélangées (Fisher-Yates), chacune une seule fois. Pas de timer par question — un **chronomètre libre** tourne du début à la fin des 20 cartes (objectif : aller vite), affiché en direct et repris dans le résumé final. Taper la réponse retourne la carte pour révéler le résultat coloré (vert/rouge)
+- **Paiement Mixte** : répartition d'un paiement entre pièces (valeur de jeu, 2.5/5/10/20/50€) et plaques (8 dénominations 2.5→1000€). 3 types d'exercice au choix (écran dédié avant le niveau) :
+  - *Montant rond* : le client demande P€ en plaques (multiple de la valeur pièce) → trouver les pièces restantes (réponse unique, 1 champ)
+  - *Garde des pièces* : le client garde K pièces → décomposer le reste en plaques (grille de 8 champs, un par dénomination) — **toute décomposition valide est acceptée**, pas de décomposition canonique unique imposée (validation par simple reconstitution du montant, pas d'algorithme glouton)
+  - *Mix libre* : le croupier propose librement plaques (€) + pièces restantes (2 champs) — validation par réconciliation `plaques + pièces×valeur == total`
+  - Niveau (Facile/Médium/Expert) fait varier la plage du nombre de pièces (`MIX_N_RANGES`) et le timer (unique, commun aux 3 types, configurable admin) ; le type de mise n'est jamais affiché, seuls les chiffres bruts (N pièces, valeur, montant/pièces demandés) sont donnés au croupier — il doit calculer les valeurs intermédiaires lui-même
 - **Ordre Paiement** : non implémenté — carte "Bientôt disponible" dans le hub
 
 Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`.
