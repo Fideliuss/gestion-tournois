@@ -59,15 +59,15 @@ prize_pool/
 
 admin/
   admin_tournois.html   Sous-hub Administration Tournois (Déclaration DTPJ, Extras, Config Tournois)
-  config_tournois.html  CRUD tournois — semainier par jour, barème de points, guard role:'admin'
-  comptes.html           Gestion Comptes — CRUD comptes + rôles personnalisables + permissions par panneau, guard role:'admin'
+  config_tournois.html  CRUD tournois — semainier par jour, barème de points, guard panel:'admin-tournois'
+  comptes.html           Gestion Comptes — CRUD comptes + rôles personnalisables + permissions par panneau, guard role:'admin' (intentionnellement admin-only, pas de panel)
   declaration/
-    declaration.html  Déclaration mensuelle PN
+    declaration.html  Déclaration mensuelle PN, guard panel:'admin-tournois'
     declaration.css / declaration.js
-    courriers.html    Générateur de courriers PN — accessible depuis declaration.html uniquement
+    courriers.html    Générateur de courriers PN — accessible depuis declaration.html uniquement, guard panel:'admin-tournois'
     courriers.css / courriers.js
   extras/
-    extras.html   Déclaration extras & émargement
+    extras.html   Déclaration extras & émargement, guard panel:'admin-tournois'
     extras.css / extras.js
 
 training/
@@ -288,6 +288,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - La vérification de rôle admin (RLS + Edge Function) se fait via `app_metadata`, **jamais** `user_metadata` (modifiable côté client) — cf. `fix_rls_app_metadata.sql`
 - Les rôles sont dynamiques (table `app_roles`) : ne pas coder en dur une liste fixe admin/mcd/floor dans une nouvelle feature, toujours passer par `SB.getRoles()` / `AUTH.guard({panel: ...})`
 - `AUTH.guard({ panel })` : les admins passent toujours, peu importe la config de panels
+- **Bug corrigé (2026-07) : sous-pages avec `role:'admin'` en dur sous un hub gardé par `panel`** — `admin_tournois.html` vérifie `panel:'admin-tournois'`, mais ses 4 sous-pages (`extras.html`, `declaration.html`, `courriers.html`, `config_tournois.html`) vérifiaient `role:'admin'` codé en dur (reliquat d'avant le système de panels), donc un MCD avec le panel accordé voyait la tuile mais se faisait rejeter en cliquant dessus. **Toute nouvelle page ajoutée sous un hub gardé par panel doit reprendre le même `panel:` dans son propre guard, jamais un `role:` fixe**, sauf si la page doit rester délibérément admin-only (comme `comptes.html`)
 - `training/roulette/roulette_tapis.js` est partagé par TOUS les modules roulette qui affichent un tapis (Paiement, Pointage, Couleur) — toute modif de `renderTapis`, `renderChips`, `buildBetPool` les impacte tous. Conversion et Tables de multiplication ne l'utilisent pas (pas de tapis)
 - `training/` est organisé en sous-dossiers par jeu (`blackjack/`, `roulette/`) depuis juillet 2026 — seuls `training.html` et `training.css` restent à la racine (partagés). Prévoir `resultats/` (Phase 3) et `uth/` (Phase 4) sur le même modèle
 - Positionnement des chips roulette : approche **DOM-based** (`getBoundingClientRect`), pas de formule de grille — voir `chipPosFromDOM` dans `roulette_tapis.js`
