@@ -17,6 +17,7 @@ let _cvQIndex    = 0;
 let _cvCorrect   = 0;
 let _cvAnswered  = false;
 let _cvChips     = 0;
+let _cvBet       = null; // mise réelle à l'origine du nombre de pièces (traçabilité)
 let _cvHandle    = null;
 let _cvTimeLeft  = 12;
 
@@ -83,7 +84,10 @@ function nextConversion() {
   if (_cvQIndex >= CV_QUESTIONS) { showConversionSummary(); return; }
 
   _cvAnswered = false;
-  _cvChips = Math.floor(Math.random() * 50) + 1; // 1 à 50 pièces
+  // Nombre de pièces = un vrai paiement roulette (type de mise pondéré par niveau,
+  // pièces plafonnées par niveau) plutôt qu'un tirage arbitraire — ratios réels (35/17/11/8/5)
+  _cvBet   = generateBet(_cvLevel);
+  _cvChips = _cvBet.payout;
 
   document.getElementById('cv-chips').textContent       = _cvChips;
   document.getElementById('cv-value-badge').textContent = '× ' + formatVal(_cvChipValue) + ' €';
@@ -177,7 +181,8 @@ async function submitConversion() {
     if (_cvSessionId && _cvUserId) {
       await SB.addTrainingResult(
         _cvSessionId, _cvUserId, 'roulette-conversion',
-        { chips: _cvChips, value: _cvChipValue, level: _cvLevel },
+        { chips: _cvChips, value: _cvChipValue, level: _cvLevel,
+          betType: _cvBet.type.id, betChips: _cvBet.chips, betRatio: _cvBet.type.ratio },
         correct, val, isCorrect
       );
     }
