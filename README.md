@@ -1,4 +1,4 @@
-# Service Jeux Traditionnels — Casino Barrière Bordeaux
+# Service Jeux Traditionnels — Barrière Casino Bordeaux
 
 Outils internes du casino, regroupés dans une seule application web déployée sur **GitHub Pages**, sécurisée par authentification e-mail + mot de passe (Supabase Auth), sans serveur, sans installation — s'ouvre directement dans le navigateur.
 
@@ -231,4 +231,4 @@ Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessibl
 
 ---
 
-*Casino Barrière Bordeaux — Outil interne*
+*Barrière Casino Bordeaux — Outil interne*

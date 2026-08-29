@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    declaration.js — Déclaration mensuelle PN
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
 const JOURS   = ['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'];

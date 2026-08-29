@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    courriers.js — Générateur de courriers PN
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
 /* ── Constantes ── */
@@ -368,7 +368,7 @@ function generateLetterHtml(tpl, rows, month, year) {
   <!-- En-tête -->
   <div class="letter-header">
     <div class="letter-header-left">
-      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Casino Barrière Bordeaux">
+      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Barrière Casino Bordeaux">
     </div>
     <div class="letter-header-right">
       <div class="letter-recipient">${recipientHtml}</div>
@@ -385,7 +385,7 @@ function generateLetterHtml(tpl, rows, month, year) {
 
   <!-- Corps -->
   <div class="letter-body">
-    <p>J'ai l'honneur de vous informer que le Casino Barrière Bordeaux organisera des Tournois Multi-tables de Texas Hold'em Poker au cours du mois ${deMois(month)}${esc(moisStr)}, comme suit&nbsp;:</p>
+    <p>J'ai l'honneur de vous informer que le Barrière Casino Bordeaux organisera des Tournois Multi-tables de Texas Hold'em Poker au cours du mois ${deMois(month)}${esc(moisStr)}, comme suit&nbsp;:</p>
 
     <ul class="letter-days">${daysHtml}</ul>
 
@@ -414,7 +414,7 @@ function generateLetterHtml(tpl, rows, month, year) {
   <!-- Pied de page -->
   <div class="letter-footer">
     Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
-    Casino Barrière Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
+    Barrière Casino Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
     Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
   </div>
 
@@ -568,7 +568,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
 
   <div class="letter-header">
     <div class="letter-header-left">
-      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Casino Barrière Bordeaux">
+      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Barrière Casino Bordeaux">
     </div>
     <div class="letter-header-right">
       <div class="letter-recipient">${recipientHtml}</div>
@@ -601,7 +601,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
 
   <div class="letter-footer">
     Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
-    Casino Barrière Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
+    Barrière Casino Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
     Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
   </div>
 

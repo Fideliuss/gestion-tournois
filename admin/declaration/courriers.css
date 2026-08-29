@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    courriers.css — Générateur de courriers PN
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
 /* ── Formulaire paramètres ── */
@@ -31,20 +31,20 @@
   text-transform: uppercase;
   color: var(--text-dim);
   background: var(--bg-card);
-  border: 1px solid rgba(196,160,74,.14);
+  border: 1px solid rgba(195,120,20,.14);
   border-radius: 3px;
   font-family: var(--f-ui);
   cursor: pointer;
   transition: all .18s;
   text-align: center;
 }
-.doc-type-btn:hover:not(.active) { color: var(--text); border-color: rgba(196,160,74,.35); }
+.doc-type-btn:hover:not(.active) { color: var(--text); border-color: rgba(195,120,20,.35); }
 .doc-type-btn.active {
-  background: rgba(196,160,74,.13);
+  background: rgba(195,120,20,.13);
   color: var(--gold);
-  border: 1px solid rgba(196,160,74,.38);
+  border: 1px solid rgba(195,120,20,.38);
 }
-body.light .doc-type-btn { background: rgba(255,252,244,.97); }
+body.light .doc-type-btn { background: rgba(247,243,233,.97); }
 
 /* ── Annulation : chips de dates ── */
 .annul-date-list {
@@ -58,7 +58,7 @@ body.light .doc-type-btn { background: rgba(255,252,244,.97); }
   align-items: center;
   gap: 10px;
   background: var(--bg-card);
-  border: 1px solid rgba(196,160,74,.2);
+  border: 1px solid rgba(195,120,20,.2);
   border-radius: 3px;
   padding: 8px 12px;
   font-size: 12px;
@@ -96,8 +96,8 @@ body.light .doc-type-btn { background: rgba(255,252,244,.97); }
 
 /* ── Objet généré preview ── */
 .annul-objet-preview {
-  background: rgba(196,160,74,.08);
-  border: 1px solid rgba(196,160,74,.25);
+  background: rgba(195,120,20,.08);
+  border: 1px solid rgba(195,120,20,.25);
   border-radius: 3px;
   padding: 8px 12px;
   font-size: 12px;
@@ -122,7 +122,7 @@ body.light .doc-type-btn { background: rgba(255,252,244,.97); }
   gap: 4px;
   flex-wrap: wrap;
   background: rgba(10,9,7,.6);
-  border: 1px solid rgba(196,160,74,.12);
+  border: 1px solid rgba(195,120,20,.12);
   border-radius: 4px;
   padding: 4px;
   width: 100%;
@@ -144,13 +144,13 @@ body.light .doc-type-btn { background: rgba(255,252,244,.97); }
   transition: all .18s;
   text-align: center;
 }
-.tab-btn:hover:not(.active) { color: var(--text); background: rgba(196,160,74,.06); }
+.tab-btn:hover:not(.active) { color: var(--text); background: rgba(195,120,20,.06); }
 .tab-btn.active {
-  background: rgba(196,160,74,.15);
+  background: rgba(195,120,20,.15);
   color: var(--gold);
-  border: 1px solid rgba(196,160,74,.25);
+  border: 1px solid rgba(195,120,20,.25);
 }
-body.light .tabs-bar { background: rgba(200,185,150,.25); border-color: rgba(138,104,32,.15); }
+body.light .tabs-bar { background: rgba(200,185,150,.25); border-color: rgba(135,50,0,.15); }
 
 .print-bar {
   display: flex;

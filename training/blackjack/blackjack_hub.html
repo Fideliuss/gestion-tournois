@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Training Blackjack — Casino Barrière Bordeaux</title>
+  <title>Training Blackjack — Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../../shared/barriere.css" />
   <link rel="stylesheet" href="../training.css" />
   <style>
@@ -17,9 +17,6 @@
 
     #modal-cfg .modal-box { max-width: 480px; } /* un peu plus large : range-table 4 colonnes */
 
-    .tool-card         { --accent: 196,160,74; }
-    .tool-card.c-teal   { --accent: 72,175,150; }
-
     .range-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
     .range-table th {
       text-align: left; padding: 6px 8px 10px; font-size: 9px; font-weight: 600;
@@ -31,7 +28,7 @@
       background: var(--bg-card); border: 1px solid var(--gold-bd);
       border-radius: 3px; color: var(--cream); text-align: center; outline: none;
     }
-    .range-table td input:focus { border-color: rgba(196,160,74,.5); }
+    .range-table td input:focus { border-color: rgba(195,120,20,.5); }
   </style>
 </head>
 <body>
@@ -43,25 +40,25 @@
   <a href="../training.html" class="back">← Training</a>
 
   <div class="hdr">
-    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Training <em>Blackjack</em></div>
   </div>
 
   <div class="grid" style="max-width:500px">
 
     <a href="blackjack.html" class="tool-card">
-      <div class="tool-badge">💰</div>
+      <div class="tool-badge picto" data-icon="wallet"></div>
       <div class="tool-name">BJ <em>Paiement</em></div>
     </a>
 
     <a href="blackjack_score.html" class="tool-card c-teal">
-      <div class="tool-badge">🃏</div>
+      <div class="tool-badge picto" data-icon="card_diamond"></div>
       <div class="tool-name">BJ <em>Score</em></div>
     </a>
 
   </div>
 
-  <div class="footer">Casino Barrière Bordeaux · Training Blackjack</div>
+  <div class="footer">Barrière Casino Bordeaux · Training Blackjack</div>
 </div>
 
 <!-- Bouton config admin -->

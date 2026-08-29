@@ -3,15 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Administration Tournois — Casino Barrière Bordeaux</title>
+  <title>Administration Tournois — Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
-
-    .tool-card         { --accent: 128,108,196; } /* indigo  */
-    .tool-card.c-gold  { --accent: 196,160,74;  } /* or      */
-    .tool-card.c-teal  { --accent: 72,175,150;  } /* teal    */
 
     .footer {
       margin-top: 52px; text-align: center;
@@ -28,30 +24,30 @@
   <a href="../outils_tournois.html" class="back">← Menu</a>
 
   <div class="hdr">
-    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Administration <em>Tournois</em></div>
   </div>
 
   <div class="grid">
 
-    <a href="declaration/declaration.html" class="tool-card">
-      <div class="tool-badge">📋</div>
+    <a href="declaration/declaration.html" class="tool-card c-cobalt">
+      <div class="tool-badge picto" data-icon="pen"></div>
       <div class="tool-name">Déclaration <em>DTPJ</em></div>
     </a>
 
     <a href="extras/extras.html" class="tool-card c-teal">
-      <div class="tool-badge">👥</div>
+      <div class="tool-badge picto" data-icon="checklist"></div>
       <div class="tool-name">Déclaration <em>Extras</em></div>
     </a>
 
-    <a href="config_tournois.html" class="tool-card c-gold">
-      <div class="tool-badge">🔧</div>
+    <a href="config_tournois.html" class="tool-card">
+      <div class="tool-badge picto" data-icon="padlock"></div>
       <div class="tool-name">Config <em>Tournois</em></div>
     </a>
 
   </div>
 
-  <div class="footer">Casino Barrière Bordeaux · Outils internes tournois</div>
+  <div class="footer">Barrière Casino Bordeaux · Outils internes tournois</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

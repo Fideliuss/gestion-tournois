@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    semainier.js — Sélecteur de tournoi par jour
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
    Utilisé par : leaderboard/leaderboard.html · prize_pool/prize_pool.html
 ═══════════════════════════════════════════════════════ */
 

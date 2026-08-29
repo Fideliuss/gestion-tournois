@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    extras.css — Déclaration Extras & Émargement
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
 /* ── Conteneurs d'onglets (centrage) ── */
@@ -12,7 +12,7 @@
 /* ── Onglets ── */
 .xt-tabs {
   display: flex; gap: 4px; margin-bottom: 20px;
-  background: rgba(10,9,7,.6); border: 1px solid rgba(196,160,74,.12);
+  background: rgba(10,9,7,.6); border: 1px solid rgba(195,120,20,.12);
   border-radius: 4px; padding: 4px;
   width: 100%; max-width: 860px; flex-wrap: wrap;
 }
@@ -22,9 +22,9 @@
   color: var(--text-dim); background: none; border: none; border-radius: 3px;
   cursor: pointer; transition: all .18s; text-align: center;
 }
-.xt-tab.active          { background: rgba(196,160,74,.15); color: var(--gold); border: 1px solid rgba(196,160,74,.25); }
-.xt-tab:hover:not(.active) { color: var(--text); background: rgba(196,160,74,.06); }
-body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(138,104,32,.15); }
+.xt-tab.active          { background: rgba(195,120,20,.15); color: var(--gold); border: 1px solid rgba(195,120,20,.25); }
+.xt-tab:hover:not(.active) { color: var(--text); background: rgba(195,120,20,.06); }
+body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(135,50,0,.15); }
 
 /* ── Période ── */
 .period-row {
@@ -51,13 +51,13 @@ body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(
 .xt-tbl thead th {
   font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
   color: var(--gold); font-weight: 600; padding: 8px 10px;
-  text-align: left; border-bottom: 1px solid rgba(196,160,74,.2);
+  text-align: left; border-bottom: 1px solid rgba(195,120,20,.2);
   white-space: nowrap;
 }
 .xt-tbl tbody tr {
-  border-bottom: 1px solid rgba(196,160,74,.06); transition: background .15s;
+  border-bottom: 1px solid rgba(195,120,20,.06); transition: background .15s;
 }
-.xt-tbl tbody tr:hover { background: rgba(196,160,74,.03); }
+.xt-tbl tbody tr:hover { background: rgba(195,120,20,.03); }
 .xt-tbl td             { padding: 6px 10px; color: var(--text); vertical-align: middle; }
 .xt-nom                { font-weight: 600; color: var(--cream); letter-spacing: .04em; }
 .xt-prenom             { font-style: italic; }
@@ -70,31 +70,31 @@ body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(
 .assign-tbl thead th {
   font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
   color: var(--gold); padding: 8px 10px; text-align: center;
-  border-bottom: 1px solid rgba(196,160,74,.2); white-space: nowrap;
+  border-bottom: 1px solid rgba(195,120,20,.2); white-space: nowrap;
 }
 .assign-tbl thead th.assign-name-col { text-align: left; }
 .assign-tbl thead th small           { font-size: 9px; letter-spacing: .03em; color: var(--text-dim); display: block; font-weight: 400; }
-.assign-tbl tbody tr                 { border-bottom: 1px solid rgba(196,160,74,.06); }
-.assign-tbl tbody tr:hover           { background: rgba(196,160,74,.03); }
+.assign-tbl tbody tr                 { border-bottom: 1px solid rgba(195,120,20,.06); }
+.assign-tbl tbody tr:hover           { background: rgba(195,120,20,.03); }
 .assign-tbl td                       { padding: 6px 10px; vertical-align: middle; text-align: center; }
 .assign-name  { text-align: left !important; color: var(--cream); font-size: 12px; white-space: nowrap; }
 .assign-check input[type=checkbox]   { width: 16px; height: 16px; cursor: pointer; accent-color: var(--gold); }
 
 /* Ligne heure-du-jour */
-.assign-hours-row   { background: rgba(196,160,74,.04); border-bottom: 1px solid rgba(196,160,74,.12) !important; }
+.assign-hours-row   { background: rgba(195,120,20,.04); border-bottom: 1px solid rgba(195,120,20,.12) !important; }
 .assign-hours-label { font-size: 9px !important; letter-spacing: .16em !important; text-transform: uppercase; color: var(--gold-dim) !important; }
 .assign-day-hour {
   display: block; width: 50px; margin: 0 auto;
   text-align: center; font-family: var(--f-num); font-size: 10px;
   padding: 2px 4px; background: var(--bg-input);
-  border: 1px solid rgba(196,160,74,.2); border-radius: 2px; color: var(--cream);
+  border: 1px solid rgba(195,120,20,.2); border-radius: 2px; color: var(--cream);
 }
 /* Override heure par cellule */
 .assign-cell-hour {
   display: block; width: 46px; margin: 3px auto 0;
   text-align: center; font-family: var(--f-num); font-size: 9px;
-  padding: 1px 3px; background: rgba(196,160,74,.08);
-  border: 1px solid rgba(196,160,74,.3); border-radius: 2px; color: var(--gold);
+  padding: 1px 3px; background: rgba(195,120,20,.08);
+  border: 1px solid rgba(195,120,20,.3); border-radius: 2px; color: var(--gold);
 }
 .assign-day-hour::placeholder, .assign-cell-hour::placeholder { color: var(--text-muted); }
 
@@ -125,14 +125,14 @@ body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(
   padding: 12px 16px; text-align: center;
 }
 .det-hrow th {
-  background: rgba(196,160,74,.1); color: var(--gold);
+  background: rgba(195,120,20,.1); color: var(--gold);
   font-size: 9px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700;
   padding: 8px 10px; text-align: center;
-  border: 1px solid rgba(196,160,74,.2);
+  border: 1px solid rgba(195,120,20,.2);
 }
-.decl-extras-tbl tbody tr:nth-child(even) { background: rgba(196,160,74,.03); }
+.decl-extras-tbl tbody tr:nth-child(even) { background: rgba(195,120,20,.03); }
 .decl-extras-tbl td {
-  border: 1px solid rgba(196,160,74,.15); padding: 7px 12px;
+  border: 1px solid rgba(195,120,20,.15); padding: 7px 12px;
   color: var(--text); vertical-align: middle; white-space: nowrap;
 }
 .det-nom    { font-weight: 700; color: var(--cream); text-align: center; letter-spacing: .04em; }
@@ -145,10 +145,10 @@ body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(
 .emarg-header {
   width: 100%; margin-bottom: 12px;
   padding: 10px 14px; background: var(--bg-card);
-  border: 1px solid rgba(196,160,74,.2); border-radius: 3px;
+  border: 1px solid rgba(195,120,20,.2); border-radius: 3px;
   text-align: center;
 }
-body.light .emarg-header { background: rgba(255,252,244,.97); }
+body.light .emarg-header { background: rgba(247,243,233,.97); }
 .emarg-header-title {
   font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   color: var(--cream);
@@ -170,24 +170,24 @@ body.light .emarg-header { background: rgba(255,252,244,.97); }
 /* Carte émargement */
 .emarg-card {
   width: 100%; border-collapse: collapse;
-  border: 1px solid rgba(196,160,74,.3);
+  border: 1px solid rgba(195,120,20,.3);
   background: var(--bg-card);
 }
-body.light .emarg-card { background: rgba(255,252,244,.97); }
+body.light .emarg-card { background: rgba(247,243,233,.97); }
 
 /* En-tête de carte */
 .emarg-card thead tr th {
-  border: 1px solid rgba(196,160,74,.25);
+  border: 1px solid rgba(195,120,20,.25);
   padding: 5px 7px; vertical-align: middle;
 }
 .ec-week {
   width: 30px; text-align: center;
   font-family: var(--f-ui); font-size: 11px; font-weight: 700;
-  color: var(--gold); background: rgba(196,160,74,.12);
+  color: var(--gold); background: rgba(195,120,20,.12);
 }
 .ec-j {
   width: 22px; text-align: center;
-  font-size: 10px; color: var(--text-dim); background: rgba(196,160,74,.05);
+  font-size: 10px; color: var(--text-dim); background: rgba(195,120,20,.05);
 }
 .ec-name {
   text-align: center; font-weight: 600; font-size: 12px; color: var(--cream);
@@ -196,7 +196,7 @@ body.light .emarg-card { background: rgba(255,252,244,.97); }
 
 /* Lignes de jours */
 .emarg-card tbody td {
-  border: 1px solid rgba(196,160,74,.15);
+  border: 1px solid rgba(195,120,20,.15);
   padding: 4px 6px; font-size: 11px; color: var(--text); vertical-align: middle;
 }
 .ec-date {
@@ -221,7 +221,7 @@ body.light .emarg-card { background: rgba(255,252,244,.97); }
   padding: 20px;
 }
 .xt-modal {
-  background: var(--bg-card); border: 1px solid rgba(196,160,74,.25);
+  background: var(--bg-card); border: 1px solid rgba(195,120,20,.25);
   border-radius: 4px; padding: 28px 30px; width: 100%; max-width: 640px;
   position: relative; max-height: 90vh; overflow-y: auto;
 }

@@ -87,9 +87,9 @@ const AUTH = {
     const short      = email.split('@')[0];
     const roleLabel  = role === 'admin' ? 'Admin' : role === 'mcd' ? 'MCD' : role === 'floor' ? 'Floor'
                      : role.charAt(0).toUpperCase() + role.slice(1);
-    const defaults   = { admin: '#c4a04a', mcd: '#8070c4', floor: '#888888' };
+    const defaults   = { admin: '#C37814', mcd: '#3264C8', floor: '#0075A9' };
     const cached     = _rolePanelsCache && _rolePanelsCache[role];
-    const color      = (cached && cached.color) || defaults[role] || '#5294d2';
+    const color      = (cached && cached.color) || defaults[role] || '#0075A9';
     badge.innerHTML = `
       <span class="auth-email">${short}</span>
       <span class="auth-chip" style="background:${color}28;color:${color}">${roleLabel}</span>

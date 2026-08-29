@@ -3,15 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Service Jeux Traditionnels — Casino Barrière Bordeaux</title>
+  <title>Service Jeux Traditionnels — Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
-
-    .tool-card              { --accent: 196,160,74;  }
-    .tool-card.c-blue       { --accent: 82,148,210;  }
-    .tool-card.c-purple     { --accent: 128,108,196; }
 
     .footer {
       margin-top: 52px; text-align: center;
@@ -35,7 +31,7 @@
     details.changelog summary:hover { color: var(--gold-dim); }
     details.changelog[open] summary { color: var(--gold-dim); margin-bottom: 10px; }
     .cl-list {
-      border-left: 1px solid rgba(196,160,74,.18);
+      border-left: 1px solid rgba(195,120,20,.18);
       padding-left: 14px; display: flex; flex-direction: column; gap: 10px;
     }
     .cl-version { font-family: var(--f-num); font-size: 9px; color: var(--gold-dim); margin-bottom: 3px; }
@@ -51,31 +47,31 @@
 
 <div class="app">
   <div class="hdr">
-    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Service <em>Jeux Traditionnels</em></div>
   </div>
 
   <div class="grid">
 
     <a href="outils_tournois.html" class="tool-card" data-panel="tournois">
-      <div class="tool-badge">🎯</div>
+      <div class="tool-badge picto" data-icon="tickets"></div>
       <div class="tool-name">Outils <em>Tournois</em></div>
     </a>
 
-    <a href="training/training.html" class="tool-card c-blue" data-panel="training">
-      <div class="tool-badge">🎓</div>
+    <a href="training/training.html" class="tool-card c-jean" data-panel="training">
+      <div class="tool-badge picto" data-icon="chip"></div>
       <div class="tool-name">Training <em>Croupier</em></div>
     </a>
 
-    <a href="admin/comptes.html" class="tool-card c-purple" data-role="admin">
-      <div class="tool-badge">👤</div>
+    <a href="admin/comptes.html" class="tool-card c-cobalt" data-role="admin">
+      <div class="tool-badge picto" data-icon="account"></div>
       <div class="tool-name">Gestion <em>Comptes</em></div>
     </a>
 
   </div>
 
   <div class="footer">
-    Casino Barrière Bordeaux · Service Jeux Traditionnels
+    Barrière Casino Bordeaux · Service Jeux Traditionnels
     <br><span class="footer-version" id="app-version"></span>
     <br><span style="opacity:.35;font-size:9px;letter-spacing:.08em">Conçu &amp; développé par B. Cuvelier · 2025–2026</span>
     <br>
