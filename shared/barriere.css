@@ -26,7 +26,7 @@
 /* ── Variables — Mode nuit (défaut) ── */
 :root {
   --gold:       #C37814;
-  --gold-dim:   #873200;
+  --gold-dim:   #FAA500;
   --gold-solid: #C37814;
   --gold-bg:    rgba(195,120,20,.07);
   --gold-bd:    rgba(195,120,20,.2);
@@ -231,7 +231,7 @@ body.light .app {
   display: inline-block;
   font-family: var(--f-ui); font-size: 10px; font-weight: 500;
   letter-spacing: .4em; text-transform: uppercase;
-  color: var(--gold-dim); margin-bottom: 16px;
+  color: var(--cream); margin-bottom: 16px;
   padding-bottom: 12px; border-bottom: 1px solid rgba(195,120,20,.18);
 }
 body.light .hdr-logo { border-bottom-color: rgba(135,50,0,.2); }
