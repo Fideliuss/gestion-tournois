@@ -7,7 +7,7 @@
   display: grid;
   grid-template-rows: repeat(3, 1fr);
   width: 100%; max-width: 760px; margin: 0 auto;
-  border: 2px solid rgba(196,160,74,.5);
+  border: 2px solid rgba(195,120,20,.5);
   border-radius: 4px 4px 0 0;
   overflow: hidden;
   box-shadow: 0 4px 24px rgba(0,0,0,.5);
@@ -29,8 +29,8 @@
 }
 
 /* ── Séparateur de douzaine ── */
-.rt-dozen-r { border-right: 3px solid rgba(196,160,74,.65); }
-.rt-dozen-l { border-left:  3px solid rgba(196,160,74,.65); }
+.rt-dozen-r { border-right: 3px solid rgba(195,120,20,.65); }
+.rt-dozen-l { border-left:  3px solid rgba(195,120,20,.65); }
 
 .rt-red   { background: #8b1a1a; }
 .rt-black { background: #111114; }
@@ -50,7 +50,7 @@
 
 .rt-highlight {
   filter: brightness(1.5);
-  box-shadow: inset 0 0 0 2px rgba(196,160,74,.9);
+  box-shadow: inset 0 0 0 2px rgba(195,120,20,.9);
 }
 
 /* ── Chip sur le tapis ── */
@@ -63,7 +63,7 @@
 .rt-chip {
   position: absolute;
   width: 36px; height: 36px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #f5e06b, #c4a04a 60%, #8b6914);
+  background: radial-gradient(circle at 35% 35%, #f5e06b, #C37814 60%, #8b6914);
   border: 3px solid #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,.6), inset 0 1px 2px rgba(255,255,255,.3);
   display: flex; align-items: center; justify-content: center;
@@ -137,7 +137,7 @@
 }
 .conv-value-badge {
   display: inline-block; margin-top: 14px; padding: 7px 18px;
-  background: rgba(196,160,74,.12); border: 1px solid rgba(196,160,74,.3);
+  background: rgba(195,120,20,.12); border: 1px solid rgba(195,120,20,.3);
   border-radius: 20px; color: var(--gold); font-family: var(--f-num);
   font-size: 17px; font-weight: 700;
 }
@@ -154,7 +154,7 @@
   cursor: pointer; transition: border-color .15s, background .15s, transform .1s;
 }
 .chipval-card:hover {
-  border-color: rgba(196,160,74,.6); background: rgba(196,160,74,.06);
+  border-color: rgba(195,120,20,.6); background: rgba(195,120,20,.06);
   transform: scale(1.06);
 }
 .chipval-amount { font-family: var(--f-num); font-size: 22px; font-weight: 700; color: var(--cream); }
@@ -175,12 +175,12 @@
   display: inline-block; padding: 5px 14px; border-radius: 2px;
   font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
   font-family: var(--f-ui); background: transparent;
-  border: 1px solid rgba(196,160,74,.3);
+  border: 1px solid rgba(195,120,20,.3);
 }
 #rp-bet-labels { margin-bottom: 8px; }
 
 /* Couleurs badges = couleurs chips */
-.rp-badge-plein        { color: #c4a04a; border-color: rgba(196,160,74,.4); }
+.rp-badge-plein        { color: #C37814; border-color: rgba(195,120,20,.4); }
 .rp-badge-cheval       { color: #c0c0c0; border-color: rgba(192,192,192,.4); }
 .rp-badge-transversale { color: #d08040; border-color: rgba(196,120,48,.4); }
 .rp-badge-carre        { color: #40b0b0; border-color: rgba(48,168,168,.4); }
@@ -251,7 +251,7 @@
   background: rgba(10,9,7,.6); border: 1px solid var(--gold-bd);
   border-radius: 4px; color: var(--cream); outline: none;
 }
-.tb-answer-row input:focus { border-color: rgba(196,160,74,.5); }
+.tb-answer-row input:focus { border-color: rgba(195,120,20,.5); }
 
 .tb-summary-time {
   font-family: var(--f-num); font-size: 56px; font-weight: 700;

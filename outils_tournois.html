@@ -3,15 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Outils Tournois — Casino Barrière Bordeaux</title>
+  <title>Outils Tournois — Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
     .hdr { margin-bottom: 52px; }
-
-    .tool-card               { --accent: 196,160,74;  }
-    .tool-card.c-blue        { --accent: 82,148,210;  }
-    .tool-card.c-teal        { --accent: 72,175,150;  }
 
     .footer {
       margin-top: 52px; text-align: center;
@@ -28,30 +24,30 @@
   <a href="index.html" class="back">← Menu</a>
 
   <div class="hdr">
-    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Outils <em>Tournois</em></div>
   </div>
 
   <div class="grid">
 
     <a href="prize_pool/prize_pool.html" class="tool-card" data-panel="prize-pool">
-      <div class="tool-badge">🎯</div>
+      <div class="tool-badge picto" style="--icon:url('icons/diamond.png')"></div>
       <div class="tool-name">Prize Pool <em>Builder</em></div>
     </a>
 
-    <a href="leaderboard/leaderboard.html" class="tool-card c-blue" data-panel="leaderboard">
-      <div class="tool-badge">🏆</div>
+    <a href="leaderboard/leaderboard.html" class="tool-card c-jean" data-panel="leaderboard">
+      <div class="tool-badge picto" style="--icon:url('icons/calendar.png')"></div>
       <div class="tool-name">Challenge <em>Saisonnier</em></div>
     </a>
 
     <a href="admin/admin_tournois.html" class="tool-card c-teal" data-panel="admin-tournois">
-      <div class="tool-badge">📁</div>
+      <div class="tool-badge picto" style="--icon:url('icons/briefcase.png')"></div>
       <div class="tool-name">Administration <em>Tournois</em></div>
     </a>
 
   </div>
 
-  <div class="footer">Casino Barrière Bordeaux · Outils internes tournois</div>
+  <div class="footer">Barrière Casino Bordeaux · Outils internes tournois</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

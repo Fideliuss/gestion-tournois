@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    tournaments.js — Référentiel tournois partagé
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
    Charger après barriere.js dans chaque module.
 ═══════════════════════════════════════════════════════ */
 

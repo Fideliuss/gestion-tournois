@@ -1,4 +1,4 @@
-# Contexte projet — Outils Tournois Casino Barrière Bordeaux
+# Contexte projet — Outils Tournois Barrière Casino Bordeaux
 
 > Fichier à lire en début de session pour assurer la continuité.
 > À mettre à jour avant de clore chaque session de travail (et avant toute PR).
@@ -7,13 +7,15 @@
 
 ## Projet
 
-Application web interne pour le Casino Barrière Bordeaux, organisée en 3 panneaux : **Outils Tournois** (gestion des tournois de poker), **Training Croupier** (entraînement Blackjack + Roulette), **Gestion Comptes** (admin). Zéro serveur, zéro build — s'ouvre directement dans Chrome/Edge.
+Application web interne pour le Barrière Casino Bordeaux, organisée en 3 panneaux : **Outils Tournois** (gestion des tournois de poker), **Training Croupier** (entraînement Blackjack + Roulette), **Gestion Comptes** (admin). Zéro serveur, zéro build — s'ouvre directement dans Chrome/Edge.
 
 Conçue pour être **extensible au-delà des tournois** — architecture de panneaux/rôles pensée pour accueillir de futurs modules (Jeux de Tables au sens large).
 
 **Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (privé)
 **Développeur :** B. Cuvelier (Fideliuss)
 **Convention de nommage :** underscore `_` pour tous les fichiers et dossiers (`prize_pool`, `admin_tournois`, `roulette_paiement`), jamais de tiret.
+
+**Charte graphique :** charte officielle Barrière Casino (redesign 2026-08). Palette de marque (Ambre/Châtaigne en accent principal, Cognac/Sauterne/Jean/Teal/Cobalt en accents d'accompagnement — voir `:root`/`body.light` dans `shared/barriere.css`), police Jost auto-hébergée (`shared/fonts/`, gras italique pour les titres, normal pour le reste, IBM Plex Mono conservé pour les données chiffrées), pictogrammes vectoriels de la charte extraits dans `shared/icons/` (masque CSS recolorable via `.tool-badge.picto` + `--icon`, remplace les emoji de badge).
 
 ---
 
@@ -44,6 +46,8 @@ shared/
   supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats/sessions/tournois/extras/app_roles/training + auth + Edge Function manage-users)
   auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), AUTH._addBadge(), AUTH.clearRolesCache() — chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
+  fonts/            Jost auto-hébergée (variable, normal + italique) — @font-face déclaré dans barriere.css
+  icons/            Pictogrammes vectoriels de la charte, extraits en PNG à masque alpha (recolorables via CSS mask)
   logos/            Logos blanc (écran) / noir (impression) / PNG (courriers)
   favicon/          Favicon et icônes PWA
 

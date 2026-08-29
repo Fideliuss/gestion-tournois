@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Config Tournois — Casino Barrière Bordeaux</title>
+  <title>Config Tournois — Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
@@ -25,20 +25,20 @@
     .tm-day-label {
       font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
       color: var(--text-muted); text-align: center; padding-bottom: 4px;
-      border-bottom: 1px solid rgba(196,160,74,.08);
+      border-bottom: 1px solid rgba(195,120,20,.08);
     }
     .tm-day-empty .tm-day-label { opacity: .35; }
 
     /* ── Carte tournoi ── */
     .tm-card {
-      background: rgba(196,160,74,.03); border: 1px solid rgba(196,160,74,.14);
+      background: rgba(195,120,20,.03); border: 1px solid rgba(195,120,20,.14);
       border-radius: 3px; padding: 10px 10px 8px;
       display: flex; flex-direction: column; gap: 5px;
       transition: border-color .16s, background .16s;
       position: relative;
     }
-    .tm-card:hover { border-color: rgba(196,160,74,.3); background: rgba(196,160,74,.06); }
-    body.light .tm-card { background: rgba(200,185,150,.1); border-color: rgba(138,104,32,.16); }
+    .tm-card:hover { border-color: rgba(195,120,20,.3); background: rgba(195,120,20,.06); }
+    body.light .tm-card { background: rgba(200,185,150,.1); border-color: rgba(135,50,0,.16); }
     body.light .tm-card:hover { background: rgba(200,185,150,.2); }
 
     .tm-card-name {
@@ -53,7 +53,7 @@
       display: flex; gap: 6px; flex-wrap: wrap;
     }
     .tm-card-meta-chip {
-      background: var(--gold-bg); border: 1px solid rgba(196,160,74,.14);
+      background: var(--gold-bg); border: 1px solid rgba(195,120,20,.14);
       border-radius: 2px; padding: 1px 5px; font-size: 9px; color: var(--gold-dim);
     }
     .tm-card-pts {
@@ -61,30 +61,30 @@
       letter-spacing: .02em;
     }
     .tm-card-actions {
-      display: flex; gap: 4px; margin-top: 4px; border-top: 1px solid rgba(196,160,74,.07);
+      display: flex; gap: 4px; margin-top: 4px; border-top: 1px solid rgba(195,120,20,.07);
       padding-top: 6px;
     }
     .tm-btn-edit {
       flex: 1; padding: 4px 6px; font-size: 10px; font-family: var(--f-ui);
-      background: rgba(196,160,74,.07); border: 1px solid rgba(196,160,74,.18);
+      background: rgba(195,120,20,.07); border: 1px solid rgba(195,120,20,.18);
       border-radius: 2px; color: var(--gold-dim); cursor: pointer; transition: all .13s;
       text-align: center;
     }
-    .tm-btn-edit:hover { background: rgba(196,160,74,.18); color: var(--gold); border-color: rgba(196,160,74,.4); }
+    .tm-btn-edit:hover { background: rgba(195,120,20,.18); color: var(--gold); border-color: rgba(195,120,20,.4); }
 
     /* ── Bouton + Ajouter ── */
     .tm-day-add {
       padding: 7px 6px; font-size: 11px; text-align: center; width: 100%; box-sizing: border-box;
-      background: transparent; border: 1px dashed rgba(196,160,74,.12);
+      background: transparent; border: 1px dashed rgba(195,120,20,.12);
       border-radius: 3px; color: var(--text-muted); cursor: pointer;
       transition: all .15s; font-family: var(--f-ui); line-height: 1;
     }
-    .tm-day-add:hover { border-color: rgba(196,160,74,.38); color: var(--gold-dim); background: rgba(196,160,74,.04); }
+    .tm-day-add:hover { border-color: rgba(195,120,20,.38); color: var(--gold-dim); background: rgba(195,120,20,.04); }
 
     /* ── Section Événements ── */
     .tm-events-section {
       display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
-      border-top: 1px solid rgba(196,160,74,.1); padding-top: 14px; margin-top: 6px;
+      border-top: 1px solid rgba(195,120,20,.1); padding-top: 14px; margin-top: 6px;
     }
     .tm-events-label {
       font-size: 9px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
@@ -98,15 +98,15 @@
       display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
       padding: 10px 20px; border-radius: 3px;
       font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-      background: rgba(196,160,74,.14); color: var(--gold);
-      border: 1px solid rgba(196,160,74,.35); cursor: pointer; transition: all .18s;
+      background: rgba(195,120,20,.14); color: var(--gold);
+      border: 1px solid rgba(195,120,20,.35); cursor: pointer; transition: all .18s;
     }
-    .btn-new-tm:hover { background: rgba(196,160,74,.24); }
+    .btn-new-tm:hover { background: rgba(195,120,20,.24); }
 
     /* ── Empty state ── */
     .tm-empty {
       text-align: center; padding: 48px 20px; color: var(--text-muted);
-      font-size: 13px; border: 1px dashed rgba(196,160,74,.13); border-radius: 3px;
+      font-size: 13px; border: 1px dashed rgba(195,120,20,.13); border-radius: 3px;
     }
     .tm-empty-icon { font-size: 28px; margin-bottom: 12px; }
 
@@ -114,10 +114,10 @@
        FORMULAIRE CRÉATION / ÉDITION
     ══════════════════════════════════════════════════════ */
     .form-panel {
-      background: rgba(196,160,74,.03); border: 1px solid rgba(196,160,74,.2);
+      background: rgba(195,120,20,.03); border: 1px solid rgba(195,120,20,.2);
       border-radius: 3px; padding: 24px 28px; margin-bottom: 20px;
     }
-    body.light .form-panel { background: rgba(138,104,32,.03); border-color: rgba(138,104,32,.22); }
+    body.light .form-panel { background: rgba(135,50,0,.03); border-color: rgba(135,50,0,.22); }
 
     .form-panel-title {
       font-size: 9px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase;
@@ -129,16 +129,16 @@
 
     .tm-inp {
       width: 100%; padding: 10px 12px; box-sizing: border-box;
-      background: rgba(10,9,7,.9); border: 1px solid rgba(196,160,74,.2);
+      background: rgba(10,9,7,.9); border: 1px solid rgba(195,120,20,.2);
       border-radius: 3px; color: var(--cream); font-size: 13px; font-family: var(--f-ui);
       outline: none; transition: border-color .15s;
     }
-    .tm-inp:focus { border-color: rgba(196,160,74,.48); box-shadow: 0 0 0 3px rgba(196,160,74,.07); }
+    .tm-inp:focus { border-color: rgba(195,120,20,.48); box-shadow: 0 0 0 3px rgba(195,120,20,.07); }
     .tm-inp[readonly] { opacity: .5; cursor: default; }
     body.light .tm-inp { background: rgba(238,230,212,.9); color: var(--text); }
     .tm-sel { cursor: pointer; }
 
-    .form-divider { border: none; border-top: 1px solid rgba(196,160,74,.1); margin: 16px 0 14px; }
+    .form-divider { border: none; border-top: 1px solid rgba(195,120,20,.1); margin: 16px 0 14px; }
 
     .pts-editor-label {
       font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase;
@@ -152,26 +152,26 @@
     .pts-cell input {
       width: 52px; padding: 7px 6px; text-align: center;
       font-family: var(--f-num); font-size: 13px; font-weight: 600; color: var(--gold);
-      background: rgba(10,9,7,.6); border: 1px solid rgba(196,160,74,.18);
+      background: rgba(10,9,7,.6); border: 1px solid rgba(195,120,20,.18);
       border-radius: 3px; outline: none; transition: border-color .15s;
       -moz-appearance: textfield; appearance: textfield;
     }
     .pts-cell input::-webkit-outer-spin-button,
     .pts-cell input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .pts-cell input:focus { border-color: rgba(196,160,74,.48); }
-    body.light .pts-cell input { background: rgba(200,185,150,.2); border-color: rgba(138,104,32,.2); }
+    .pts-cell input:focus { border-color: rgba(195,120,20,.48); }
+    body.light .pts-cell input { background: rgba(200,185,150,.2); border-color: rgba(135,50,0,.2); }
 
     .pts-actions { display: flex; gap: 8px; margin-bottom: 18px; }
-    .btn-pts-add { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(196,160,74,.1); color: var(--gold-dim); border: 1px solid rgba(196,160,74,.22); border-radius: 3px; cursor: pointer; transition: all .15s; }
-    .btn-pts-add:hover { background: rgba(196,160,74,.2); color: var(--gold); }
+    .btn-pts-add { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(195,120,20,.1); color: var(--gold-dim); border: 1px solid rgba(195,120,20,.22); border-radius: 3px; cursor: pointer; transition: all .15s; }
+    .btn-pts-add:hover { background: rgba(195,120,20,.2); color: var(--gold); }
     .btn-pts-rem { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(192,57,43,.07); color: #e07a68; border: 1px solid rgba(192,57,43,.2); border-radius: 3px; cursor: pointer; transition: all .15s; }
     .btn-pts-rem:hover { background: rgba(192,57,43,.16); }
 
     .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-save   { padding: 10px 24px; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; background: rgba(196,160,74,.18); color: var(--gold); border: 1px solid rgba(196,160,74,.4); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-save:hover { background: rgba(196,160,74,.3); }
-    .btn-cancel { padding: 10px 18px; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; background: none; color: var(--text-dim); border: 1px solid rgba(196,160,74,.12); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-cancel:hover { color: var(--text); border-color: rgba(196,160,74,.28); }
+    .btn-save   { padding: 10px 24px; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; background: rgba(195,120,20,.18); color: var(--gold); border: 1px solid rgba(195,120,20,.4); border-radius: 3px; cursor: pointer; transition: all .18s; }
+    .btn-save:hover { background: rgba(195,120,20,.3); }
+    .btn-cancel { padding: 10px 18px; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; background: none; color: var(--text-dim); border: 1px solid rgba(195,120,20,.12); border-radius: 3px; cursor: pointer; transition: all .18s; }
+    .btn-cancel:hover { color: var(--text); border-color: rgba(195,120,20,.28); }
 
     /* ── Alert succès ── */
     .alert-ok {
@@ -190,7 +190,7 @@
   <a href="admin_tournois.html" class="back">← Administration</a>
 
   <div class="hdr">
-    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Config <em>Tournois</em></div>
   </div>
 
