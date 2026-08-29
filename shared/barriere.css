@@ -505,15 +505,32 @@ body.light .tool-card:hover { background: #fff; box-shadow: 0 4px 20px rgba(0,0,
 }
 body.light .tool-badge { background: linear-gradient(140deg, rgba(var(--accent),.1), rgba(var(--accent),.03)); }
 
-/* Icône vectorielle (charte) à la place de l'emoji — poser --icon:url(...) + class="picto" */
+/* Icône vectorielle (charte) à la place de l'emoji — class="picto" + data-icon="nom" */
 .tool-badge.picto { font-size: 0; }
 .tool-badge.picto::before {
   content: ''; display: block; width: 28px; height: 28px;
   background: rgb(var(--accent));
-  -webkit-mask: var(--icon) center / contain no-repeat;
-          mask: var(--icon) center / contain no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain;    mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   transition: background .2s;
 }
+.tool-badge.picto[data-icon="roulette"]::before   { -webkit-mask-image: url('icons/roulette.png');   mask-image: url('icons/roulette.png'); }
+.tool-badge.picto[data-icon="chip"]::before       { -webkit-mask-image: url('icons/chip.png');       mask-image: url('icons/chip.png'); }
+.tool-badge.picto[data-icon="card_heart"]::before { -webkit-mask-image: url('icons/card_heart.png'); mask-image: url('icons/card_heart.png'); }
+.tool-badge.picto[data-icon="card_diamond"]::before { -webkit-mask-image: url('icons/card_diamond.png'); mask-image: url('icons/card_diamond.png'); }
+.tool-badge.picto[data-icon="card_spade"]::before { -webkit-mask-image: url('icons/card_spade.png'); mask-image: url('icons/card_spade.png'); }
+.tool-badge.picto[data-icon="circle"]::before     { -webkit-mask-image: url('icons/circle.png');     mask-image: url('icons/circle.png'); }
+.tool-badge.picto[data-icon="account"]::before    { -webkit-mask-image: url('icons/account.png');    mask-image: url('icons/account.png'); }
+.tool-badge.picto[data-icon="magnifier"]::before  { -webkit-mask-image: url('icons/magnifier.png');  mask-image: url('icons/magnifier.png'); }
+.tool-badge.picto[data-icon="padlock"]::before    { -webkit-mask-image: url('icons/padlock.png');    mask-image: url('icons/padlock.png'); }
+.tool-badge.picto[data-icon="calendar"]::before   { -webkit-mask-image: url('icons/calendar.png');   mask-image: url('icons/calendar.png'); }
+.tool-badge.picto[data-icon="pen"]::before        { -webkit-mask-image: url('icons/pen.png');        mask-image: url('icons/pen.png'); }
+.tool-badge.picto[data-icon="tickets"]::before    { -webkit-mask-image: url('icons/tickets.png');    mask-image: url('icons/tickets.png'); }
+.tool-badge.picto[data-icon="wallet"]::before     { -webkit-mask-image: url('icons/wallet.png');     mask-image: url('icons/wallet.png'); }
+.tool-badge.picto[data-icon="checklist"]::before  { -webkit-mask-image: url('icons/checklist.png');  mask-image: url('icons/checklist.png'); }
+.tool-badge.picto[data-icon="briefcase"]::before  { -webkit-mask-image: url('icons/briefcase.png');  mask-image: url('icons/briefcase.png'); }
+.tool-badge.picto[data-icon="diamond"]::before    { -webkit-mask-image: url('icons/diamond.png');    mask-image: url('icons/diamond.png'); }
 
 .tool-name {
   font-family: var(--f-display); font-size: 17px; font-weight: 700; font-style: italic;
