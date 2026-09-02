@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════
    barriere.js — Scripts communs
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════ */
 
 /* Injection favicon — chemin déduit depuis l'URL du script lui-même */

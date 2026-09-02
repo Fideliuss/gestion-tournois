@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Config Comptes — Casino Barrière Bordeaux</title>
+  <title>Config Comptes — Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../shared/barriere.css" />
   <style>
 
@@ -31,7 +31,7 @@
     .stat-value { font-size: 22px; font-weight: 500; color: var(--cream); font-family: var(--f-num); }
 
     /* ── Sections par rôle ── */
-    .role-section + .role-section { border-top: 1px solid rgba(196,160,74,.07); }
+    .role-section + .role-section { border-top: 1px solid rgba(195,120,20,.07); }
     .role-section-header {
       display: flex; align-items: center; gap: 9px;
       padding: 8px 0 6px;
@@ -47,7 +47,7 @@
     .account-row {
       display: flex; align-items: center; gap: 12px;
       padding: 10px 0;
-      border-bottom: 1px solid rgba(196,160,74,.04);
+      border-bottom: 1px solid rgba(195,120,20,.04);
     }
     .account-row:last-child { border-bottom: none; }
     .account-info { flex: 1; min-width: 0; }
@@ -64,7 +64,7 @@
       font-size: 9px; font-weight: 700; letter-spacing: .04em;
       flex-shrink: 0;
     }
-    .account-avatar.chip-admin  { background: rgba(196,160,74,.15); color: var(--gold); }
+    .account-avatar.chip-admin  { background: rgba(195,120,20,.15); color: var(--gold); }
     .account-avatar.chip-mcd    { background: rgba(128,108,196,.15); color: #b0a0e0; }
     .account-avatar.chip-floor  { background: rgba(255,255,255,.06); color: var(--text-dim); }
     .account-avatar.chip-custom { background: rgba(80,160,200,.10); color: #7ab8d8; }
@@ -75,8 +75,8 @@
       text-transform: uppercase; padding: 3px 9px; border-radius: 2px;
       white-space: nowrap;
     }
-    .chip-admin  { background: rgba(196,160,74,.12); color: var(--gold);
-      border: 1px solid rgba(196,160,74,.28); }
+    .chip-admin  { background: rgba(195,120,20,.12); color: var(--gold);
+      border: 1px solid rgba(195,120,20,.28); }
     .chip-mcd    { background: rgba(128,108,196,.12); color: #b0a0e0;
       border: 1px solid rgba(128,108,196,.28); }
     .chip-floor  { background: rgba(255,255,255,.05); color: var(--text-dim);
@@ -102,7 +102,7 @@
     .perm-table th.col-del  { width: 32px; }
     .perm-table td {
       padding: 11px 10px; text-align: center;
-      border-top: 1px solid rgba(196,160,74,.06);
+      border-top: 1px solid rgba(195,120,20,.06);
       vertical-align: middle;
     }
     .perm-table td.col-role {
@@ -115,15 +115,15 @@
     }
     .perm-dot {
       display: inline-block; width: 8px; height: 8px;
-      border-radius: 50%; background: rgba(196,160,74,.3);
-      border: 1px solid rgba(196,160,74,.5);
+      border-radius: 50%; background: rgba(195,120,20,.3);
+      border: 1px solid rgba(195,120,20,.5);
     }
 
     /* ── Nouveau rôle ── */
     .new-role-row {
       display: flex; align-items: flex-end; gap: 12px;
       padding-top: 16px; margin-top: 4px;
-      border-top: 1px solid rgba(196,160,74,.08);
+      border-top: 1px solid rgba(195,120,20,.08);
       flex-wrap: wrap;
     }
     .new-role-slug {
@@ -136,7 +136,7 @@
     .perm-actions {
       display: flex; align-items: center; gap: 10px;
       margin-top: 20px; padding-top: 16px;
-      border-top: 1px solid rgba(196,160,74,.08);
+      border-top: 1px solid rgba(195,120,20,.08);
       flex-wrap: wrap;
     }
     .perm-msg { font-size: 11px; font-family: var(--f-ui); }
@@ -152,7 +152,7 @@
     .panel-children {
       display: flex; flex-direction: column; gap: 6px;
       padding: 8px 0 4px 20px;
-      border-left: 1px solid rgba(196,160,74,.12);
+      border-left: 1px solid rgba(195,120,20,.12);
       margin: 6px 0 2px 7px;
     }
 
@@ -184,7 +184,7 @@
   <a href="../index.html" class="back">← Menu</a>
 
   <div class="hdr">
-    <span class="hdr-logo">Casino Barrière · Bordeaux</span>
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Config <em>Comptes</em></div>
   </div>
 
@@ -358,17 +358,17 @@
   ];
 
   const ROLE_COLORS = [
-    { hex: '#c4a04a', label: 'Or'     },
-    { hex: '#8070c4', label: 'Violet' },
-    { hex: '#5294d2', label: 'Bleu'   },
-    { hex: '#48af96', label: 'Teal'   },
+    { hex: '#C37814', label: 'Or'     },
+    { hex: '#3264C8', label: 'Cobalt' },
+    { hex: '#0075A9', label: 'Jean'   },
+    { hex: '#28B4D7', label: 'Teal'   },
     { hex: '#c45278', label: 'Rose'   },
     { hex: '#6dcc8e', label: 'Vert'   },
-    { hex: '#e09050', label: 'Orange' },
+    { hex: '#E65A00', label: 'Cognac' },
     { hex: '#888888', label: 'Gris'   },
   ];
 
-  const DEFAULT_COLORS = { admin: '#c4a04a', mcd: '#8070c4', floor: '#888888' };
+  const DEFAULT_COLORS = { admin: '#C37814', mcd: '#3264C8', floor: '#0075A9' };
 
   // ── Escape pour fermer ────────────────────────────────
   document.addEventListener('keydown', function(e) {

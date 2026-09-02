@@ -536,7 +536,7 @@ function _renderResultRow(r, search = '') {
   const pc      = r.place === 1 ? 'p1' : r.place <= 3 ? 'p3' : '';
   const extra   = r.extra ? '<span class="extra-badge">extra</span>' : '';
   const name    = cap(r.player);
-  const hilite  = search && r.player.toLowerCase().includes(search) ? ' style="background:rgba(196,160,74,.09)"' : '';
+  const hilite  = search && r.player.toLowerCase().includes(search) ? ' style="background:rgba(195,120,20,.09)"' : '';
   return `<div class="res-row" id="res-${r.id}"${hilite}>
     <span class="place-badge-sm ${pc}">${r.place}</span>
     <span class="res-name">${name}${extra}</span>
@@ -659,7 +659,7 @@ async function renderRankingDoc() {
 
   const inner = `
     <div class="rp-top">
-      <img class="rp-logo" src="../shared/logos/barriere_casino-logo-black.svg" alt="Casino Barrière Bordeaux" />
+      <img class="rp-logo" src="../shared/logos/barriere_casino-logo-black.svg" alt="Barrière Casino Bordeaux" />
       <div class="rp-hr"></div>
       <div class="rp-main-title">Montant du Ranking</div>
       <div class="rp-challenge">Challenge Saisonnier · 2025 / 2026</div>
@@ -774,7 +774,7 @@ async function openPlayerModal(playerName) {
   const rows =results.map(r=>{
     const pc=r.place===1?'p1':r.place<=3?'p3':'';
     const extraTag=r.extra?'<span style="font-size:9px;color:var(--text-muted);margin-left:4px">extra</span>':'';
-    return `<tr style="border-top:1px solid rgba(196,160,74,.05)">
+    return `<tr style="border-top:1px solid rgba(195,120,20,.05)">
       <td style="padding:8px;font-size:12px;color:var(--text-dim)">${fmtDate(r.date)}</td>
       <td style="padding:8px"><span class="tournament-badge">${getTNameSync(r.tournamentId)}</span></td>
       <td style="padding:8px"><span class="place-badge-sm ${pc}">${r.place}</span>${extraTag}</td>

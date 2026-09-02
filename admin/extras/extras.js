@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    extras.js — Déclaration Extras & Émargement Hebdomadaire
-   Casino Barrière Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
 const MOIS_FULL  = ['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN',
@@ -379,7 +379,7 @@ function renderEmargement() {
   el.innerHTML = `
     <div class="emarg-header">
       <div class="emarg-header-title">FEUILLE D'ÉMARGEMENT — CROUPIERS EXTRAS POKER</div>
-      <div class="emarg-header-meta">Casino Barrière Bordeaux &nbsp;·&nbsp; Semaine ${String(week).padStart(2,'0')} &nbsp;·&nbsp; du ${rangeStr}</div>
+      <div class="emarg-header-meta">Barrière Casino Bordeaux &nbsp;·&nbsp; Semaine ${String(week).padStart(2,'0')} &nbsp;·&nbsp; du ${rangeStr}</div>
     </div>
     <div class="emarg-grid">
       ${cards.map(e =>

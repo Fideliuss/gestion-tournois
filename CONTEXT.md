@@ -1,4 +1,4 @@
-# Contexte projet — Outils Tournois Casino Barrière Bordeaux
+# Contexte projet — Outils Tournois Barrière Casino Bordeaux
 
 > Fichier à lire en début de session pour assurer la continuité.
 > À mettre à jour avant de clore chaque session de travail (et avant toute PR).
@@ -7,13 +7,15 @@
 
 ## Projet
 
-Application web interne pour le Casino Barrière Bordeaux, organisée en 3 panneaux : **Outils Tournois** (gestion des tournois de poker), **Training Croupier** (entraînement Blackjack + Roulette), **Gestion Comptes** (admin). Zéro serveur, zéro build — s'ouvre directement dans Chrome/Edge.
+Application web interne pour le Barrière Casino Bordeaux, organisée en 3 panneaux : **Outils Tournois** (gestion des tournois de poker), **Training Croupier** (entraînement Blackjack + Roulette), **Gestion Comptes** (admin). Zéro serveur, zéro build — s'ouvre directement dans Chrome/Edge.
 
 Conçue pour être **extensible au-delà des tournois** — architecture de panneaux/rôles pensée pour accueillir de futurs modules (Jeux de Tables au sens large).
 
 **Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (privé)
 **Développeur :** B. Cuvelier (Fideliuss)
 **Convention de nommage :** underscore `_` pour tous les fichiers et dossiers (`prize_pool`, `admin_tournois`, `roulette_paiement`), jamais de tiret.
+
+**Charte graphique :** charte officielle Barrière Casino (redesign 2026-08). Palette de marque (Ambre/Châtaigne en accent principal, Cognac/Sauterne/Jean/Teal/Cobalt en accents d'accompagnement — voir `:root`/`body.light` dans `shared/barriere.css`), police Jost auto-hébergée (`shared/fonts/`, gras italique pour les titres, normal pour le reste, IBM Plex Mono conservé pour les données chiffrées), pictogrammes vectoriels de la charte extraits dans `shared/icons/` (masque CSS recolorable via `.tool-badge.picto` + `--icon`, remplace les emoji de badge).
 
 ---
 
@@ -44,6 +46,8 @@ shared/
   supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats/sessions/tournois/extras/app_roles/training + auth + Edge Function manage-users)
   auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), AUTH._addBadge(), AUTH.clearRolesCache() — chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
+  fonts/            Jost auto-hébergée (variable, normal + italique) — @font-face déclaré dans barriere.css
+  icons/            Pictogrammes vectoriels de la charte, extraits en PNG à masque alpha (recolorables via CSS mask)
   logos/            Logos blanc (écran) / noir (impression) / PNG (courriers)
   favicon/          Favicon et icônes PWA
 
@@ -255,7 +259,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
   - Génération par pool de positions valides (`buildBetPool`) : pour un numéro donné, liste TOUTES les mises possibles (plein, chevaux, transversale, carrés, sixains, + variantes incluant le 0) puis sélection pondérée sans remise par position (`weightedPickPool`) — permet plusieurs mises du même type à des positions différentes dans une même question (ex: 2 chevaux)
   - Positionnement des chips **par le DOM réel** (`chipPosFromDOM`, `getBoundingClientRect()` sur les cellules `[data-num]`) plutôt que par formule de grille — robuste à tout changement de CSS. Règles de position : plein = centre cellule ; cheval = bord partagé ; transversale/sixain = bord supérieur du groupe ; carré = intersection des 4 cellules ; carré 0-1-2-3 = coin supérieur (bord 0/col1 × bord supérieur, cas spécial car le 0 occupe toute la hauteur de colonne)
   - Chips en couleur neutre pendant la question (classe `.rp-chip-overlay:not(.rp-revealed) .rt-chip`) ; en cas d'erreur, classe `rp-revealed` ajoutée → couleurs par type révélées + badges de feedback **groupés par type de mise** (cumul pièces/gain si plusieurs mises du même type)
-- **Conversion Pièces** : valeur de pièce fixée par session, avance manuelle, valeurs configurables (2€ / 2.5€ / 5€ / 10€ / 20€ / 50€, cochables dans la config admin)
+- **Conversion Pièces** : valeur de pièce fixée par session, avance manuelle, valeurs configurables (2€ / 2.5€ / 5€ / 10€ / 20€ / 50€, cochables dans la config admin). Le nombre de pièces à convertir n'est plus un tirage arbitraire (1-50) : `generateBet(level)` (`roulette_tapis.js`) génère une vraie mise pondérée par niveau (type + pièces plafonnées comme dans Calcul Paiement) et son `payout` réel devient le nombre de pièces affiché — montants réalistes (5 à 700+ selon le niveau), type de mise sous-jacent gardé caché (pas affiché, juste tracé dans le `scenario` persisté pour traçabilité)
 - **Pointage Numéro** : orientation aléatoire du tapis (miroir gauche/droite déterminé par le 0), numéros masqués pendant la question puis révélés
 - **Couleur Numéro** : identification rouge/noir/vert, timer par niveau
 - **Tables de multiplication** : vraies flashcards (carte 3D qui se retourne, `.tb-card.flipped`), sans tapis, sans niveau. Choix de la table (×35/×17/×11/×8/×5) puis 20 cartes = les 20 multiplications ×1 à ×20 mélangées (Fisher-Yates), chacune une seule fois. Pas de timer par question — un **chronomètre libre** tourne du début à la fin des 20 cartes (objectif : aller vite), affiché en direct et repris dans le résumé final. Taper la réponse retourne la carte pour révéler le résultat coloré (vert/rouge)
