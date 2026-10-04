@@ -100,3 +100,54 @@ function svFormatDate(iso) {
 function svFormatDay(iso) {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
+
+// Les libellés (user_label…) viennent de la base : toujours échapper avant injection dans innerHTML
+function svEsc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// uuid reçu de la base, avant de le placer dans un attribut onclick
+function svIsId(v) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(v));
+}
+
+function svAgo(iso) {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days <= 0) return 'aujourd\'hui';
+  if (days === 1) return 'hier';
+  if (days < 60) return 'il y a ' + days + ' j';
+  return 'il y a ' + Math.round(days / 30) + ' mois';
+}
+
+// ── Blocs d'affichage partagés (vue croupier + vue manager) ──
+function metric(label, val) {
+  return '<div class="sv-metric"><div class="sv-metric-label">' + label + '</div>'
+    + '<div class="sv-metric-val">' + val + '</div></div>';
+}
+
+function stat(label, val) {
+  return '<div><div class="sv-stat-label">' + label + '</div><div class="sv-stat-val">' + val + '</div></div>';
+}
+
+function trendInline(trend) {
+  if (trend === null) {
+    // Message explicite plutôt qu'un tiret : il faut SV_RECENT sessions récentes + SV_MIN_PREV de comparaison
+    return '<span class="sv-flat sv-trend-none" title="Il faut au moins ' + (SV_RECENT + SV_MIN_PREV)
+      + ' sessions pour comparer les ' + SV_RECENT + ' dernières aux précédentes">Pas assez de sessions</span>';
+  }
+  if (trend > 0) return '<span class="sv-up">▲ ' + trend + '<small>pts</small></span>';
+  if (trend < 0) return '<span class="sv-down">▼ ' + Math.abs(trend) + '<small>pts</small></span>';
+  return '<span class="sv-flat">= 0<small>pt</small></span>';
+}
+
+function renderBestTimes(all) {
+  const best = svBestTimes(all);
+  return '<div class="sv-times">' + SV_RATIOS.map(function(r) {
+    const ms = best[r];
+    return '<div class="sv-time"><div class="sv-time-ratio">× ' + r + '</div>'
+      + '<div class="sv-time-val' + (ms ? '' : ' none') + '">' + (ms ? svFormatTime(ms) : '—') + '</div></div>';
+  }).join('') + '</div>'
+    + '<div class="sv-caption" style="margin-top:6px">Meilleur temps par table — sessions sans erreur uniquement</div>';
+}

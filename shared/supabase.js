@@ -344,6 +344,45 @@ const SB = {
     return data || [];
   },
 
+  // ── Suivi manager (Phase 3) ────────────────────────
+  // Fonctions SQL en SECURITY INVOKER : la RLS limite l'appelant (un non-manager ne reçoit que ses propres lignes)
+  async _rpc(fn, args) {
+    const { data, error } = await _sb.rpc(fn, args || {});
+    if (error) throw error;
+    return data || [];
+  },
+
+  getTrainingRanking(game, level, minSessions) {
+    return this._rpc('training_ranking', { p_game: game, p_level: level || null, p_min: minSessions || 3 });
+  },
+
+  getTrainingTablesBest(ratio) {
+    return this._rpc('training_tables_best', { p_ratio: ratio || null });
+  },
+
+  getTrainingWeakPoints(game, userId) {
+    return this._rpc('training_weak_points', { p_game: game, p_user: userId || null });
+  },
+
+  getTrainingActivity(days) {
+    return this._rpc('training_activity', { p_days: days || 30 });
+  },
+
+  getTrainingActivityWeekly(weeks) {
+    return this._rpc('training_activity_weekly', { p_weeks: weeks || 12 });
+  },
+
+  // Sessions terminées d'un croupier précis (vue Progression) — lecture réservée aux managers par la RLS
+  async getTrainingSessionsOf(userId, game) {
+    const q = _sb.from('training_sessions')
+      .select('*').eq('user_id', userId).not('ended_at', 'is', null)
+      .order('started_at', { ascending: false }).limit(1000);
+    if (game) q.eq('game', game);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data || [];
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);

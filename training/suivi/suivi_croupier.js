@@ -165,11 +165,6 @@ function renderMetrics(all, playedCount, moduleCount) {
     + '</div>';
 }
 
-function metric(label, val) {
-  return '<div class="sv-metric"><div class="sv-metric-label">' + label + '</div>'
-    + '<div class="sv-metric-val">' + val + '</div></div>';
-}
-
 function renderModuleCard(m) {
   const all = _svcByGame[m.game];
   const level = _svcLevel[m.game] || 'all';
@@ -199,17 +194,6 @@ function renderModuleCard(m) {
   return html + '</div>';
 }
 
-function stat(label, val) {
-  return '<div><div class="sv-stat-label">' + label + '</div><div class="sv-stat-val">' + val + '</div></div>';
-}
-
-function trendInline(trend) {
-  if (trend === null) return '<span class="sv-flat">—</span>';
-  if (trend > 0) return '<span class="sv-up">▲ ' + trend + '<small>pts</small></span>';
-  if (trend < 0) return '<span class="sv-down">▼ ' + Math.abs(trend) + '<small>pts</small></span>';
-  return '<span class="sv-flat">= 0<small>pt</small></span>';
-}
-
 function renderTrend(trend) {
   return '<div><div class="sv-stat-label">Tendance</div><div class="sv-stat-val">' + trendInline(trend) + '</div></div>';
 }
@@ -234,16 +218,6 @@ function renderBars(list) {
   }).join('');
   return '<div class="sv-bars">' + bars + '</div>'
     + '<div class="sv-caption">Précision des ' + recent.length + ' dernières sessions (la plus récente à droite)</div>';
-}
-
-function renderBestTimes(all) {
-  const best = svBestTimes(all);
-  return '<div class="sv-times">' + SV_RATIOS.map(function(r) {
-    const ms = best[r];
-    return '<div class="sv-time"><div class="sv-time-ratio">× ' + r + '</div>'
-      + '<div class="sv-time-val' + (ms ? '' : ' none') + '">' + (ms ? svFormatTime(ms) : '—') + '</div></div>';
-  }).join('') + '</div>'
-    + '<div class="sv-caption" style="margin-top:6px">Meilleur temps par table — sessions sans erreur uniquement</div>';
 }
 
 function renderHistory(m, list) {
