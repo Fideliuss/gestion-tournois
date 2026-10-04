@@ -25,32 +25,8 @@
     <div class="hdr-title">Meilleure <em>Main</em></div>
   </div>
 
-  <!-- ══ Sélection de niveau ══ -->
-  <div id="um-level-screen" style="width:100%;max-width:480px">
-    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
-      Choisissez votre niveau — pas de chronomètre, prenez le temps de réfléchir
-    </div>
-    <div class="level-grid">
-      <div class="level-card" onclick="startUthMain('facile')">
-        <div class="level-name facile">Facile</div>
-        <div class="level-timer">5</div>
-        <div class="level-unit">cartes</div>
-      </div>
-      <div class="level-card" onclick="startUthMain('medium')">
-        <div class="level-name medium">Médium</div>
-        <div class="level-timer">7</div>
-        <div class="level-unit">cartes</div>
-      </div>
-      <div class="level-card" onclick="startUthMain('expert')">
-        <div class="level-name expert">Expert</div>
-        <div class="level-timer">7</div>
-        <div class="level-unit">cartes + pièges</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Entraînement ══ -->
-  <div id="um-training-screen" style="display:none;width:100%;max-width:640px">
+  <!-- ══ Entraînement (la session démarre dès l'ouverture : pas de niveaux, pas de chronomètre) ══ -->
+  <div id="um-training-screen" style="width:100%;max-width:640px">
 
     <div class="training-header">
       <span class="training-progress" id="um-progress">Question 1 / 10</span>
@@ -62,7 +38,7 @@
 
     <div class="uth-table" id="um-table"></div>
 
-    <div class="answer-question" id="um-question" style="margin-bottom:14px"></div>
+    <div class="answer-question" id="um-question" style="margin-bottom:14px">Quelle est la meilleure combinaison de 5 cartes ?</div>
     <div class="uth-answers" id="um-answers"></div>
 
     <div class="feedback-bar empty" id="um-feedback"></div>
@@ -73,8 +49,7 @@
   <div id="um-summary-screen" style="display:none">
     <div class="session-summary">
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
-           id="um-summary-level"></div>
+                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px">Meilleure main</div>
       <div class="summary-score-big"   id="um-summary-score">8/10</div>
       <div class="summary-score-label" id="um-summary-pct">80%</div>
       <div class="summary-verdict"     id="um-summary-verdict">Excellent !</div>
