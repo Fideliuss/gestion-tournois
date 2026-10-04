@@ -72,7 +72,7 @@ async function startConversionLevel(level) {
   document.getElementById('cv-training-screen').style.display = '';
 
   try {
-    const s = await SB.startTrainingSession('roulette-conversion');
+    const s = await SB.startTrainingSession('roulette-conversion', { level: _cvLevel, chipValue: _cvChipValue });
     _cvSessionId = s.id;
   } catch(e) {}
 

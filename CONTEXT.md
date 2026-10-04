@@ -24,7 +24,7 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 - **Phase 0** — Restructuration : hub multi-panneaux, rôles/permissions par panel, licence propriétaire. Livrée.
 - **Phase 1** — Training Croupier : Blackjack (BJ Paiement, BJ Score). Livrée.
 - **Phase 2** — Training Croupier : Roulette Anglaise (Couleur, Pointage, Conversion, Calcul Paiement). Livrée, taguée `v2.0.0` (2026-07-03).
-- **Phase 3** — Suivi résultats : vue historique croupier + vue manager (tous les croupiers). À venir.
+- **Phase 3** — Suivi résultats : vue historique croupier (« Mes résultats ») + vue manager (« Suivi équipe »). Développée (étapes 1 à 3, mergées dans `develop` ou en PR), **release prévue à la fin de la phase** (pas avant).
 - **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet. À venir.
 
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
@@ -77,6 +77,11 @@ admin/
 training/
   training.html          Sous-hub Training Croupier (Blackjack / Roulette / Ultimate Poker à venir)
   training.css            Styles partagés training (level-card, game-card, answer-zone, feedback-bar)
+  suivi/                  Phase 3 — Suivi résultats (voir section Suivi résultats)
+    suivi_croupier.html/.js  « Mes résultats » : historique, record, tendance de l'utilisateur connecté, guard panel:'training'
+    suivi_manager.html/.js   « Suivi équipe » : classement, progression, points faibles, activité — guard panel:'training-suivi'
+    suivi_common.js          Modules suivis (SV_FAMILIES / SV_MODULES), niveaux, calculs et blocs d'affichage partagés (précision, tendance, meilleurs temps, svEsc) — utilisé par les deux vues
+    suivi.css                Styles des pages de suivi (.sv-*)
   blackjack/
     blackjack_hub.html      Sous-hub Blackjack + modal config admin (plages de mise, timers, cartes/niveau)
     blackjack.html / .js    BJ Paiement
@@ -90,7 +95,6 @@ training/
     roulette_pointage.html / .js    Pointage Numéro
     roulette_couleur.html / .js     Couleur Numéro
     roulette_tables.html / .js      Tables de multiplication (flashcard ×35/×17/×11/×8/×5)
-  resultats/               Phase 3 — pas encore créé (voir roadmap)
 
 supabase/
   functions/manage-users/index.ts   Edge Function Deno — CRUD comptes, vérif admin via app_metadata côté serveur
@@ -98,6 +102,8 @@ supabase/
     training_tables.sql              training_config, training_sessions, training_results (+ RLS)
     fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
     add_blackjack_cards_config.sql   Ajoute la clé "cards" (nb cartes/niveau BJ Score) au training_config existant
+    phase3_suivi_meta_et_acces_manager.sql  Phase 3 : training_sessions.meta (jsonb) + user_label, fonction can_view_training_stats(), policies de lecture manager (appliquée sur la base le 2026-10-04)
+    phase3_suivi_fonctions_manager.sql      Phase 3 : fonctions d'agrégat de la vue manager (training_ranking, training_tables_best, training_weak_points, training_activity, training_activity_weekly) — appliquée le 2026-10-04
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
@@ -125,7 +131,7 @@ supabase/
   - `shared/auth.js` : `AUTH.guard({ loginUrl, role, panel })` — overlay spinner, vérif session, vérif rôle (`role`), vérif panneau (`panel`, via table `app_roles`), badge utilisateur
   - Rôles : entièrement personnalisables via **Gestion Comptes** (table `app_roles`) — `admin`, `mcd`, `floor` sont les seeds par défaut, mais tout rôle custom (slug, label, couleur, panels) peut être créé/édité/supprimé
   - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable) — `raw_user_meta_data.role` conservé en fallback pendant la période de migration
-  - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent, pas d'enfants pour l'instant). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé — **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
+  - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent) → `training-suivi` (enfant : voir les résultats de toute l'équipe, utilisé par la RLS via `can_view_training_stats()`). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé — **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
   - Gestion des comptes : `admin/comptes.html` — CRUD comptes (email+password+role) + CRUD rôles (label, couleur, panels) + table croisée permissions
   - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin côté serveur avant d'utiliser `auth.admin.*`
   - Changement de mot de passe : modal 🔑 dans le badge utilisateur (`AUTH._openChangePwd()`)
@@ -265,7 +271,22 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Tables de multiplication** : vraies flashcards (carte 3D qui se retourne, `.tb-card.flipped`), sans tapis, sans niveau. Choix de la table (×35/×17/×11/×8/×5) puis 20 cartes = les 20 multiplications ×1 à ×20 mélangées (Fisher-Yates), chacune une seule fois. Pas de timer par question — un **chronomètre libre** tourne du début à la fin des 20 cartes (objectif : aller vite), affiché en direct et repris dans le résumé final. Taper la réponse retourne la carte pour révéler le résultat coloré (vert/rouge)
 - **Ordre Paiement** : non implémenté — carte "Bientôt disponible" dans le hub
 
-Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`.
+Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`. Chaque session porte `meta` (jsonb : `level`, `ratio`, `chipValue`, `elapsedMs` selon le module — écrit par `SB.startTrainingSession(game, meta)` / `endTrainingSession(..., meta)`) et `user_label` (préfixe e-mail dénormalisé, car `auth.users` est illisible côté navigateur). Un croupier ne lit que ses lignes (`*_own`) ; les rôles avec le panel `training-suivi` (et les admins) lisent tout (`*_manager_read`).
+
+### Suivi résultats (Phase 3)
+
+- **Vue croupier — « Mes résultats »** (`training/suivi/suivi_croupier.html`, tuile dans `training.html`) : **navigation en 3 niveaux** — onglets *Vue d'ensemble / Black Jack / Roulette Anglaise* (avec nombre de sessions), puis pastilles de module dans un jeu (« Tous les modules » ou un seul ; modules sans session grisés). La vue d'ensemble affiche un tableau cliquable par jeu (sessions, record, moyenne, tendance par module). La vue courante est portée par le **hash de l'URL** (`#`, `#roulette`, `#roulette/roulette-tables`) : bouton retour et liens directs fonctionnent. Regroupement des modules en jeux : `SV_FAMILIES` / champ `family` de `SV_MODULES` dans `suivi_common.js` (à compléter en Phase 4). Chaque carte module : nombre de sessions, record, moyenne des 5 dernières, tendance (5 dernières vs 5 précédentes, affichée à partir de 8 sessions), histogramme des 12 dernières sessions, historique paginé (8 + « Tout voir »), filtre par niveau (chips Tous/Facile/Médium/Expert quand le module a des niveaux). Tables ×: meilleur temps par table, **sessions sans erreur uniquement** et avec chrono mesuré (`meta.elapsedMs`, donc pas d'historique avant octobre 2026).
+- `roulette-mixte` (module abandonné) est ignoré par les vues (absent de `SV_MODULES`) ; une session orpheline subsiste en base.
+- Source des données : `SB.getMyTrainingSessions()` ; aucun calcul serveur nécessaire pour la vue croupier (volume faible : un seul utilisateur).
+- **Vue manager — « Suivi équipe »** (`training/suivi/suivi_manager.html`, guard `panel: 'training-suivi'`, tuile `#tile-suivi-equipe` de `training.html` masquée tant que le rôle n'a pas le panel) : 4 onglets portés par le hash (`#classement`, `#progression/<user_id>`, `#faibles`, `#activite`). Une ligne de classement ou d'activité ouvre la progression du croupier.
+  - **Classement** : moyenne des 5 dernières sessions par module et niveau ; au moins `SVM_MIN_RANKED` (3) sessions pour être numéroté, les autres sont listés dessous (« pas encore classés »). Tables × : meilleur temps par table (sessions sans erreur chronométrées).
+  - **Progression** : courbe SVG (un point par session + moyenne glissante sur 5), stats, meilleurs temps pour les Tables ×.
+  - **Points faibles** : taux d'erreur par facette (type de mise, valeur de pièce, table, numéro, nombre de cartes, tranche de mise) pour l'équipe ou un croupier ; seuil de 5 tentatives (3 pour un croupier seul). Pour Calcul Paiement, une question compte une fois par type de mise qu'elle contient.
+  - **Activité** : sessions et croupiers actifs sur 7/30/90 jours, sessions par semaine (12 semaines), badge « Inactif » au-delà de `SVM_INACTIVE_DAYS` (14 j).
+- **Données** : 5 fonctions SQL `training_ranking`, `training_tables_best`, `training_weak_points`, `training_activity`, `training_activity_weekly` (migration `phase3_suivi_fonctions_manager.sql`), appelées via `SB.getTraining*` (`shared/supabase.js`) ; plafond 1000 lignes Supabase contourné en agrégeant en base. Toutes **SECURITY INVOKER** : la RLS s'applique à l'appelant (un non-manager ne reçoit que ses propres lignes — vérifié par simulation de rôles). La progression d'un croupier lit directement `training_sessions` (policy `*_manager_read`).
+- **Sécurité front** : tout libellé issu de la base (`user_label`, modifiable par son propriétaire) passe par `svEsc()` avant `innerHTML` ; les `user_id` placés dans un `onclick` sont validés par `svIsId()`. Le masquage de la tuile côté client est du confort — le verrou réel est la RLS (`app_metadata.role`).
+- **Suppression d'un compte** (Gestion Comptes → Edge Function `manage-users`, `auth.admin.deleteUser`) : `training_sessions` et `training_results` ont `user_id` en `ON DELETE CASCADE` vers `auth.users` (vérifié sur la base), donc tout l'historique de training part avec le compte — y compris `user_label`. Aucune autre table n'est liée à un compte. La confirmation de `comptes.html` le dit explicitement. **Toute nouvelle table liée à un utilisateur doit déclarer son `user_id` avec `ON DELETE CASCADE`.**
+- **Données incomplètes connues** : pas de chrono (`elapsedMs`) pour les sessions Tables antérieures à octobre 2026 ; pas de niveau pour BJ Paiement et Tables (modules sans niveau) ; 1 session `roulette-mixte` orpheline en base (module abandonné, ignorée).
 
 ---
 
@@ -294,7 +315,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - `AUTH.guard({ panel })` : les admins passent toujours, peu importe la config de panels
 - **Bug corrigé (2026-07) : sous-pages avec `role:'admin'` en dur sous un hub gardé par `panel`** — `admin_tournois.html` vérifie `panel:'admin-tournois'`, mais ses 4 sous-pages (`extras.html`, `declaration.html`, `courriers.html`, `config_tournois.html`) vérifiaient `role:'admin'` codé en dur (reliquat d'avant le système de panels), donc un MCD avec le panel accordé voyait la tuile mais se faisait rejeter en cliquant dessus. **Toute nouvelle page ajoutée sous un hub gardé par panel doit reprendre le même `panel:` dans son propre guard, jamais un `role:` fixe**, sauf si la page doit rester délibérément admin-only (comme `comptes.html`)
 - `training/roulette/roulette_tapis.js` est partagé par TOUS les modules roulette qui affichent un tapis (Paiement, Pointage, Couleur) — toute modif de `renderTapis`, `renderChips`, `buildBetPool` les impacte tous. Conversion et Tables de multiplication ne l'utilisent pas (pas de tapis)
-- `training/` est organisé en sous-dossiers par jeu (`blackjack/`, `roulette/`) depuis juillet 2026 — seuls `training.html` et `training.css` restent à la racine (partagés). Prévoir `resultats/` (Phase 3) et `uth/` (Phase 4) sur le même modèle
+- `training/` est organisé en sous-dossiers par jeu (`blackjack/`, `roulette/`) depuis juillet 2026 — seuls `training.html` et `training.css` restent à la racine (partagés). `suivi/` (Phase 3) en place depuis octobre 2026 ; prévoir `uth/` (Phase 4) sur le même modèle
 - Positionnement des chips roulette : approche **DOM-based** (`getBoundingClientRect`), pas de formule de grille — voir `chipPosFromDOM` dans `roulette_tapis.js`
 - Transitions de page (fade in/out) gérées dans `shared/barriere.js` — classe `is-leaving` sur `<body>`
 - Lien `.back` est `position:fixed` top-left sur toutes les pages

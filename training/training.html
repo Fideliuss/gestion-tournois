@@ -43,6 +43,17 @@
       <div class="tool-soon">Bientôt disponible</div>
     </div>
 
+    <a href="suivi/suivi_croupier.html" class="tool-card c-sauterne">
+      <div class="tool-badge picto" data-icon="checklist"></div>
+      <div class="tool-name">Mes <em>Résultats</em></div>
+    </a>
+
+    <!-- Affichée uniquement si le rôle a le panel 'training-suivi' (ou admin) — voir script ci-dessous -->
+    <a href="suivi/suivi_manager.html" class="tool-card c-teal" id="tile-suivi-equipe" style="display:none">
+      <div class="tool-badge picto" data-icon="account"></div>
+      <div class="tool-name">Suivi <em>Équipe</em></div>
+    </a>
+
   </div>
 
   <div class="footer">Barrière Casino Bordeaux · Training Croupier</div>
@@ -52,6 +63,21 @@
 <script src="../shared/barriere.js"></script>
 <script src="../shared/supabase.js"></script>
 <script src="../shared/auth.js"></script>
-<script>AUTH.guard({ loginUrl: '../login.html', panel: 'training' });</script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'training' }).then(async function(user) {
+  if (!user) return;
+  const role = user.user_metadata?.role || 'floor';
+  let allowed = role === 'admin';
+  if (!allowed) {
+    try {
+      const roles = await SB.getRoles();
+      const entry = roles.find(function(r) { return r.slug === role; });
+      allowed = !!(entry && (entry.panels || []).includes('training-suivi'));
+    } catch (e) {}
+  }
+  // Confort d'affichage uniquement : l'accès aux données d'équipe est verrouillé par la RLS en base
+  if (allowed) document.getElementById('tile-suivi-equipe').style.display = '';
+});
+</script>
 </body>
 </html>

@@ -63,7 +63,7 @@ async function selectTable(ratio) {
   document.getElementById('tb-table-badge').textContent = '× ' + ratio;
 
   try {
-    const s = await SB.startTrainingSession('roulette-tables');
+    const s = await SB.startTrainingSession('roulette-tables', { ratio: _tbRatio });
     _tbSessionId = s.id;
   } catch(e) {}
 
@@ -165,7 +165,7 @@ async function submitTables() {
 async function finishTables() {
   stopStopwatch();
   updateStopwatchDisplay();
-  try { if (_tbSessionId) await SB.endTrainingSession(_tbSessionId, TB_DECK_SIZE, _tbCorrect); } catch(e) {}
+  try { if (_tbSessionId) await SB.endTrainingSession(_tbSessionId, TB_DECK_SIZE, _tbCorrect, { ratio: _tbRatio, elapsedMs: _tbElapsedMs }); } catch(e) {}
 
   document.getElementById('tb-training-screen').style.display = 'none';
   document.getElementById('tb-summary-screen').style.display  = '';

@@ -69,7 +69,7 @@ async function startWithLevel(level) {
   document.getElementById('training-screen').style.display = '';
 
   try {
-    const s = await SB.startTrainingSession('blackjack-score');
+    const s = await SB.startTrainingSession('blackjack-score', { level: _level });
     _sessionId = s.id;
   } catch(e) {}
 

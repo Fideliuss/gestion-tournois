@@ -285,7 +285,8 @@ const SB = {
     if (error) throw error;
   },
 
-  async startTrainingSession(game) {
+  // meta : contexte de la session (level, ratio, chipValue...) — exploité par le suivi (Phase 3)
+  async startTrainingSession(game, meta) {
     const session = await this.getSession();
     if (!session) throw new Error('Non authentifié');
 
@@ -304,15 +305,21 @@ const SB = {
       await _sb.from('training_sessions').delete().in('id', ids);
     }
 
+    // user_label dénormalisé : le navigateur ne peut pas lire auth.users (vue manager)
+    const label = (session.user.email || '').split('@')[0] || null;
     const { data, error } = await _sb.from('training_sessions')
-      .insert({ user_id: session.user.id, game }).select().single();
+      .insert({ user_id: session.user.id, game, user_label: label, meta: meta || {} })
+      .select().single();
     if (error) throw error;
     return data;
   },
 
-  async endTrainingSession(sessionId, total, correct) {
+  // meta (optionnel) remplace le meta de départ — le module passe l'objet complet (ex. { ratio, elapsedMs })
+  async endTrainingSession(sessionId, total, correct, meta) {
+    const patch = { ended_at: new Date().toISOString(), total, correct };
+    if (meta) patch.meta = meta;
     const { error } = await _sb.from('training_sessions')
-      .update({ ended_at: new Date().toISOString(), total, correct })
+      .update(patch)
       .eq('id', sessionId);
     if (error) throw error;
   },
@@ -331,6 +338,45 @@ const SB = {
     const q = _sb.from('training_sessions')
       .select('*').eq('user_id', session.user.id).not('ended_at', 'is', null)
       .order('started_at', { ascending: false });
+    if (game) q.eq('game', game);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data || [];
+  },
+
+  // ── Suivi manager (Phase 3) ────────────────────────
+  // Fonctions SQL en SECURITY INVOKER : la RLS limite l'appelant (un non-manager ne reçoit que ses propres lignes)
+  async _rpc(fn, args) {
+    const { data, error } = await _sb.rpc(fn, args || {});
+    if (error) throw error;
+    return data || [];
+  },
+
+  getTrainingRanking(game, level, minSessions) {
+    return this._rpc('training_ranking', { p_game: game, p_level: level || null, p_min: minSessions || 3 });
+  },
+
+  getTrainingTablesBest(ratio) {
+    return this._rpc('training_tables_best', { p_ratio: ratio || null });
+  },
+
+  getTrainingWeakPoints(game, userId) {
+    return this._rpc('training_weak_points', { p_game: game, p_user: userId || null });
+  },
+
+  getTrainingActivity(days) {
+    return this._rpc('training_activity', { p_days: days || 30 });
+  },
+
+  getTrainingActivityWeekly(weeks) {
+    return this._rpc('training_activity_weekly', { p_weeks: weeks || 12 });
+  },
+
+  // Sessions terminées d'un croupier précis (vue Progression) — lecture réservée aux managers par la RLS
+  async getTrainingSessionsOf(userId, game) {
+    const q = _sb.from('training_sessions')
+      .select('*').eq('user_id', userId).not('ended_at', 'is', null)
+      .order('started_at', { ascending: false }).limit(1000);
     if (game) q.eq('game', game);
     const { data, error } = await q;
     if (error) throw error;
