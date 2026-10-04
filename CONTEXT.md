@@ -77,6 +77,10 @@ admin/
 training/
   training.html          Sous-hub Training Croupier (Blackjack / Roulette / Ultimate Poker à venir)
   training.css            Styles partagés training (level-card, game-card, answer-zone, feedback-bar)
+  suivi/                  Phase 3 — Suivi résultats (voir section Suivi résultats)
+    suivi_croupier.html/.js  « Mes résultats » : historique, record, tendance de l'utilisateur connecté, guard panel:'training'
+    suivi_common.js          Modules suivis (SV_MODULES), niveaux, calculs partagés (précision, tendance, meilleurs temps) — réutilisé par la vue manager
+    suivi.css                Styles des pages de suivi (.sv-*)
   blackjack/
     blackjack_hub.html      Sous-hub Blackjack + modal config admin (plages de mise, timers, cartes/niveau)
     blackjack.html / .js    BJ Paiement
@@ -268,6 +272,13 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 
 Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`. Chaque session porte `meta` (jsonb : `level`, `ratio`, `chipValue`, `elapsedMs` selon le module — écrit par `SB.startTrainingSession(game, meta)` / `endTrainingSession(..., meta)`) et `user_label` (préfixe e-mail dénormalisé, car `auth.users` est illisible côté navigateur). Un croupier ne lit que ses lignes (`*_own`) ; les rôles avec le panel `training-suivi` (et les admins) lisent tout (`*_manager_read`).
 
+### Suivi résultats (Phase 3)
+
+- **Vue croupier — « Mes résultats »** (`training/suivi/suivi_croupier.html`, tuile dans `training.html`) : par module, nombre de sessions, record, moyenne des 5 dernières, tendance (5 dernières vs 5 précédentes, affichée à partir de 8 sessions), histogramme des 12 dernières sessions, historique paginé (8 + « Tout voir »), filtre par niveau (chips Tous/Facile/Médium/Expert quand le module a des niveaux). Tables ×: meilleur temps par table, **sessions sans erreur uniquement** et avec chrono mesuré (`meta.elapsedMs`, donc pas d'historique avant octobre 2026).
+- `roulette-mixte` (module abandonné) est ignoré par les vues (absent de `SV_MODULES`) ; une session orpheline subsiste en base.
+- Source des données : `SB.getMyTrainingSessions()` ; aucun calcul serveur nécessaire pour la vue croupier (volume faible : un seul utilisateur).
+- **À venir (étape 3)** : vue manager (`panel: 'training-suivi'`) — classement équipe par module/niveau, progression d'un croupier, points faibles, activité ; agrégats via fonctions SQL (plafond 1000 lignes Supabase).
+
 ---
 
 ## Conventions de code
@@ -295,7 +306,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - `AUTH.guard({ panel })` : les admins passent toujours, peu importe la config de panels
 - **Bug corrigé (2026-07) : sous-pages avec `role:'admin'` en dur sous un hub gardé par `panel`** — `admin_tournois.html` vérifie `panel:'admin-tournois'`, mais ses 4 sous-pages (`extras.html`, `declaration.html`, `courriers.html`, `config_tournois.html`) vérifiaient `role:'admin'` codé en dur (reliquat d'avant le système de panels), donc un MCD avec le panel accordé voyait la tuile mais se faisait rejeter en cliquant dessus. **Toute nouvelle page ajoutée sous un hub gardé par panel doit reprendre le même `panel:` dans son propre guard, jamais un `role:` fixe**, sauf si la page doit rester délibérément admin-only (comme `comptes.html`)
 - `training/roulette/roulette_tapis.js` est partagé par TOUS les modules roulette qui affichent un tapis (Paiement, Pointage, Couleur) — toute modif de `renderTapis`, `renderChips`, `buildBetPool` les impacte tous. Conversion et Tables de multiplication ne l'utilisent pas (pas de tapis)
-- `training/` est organisé en sous-dossiers par jeu (`blackjack/`, `roulette/`) depuis juillet 2026 — seuls `training.html` et `training.css` restent à la racine (partagés). Prévoir `resultats/` (Phase 3) et `uth/` (Phase 4) sur le même modèle
+- `training/` est organisé en sous-dossiers par jeu (`blackjack/`, `roulette/`) depuis juillet 2026 — seuls `training.html` et `training.css` restent à la racine (partagés). `suivi/` (Phase 3) en place depuis octobre 2026 ; prévoir `uth/` (Phase 4) sur le même modèle
 - Positionnement des chips roulette : approche **DOM-based** (`getBoundingClientRect`), pas de formule de grille — voir `chipPosFromDOM` dans `roulette_tapis.js`
 - Transitions de page (fade in/out) gérées dans `shared/barriere.js` — classe `is-leaving` sur `<body>`
 - Lien `.back` est `position:fixed` top-left sur toutes les pages
