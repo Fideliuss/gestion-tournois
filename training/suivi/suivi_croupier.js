@@ -31,8 +31,7 @@ async function initSuiviCroupier() {
   });
 
   if (!Object.keys(_svcByGame).length) {
-    root.innerHTML = '<div class="sv-empty">Aucune session terminée pour l\'instant.<br>'
-      + 'Lance un module depuis <a href="../training.html">Training Croupier</a> : tes résultats apparaîtront ici.</div>';
+    root.innerHTML = '<div class="sv-empty">Pas de résultats</div>';
     return;
   }
 
@@ -105,7 +104,7 @@ function renderModuleRow(m) {
   const name = m.name + ' <em>' + m.em + '</em>';
   if (!list) {
     return '<div class="sv-mrow sv-none"><span class="sv-mname">' + name + '</span>'
-      + '<span class="sv-mnone">Pas encore essayé</span></div>';
+      + '<span class="sv-mnone">Pas de résultats</span></div>';
   }
   const st = svStats(list);
   return '<button class="sv-mrow" onclick="svcGo(\'' + m.family + '\',\'' + m.game + '\')">'
@@ -120,7 +119,6 @@ function renderModuleRow(m) {
 function renderFamily(familyId, moduleKey) {
   const mods = svModulesOf(familyId);
   const played = mods.filter(function(m) { return _svcByGame[m.game]; });
-  const untried = mods.filter(function(m) { return !_svcByGame[m.game]; });
 
   let html = renderMetrics(svcSessionsOf(familyId), played.length, mods.length);
   html += renderModulePills(familyId, mods, moduleKey);
@@ -128,15 +126,11 @@ function renderFamily(familyId, moduleKey) {
   if (moduleKey) {
     html += _svcByGame[moduleKey]
       ? renderModuleCard(svModule(moduleKey))
-      : '<div class="sv-empty">Pas encore de session sur ce module.</div>';
+      : '<div class="sv-empty">Pas de résultats</div>';
   } else if (!played.length) {
-    html += '<div class="sv-empty">Aucune session sur ce jeu pour l\'instant.</div>';
+    html += '<div class="sv-empty">Pas de résultats</div>';
   } else {
     html += played.map(renderModuleCard).join('');
-    if (untried.length) {
-      html += '<div class="sv-untried">Pas encore essayé : '
-        + untried.map(function(m) { return m.name + ' ' + m.em; }).join(' · ') + '</div>';
-    }
   }
   return html;
 }
@@ -188,7 +182,7 @@ function renderModuleCard(m) {
     + (m.levels ? renderLevelChips(m, all, level) : '') + '</div>';
 
   if (!list.length) {
-    return html + '<div class="sv-empty" style="padding:20px">Aucune session à ce niveau.</div></div>';
+    return html + '<div class="sv-empty" style="padding:20px">Pas de résultats</div></div>';
   }
 
   const st = svStats(list);

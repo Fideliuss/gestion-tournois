@@ -94,7 +94,6 @@ training/
     roulette_pointage.html / .js    Pointage Numéro
     roulette_couleur.html / .js     Couleur Numéro
     roulette_tables.html / .js      Tables de multiplication (flashcard ×35/×17/×11/×8/×5)
-  resultats/               Phase 3 — pas encore créé (voir roadmap)
 
 supabase/
   functions/manage-users/index.ts   Edge Function Deno — CRUD comptes, vérif admin via app_metadata côté serveur
