@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qui gagne ? — Ultimate Texas Hold'em — Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../../shared/barriere.css" />
+  <link rel="stylesheet" href="../training.css" />
+  <link rel="stylesheet" href="uth.css" />
+  <style>
+    .app { padding: 64px 20px 80px; display: flex; flex-direction: column; align-items: center; }
+    .hdr { margin-bottom: 40px; text-align: center; }
+  </style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="uth_hub.html" class="back">← Ultimate Texas Hold'em</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Qui <em>Gagne ?</em></div>
+  </div>
+
+  <!-- ══ Sélection de niveau ══ -->
+  <div id="ug-level-screen" style="width:100%;max-width:480px">
+    <div style="font-size:13px;color:var(--text-dim);text-align:center;margin-bottom:24px;font-family:var(--f-ui)">
+      Choisissez votre niveau — pas de chronomètre, prenez le temps de réfléchir
+    </div>
+    <div class="level-grid">
+      <div class="level-card" onclick="startUthGagnant('facile')">
+        <div class="level-name facile">Facile</div>
+        <div class="level-timer" style="font-size:15px;line-height:1.4">Combinaisons<br>différentes</div>
+        <div class="level-unit">&nbsp;</div>
+      </div>
+      <div class="level-card" onclick="startUthGagnant('medium')">
+        <div class="level-name medium">Médium</div>
+        <div class="level-timer" style="font-size:15px;line-height:1.4">Même combinaison<br>kickers</div>
+        <div class="level-unit">&nbsp;</div>
+      </div>
+      <div class="level-card" onclick="startUthGagnant('expert')">
+        <div class="level-name expert">Expert</div>
+        <div class="level-timer" style="font-size:15px;line-height:1.4">Égalités<br>croupier qualifié ?</div>
+        <div class="level-unit">&nbsp;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Entraînement ══ -->
+  <div id="ug-training-screen" style="display:none;width:100%;max-width:640px">
+
+    <div class="training-header">
+      <span class="training-progress" id="ug-progress">Question 1 / 10</span>
+      <span class="training-score"    id="ug-score">Score : 0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="ug-progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="uth-table" id="ug-table"></div>
+
+    <div class="answer-question" id="ug-question" style="margin-bottom:14px"></div>
+    <div class="uth-answers uth-answers-3" id="ug-winner-btns">
+      <button class="uth-ans" data-v="1"  onclick="ugPickWinner(1)">Le joueur</button>
+      <button class="uth-ans" data-v="0"  onclick="ugPickWinner(0)">Égalité</button>
+      <button class="uth-ans" data-v="-1" onclick="ugPickWinner(-1)">Le croupier</button>
+    </div>
+
+    <!-- Expert uniquement : qualification du croupier -->
+    <div id="ug-qualif-zone" style="display:none;margin-top:14px">
+      <div class="answer-question" style="margin-bottom:10px">Le croupier est-il qualifié ?</div>
+      <div class="uth-answers uth-answers-2" id="ug-qualif-btns">
+        <button class="uth-ans" data-v="1" onclick="ugPickQualified(true)">Oui — au moins une paire</button>
+        <button class="uth-ans" data-v="0" onclick="ugPickQualified(false)">Non — carte haute</button>
+      </div>
+    </div>
+    <button class="btn btn-gold uth-next" id="ug-validate-btn" style="display:none;padding:12px 28px;font-size:13px" onclick="ugSubmit()" disabled>Valider →</button>
+
+    <div class="feedback-bar empty" id="ug-feedback"></div>
+    <div class="uth-table" id="ug-result" style="margin-top:20px;margin-bottom:0"></div>
+    <button class="btn btn-gold uth-next" id="ug-next-btn" style="display:none;padding:12px 28px;font-size:13px" onclick="ugNext()">Suivant →</button>
+  </div>
+
+  <!-- ══ Résumé ══ -->
+  <div id="ug-summary-screen" style="display:none">
+    <div class="session-summary">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+                  font-family:var(--f-ui);color:var(--text-muted);margin-bottom:12px"
+           id="ug-summary-level"></div>
+      <div class="summary-score-big"   id="ug-summary-score">8/10</div>
+      <div class="summary-score-label" id="ug-summary-pct">80%</div>
+      <div class="summary-verdict"     id="ug-summary-verdict">Excellent !</div>
+      <div class="summary-actions">
+        <button class="btn btn-gold" onclick="ugRestart()" style="padding:12px 28px;font-size:13px">↺ Rejouer</button>
+        <a href="uth_hub.html" class="btn btn-ghost" style="padding:12px 28px;font-size:13px;text-decoration:none">← Ultimate Texas Hold'em</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../shared/barriere.js"></script>
+<script src="../../shared/supabase.js"></script>
+<script src="../../shared/auth.js"></script>
+<script src="uth_engine.js"></script>
+<script src="uth_ui.js"></script>
+<script src="uth_gagnant.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../../login.html', panel: 'training' }).then(function(user) {
+  if (!user) return;
+  initUthGagnant();
+});
+</script>
+</body>
+</html>

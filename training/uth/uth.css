@@ -18,6 +18,9 @@
 .playing-card.uth-dim  { opacity: .3; filter: saturate(.5); }
 .playing-card.uth-best { box-shadow: 0 0 0 2px var(--gold), 2px 4px 12px rgba(0,0,0,.4); }
 
+/* ── Duel : joueur et croupier côte à côte ── */
+.uth-duel { display: flex; justify-content: center; align-items: flex-start; gap: 36px; flex-wrap: wrap; width: 100%; }
+
 /* ── Grille de réponses (une touche par combinaison) ── */
 .uth-answers {
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
@@ -32,6 +35,9 @@
 .uth-ans:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-bg); }
 .uth-ans:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .uth-ans:disabled { cursor: default; opacity: .55; }
+.uth-ans.sel { border-color: var(--gold); background: var(--gold-bg); color: var(--gold); }
+.uth-answers-3 { grid-template-columns: repeat(3, 1fr); }
+.uth-answers-2 { grid-template-columns: repeat(2, 1fr); }
 .uth-ans.ok { opacity: 1; border-color: #6dcc8e; background: rgba(109,204,142,.14); color: #6dcc8e; }
 .uth-ans.ko { opacity: 1; border-color: #e07a68; background: rgba(224,122,104,.14); color: #e07a68; }
 body.light .uth-ans.ok { color: #2e7d4f; border-color: #2e7d4f; }
@@ -42,6 +48,8 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 
 @media (max-width: 620px) {
   .uth-answers { grid-template-columns: repeat(2, 1fr); }
+  .uth-answers-3 { grid-template-columns: 1fr; }
+  .uth-duel { gap: 18px; }
   .uth-cards { gap: 6px; }
   .uth-cards .playing-card { width: 52px; height: 74px; }
   .uth-cards .card-center { font-size: 20px; }

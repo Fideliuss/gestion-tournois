@@ -79,7 +79,8 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 ### Ultimate Texas Hold'em
 
 - **Meilleure main** — le croupier identifie la meilleure combinaison. *Facile* : 5 cartes. *Médium* : 2 cartes du joueur + board. *Expert* : mêmes 7 cartes avec des pièges (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqués après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
-- **Qui gagne ?** et **Calcul des gains** (Ante, Blind, Play, Trips, jackpot JP1) — *bientôt disponibles*
+- **Qui gagne ?** — le croupier voit le board, la main du joueur et la sienne, et désigne le gagnant. *Facile* : combinaisons nettement différentes. *Médium* : même combinaison, départage au kicker. *Expert* : égalités (board), croupier non qualifié, et il faut aussi dire si le croupier est qualifié. Après chaque réponse : les deux meilleures mains et l'explication de ce qui décide
+- **Calcul des gains** (Ante, Blind, Play, Trips, jackpot JP1) — *bientôt disponible*
 
 ### Suivi des résultats
 
@@ -178,6 +179,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── uth/
 │   │   ├── uth_hub.html               — Sous-hub Ultimate Texas Hold'em
 │   │   ├── uth_main.html / .js        — Meilleure main
+│   │   ├── uth_gagnant.html / .js     — Qui gagne ?
 │   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
 │   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
 │   ├── blackjack/

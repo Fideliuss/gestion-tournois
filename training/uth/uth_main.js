@@ -123,7 +123,7 @@ async function umAnswer(chosen) {
   const fb = document.getElementById('um-feedback');
   const name = UTH.describe(q.best);
   fb.className = 'feedback-bar ' + (isCorrect ? 'correct' : 'wrong');
-  fb.innerHTML = (isCorrect ? '✓ <b>' + name + '</b> — Correct !' : '✕ Incorrect — c\'est <b>' + name + '</b>')
+  fb.innerHTML = '<div>' + (isCorrect ? '✓ <b>' + name + '</b> — Correct !' : '✕ Incorrect — c\'est <b>' + name + '</b>') + '</div>'
     + (q.trap ? '<div class="uth-trap">' + q.trap + '</div>' : '');
   if (q.trap || !isCorrect) fb.style.flexDirection = 'column';
 
