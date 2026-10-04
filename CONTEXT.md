@@ -98,6 +98,7 @@ supabase/
     training_tables.sql              training_config, training_sessions, training_results (+ RLS)
     fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
     add_blackjack_cards_config.sql   Ajoute la clé "cards" (nb cartes/niveau BJ Score) au training_config existant
+    phase3_suivi_meta_et_acces_manager.sql  Phase 3 : training_sessions.meta (jsonb) + user_label, fonction can_view_training_stats(), policies de lecture manager (appliquée sur la base le 2026-10-04)
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
@@ -125,7 +126,7 @@ supabase/
   - `shared/auth.js` : `AUTH.guard({ loginUrl, role, panel })` — overlay spinner, vérif session, vérif rôle (`role`), vérif panneau (`panel`, via table `app_roles`), badge utilisateur
   - Rôles : entièrement personnalisables via **Gestion Comptes** (table `app_roles`) — `admin`, `mcd`, `floor` sont les seeds par défaut, mais tout rôle custom (slug, label, couleur, panels) peut être créé/édité/supprimé
   - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable) — `raw_user_meta_data.role` conservé en fallback pendant la période de migration
-  - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent, pas d'enfants pour l'instant). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé — **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
+  - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent) → `training-suivi` (enfant : voir les résultats de toute l'équipe, utilisé par la RLS via `can_view_training_stats()`). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé — **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
   - Gestion des comptes : `admin/comptes.html` — CRUD comptes (email+password+role) + CRUD rôles (label, couleur, panels) + table croisée permissions
   - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin côté serveur avant d'utiliser `auth.admin.*`
   - Changement de mot de passe : modal 🔑 dans le badge utilisateur (`AUTH._openChangePwd()`)
@@ -265,7 +266,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Tables de multiplication** : vraies flashcards (carte 3D qui se retourne, `.tb-card.flipped`), sans tapis, sans niveau. Choix de la table (×35/×17/×11/×8/×5) puis 20 cartes = les 20 multiplications ×1 à ×20 mélangées (Fisher-Yates), chacune une seule fois. Pas de timer par question — un **chronomètre libre** tourne du début à la fin des 20 cartes (objectif : aller vite), affiché en direct et repris dans le résumé final. Taper la réponse retourne la carte pour révéler le résultat coloré (vert/rouge)
 - **Ordre Paiement** : non implémenté — carte "Bientôt disponible" dans le hub
 
-Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`.
+Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`. Chaque session porte `meta` (jsonb : `level`, `ratio`, `chipValue`, `elapsedMs` selon le module — écrit par `SB.startTrainingSession(game, meta)` / `endTrainingSession(..., meta)`) et `user_label` (préfixe e-mail dénormalisé, car `auth.users` est illisible côté navigateur). Un croupier ne lit que ses lignes (`*_own`) ; les rôles avec le panel `training-suivi` (et les admins) lisent tout (`*_manager_read`).
 
 ---
 

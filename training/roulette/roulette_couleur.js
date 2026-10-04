@@ -48,7 +48,7 @@ async function startCouleurLevel(level) {
   document.getElementById('col-training-screen').style.display = '';
 
   try {
-    const s = await SB.startTrainingSession('roulette-couleur');
+    const s = await SB.startTrainingSession('roulette-couleur', { level: _colLevel });
     _colSessionId = s.id;
   } catch(e) {}
 

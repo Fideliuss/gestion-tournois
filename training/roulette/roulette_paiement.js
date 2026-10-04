@@ -37,7 +37,7 @@ async function startPaiementLevel(level) {
   document.getElementById('rp-training-screen').style.display = '';
 
   try {
-    const s = await SB.startTrainingSession('roulette-paiement');
+    const s = await SB.startTrainingSession('roulette-paiement', { level: _rpLevel });
     _rpSessionId = s.id;
   } catch(e) {}
 

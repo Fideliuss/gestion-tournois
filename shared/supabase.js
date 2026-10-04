@@ -285,7 +285,8 @@ const SB = {
     if (error) throw error;
   },
 
-  async startTrainingSession(game) {
+  // meta : contexte de la session (level, ratio, chipValue...) — exploité par le suivi (Phase 3)
+  async startTrainingSession(game, meta) {
     const session = await this.getSession();
     if (!session) throw new Error('Non authentifié');
 
@@ -304,15 +305,21 @@ const SB = {
       await _sb.from('training_sessions').delete().in('id', ids);
     }
 
+    // user_label dénormalisé : le navigateur ne peut pas lire auth.users (vue manager)
+    const label = (session.user.email || '').split('@')[0] || null;
     const { data, error } = await _sb.from('training_sessions')
-      .insert({ user_id: session.user.id, game }).select().single();
+      .insert({ user_id: session.user.id, game, user_label: label, meta: meta || {} })
+      .select().single();
     if (error) throw error;
     return data;
   },
 
-  async endTrainingSession(sessionId, total, correct) {
+  // meta (optionnel) remplace le meta de départ — le module passe l'objet complet (ex. { ratio, elapsedMs })
+  async endTrainingSession(sessionId, total, correct, meta) {
+    const patch = { ended_at: new Date().toISOString(), total, correct };
+    if (meta) patch.meta = meta;
     const { error } = await _sb.from('training_sessions')
-      .update({ ended_at: new Date().toISOString(), total, correct })
+      .update(patch)
       .eq('id', sessionId);
     if (error) throw error;
   },
