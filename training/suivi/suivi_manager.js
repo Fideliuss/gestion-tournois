@@ -21,6 +21,17 @@ const SVM_WEEKS = 12;
 
 const SVM_LABELS = {
   'Type de mise': { plein: 'Plein (×35)', cheval: 'Cheval (×17)', transversale: 'Transversale (×11)', carre: 'Carré (×8)', sixain: 'Sixain (×5)' },
+  // Ultimate Texas Hold'em
+  'Combinaison': { 0: 'Carte haute', 1: 'Paire', 2: 'Double paire', 3: 'Brelan', 4: 'Quinte', 5: 'Couleur', 6: 'Full', 7: 'Carré', 8: 'Quinte flush', 9: 'Quinte flush royale' },
+  'Piège': {
+    roue: 'Quinte à la roue (A-2-3-4-5)', couleur_et_quinte: 'Couleur et quinte', deux_brelans: 'Deux brelans', trois_paires: 'Trois paires',
+    carre_brelan: 'Carré et brelan', full_deux_paires: 'Brelan et deux paires', quinte_et_paire: 'Quinte et paire', couleur_et_paire: 'Couleur et paire',
+  },
+  'Situation': {
+    category: 'Combinaisons différentes', kicker: 'Même combinaison (kicker)', unqualified: 'Banque non qualifiée', tie: 'Égalité',
+    win: 'Le joueur gagne (Blind rendu)', blind: 'Le joueur gagne (Blind payé)', lose: 'La banque gagne', fold: 'Le joueur se couche', jackpot: 'Jackpot Prog',
+  },
+  'Mise': { ante: 'Ante', blind: 'Blind', play: 'Play', trips: 'Bonus (Trips)', jp1: 'Prog (JP1)' },
 };
 
 const _svm = {
@@ -343,6 +354,9 @@ async function svmFaibles() {
         }).join('') + '</div>';
   });
 
+  if (m.game === 'uth-gains') {
+    html += '<div class="sv-caption svm-note">Une donne est comptée une fois pour chaque mise corrigée : l\'action (je paie, je laisse, je ramasse) et, pour « je paie », le montant doivent être justes. Le jackpot n\'est pas corrigé.</div>';
+  }
   if (m.game === 'roulette-paiement') {
     html += '<div class="sv-caption svm-note">Une question est comptée une fois pour chaque type de mise qu\'elle contient.</div>';
   }

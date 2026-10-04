@@ -1,0 +1,231 @@
+/* ══════════════════════════════════════════════════════
+   ULTIMATE TEXAS HOLD'EM — styles partagés des modules
+   S'appuie sur training.css (playing-card, level-card, feedback-bar, summary…)
+   ══════════════════════════════════════════════════════ */
+
+/* ── Table : cartes du joueur et board ── */
+.uth-table {
+  width: 100%; max-width: 640px; margin: 4px auto 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.uth-cards { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+/* les cartes ne se chevauchent pas : il faut pouvoir toutes les lire */
+.uth-cards .playing-card { margin-left: 0; }
+.playing-card.uth-dim  { opacity: .3; filter: saturate(.5); }
+.playing-card.uth-best { box-shadow: 0 0 0 2px var(--gold), 2px 4px 12px rgba(0,0,0,.4); }
+
+/* ── Duel : joueur et banque côte à côte ── */
+.uth-duel { display: flex; justify-content: center; align-items: stretch; gap: 14px; flex-wrap: wrap; width: 100%; }
+.uth-duel .uth-frame { flex: 0 1 auto; }
+
+/* ── Encadrés de la table (Joueur · Board · Banque) ──
+   Ils épousent la zone des cartes : largeur au plus juste (fit-content), centrés, marges réduites.
+   Fond légèrement teinté, filet fin, titre centré en couleur d'accent. */
+.uth-frame {
+  width: fit-content; max-width: 100%; box-sizing: border-box; margin: 0 auto;
+  background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: 6px;
+  padding: 8px 12px 12px;
+}
+.uth-frame-label {
+  text-align: center; margin-bottom: 8px;
+  font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--gold);
+}
+
+/* Joueur : deux cartes en quinconce (hauteur = carte + décalage vertical, rien de plus) */
+.uth-fan { display: flex; justify-content: center; align-items: center; height: 118px; }
+.uth-fan .playing-card { margin-left: 0; }
+.uth-fan .playing-card:first-child { transform: translate(-4px, 14px) rotate(-5deg); }
+.uth-fan .playing-card:last-child  { margin-left: -18px; transform: translate(4px, -12px) rotate(5deg); z-index: 3; }
+
+/* Board : une case par carte, flop · turn · river séparés discrètement */
+.uth-board { display: flex; justify-content: center; align-items: flex-end; }
+.uth-street { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.uth-street-label { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-muted); }
+.uth-street-cards { display: flex; gap: 5px; }
+.uth-slot { padding: 4px; border: 1px dashed var(--gold-bd); border-radius: 7px; }
+.uth-slot .playing-card { margin-left: 0; }
+.uth-sep { width: 1px; align-self: stretch; margin: 18px 14px 0; background: var(--gold-bd); }
+
+/* ── Grille de réponses (une touche par combinaison) ── */
+.uth-answers {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  width: 100%; max-width: 640px; margin: 0 auto;
+}
+.uth-ans {
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 4px;
+  padding: 14px 6px; font-family: var(--f-ui); font-size: 13px; font-weight: 500;
+  color: var(--cream); cursor: pointer; text-align: center; line-height: 1.25;
+  transition: border-color .15s, background .15s;
+}
+.uth-ans:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-bg); }
+.uth-ans:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.uth-ans:disabled { cursor: default; opacity: .55; }
+.uth-ans.sel { border-color: var(--gold); background: var(--gold-bg); color: var(--gold); }
+.uth-ans.sel:disabled { opacity: 1; }   /* la réponse choisie reste lisible une fois verrouillée */
+.uth-answers-3 { grid-template-columns: repeat(3, 1fr); }
+.uth-answers-2 { grid-template-columns: repeat(2, 1fr); }
+.uth-ans.ok { opacity: 1; border-color: #6dcc8e; background: rgba(109,204,142,.14); color: #6dcc8e; }
+.uth-ans.ko { opacity: 1; border-color: #e07a68; background: rgba(224,122,104,.14); color: #e07a68; }
+body.light .uth-ans.ok { color: #2e7d4f; border-color: #2e7d4f; }
+body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
+
+.uth-trap { margin-top: 8px; font-size: 12px; line-height: 1.5; opacity: .9; }
+.uth-next { margin: 14px auto 0; display: block; }
+
+/* ── Calcul des gains : le tapis, les cases de mises, les jetons et la fenêtre de réponse ── */
+.uc-situation { width: 100%; max-width: 640px; margin: 0 auto 12px; text-align: center; font-size: 14px; color: var(--cream); }
+
+/* Tapis (feutre vert, identique en mode jour) : banque, board, cases de mises, joueur — de haut en bas */
+.uc-felt {
+  --felt-line: rgba(232,196,120,.55);
+  position: relative; width: 100%; max-width: 640px; box-sizing: border-box; margin: 0 auto;
+  padding: 18px 14px 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  background: radial-gradient(ellipse at 50% 38%, #1b6b4b 0%, #11513a 55%, #0b3a29 100%);
+  border: 2px solid var(--gold-bd); border-radius: 18px 18px 90px 90px / 18px 18px 54px 54px;
+  box-shadow: inset 0 0 40px rgba(0,0,0,.45), 0 6px 22px rgba(0,0,0,.35);
+}
+/* les encadrés de cartes restent lisibles sur le feutre */
+.uc-felt .uth-frame { background: rgba(0,0,0,.22); border-color: var(--felt-line); }
+.uc-felt .uth-frame-label { color: #f0c879; }
+.uc-felt .uth-street-label { color: rgba(255,255,255,.6); }
+.uc-felt .uth-slot { border-color: var(--felt-line); }
+.uc-felt .uth-sep { background: var(--felt-line); }
+
+/* Cases de mises, de haut en bas : Bonus (losange) et Prog (voyant), Blind = Ante, Play. Deux colonnes séparées par la
+   colonne du « = » : Bonus, Blind et Play sont alignés verticalement à gauche ; Prog et Ante à droite */
+.uc-spots {
+  display: grid; grid-template-columns: 110px 36px 110px; justify-items: center; align-items: start; gap: 2px 0;
+}
+.uc-eq { align-self: start; margin-top: 18px; height: 88px; display: flex; align-items: center; font-size: 30px; font-weight: 600; line-height: 1; color: #f0c879; }
+.uc-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.uc-spot-label { font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #f0c879; }
+.uc-spot-amount { min-height: 14px; font-size: 12px; font-weight: 500; color: #fff; }
+
+.uc-spot {
+  position: relative; box-sizing: border-box; width: 82px; height: 82px; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.18); border: 2px solid var(--felt-line); color: inherit;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.uc-spot.round  { border-radius: 50%; }
+.uc-spot.mid    { width: 88px; height: 88px; }
+/* Bonus : un carré posé sur la pointe ; les jetons restent droits */
+.uc-spot.diamond { width: 62px; height: 62px; margin: 13px; border-radius: 6px; transform: rotate(45deg); }
+.uc-unrotate { display: flex; align-items: center; justify-content: center; transform: rotate(-45deg); }
+/* Prog : voyant rouge, allumé si le joueur a misé */
+.uc-spot.led { width: 36px; height: 36px; margin: 26px 0; border-radius: 50%; background: rgba(0,0,0,.35); }
+.uc-led-dot { width: 18px; height: 18px; border-radius: 50%; background: #4a1410; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
+.uc-spot.led:not(.empty) .uc-led-dot { background: radial-gradient(circle at 35% 30%, #ff9a8c, #e8281a 55%, #a30f06); box-shadow: 0 0 10px 3px rgba(255,64,44,.85), 0 0 22px 6px rgba(255,64,44,.4); }
+.uc-spot.led.empty { opacity: .7; border-style: solid; }
+.uc-spot:hover:not(:disabled) { border-color: #f0c879; background: rgba(240,200,121,.14); }
+.uc-spot:focus-visible { outline: 2px solid #f0c879; outline-offset: 3px; }
+.uc-spot.open { border-color: #f0c879; box-shadow: 0 0 0 3px rgba(240,200,121,.35); }
+.uc-spot.empty { border-style: dashed; opacity: .45; cursor: default; }
+.uc-spot.answered { border-color: #f0c879; }
+.uc-spot.ok { border-color: #6dcc8e; box-shadow: 0 0 0 3px rgba(109,204,142,.35); }
+.uc-spot.ko { border-color: #e07a68; box-shadow: 0 0 0 3px rgba(224,122,104,.35); }
+.uc-spot.jackpot { border-color: #f0c879; box-shadow: 0 0 0 3px rgba(240,200,121,.45), 0 0 18px rgba(240,200,121,.5); }
+
+/* Pastille de réponse sous la case */
+.uc-tag { min-height: 16px; max-width: 100%; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; color: #f0c879; white-space: nowrap; }
+.uc-tag:empty { visibility: hidden; }
+.uc-tag.pending { color: #fff; background: rgba(224,122,104,.45); }
+.uc-tag.ok { color: #0b3a29; background: #6dcc8e; }
+.uc-tag.ko { color: #3b0f08; background: #e07a68; }
+
+/* Jetons : piles par valeur, jetons empilés qui se chevauchent */
+.uc-chips { display: flex; align-items: flex-end; justify-content: center; }
+.uc-stack { display: flex; flex-direction: column-reverse; align-items: center; }
+.uc-stack + .uc-stack { margin-left: -8px; }
+.uc-chip {
+  --chip: #c0392b; --chip-ink: #fff;
+  box-sizing: border-box; width: 34px; height: 34px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; color: var(--chip-ink);
+  background: radial-gradient(circle at 50% 50%, var(--chip) 0 56%, #fff 57% 60%, var(--chip) 61%);
+  border: 2px dashed rgba(255,255,255,.85); box-shadow: 0 1px 2px rgba(0,0,0,.55);
+}
+.uc-chip + .uc-chip { margin-bottom: -26px; }
+.uc-chip.v2_5 { --chip: #d8d8d8; --chip-ink: #222; }
+.uc-chip.v5   { --chip: #c0392b; }
+.uc-chip.v10  { --chip: #2a5fb0; }
+.uc-chip.v20  { --chip: #d29a12; --chip-ink: #2a1c00; }
+.uc-chip.v50  { --chip: #7b3fa0; }
+.uc-chip.v100 { --chip: #1c1c1c; }
+
+/* Fenêtre de réponse : à côté des jetons */
+.uc-pop-backdrop { position: absolute; inset: 0; z-index: 5; border-radius: inherit; background: rgba(0,0,0,.28); }
+.uc-pop {
+  position: absolute; z-index: 6; width: 230px; box-sizing: border-box; padding: 12px 14px 14px;
+  background: var(--bg-card); border: 1px solid var(--gold); border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  color: var(--cream);
+}
+.uc-pop-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.uc-pop-title span:first-child { font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.uc-pop-title span:last-child  { font-size: 15px; font-weight: 500; }
+.uc-pop-btns { display: flex; flex-direction: column; gap: 6px; }
+.uc-pop .uth-ans { padding: 10px 8px; }
+.uc-amount { margin-top: 10px; font-size: 12px; color: var(--text-muted); }
+.uc-amount label { display: block; margin-bottom: 6px; }
+.uc-amount-row { display: flex; align-items: center; gap: 6px; }
+.uc-amount-row input {
+  width: 72px; padding: 8px 10px; text-align: right; font-family: var(--f-ui); font-size: 14px; color: var(--cream);
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 4px;
+}
+.uc-amount-row input.bad { border-color: #e07a68; }
+.uc-amount-row input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.uc-amount-row .btn { padding: 8px 14px; font-size: 12px; margin-left: auto; }
+.uc-pop-info, .uc-pop-res { font-size: 12px; line-height: 1.5; }
+.uc-pop-res.ok { color: #6dcc8e; }
+.uc-pop-res.ko { color: #e07a68; }
+body.light .uc-pop-res.ok { color: #2e7d4f; }
+body.light .uc-pop-res.ko { color: #b5483a; }
+.uc-pop-info b { color: var(--gold); }
+
+.uc-hint { margin: 12px 0 0; text-align: center; font-size: 12px; color: var(--text-muted); }
+.uc-hint:empty { display: none; }
+
+/* Détail après validation */
+.uc-detail { width: 100%; max-width: 640px; margin: 10px auto 0; display: flex; flex-direction: column; gap: 6px; }
+.uc-detail:empty { display: none; }
+.uc-d { padding: 8px 12px; border: 1px solid var(--gold-bd); border-left-width: 3px; border-radius: 6px; background: var(--bg-card); font-size: 12px; line-height: 1.5; color: var(--cream); }
+.uc-d.ok { border-left-color: #6dcc8e; }
+.uc-d.ko { border-left-color: #e07a68; }
+body.light .uc-d.ok { border-left-color: #2e7d4f; }
+body.light .uc-d.ko { border-left-color: #b5483a; }
+.uc-jackpot {
+  width: 100%; max-width: 640px; box-sizing: border-box; margin: 14px auto 0; padding: 10px 14px;
+  border: 1px solid var(--gold); border-radius: 6px; background: var(--gold-bg); font-size: 13px; line-height: 1.5; color: var(--cream);
+}
+.uc-jackpot b { color: var(--gold); }
+.uth-next:disabled { opacity: .4; cursor: not-allowed; }
+
+@media (max-width: 620px) {
+  .uth-answers { grid-template-columns: repeat(2, 1fr); }
+  .uth-answers-3 { grid-template-columns: 1fr; }
+  .uc-felt { padding: 14px 8px 18px; border-radius: 14px 14px 60px 60px / 14px 14px 40px 40px; }
+  .uc-spot { width: 64px; height: 64px; }
+  .uc-spot.mid { width: 76px; height: 76px; }
+  .uc-spot.diamond { width: 52px; height: 52px; margin: 11px; }
+  .uc-spot.led { width: 32px; height: 32px; margin: 21px 0; }
+  .uc-spots { grid-template-columns: 90px 28px 90px; }
+  .uc-eq { height: 76px; }
+  .uc-chip { width: 24px; height: 24px; font-size: 8px; border-width: 1.5px; }
+  .uc-chip + .uc-chip { margin-bottom: -18px; }
+  .uc-stack + .uc-stack { margin-left: -8px; }
+  .uc-pop { width: min(230px, calc(100% - 12px)); }
+  .uth-duel { gap: 12px; }
+  .uth-frame { padding: 8px 8px 10px; }
+  .uth-slot { padding: 3px; }
+  .uth-sep { margin: 16px 7px 0; }
+  .uth-frame .playing-card { width: 44px; height: 64px; }
+  .uth-frame .card-center { font-size: 18px; }
+  .uth-frame .card-rank { font-size: 11px; }
+  .uth-frame .card-suit { font-size: 9px; }
+  .uth-fan { height: 100px; }
+  .uth-fan .playing-card { width: 52px; height: 74px; }
+  .uth-cards { gap: 6px; }
+  .uth-cards .playing-card { width: 52px; height: 74px; }
+  .uth-cards .card-center { font-size: 20px; }
+  .uth-cards .card-rank { font-size: 12px; }
+}

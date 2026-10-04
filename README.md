@@ -76,12 +76,16 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 - **Tables de multiplication** — vraies flashcards qui se retournent pour révéler la réponse. Choix d'une table (×35, ×17, ×11, ×8, ×5), puis les 20 multiplications ×1 à ×20 mélangées. Pas de niveau ni de timer par carte : un chronomètre libre tourne sur l'ensemble des 20 cartes, l'objectif étant d'aller le plus vite possible
 - **Ordre Paiement** — *bientôt disponible*
 
-### Ultimate Poker — *bientôt disponible*
+### Ultimate Texas Hold'em
+
+- **Meilleure main** — pas de niveaux : comme à la table, le croupier voit 7 cartes (les 2 du joueur et le board, présentés comme dans « Qui gagne ? ») et identifie la meilleure combinaison. Donnes au hasard, avec environ une sur trois qui est un piège (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
+- **Qui gagne ?** — pas de niveaux : des donnes au hasard, de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). La table est affichée en trois encadrés : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier annonce d'abord si la banque est qualifiée, puis qui gagne. Après chaque donne : les deux meilleures mains et l'explication de ce qui décide
+- **Calcul des gains** — pas de niveaux : à chaque donne, un vrai tapis (de haut en bas : banque, board, Bonus en losange et voyant du Prog, ronds Blind = Ante, rond Play, cartes du joueur, avec leurs jetons) ; le croupier clique sur chaque mise (Play, Blind, Ante, Bonus, Prog) et répond dans une fenêtre à côté des jetons : « Je paie » (avec le montant du gain), « Je laisse » (mise rendue) ou « Je ramasse » (mise perdue). Situations au hasard : banque non qualifiée, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents. Mises par multiples de 5 € jusqu'à 50 € (maximum modifiable par un admin via « ⚙ Config UTH »). Le jackpot JP1 est seulement indiqué, sans calcul
 
 ### Suivi des résultats
 
-- **Mes résultats** (tous les croupiers) — pour chaque module : sessions, record, moyenne des 5 dernières, tendance, historique, filtre par niveau, meilleur temps par table (Tables ×). Navigation par jeu (Black Jack / Roulette) puis par module
-- **Suivi équipe** (rôles disposant du panel « Suivi Training », et admins) — *Classement* par module et niveau (meilleur temps par table pour les Tables ×), *Progression* d'un croupier dans le temps, *Points faibles* (taux d'erreur par type de mise, table, numéro… pour l'équipe ou un croupier), *Activité* (sessions par semaine, croupiers inactifs). Le droit se donne dans Gestion Comptes, sous Training Croupier
+- **Mes résultats** (tous les croupiers) — pour chaque module : sessions, record, moyenne des 5 dernières, tendance, historique, filtre par niveau, meilleur temps par table (Tables ×). Navigation par jeu (Black Jack / Roulette / Ultimate Texas Hold'em) puis par module
+- **Suivi équipe** (rôles disposant du panel « Suivi Training », et admins) — *Classement* par module et niveau (meilleur temps par table pour les Tables ×), *Progression* d'un croupier dans le temps, *Points faibles* (taux d'erreur par type de mise, table, numéro, combinaison, situation… pour l'équipe ou un croupier), *Activité* (sessions par semaine, croupiers inactifs). Le droit se donne dans Gestion Comptes, sous Training Croupier
 
 Toutes les sessions et résultats de training sont enregistrés dans **Supabase** (historique par utilisateur). Les paramètres (timers, plages de mise, valeurs de pièces) sont configurables par un admin depuis chaque hub de module.
 
@@ -172,6 +176,13 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   │   ├── suivi_manager.html / .js   — Suivi équipe (panel training-suivi)
 │   │   ├── suivi_common.js            — Modules suivis, calculs et blocs d'affichage partagés
 │   │   └── suivi.css                  — Styles des pages de suivi
+│   ├── uth/
+│   │   ├── uth_hub.html               — Sous-hub Ultimate Texas Hold'em
+│   │   ├── uth_main.html / .js        — Meilleure main
+│   │   ├── uth_gagnant.html / .js     — Qui gagne ?
+│   │   ├── uth_gains.html / .js       — Calcul des gains
+│   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
+│   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
 │   ├── blackjack/
 │   │   ├── blackjack_hub.html         — Sous-hub Blackjack + config admin
 │   │   ├── blackjack.html / .js       — BJ Paiement
