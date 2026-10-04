@@ -78,7 +78,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 
 ### Ultimate Texas Hold'em
 
-- **Meilleure main** — pas de niveaux : comme à la table, le croupier voit 7 cartes (les 2 du joueur et le board) et identifie la meilleure combinaison. Donnes au hasard, avec environ une sur trois qui est un piège (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
+- **Meilleure main** — pas de niveaux : comme à la table, le croupier voit 7 cartes (les 2 du joueur et le board, présentés comme dans « Qui gagne ? ») et identifie la meilleure combinaison. Donnes au hasard, avec environ une sur trois qui est un piège (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
 - **Qui gagne ?** — pas de niveaux : des donnes au hasard, de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). La table est affichée en trois encadrés : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier annonce d'abord si la banque est qualifiée, puis qui gagne. Après chaque donne : les deux meilleures mains et l'explication de ce qui décide
 - **Calcul des gains** (Ante, Blind, Play, Trips, jackpot JP1) — *bientôt disponible*
 

@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════
 //  UTH — MEILLEURE MAIN
 //  Pas de niveaux : l'UTH est un jeu simple, il doit être maîtrisé en entier. Comme à la table, le croupier
-//  voit toujours 7 cartes (les 2 du joueur + le board de 5) et identifie la meilleure combinaison de 5 cartes.
+//  voit toujours 7 cartes (les 2 du joueur + le board de 5, affichés comme dans « Qui gagne ? ») et identifie la meilleure combinaison de 5 cartes.
 //  Les donnes sont tirées au hasard, de la carte haute à la quinte flush royale ; une donne sur trois environ
 //  est un « piège » (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse.
 //  Pas de chronomètre. Dépend de uth_engine.js et uth_ui.js.
@@ -74,9 +74,8 @@ function umNext() {
   q.best = UTH.bestHand(q.cards);
   _umQuestion = q;
 
-  // Les 2 premières cartes sont celles du joueur, les 5 suivantes le board
-  document.getElementById('um-table').innerHTML =
-    uthLabeledRow('Vos cartes', q.cards.slice(0, 2)) + uthLabeledRow('Board', q.cards.slice(2));
+  // Les 2 premières cartes sont celles du joueur, les 5 suivantes le board — même table que « Qui gagne ? »
+  document.getElementById('um-table').innerHTML = uthPlayerZone(q.cards.slice(0, 2)) + uthBoardZone(q.cards.slice(2));
 
   document.querySelectorAll('#um-answers .uth-ans').forEach(function (b) { b.disabled = false; b.className = 'uth-ans'; });
   const fb = document.getElementById('um-feedback');
@@ -108,7 +107,7 @@ async function umAnswer(chosen) {
 
   // Met en évidence les 5 cartes de la meilleure main et atténue les deux autres
   document.getElementById('um-table').innerHTML =
-    uthLabeledRow('Vos cartes', q.cards.slice(0, 2), q.best.cards) + uthLabeledRow('Board', q.cards.slice(2), q.best.cards);
+    uthPlayerZone(q.cards.slice(0, 2), q.best.cards) + uthBoardZone(q.cards.slice(2), q.best.cards);
 
   // describe() ne produit que du texte issu de constantes : sans risque dans innerHTML
   const fb = document.getElementById('um-feedback');

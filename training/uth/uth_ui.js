@@ -24,11 +24,6 @@ function uthCardsRow(cards, best) {
   }).join('') + '</div>';
 }
 
-// Une rangée avec son libellé
-function uthLabeledRow(label, cards, best) {
-  return '<div class="uth-group"><div class="uth-row-label">' + label + '</div>' + uthCardsRow(cards, best) + '</div>';
-}
-
 // ── Table du module « Qui gagne ? » : trois encadrés, de haut en bas ──
 // Encadré avec son libellé (Joueur, Board, Banque)
 function uthFrame(label, inner) {
@@ -36,13 +31,19 @@ function uthFrame(label, inner) {
 }
 
 // Joueur : deux cartes en quinconce (décalées en hauteur, légèrement superposées)
-function uthPlayerZone(cards) {
-  return uthFrame('Joueur', '<div class="uth-fan">' + cards.map(function (c) { return uthCardHtml(c); }).join('') + '</div>');
+// `best` (optionnel) : les 5 cartes de la meilleure main — les autres cartes sont alors atténuées
+function uthMark(card, best) {
+  if (!best) return '';
+  return best.some(function (b) { return uthSameCard(b, card); }) ? 'uth-best' : 'uth-dim';
+}
+
+function uthPlayerZone(cards, best) {
+  return uthFrame('Joueur', '<div class="uth-fan">' + cards.map(function (c) { return uthCardHtml(c, uthMark(c, best)); }).join('') + '</div>');
 }
 
 // Board : une case par carte, séparées discrètement en flop (3) · turn (1) · river (1)
-function uthBoardZone(board) {
-  const slot = function (c) { return '<div class="uth-slot">' + uthCardHtml(c) + '</div>'; };
+function uthBoardZone(board, best) {
+  const slot = function (c) { return '<div class="uth-slot">' + uthCardHtml(c, uthMark(c, best)) + '</div>'; };
   const street = function (name, cs) {
     return '<div class="uth-street"><div class="uth-street-label">' + name + '</div>'
       + '<div class="uth-street-cards">' + cs.map(slot).join('') + '</div></div>';
