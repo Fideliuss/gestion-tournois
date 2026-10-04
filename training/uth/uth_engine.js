@@ -223,8 +223,8 @@ const UTH = (function () {
     // Trips : sur la main du joueur seule (7 cartes), quel que soit le résultat contre la banque
     if (round.trips) {
       const rate = pEv.category >= CAT.TRIPS ? cfg.trips[pEv.key] : 0;
-      if (rate) add('trips', round.trips, 'win', round.trips * rate, 'Trips : ' + describe(pEv) + ' payé ' + formatRate(rate) + '.');
-      else      add('trips', round.trips, 'lose', -round.trips, 'Trips : ' + describe(pEv) + ', moins qu\'un brelan : mise perdue.');
+      if (rate) add('trips', round.trips, 'win', round.trips * rate, 'Bonus (Trips) : ' + describe(pEv) + ' payé ' + formatRate(rate) + '.');
+      else      add('trips', round.trips, 'lose', -round.trips, 'Bonus (Trips) : ' + describe(pEv) + ', moins qu\'un brelan : mise perdue.');
     }
 
     // JP1 : gains fixes ; quinte flush royale = jackpot (superviseur), donc pas de montant calculable ici
@@ -233,13 +233,13 @@ const UTH = (function () {
       const j = evaluateJp1(round.player, round.board, cfg);
       if (j && j.rate === null) {
         jackpot = { type: j.type };
-        add('jp1', round.jp1, 'jackpot', 0, 'Quinte flush royale : 100 % du jackpot, à faire valider par le superviseur (vidéo).');
+        add('jp1', round.jp1, 'jackpot', 0, 'Quinte flush royale : 100 % du jackpot Prog, à faire valider par le superviseur (vidéo).');
       } else if (j) {
-        add('jp1', round.jp1, 'win', round.jp1 * j.rate, 'JP1 : ' + (j.type === 'community_royal' ? 'quinte flush royale communautaire' : describe(bestHand(round.player.concat(round.board)))) + ' payé ' + formatRate(j.rate) + '.');
+        add('jp1', round.jp1, 'win', round.jp1 * j.rate, 'Prog : ' + (j.type === 'community_royal' ? 'quinte flush royale communautaire' : describe(bestHand(round.player.concat(round.board)))) + ' payé ' + formatRate(j.rate) + '.');
       } else if (round.jp1Consolation) {
         add('jp1', round.jp1, 'win', round.jp1 * cfg.jp1.consolation, 'Lot de consolation : un autre joueur a reçu la quinte flush royale (' + formatRate(cfg.jp1.consolation) + ').');
       } else {
-        add('jp1', round.jp1, 'lose', -round.jp1, 'JP1 : pas de full ou mieux, mise perdue (ajoutée à la cagnotte).');
+        add('jp1', round.jp1, 'lose', -round.jp1, 'Prog : pas de full ou mieux, mise perdue (ajoutée à la cagnotte).');
       }
     }
 

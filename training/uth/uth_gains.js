@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════
 //  UTH — CALCUL DES GAINS
 //  Pas de niveaux, pas de chronomètre. À chaque donne, le croupier voit un tapis : la banque, le board, les cases de
-//  mises du joueur avec leurs jetons (Trips · Play · JP1 en haut, Blind · Ante dessous) et les cartes du joueur.
-//  Il répond MISE PAR MISE : un clic sur une mise ouvre, à côté des jetons, une fenêtre « Je paie » (avec le montant
+//  mises du joueur avec leurs jetons (Bonus en losange et voyant du Prog de part et d'autre du board, cartes du joueur, Play, Blind = Ante).
+//  (En France : « Bonus » = option Trips, « Prog » = jackpot progressif JP1.) Il répond MISE PAR MISE : un clic sur une mise ouvre, à côté des jetons, une fenêtre « Je paie » (avec le montant
 //  du gain) / « Je laisse » (la mise est rendue) / « Je ramasse » (la mise est perdue). Les situations sont tirées au
 //  hasard : banque qualifiée ou non, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents.
 //  Le jackpot (quinte flush royale JP1) est seulement indiqué : pas de question, pas de calcul.
@@ -10,7 +10,7 @@
 // ══════════════════════════════════════════════════════
 
 const UC_QUESTIONS = 10;
-const UC_BET_NAMES = { ante: 'Ante', blind: 'Blind', play: 'Play', trips: 'Trips', jp1: 'JP1' };
+const UC_BET_NAMES = { ante: 'Ante', blind: 'Blind', play: 'Play', trips: 'Bonus', jp1: 'Prog' };
 const UC_ACTIONS = [['pay', 'Je paie'], ['push', 'Je laisse'], ['take', 'Je ramasse']];
 const UC_ACTION_TAG = { pay: 'Paie', push: 'Laisse', take: 'Ramasse' };
 // Valeurs des jetons du tapis, de la plus grosse à la plus petite (le 2,50 € sert au Blind payé 3 pour 2)
@@ -88,28 +88,35 @@ function ucAmountOf(bet, q) {
   return bet === 'ante' ? q.ante : bet === 'blind' ? q.blind : q[bet];
 }
 
+// shape : 'round' (Play, Blind, Ante), 'diamond' (Bonus = Trips, carré posé sur la pointe), 'led' (Prog = JP1 : voyant rouge allumé si misé)
 function ucSpotHtml(bet, shape, q) {
   const amount = ucAmountOf(bet, q);
   const jackpot = bet === 'jp1' && q.res.jackpot;
   const cls = 'uc-spot ' + shape + (amount ? '' : ' empty') + (jackpot ? ' jackpot' : '');
+  const inner = amount ? (shape === 'led' ? '<span class="uc-led-dot"></span>' : ucChipsHtml(amount)) : (shape === 'led' ? '<span class="uc-led-dot"></span>' : '');
   return '<div class="uc-cell uc-c-' + bet + '">'
     + '<div class="uc-spot-label">' + UC_BET_NAMES[bet] + '</div>'
     + '<button class="' + cls + '" id="uc-spot-' + bet + '"' + (amount ? ' onclick="ucOpen(\'' + bet + '\')"' : ' disabled') + '>'
-    + (amount ? ucChipsHtml(amount) : '') + '</button>'
+    + (shape === 'diamond' ? '<span class="uc-unrotate">' + inner + '</span>' : inner) + '</button>'
     + '<div class="uc-spot-amount">' + (amount ? ucEuro(amount) : '') + '</div>'
     + '<div class="uc-tag" id="uc-tag-' + bet + '">' + (jackpot ? 'Jackpot' : '') + '</div>'
     + '</div>';
 }
 
 function ucFeltHtml(q) {
-  // Comme à une vraie table : la banque en haut, le board au centre, les cases de mises (Trips · Play · JP1, Blind · Ante
-  // dessous) puis les cartes du joueur au plus près de lui
-  return uthBankZone(q.dealer) + uthBoardZone(q.board)
-    + '<div class="uc-spots">'
-    + ucSpotHtml('trips', 'round', q) + ucSpotHtml('play', 'round big', q) + ucSpotHtml('jp1', 'round', q)
-    + ucSpotHtml('blind', 'square', q) + ucSpotHtml('ante', 'square', q)
+  // Bonus (Trips, en losange) et Prog (voyant rouge, allumé si misé) de part et d'autre du board ; puis, de haut en bas,
+  // les cartes du client, le rond Play et les ronds Blind = Ante sur une même ligne
+  return uthBankZone(q.dealer)
+    + '<div class="uc-boardrow">'
+    + ucSpotHtml('trips', 'diamond', q)
+    + '<div class="uc-board-slot">' + uthBoardZone(q.board) + '</div>'
+    + ucSpotHtml('jp1', 'led', q)
     + '</div>'
     + uthPlayerZone(q.player)
+    + '<div class="uc-spots">'
+    + '<div class="uc-row">' + ucSpotHtml('play', 'round big', q) + '</div>'
+    + '<div class="uc-row">' + ucSpotHtml('blind', 'round mid', q) + '<div class="uc-eq" aria-label="égale">=</div>' + ucSpotHtml('ante', 'round mid', q) + '</div>'
+    + '</div>'
     + '<div class="uc-pop-backdrop" id="uc-pop-backdrop" onclick="ucClose()" style="display:none"></div>'
     + '<div class="uc-pop" id="uc-pop" role="dialog" style="display:none"></div>';
 }
@@ -131,7 +138,7 @@ function ucNext() {
   document.getElementById('uc-detail').innerHTML = '';
   const jp = document.getElementById('uc-jackpot');
   if (q.res.jackpot) {      // jackpot : seulement indiqué, sans question
-    jp.innerHTML = '<b>Jackpot JP1</b> — quinte flush royale du joueur : 100 % du jackpot. Pas de calcul ici : à faire valider par le superviseur (vidéo).';
+    jp.innerHTML = '<b>Jackpot Prog</b> — quinte flush royale du joueur : 100 % du jackpot. Pas de calcul ici : à faire valider par le superviseur (vidéo).';
     jp.style.display = '';
   } else { jp.style.display = 'none'; jp.innerHTML = ''; }
   document.getElementById('uc-next-btn').style.display = 'none';
