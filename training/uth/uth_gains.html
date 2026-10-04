@@ -36,15 +36,16 @@
       <div class="progress-bar-fill" id="uc-progress-fill" style="width:0%"></div>
     </div>
 
-    <div class="uth-table" id="uc-table"></div>
-
-    <!-- Les mises de la donne, puis une réponse par mise : je paie / je laisse / je ramasse -->
+    <!-- Ce que fait le joueur, puis le tapis : banque, board, cases de mises (jetons) et joueur.
+         Un clic sur une mise ouvre, à côté des jetons, la fenêtre de réponse : je paie / je laisse / je ramasse -->
     <div class="uc-situation" id="uc-situation"></div>
-    <div class="uc-bets" id="uc-bets"></div>
+    <div class="uc-felt" id="uc-felt"></div>
+    <div class="uc-hint" id="uc-hint"></div>
 
     <button class="btn btn-gold uth-next" id="uc-validate-btn" style="padding:12px 28px;font-size:13px" onclick="ucValidate()" disabled>Valider</button>
 
     <div class="feedback-bar empty" id="uc-feedback"></div>
+    <div class="uc-detail" id="uc-detail"></div>
     <div class="uc-jackpot" id="uc-jackpot" style="display:none"></div>
     <button class="btn btn-gold uth-next" id="uc-next-btn" style="display:none;padding:12px 28px;font-size:13px" onclick="ucNext()">Suivant →</button>
   </div>
