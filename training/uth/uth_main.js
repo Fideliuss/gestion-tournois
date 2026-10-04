@@ -1,25 +1,26 @@
 // ══════════════════════════════════════════════════════
 //  UTH — MEILLEURE MAIN
-//  Le croupier identifie la meilleure combinaison. Pas de chronomètre.
-//    Facile : 5 cartes · Médium : 2 cartes du joueur + board de 5 · Expert : même chose avec des pièges
-//  Dépend de uth_engine.js et uth_ui.js.
+//  Pas de niveaux : l'UTH est un jeu simple, il doit être maîtrisé en entier. Comme à la table, le croupier
+//  voit toujours 7 cartes (les 2 du joueur + le board de 5, affichés comme dans « Qui gagne ? ») et identifie la meilleure combinaison de 5 cartes.
+//  Les donnes sont tirées au hasard, de la carte haute à la quinte flush royale ; une donne sur trois environ
+//  est un « piège » (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse.
+//  Pas de chronomètre. Dépend de uth_engine.js et uth_ui.js.
 // ══════════════════════════════════════════════════════
 
 const UM_QUESTIONS = 10;
-const UM_LEVEL_LABELS = { facile: 'Facile', medium: 'Médium', expert: 'Expert' };
 // Poids de tirage par combinaison (de la carte haute à la quinte flush royale) :
 // les combinaisons rares apparaissent plus souvent qu'au hasard, pour qu'on les rencontre vraiment
 const UM_WEIGHTS = [6, 12, 11, 11, 11, 11, 11, 8, 5, 3];
+const UM_TRAP_SHARE = 0.35;   // part des donnes « pièges » (UTH.expertTrap)
 
 let _umSessionId = null;
 let _umUserId    = null;
-let _umLevel     = null;
 let _umQIndex    = 0;
 let _umCorrect   = 0;
 let _umAnswered  = false;
-let _umQuestion  = null;   // { cards, cat, best, trap }
+let _umQuestion  = null;   // { cards, cat, best, trap, trapId }
 
-// ── Init ─────────────────────────────────────────────
+// ── Démarrage : la session commence dès l'ouverture de la page ──
 async function initUthMain() {
   try {
     const session = await SB.getSession();
@@ -27,6 +28,7 @@ async function initUthMain() {
     _umUserId = session.user.id;
   } catch (e) {}
   buildAnswerGrid();
+  umStartSession();
 }
 
 function buildAnswerGrid() {
@@ -35,13 +37,12 @@ function buildAnswerGrid() {
   }).join('');
 }
 
-// ── Niveau ───────────────────────────────────────────
-async function startUthMain(level) {
-  _umLevel = level; _umQIndex = 0; _umCorrect = 0; _umAnswered = false;
-  document.getElementById('um-level-screen').style.display    = 'none';
+async function umStartSession() {
+  _umQIndex = 0; _umCorrect = 0; _umAnswered = false;
+  document.getElementById('um-summary-screen').style.display  = 'none';
   document.getElementById('um-training-screen').style.display = '';
   try {
-    const s = await SB.startTrainingSession('uth-main', { level: level });
+    const s = await SB.startTrainingSession('uth-main', {});
     _umSessionId = s.id;
   } catch (e) {}
   umNext();
@@ -55,17 +56,13 @@ function umPickCategory() {
   return 0;
 }
 
-function umGenerate(level) {
-  if (level === 'facile') {
-    const cat = umPickCategory();
-    return { cards: UTH.shuffle(UTH.makeHand5(cat)), cat: cat, trap: null, trapId: null };
+function umGenerate() {
+  if (Math.random() < UM_TRAP_SHARE) {
+    const t = UTH.expertTrap();
+    if (t) return { cards: t.cards, cat: t.expected, trap: t.text, trapId: t.id };
   }
-  if (level === 'medium') {
-    const cat = umPickCategory();
-    return { cards: UTH.sevenWithBest(cat), cat: cat, trap: null, trapId: null };
-  }
-  const t = UTH.expertTrap();
-  return { cards: t.cards, cat: t.expected, trap: t.text, trapId: t.id };
+  const cat = umPickCategory();
+  return { cards: UTH.sevenWithBest(cat), cat: cat, trap: null, trapId: null };
 }
 
 // ── Question ─────────────────────────────────────────
@@ -73,22 +70,17 @@ function umNext() {
   if (_umQIndex >= UM_QUESTIONS) { umSummary(); return; }
   _umAnswered = false;
 
-  const q = umGenerate(_umLevel);
+  const q = umGenerate();
   q.best = UTH.bestHand(q.cards);
   _umQuestion = q;
 
-  const table = document.getElementById('um-table');
-  table.innerHTML = _umLevel === 'facile'
-    ? uthLabeledRow('Votre main', q.cards)
-    : uthLabeledRow('Vos cartes', q.cards.slice(0, 2)) + uthLabeledRow('Board', q.cards.slice(2));
+  // Les 2 premières cartes sont celles du joueur, les 5 suivantes le board — même table que « Qui gagne ? »
+  document.getElementById('um-table').innerHTML = uthPlayerZone(q.cards.slice(0, 2)) + uthBoardZone(q.cards.slice(2));
 
   document.querySelectorAll('#um-answers .uth-ans').forEach(function (b) { b.disabled = false; b.className = 'uth-ans'; });
   const fb = document.getElementById('um-feedback');
-  fb.className = 'feedback-bar empty'; fb.innerHTML = '';
+  fb.className = 'feedback-bar empty'; fb.innerHTML = ''; fb.style.flexDirection = '';
   document.getElementById('um-next-btn').style.display = 'none';
-  document.getElementById('um-question').textContent = _umLevel === 'facile'
-    ? 'Quelle est cette combinaison ?'
-    : 'Quelle est la meilleure combinaison de 5 cartes ?';
   umProgress();
 }
 
@@ -113,11 +105,9 @@ async function umAnswer(chosen) {
     else if (c === chosen) b.classList.add('ko');
   });
 
-  // Met en évidence les 5 cartes de la meilleure main (et atténue les autres quand il y en a 7)
-  if (_umLevel !== 'facile') {
-    document.getElementById('um-table').innerHTML =
-      uthLabeledRow('Vos cartes', q.cards.slice(0, 2), q.best.cards) + uthLabeledRow('Board', q.cards.slice(2), q.best.cards);
-  }
+  // Met en évidence les 5 cartes de la meilleure main et atténue les deux autres
+  document.getElementById('um-table').innerHTML =
+    uthPlayerZone(q.cards.slice(0, 2), q.best.cards) + uthBoardZone(q.cards.slice(2), q.best.cards);
 
   // describe() ne produit que du texte issu de constantes : sans risque dans innerHTML
   const fb = document.getElementById('um-feedback');
@@ -130,7 +120,7 @@ async function umAnswer(chosen) {
   try {
     if (_umSessionId && _umUserId) {
       await SB.addTrainingResult(_umSessionId, _umUserId, 'uth-main',
-        { cards: q.cards, level: _umLevel, best: q.best.key, trap: q.trapId },
+        { cards: q.cards, best: q.best.key, trap: q.trapId },
         q.cat, chosen, isCorrect);
     }
   } catch (e) {}
@@ -154,7 +144,6 @@ async function umSummary() {
   document.getElementById('um-training-screen').style.display = 'none';
   document.getElementById('um-summary-screen').style.display  = '';
   const pct = Math.round((_umCorrect / UM_QUESTIONS) * 100);
-  document.getElementById('um-summary-level').textContent   = UM_LEVEL_LABELS[_umLevel];
   document.getElementById('um-summary-score').textContent   = _umCorrect + '/' + UM_QUESTIONS;
   document.getElementById('um-summary-pct').textContent     = pct + '%';
   document.getElementById('um-summary-verdict').textContent = umVerdict(_umCorrect);
@@ -169,9 +158,8 @@ function umVerdict(n) {
 }
 
 function umRestart() {
-  _umSessionId = null; _umQIndex = 0; _umCorrect = 0; _umAnswered = false; _umLevel = null;
-  document.getElementById('um-summary-screen').style.display = 'none';
-  document.getElementById('um-level-screen').style.display   = '';
+  _umSessionId = null;
+  umStartSession();
 }
 
 document.addEventListener('keydown', function (e) {
