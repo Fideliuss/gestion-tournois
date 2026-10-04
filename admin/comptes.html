@@ -902,10 +902,11 @@
 
   // ── Suppression ──────────────────────────────────────
   async function deleteAccount(id, email) {
-    if (!confirm('Supprimer « ' + email + ' » ?')) return;
+    // Les sessions et résultats de training sont liés au compte (ON DELETE CASCADE) : ils partent avec lui
+    if (!confirm('Supprimer « ' + email + ' » ?\n\nSon historique d\'entraînement (sessions et résultats) sera aussi effacé définitivement, et il disparaîtra des classements du Suivi équipe.\n\nCette action est irréversible.')) return;
     try {
       await SB.deleteUser(id);
-      showOk('Compte supprimé.');
+      showOk('Compte et historique d\'entraînement supprimés.');
       await loadAndRender();
     } catch(e) { showErr('Erreur : ' + e.message); }
   }
