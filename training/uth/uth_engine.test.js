@@ -418,4 +418,138 @@ test('20 000 donnes aléatoires : aucune erreur, net total = somme des lignes, j
   }
 });
 
+// ══ 6. Calcul des gains : donnes et correction ═══════
+test('gainsRound : mises valides (multiples de 5 € jusqu\'au max, JP1 5 €, Blind = Ante)', function () {
+  for (let i = 0; i < 1500; i++) {
+    const g = UTH.gainsRound({ maxBet: 30 });
+    assert.ok(g, 'une donne doit toujours être produite');
+    assert.ok(g.ante >= 5 && g.ante <= 30 && g.ante % 5 === 0, 'ante ' + g.ante);
+    assert.strictEqual(g.blind, g.ante);
+    assert.ok(g.trips === 0 || (g.trips >= 5 && g.trips <= 30 && g.trips % 5 === 0), 'trips ' + g.trips);
+    assert.ok(g.jp1 === 0 || g.jp1 === 5);
+    assert.ok(g.street in UTH.PLAY_MULTIPLIERS);
+    const ids = g.player.concat(g.dealer, g.board).map(function (c) { return c.rank + c.suit; });
+    assert.strictEqual(new Set(ids).size, 9, 'cartes distinctes');
+  }
+});
+
+test('gainsRound : chaque situation demandée est bien celle qui est produite', function () {
+  const check = {
+    win:         function (g) { return g.res.cmp > 0 && g.res.dealerQualified && g.res.player.category < CAT.STRAIGHT && g.street !== 'fold'; },
+    blind:       function (g) { return g.res.cmp > 0 && g.res.player.category >= CAT.STRAIGHT; },
+    unqualified: function (g) { return !g.res.dealerQualified; },
+    tie:         function (g) { return g.res.cmp === 0; },
+    lose:        function (g) { return g.res.cmp < 0; },
+    fold:        function (g) { return g.street === 'fold'; },
+  };
+  Object.keys(check).forEach(function (kind) {
+    for (let i = 0; i < 60; i++) {
+      const g = UTH.gainsRound({ kind: kind });
+      assert.ok(g && check[kind](g), kind + ' non respecté');
+    }
+  });
+});
+
+test('gainsRound : tirage libre — toutes les situations, Trips/JP1 présents ET absents, gains Trips/JP1', function () {
+  const seen = { kinds: new Set(), trips0: 0, trips1: 0, jp0: 0, jp1: 0, tripsWin: 0, jpWin: 0, fold: 0, blindPays: 0, jackpot: 0 };
+  for (let i = 0; i < 2000; i++) {
+    const g = UTH.gainsRound();
+    seen.kinds.add(g.kind);
+    g.trips ? seen.trips1++ : seen.trips0++;
+    g.jp1 ? seen.jp1++ : seen.jp0++;
+    if (g.street === 'fold') seen.fold++;
+    g.res.lines.forEach(function (l) {
+      if (l.bet === 'trips' && l.result === 'win') seen.tripsWin++;
+      if (l.bet === 'jp1' && l.result === 'win') seen.jpWin++;
+      if (l.bet === 'jp1' && l.result === 'jackpot') seen.jackpot++;
+      if (l.bet === 'blind' && l.result === 'win') seen.blindPays++;
+    });
+  }
+  ['win', 'blind', 'unqualified', 'tie', 'lose', 'fold'].forEach(function (k) { assert.ok(seen.kinds.has(k), 'situation absente : ' + k); });
+  assert.ok(seen.trips0 > 300 && seen.trips1 > 300 && seen.jp0 > 300 && seen.jp1 > 300, JSON.stringify(Array.from(Object.entries(seen))));
+  assert.ok(seen.tripsWin > 100, 'Trips gagnants trop rares : ' + seen.tripsWin);
+  assert.ok(seen.jpWin > 15, 'JP1 gagnants trop rares : ' + seen.jpWin);
+  assert.ok(seen.jackpot > 0, 'aucun jackpot en 2000 donnes');
+  assert.ok(seen.blindPays > 200, 'Blind payé trop rare : ' + seen.blindPays);
+});
+
+test('gainsRound : le jackpot (quinte flush royale du joueur) est seulement une indication, hors de la correction', function () {
+  for (let i = 0; i < 20; i++) {
+    const g = UTH.gainsRound({ kind: 'jackpot' });
+    assert.ok(g.res.jackpot);
+    assert.strictEqual(g.res.player.category, CAT.ROYAL_FLUSH);
+    assert.strictEqual(g.jp1, 5);
+    assert.ok(UTH.gradeGains(g.res, {}).rows.every(function (r) { return r.bet !== 'jp1'; }), 'le JP1 jackpot ne doit pas être corrigé');
+  }
+});
+
+test('gainsRound : maxBet est borné (5 € minimum) et arrondi au multiple de 5', function () {
+  assert.strictEqual(UTH.clampMaxBet(0), 5);
+  assert.strictEqual(UTH.clampMaxBet(52), 50);
+  assert.strictEqual(UTH.clampMaxBet('abc'), 50);
+  for (let i = 0; i < 200; i++) assert.strictEqual(UTH.gainsRound({ maxBet: 5 }).ante, 5);
+});
+
+// Donne fixe : Ante/Blind 10 €, couleur du joueur (Blind payé 3 pour 2), banque qualifiée perdante, Trips 5 € (couleur : 7 pour 1), JP1 5 € perdu
+const GAINS_FLUSH = {
+  ante: 10, blind: 10, trips: 5, jp1: 5, street: 'pre4',
+  player: cards('AH 4H'), dealer: cards('KS KD'), board: cards('7H 9H 2H 2C 3D'),
+};
+const GAINS_OK = {
+  ante:  { action: 'pay', amount: 10 },
+  play:  { action: 'pay', amount: 40 },
+  blind: { action: 'pay', amount: 15 },
+  trips: { action: 'pay', amount: 35 },
+  jp1:   { action: 'take' },
+};
+
+test('gradeGains : bonnes réponses mise par mise (payer / laisser / ramasser)', function () {
+  const res = UTH.settle(GAINS_FLUSH);
+  const g = UTH.gradeGains(res, GAINS_OK);
+  assert.ok(g.allOk, JSON.stringify(g.rows.filter(function (r) { return !r.ok; })));
+  assert.strictEqual(g.correctNet, res.net);
+  assert.strictEqual(g.userNet, res.net);
+});
+
+test('gradeGains : mauvaise action, mauvais montant et réponse manquante sont refusés', function () {
+  const res = UTH.settle(GAINS_FLUSH);
+  const variant = function (bet, v) { return UTH.gradeGains(res, Object.assign({}, GAINS_OK, { [bet]: v })); };
+  assert.ok(!variant('blind', { action: 'pay', amount: 10 }).allOk, 'Blind : 10 au lieu de 15');
+  assert.ok(!variant('ante', { action: 'push' }).allOk, 'Ante rendu à tort');
+  assert.ok(!variant('jp1', { action: 'pay', amount: 50 }).allOk, 'JP1 payé à tort');
+  assert.ok(!variant('play', { action: 'pay' }).allOk, 'montant absent');
+  assert.ok(!UTH.gradeGains(res, {}).allOk, 'aucune réponse');
+});
+
+test('gradeGains : le montant se compare à 1 centime près (Blind 3 pour 2 sur 5 €, soit 7,50 €)', function () {
+  const res = UTH.settle(Object.assign({}, GAINS_FLUSH, { ante: 5, blind: 5, trips: 0, jp1: 0 }));
+  const rep = function (blind) { return { ante: { action: 'pay', amount: 5 }, play: { action: 'pay', amount: 20 }, blind: { action: 'pay', amount: blind } }; };
+  assert.ok(UTH.gradeGains(res, rep(7.5)).allOk);
+  assert.ok(!UTH.gradeGains(res, rep(7)).allOk);
+});
+
+test('gradeGains : banque non qualifiée (Ante laissé), égalité (tout laissé), couché (tout ramassé)', function () {
+  const nq = UTH.settle({ ante: 10, blind: 10, trips: 0, jp1: 0, street: 'flop', player: cards('AH KS'), dealer: cards('2D 3C'), board: cards('7H 9H JD 4C 6S') });
+  assert.strictEqual(UTH.gainsExpected(nq.lines.find(function (l) { return l.bet === 'ante'; })).action, 'push');
+  const tie = UTH.settle({ ante: 10, blind: 10, trips: 5, jp1: 0, street: 'river', player: cards('2H 3S'), dealer: cards('2D 3C'), board: cards('AH KS QD JC 9S') });
+  const gt = UTH.gradeGains(tie, { ante: { action: 'push' }, play: { action: 'push' }, blind: { action: 'push' }, trips: { action: 'take' } });
+  assert.ok(gt.allOk, JSON.stringify(gt.rows));
+  const fold = UTH.settle({ ante: 10, blind: 10, trips: 0, jp1: 0, street: 'fold', player: cards('2H 3S'), dealer: cards('2D 3C'), board: cards('AH KS QD JC 9S') });
+  const gf = UTH.gradeGains(fold, { ante: { action: 'take' }, blind: { action: 'take' } });
+  assert.ok(gf.allOk);
+  assert.strictEqual(gf.rows.length, 2, 'couché : pas de Play à corriger');
+  assert.strictEqual(gf.userNet, -20);
+});
+
+test('gradeGains : 1 500 donnes — répondre exactement comme le règlement est toujours correct', function () {
+  for (let i = 0; i < 1500; i++) {
+    const g = UTH.gainsRound({ maxBet: 50 });
+    const answers = {};
+    g.res.lines.forEach(function (l) { const e = UTH.gainsExpected(l); answers[l.bet] = { action: e.action, amount: e.amount }; });
+    const graded = UTH.gradeGains(g.res, answers);
+    assert.ok(graded.allOk);
+    assert.strictEqual(graded.userNet, g.res.net, 'net recalculé (hors jackpot)');
+  }
+});
+
 console.log(process.exitCode ? '\nÉCHEC' : '\n' + passed + ' tests réussis');
