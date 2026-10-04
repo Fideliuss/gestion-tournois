@@ -154,3 +154,84 @@ button.sv-mrow:focus-visible, .sv-tab:focus-visible, .sv-chip:focus-visible { ou
   .sv-mnone { grid-column: 2 / -1; }
   .sv-tab { padding: 10px 12px; }
 }
+
+/* ══ Vue manager ══════════════════════════════════════ */
+.svm-controls { display: flex; flex-direction: column; gap: 12px; margin: 4px 0; }
+.svm-group { display: flex; flex-direction: column; gap: 6px; }
+.svm-group-label {
+  font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim);
+}
+.svm-select { width: auto; min-width: 240px; max-width: 100%; }
+
+/* Tableaux : une ligne = une grille ; chaque tableau fixe ses colonnes */
+.svm-row {
+  display: grid; gap: 10px; align-items: center; width: 100%;
+  padding: 11px 8px; background: none; border: none; border-top: 1px solid var(--gold-bd);
+  text-align: left; font-family: var(--f-ui); font-size: 13px; color: var(--text);
+}
+button.svm-row { cursor: pointer; transition: background .15s; }
+button.svm-row:hover { background: var(--gold-bg); }
+button.svm-row:focus-visible, .svm-select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.svm-head {
+  border-top: none; padding-top: 0; padding-bottom: 8px; cursor: default;
+  font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim);
+}
+.svm-t-rank { grid-template-columns: 34px 1fr 70px 88px 110px 64px 96px; }
+.svm-t-time { grid-template-columns: 34px 1fr 110px 90px 80px 96px; }
+.svm-t-act  { grid-template-columns: 1fr 120px 90px 70px 100px; }
+.svm-t-weak { grid-template-columns: 1fr 70px 90px 200px; }
+
+.svm-rank { font-family: var(--f-num); font-weight: 600; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.svm-rank.top { color: var(--gold); }
+.svm-name { color: var(--cream); font-weight: 500; overflow-wrap: anywhere; }
+.svm-val  { font-family: var(--f-num); font-variant-numeric: tabular-nums; color: var(--cream); }
+.svm-val small { font-size: 11px; color: var(--text-dim); margin-left: 1px; }
+.svm-date { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+.svm-dim .svm-name, .svm-dim .svm-val { color: var(--text-dim); font-weight: 400; }
+.svm-sep {
+  margin-top: 6px; padding: 12px 8px 6px; border-top: 1px dashed var(--gold-bd);
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted);
+}
+.svm-badge {
+  display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 8px;
+  font-size: 10px; font-weight: 600; letter-spacing: .04em; color: #e07a68; background: rgba(224,122,104,.14);
+}
+body.light .svm-badge { color: #b5483a; background: rgba(181,72,58,.12); }
+.svm-note { margin-top: 4px; text-align: center; }
+
+/* Taux d'erreur */
+.svm-rate { display: flex; align-items: center; gap: 10px; }
+.svm-rate .sv-meter { flex: 1; }
+.svm-rate b { width: 40px; text-align: right; font-family: var(--f-num); font-variant-numeric: tabular-nums; color: var(--cream); }
+.svm-rate.hi .sv-meter i { background: #e07a68; }
+.svm-rate.mid .sv-meter i { background: var(--sauterne); }
+.svm-rate.lo .sv-meter i { background: var(--text-dim); }
+body.light .svm-rate.hi .sv-meter i { background: #b5483a; }
+
+/* Courbe de progression */
+.svm-chart-wrap { margin-top: 18px; overflow-x: auto; }
+.svm-chart { display: block; max-width: 100%; height: auto; }
+.svm-grid { stroke: var(--gold-bd); stroke-width: 1; }
+.svm-axis { fill: var(--text-dim); font-size: 10px; font-family: var(--f-num); }
+.svm-raw  { fill: none; stroke: var(--gold); stroke-width: 1; opacity: .35; }
+.svm-avg  { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.svm-dot  { fill: var(--bg); stroke: var(--gold); stroke-width: 1.5; }
+.svm-dot.last { fill: var(--gold); }
+
+/* Sessions par semaine */
+.svm-weeks { display: flex; align-items: flex-end; gap: 6px; height: 130px; padding-top: 8px; }
+.svm-week { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
+.svm-week-bar { width: 100%; max-width: 34px; background: var(--gold); opacity: .4; border-radius: 1px 1px 0 0; }
+.svm-week-bar.last { opacity: 1; }
+.svm-week-n { font-family: var(--f-num); font-size: 10px; color: var(--text-dim); min-height: 12px; }
+.svm-week-l { font-family: var(--f-num); font-size: 9px; color: var(--text-muted); }
+
+@media (max-width: 620px) {
+  .svm-hide-m { display: none; }
+  .svm-t-rank { grid-template-columns: 28px 1fr 64px 80px; }
+  .svm-t-time { grid-template-columns: 28px 1fr 90px 80px; }
+  .svm-t-act  { grid-template-columns: 1fr 74px 90px; }
+  .svm-t-weak { grid-template-columns: 1fr 150px; }
+  .svm-week-l { font-size: 8px; }
+  .svm-week:nth-child(even) .svm-week-l { visibility: hidden; }
+}

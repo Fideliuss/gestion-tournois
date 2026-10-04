@@ -24,7 +24,7 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 - **Phase 0** — Restructuration : hub multi-panneaux, rôles/permissions par panel, licence propriétaire. Livrée.
 - **Phase 1** — Training Croupier : Blackjack (BJ Paiement, BJ Score). Livrée.
 - **Phase 2** — Training Croupier : Roulette Anglaise (Couleur, Pointage, Conversion, Calcul Paiement). Livrée, taguée `v2.0.0` (2026-07-03).
-- **Phase 3** — Suivi résultats : vue historique croupier + vue manager (tous les croupiers). À venir.
+- **Phase 3** — Suivi résultats : vue historique croupier (« Mes résultats ») + vue manager (« Suivi équipe »). Développée (étapes 1 à 3, mergées dans `develop` ou en PR), **release prévue à la fin de la phase** (pas avant).
 - **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet. À venir.
 
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
@@ -79,7 +79,8 @@ training/
   training.css            Styles partagés training (level-card, game-card, answer-zone, feedback-bar)
   suivi/                  Phase 3 — Suivi résultats (voir section Suivi résultats)
     suivi_croupier.html/.js  « Mes résultats » : historique, record, tendance de l'utilisateur connecté, guard panel:'training'
-    suivi_common.js          Modules suivis (SV_MODULES), niveaux, calculs partagés (précision, tendance, meilleurs temps) — réutilisé par la vue manager
+    suivi_manager.html/.js   « Suivi équipe » : classement, progression, points faibles, activité — guard panel:'training-suivi'
+    suivi_common.js          Modules suivis (SV_FAMILIES / SV_MODULES), niveaux, calculs et blocs d'affichage partagés (précision, tendance, meilleurs temps, svEsc) — utilisé par les deux vues
     suivi.css                Styles des pages de suivi (.sv-*)
   blackjack/
     blackjack_hub.html      Sous-hub Blackjack + modal config admin (plages de mise, timers, cartes/niveau)
@@ -102,6 +103,7 @@ supabase/
     fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
     add_blackjack_cards_config.sql   Ajoute la clé "cards" (nb cartes/niveau BJ Score) au training_config existant
     phase3_suivi_meta_et_acces_manager.sql  Phase 3 : training_sessions.meta (jsonb) + user_label, fonction can_view_training_stats(), policies de lecture manager (appliquée sur la base le 2026-10-04)
+    phase3_suivi_fonctions_manager.sql      Phase 3 : fonctions d'agrégat de la vue manager (training_ranking, training_tables_best, training_weak_points, training_activity, training_activity_weekly) — appliquée le 2026-10-04
 ```
 
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
@@ -276,7 +278,14 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - **Vue croupier — « Mes résultats »** (`training/suivi/suivi_croupier.html`, tuile dans `training.html`) : **navigation en 3 niveaux** — onglets *Vue d'ensemble / Black Jack / Roulette Anglaise* (avec nombre de sessions), puis pastilles de module dans un jeu (« Tous les modules » ou un seul ; modules sans session grisés). La vue d'ensemble affiche un tableau cliquable par jeu (sessions, record, moyenne, tendance par module). La vue courante est portée par le **hash de l'URL** (`#`, `#roulette`, `#roulette/roulette-tables`) : bouton retour et liens directs fonctionnent. Regroupement des modules en jeux : `SV_FAMILIES` / champ `family` de `SV_MODULES` dans `suivi_common.js` (à compléter en Phase 4). Chaque carte module : nombre de sessions, record, moyenne des 5 dernières, tendance (5 dernières vs 5 précédentes, affichée à partir de 8 sessions), histogramme des 12 dernières sessions, historique paginé (8 + « Tout voir »), filtre par niveau (chips Tous/Facile/Médium/Expert quand le module a des niveaux). Tables ×: meilleur temps par table, **sessions sans erreur uniquement** et avec chrono mesuré (`meta.elapsedMs`, donc pas d'historique avant octobre 2026).
 - `roulette-mixte` (module abandonné) est ignoré par les vues (absent de `SV_MODULES`) ; une session orpheline subsiste en base.
 - Source des données : `SB.getMyTrainingSessions()` ; aucun calcul serveur nécessaire pour la vue croupier (volume faible : un seul utilisateur).
-- **À venir (étape 3)** : vue manager (`panel: 'training-suivi'`) — classement équipe par module/niveau, progression d'un croupier, points faibles, activité ; agrégats via fonctions SQL (plafond 1000 lignes Supabase).
+- **Vue manager — « Suivi équipe »** (`training/suivi/suivi_manager.html`, guard `panel: 'training-suivi'`, tuile `#tile-suivi-equipe` de `training.html` masquée tant que le rôle n'a pas le panel) : 4 onglets portés par le hash (`#classement`, `#progression/<user_id>`, `#faibles`, `#activite`). Une ligne de classement ou d'activité ouvre la progression du croupier.
+  - **Classement** : moyenne des 5 dernières sessions par module et niveau ; au moins `SVM_MIN_RANKED` (3) sessions pour être numéroté, les autres sont listés dessous (« pas encore classés »). Tables × : meilleur temps par table (sessions sans erreur chronométrées).
+  - **Progression** : courbe SVG (un point par session + moyenne glissante sur 5), stats, meilleurs temps pour les Tables ×.
+  - **Points faibles** : taux d'erreur par facette (type de mise, valeur de pièce, table, numéro, nombre de cartes, tranche de mise) pour l'équipe ou un croupier ; seuil de 5 tentatives (3 pour un croupier seul). Pour Calcul Paiement, une question compte une fois par type de mise qu'elle contient.
+  - **Activité** : sessions et croupiers actifs sur 7/30/90 jours, sessions par semaine (12 semaines), badge « Inactif » au-delà de `SVM_INACTIVE_DAYS` (14 j).
+- **Données** : 5 fonctions SQL `training_ranking`, `training_tables_best`, `training_weak_points`, `training_activity`, `training_activity_weekly` (migration `phase3_suivi_fonctions_manager.sql`), appelées via `SB.getTraining*` (`shared/supabase.js`) ; plafond 1000 lignes Supabase contourné en agrégeant en base. Toutes **SECURITY INVOKER** : la RLS s'applique à l'appelant (un non-manager ne reçoit que ses propres lignes — vérifié par simulation de rôles). La progression d'un croupier lit directement `training_sessions` (policy `*_manager_read`).
+- **Sécurité front** : tout libellé issu de la base (`user_label`, modifiable par son propriétaire) passe par `svEsc()` avant `innerHTML` ; les `user_id` placés dans un `onclick` sont validés par `svIsId()`. Le masquage de la tuile côté client est du confort — le verrou réel est la RLS (`app_metadata.role`).
+- **Données incomplètes connues** : pas de chrono (`elapsedMs`) pour les sessions Tables antérieures à octobre 2026 ; pas de niveau pour BJ Paiement et Tables (modules sans niveau) ; 1 session `roulette-mixte` orpheline en base (module abandonné, ignorée).
 
 ---
 

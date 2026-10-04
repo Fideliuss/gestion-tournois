@@ -78,6 +78,11 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 
 ### Ultimate Poker — *bientôt disponible*
 
+### Suivi des résultats
+
+- **Mes résultats** (tous les croupiers) — pour chaque module : sessions, record, moyenne des 5 dernières, tendance, historique, filtre par niveau, meilleur temps par table (Tables ×). Navigation par jeu (Black Jack / Roulette) puis par module
+- **Suivi équipe** (rôles disposant du panel « Suivi Training », et admins) — *Classement* par module et niveau (meilleur temps par table pour les Tables ×), *Progression* d'un croupier dans le temps, *Points faibles* (taux d'erreur par type de mise, table, numéro… pour l'équipe ou un croupier), *Activité* (sessions par semaine, croupiers inactifs). Le droit se donne dans Gestion Comptes, sous Training Croupier
+
 Toutes les sessions et résultats de training sont enregistrés dans **Supabase** (historique par utilisateur). Les paramètres (timers, plages de mise, valeurs de pièces) sont configurables par un admin depuis chaque hub de module.
 
 ---
@@ -162,6 +167,11 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── training/
 │   ├── training.html              — Sous-hub Training Croupier
 │   ├── training.css               — Styles partagés training
+│   ├── suivi/
+│   │   ├── suivi_croupier.html / .js  — Mes résultats
+│   │   ├── suivi_manager.html / .js   — Suivi équipe (panel training-suivi)
+│   │   ├── suivi_common.js            — Modules suivis, calculs et blocs d'affichage partagés
+│   │   └── suivi.css                  — Styles des pages de suivi
 │   ├── blackjack/
 │   │   ├── blackjack_hub.html         — Sous-hub Blackjack + config admin
 │   │   ├── blackjack.html / .js       — BJ Paiement
