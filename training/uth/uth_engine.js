@@ -311,7 +311,126 @@ const UTH = (function () {
     return null;
   }
 
+  // ── Pièges du niveau expert (« Meilleure main ») ────
+  // Chaque piège construit 7 cartes dont la meilleure combinaison est connue d'avance, avec l'explication
+  // du piège. Les cartes de base sont complétées au hasard puis la catégorie est revérifiée : un tirage
+  // qui donnerait une autre combinaison (ex. un 4e As) est écarté.
+  const rankCounts = function (cs) { const m = {}; cs.forEach(function (c) { m[c.rank] = (m[c.rank] || 0) + 1; }); return Object.keys(m).map(function (k) { return m[k]; }); };
+  const hasCategory = function (cs, cat) { return combinations(cs, 5).some(function (c) { return evaluate5(c).category === cat; }); };
+
+  const TRAPS = [
+    {
+      id: 'roue', expected: CAT.STRAIGHT,
+      valid: function (seven) { return bestHand(seven).tiebreak[0] === 5; },
+      text: 'La « roue » A-2-3-4-5 est une quinte (de hauteur 5) : l\'As compte aussi comme la plus petite carte.',
+      base: function (pick, rng) {
+        return [14, 2, 3, 4, 5].map(function (r) { return { rank: r, suit: SUITS[Math.floor(rng() * 4)] }; });
+      },
+    },
+    {
+      id: 'couleur_et_quinte', expected: CAT.FLUSH,
+      valid: function (seven) { return hasCategory(seven, CAT.STRAIGHT) && hasCategory(seven, CAT.FLUSH); },
+      text: 'Le joueur a une quinte ET une couleur : la couleur est plus forte que la quinte.',
+      base: function (pick, rng) {
+        const high = 6 + Math.floor(rng() * 8), s = pick(SUITS);
+        const ranks = [high, high - 1, high - 2, high - 3, high - 4];
+        const others = SUITS.filter(function (x) { return x !== s; });
+        const cards = ranks.map(function (r, i) { return { rank: r, suit: i < 3 ? s : pick(others) }; });
+        // deux cartes de la couleur en plus, de rangs hors de la quinte : 5 cartes de la couleur, mais pas consécutives
+        shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].filter(function (r) { return ranks.indexOf(r) < 0; }), rng)
+          .slice(0, 2).forEach(function (r) { cards.push({ rank: r, suit: s }); });
+        return cards;
+      },
+    },
+    {
+      id: 'deux_brelans', expected: CAT.FULL_HOUSE,
+      valid: function (seven) { return rankCounts(seven).filter(function (n) { return n === 3; }).length === 2; },
+      text: 'Deux brelans : le plus haut reste un brelan, et trois cartes du second brelan servent de paire pour faire le Full.',
+      base: function (pick, rng) {
+        const rs = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], rng).slice(0, 2);
+        const s1 = shuffle(SUITS.slice(), rng), s2 = shuffle(SUITS.slice(), rng);
+        return [0, 1, 2].map(function (i) { return { rank: rs[0], suit: s1[i] }; }).concat([0, 1, 2].map(function (i) { return { rank: rs[1], suit: s2[i] }; }));
+      },
+    },
+    {
+      id: 'trois_paires', expected: CAT.TWO_PAIR,
+      valid: function (seven) { return rankCounts(seven).filter(function (n) { return n === 2; }).length === 3; },
+      text: 'Trois paires : seules les deux plus hautes comptent, et la 5e carte est la plus haute des cartes restantes.',
+      base: function (pick, rng) {
+        const rs = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], rng).slice(0, 3);
+        const out = [];
+        rs.forEach(function (r) { const s = shuffle(SUITS.slice(), rng); out.push({ rank: r, suit: s[0] }, { rank: r, suit: s[1] }); });
+        return out;
+      },
+    },
+    {
+      id: 'carre_brelan', expected: CAT.QUADS,
+      valid: function (seven) { const c = rankCounts(seven); return c.indexOf(4) >= 0 && c.indexOf(3) >= 0; },
+      text: 'Un carré et un brelan : le carré l\'emporte sur le Full, on ne garde pas le brelan.',
+      base: function (pick, rng) {
+        const rs = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], rng).slice(0, 2), s = shuffle(SUITS.slice(), rng);
+        return SUITS.map(function (x) { return { rank: rs[0], suit: x }; }).concat([0, 1, 2].map(function (i) { return { rank: rs[1], suit: s[i] }; }));
+      },
+    },
+    {
+      id: 'full_deux_paires', expected: CAT.FULL_HOUSE,
+      valid: function (seven) { const c = rankCounts(seven); return c.indexOf(3) >= 0 && c.filter(function (n) { return n === 2; }).length === 2; },
+      text: 'Un brelan et deux paires : on forme un Full avec le brelan et la plus haute des deux paires.',
+      base: function (pick, rng) {
+        const rs = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], rng).slice(0, 3), out = [];
+        const s0 = shuffle(SUITS.slice(), rng);
+        [0, 1, 2].forEach(function (i) { out.push({ rank: rs[0], suit: s0[i] }); });
+        [1, 2].forEach(function (k) { const s = shuffle(SUITS.slice(), rng); out.push({ rank: rs[k], suit: s[0] }, { rank: rs[k], suit: s[1] }); });
+        return out;
+      },
+    },
+    {
+      id: 'quinte_et_paire', expected: CAT.STRAIGHT,
+      valid: function (seven) { const c = rankCounts(seven); return c.indexOf(2) >= 0 && Math.max.apply(null, c) === 2; },
+      text: 'Une quinte avec une paire dans les 7 cartes : la quinte est plus forte que la paire.',
+      base: function (pick, rng) {
+        const high = 6 + Math.floor(rng() * 9);
+        const ranks = [high, high - 1, high - 2, high - 3, high - 4];
+        const cards = ranks.map(function (r) { return { rank: r, suit: SUITS[Math.floor(rng() * 4)] }; });
+        cards.push({ rank: pick(ranks), suit: SUITS[Math.floor(rng() * 4)] });
+        return cards;
+      },
+    },
+    {
+      id: 'couleur_et_paire', expected: CAT.FLUSH,
+      valid: function (seven) { const c = rankCounts(seven); return c.indexOf(2) >= 0 && Math.max.apply(null, c) === 2; },
+      text: 'Une couleur avec une paire dans les 7 cartes : la couleur est plus forte que la paire (ou la double paire).',
+      base: function (pick, rng) {
+        const s = pick(SUITS), cards = [];
+        let rs;
+        do { rs = shuffle([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], rng).slice(0, 5); } while (evaluate5(rs.map(function (r) { return { rank: r, suit: s }; })).category !== CAT.FLUSH);
+        rs.forEach(function (r) { cards.push({ rank: r, suit: s }); });
+        const others = SUITS.filter(function (x) { return x !== s; });
+        cards.push({ rank: rs[0], suit: pick(others) });   // même rang qu'une carte de la couleur : fait une paire
+        return cards;
+      },
+    },
+  ];
+
+  function expertTrap(rng, only) {
+    rng = rng || Math.random;
+    const pick = function (arr) { return arr[Math.floor(rng() * arr.length)]; };
+    const pool = only ? TRAPS.filter(function (t) { return t.id === only; }) : TRAPS;
+    for (let tries = 0; tries < 600; tries++) {
+      const trap = pick(pool);
+      const base = trap.base(pick, rng);
+      const used = function (c) { return base.some(function (b) { return b.rank === c.rank && b.suit === c.suit; }); };
+      // les cartes de base doivent être distinctes (un tirage de suits peut en dupliquer une)
+      if (new Set(base.map(function (c) { return c.rank + c.suit; })).size !== base.length) continue;
+      const extra = shuffle(newDeck().filter(function (c) { return !used(c); }), rng).slice(0, 7 - base.length);
+      const seven = shuffle(base.concat(extra), rng);
+      if (bestHand(seven).category === trap.expected && (!trap.valid || trap.valid(seven))) return { cards: seven, expected: trap.expected, id: trap.id, text: trap.text };
+    }
+    return null;
+  }
+
   return {
+    TRAPS: TRAPS, expertTrap: expertTrap,
     SUITS: SUITS, RED: RED, RANK_LABELS: RANK_LABELS, CAT: CAT, CAT_KEYS: CAT_KEYS, CAT_NAMES: CAT_NAMES,
     PLAY_MULTIPLIERS: PLAY_MULTIPLIERS, PLAY_LABELS: PLAY_LABELS, DEFAULT_CONFIG: DEFAULT_CONFIG,
     newDeck: newDeck, shuffle: shuffle, evaluate5: evaluate5, bestHand: bestHand, compare: compare,

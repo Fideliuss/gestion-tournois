@@ -1,0 +1,49 @@
+/* ══════════════════════════════════════════════════════
+   ULTIMATE TEXAS HOLD'EM — styles partagés des modules
+   S'appuie sur training.css (playing-card, level-card, feedback-bar, summary…)
+   ══════════════════════════════════════════════════════ */
+
+/* ── Table : cartes du joueur et board ── */
+.uth-table {
+  width: 100%; max-width: 640px; margin: 4px auto 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+.uth-row-label {
+  font-size: 10px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 10px; text-align: center;
+}
+.uth-cards { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+/* les cartes ne se chevauchent pas : il faut pouvoir toutes les lire */
+.uth-cards .playing-card { margin-left: 0; }
+.playing-card.uth-dim  { opacity: .3; filter: saturate(.5); }
+.playing-card.uth-best { box-shadow: 0 0 0 2px var(--gold), 2px 4px 12px rgba(0,0,0,.4); }
+
+/* ── Grille de réponses (une touche par combinaison) ── */
+.uth-answers {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  width: 100%; max-width: 640px; margin: 0 auto;
+}
+.uth-ans {
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 4px;
+  padding: 14px 6px; font-family: var(--f-ui); font-size: 13px; font-weight: 500;
+  color: var(--cream); cursor: pointer; text-align: center; line-height: 1.25;
+  transition: border-color .15s, background .15s;
+}
+.uth-ans:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-bg); }
+.uth-ans:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.uth-ans:disabled { cursor: default; opacity: .55; }
+.uth-ans.ok { opacity: 1; border-color: #6dcc8e; background: rgba(109,204,142,.14); color: #6dcc8e; }
+.uth-ans.ko { opacity: 1; border-color: #e07a68; background: rgba(224,122,104,.14); color: #e07a68; }
+body.light .uth-ans.ok { color: #2e7d4f; border-color: #2e7d4f; }
+body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
+
+.uth-trap { margin-top: 8px; font-size: 12px; line-height: 1.5; opacity: .9; }
+.uth-next { margin: 14px auto 0; display: block; }
+
+@media (max-width: 620px) {
+  .uth-answers { grid-template-columns: repeat(2, 1fr); }
+  .uth-cards { gap: 6px; }
+  .uth-cards .playing-card { width: 52px; height: 74px; }
+  .uth-cards .card-center { font-size: 20px; }
+  .uth-cards .card-rank { font-size: 12px; }
+}

@@ -25,7 +25,7 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 - **Phase 1** — Training Croupier : Blackjack (BJ Paiement, BJ Score). Livrée.
 - **Phase 2** — Training Croupier : Roulette Anglaise (Couleur, Pointage, Conversion, Calcul Paiement). Livrée, taguée `v2.0.0` (2026-07-03).
 - **Phase 3** — Suivi résultats : vue historique croupier (« Mes résultats ») + vue manager (« Suivi équipe »). Développée (étapes 1 à 3, mergées dans `develop` ou en PR), **release prévue à la fin de la phase** (pas avant).
-- **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet (3 modules : Calcul des gains, Meilleure main, Qui gagne ?). **En cours** : moteur de cartes et de paiements fait (étape 1) ; hub et modules à venir. Release prévue à la fin de la phase.
+- **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet (3 modules : Calcul des gains, Meilleure main, Qui gagne ?). **En cours** : moteur (étape 1), hub + Meilleure main (étape 2) faits ; Qui gagne ?, Calcul des gains et intégration au suivi à venir. Release prévue à la fin de la phase.
 
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
 
@@ -75,7 +75,7 @@ admin/
     extras.css / extras.js
 
 training/
-  training.html          Sous-hub Training Croupier (Blackjack / Roulette / Ultimate Poker à venir)
+  training.html          Sous-hub Training Croupier (Blackjack / Roulette / Ultimate Texas Hold'em / Mes résultats / Suivi équipe)
   training.css            Styles partagés training (level-card, game-card, answer-zone, feedback-bar)
   suivi/                  Phase 3 — Suivi résultats (voir section Suivi résultats)
     suivi_croupier.html/.js  « Mes résultats » : historique, record, tendance de l'utilisateur connecté, guard panel:'training'
@@ -84,6 +84,10 @@ training/
     suivi.css                Styles des pages de suivi (.sv-*)
   uth/                    Phase 4 — Ultimate Texas Hold'em
     uth_engine.js            Moteur pur (sans DOM) : paquet, meilleure main de 5 parmi 7, comparaison, qualification du croupier, règlement d'une donne (Ante/Blind/Play/Trips/JP1), générateurs de donnes ciblées
+    uth_hub.html             Sous-hub Ultimate Texas Hold'em (Meilleure main active ; Qui gagne ? et Calcul des gains « bientôt disponible »)
+    uth_main.html/.js        Module Meilleure main (clé de session `uth-main`)
+    uth_ui.js                Affichage des cartes partagé (réutilise .playing-card de training.css ; surligne les 5 cartes de la meilleure main)
+    uth.css                  Styles des modules UTH (table, grille de réponses, états juste/faux)
     uth_engine.test.js       Tests Node (`node training/uth/uth_engine.test.js`, ~50 s) — à relancer après toute modification du moteur ou des tables
   blackjack/
     blackjack_hub.html      Sous-hub Blackjack + modal config admin (plages de mise, timers, cartes/niveau)
@@ -281,6 +285,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - **Règles appliquées** : réglementation des jeux, telle que fournie par l'utilisateur. Ante et Blind égaux ; Trips optionnel ; Play 3× ou 4× l'Ante avant le flop (`pre3`/`pre4`), 2× au flop, 1× à la river, ou couché (`fold`). Croupier qualifié à partir d'une paire. Joueur gagnant : Ante et Play payés 1 pour 1, Blind payé selon la table à partir de la quinte (rendu en dessous). Croupier gagnant : Ante, Play et Blind perdus. Égalité : tout est rendu. **Croupier non qualifié : l'Ante est rendu, Play et Blind jouent.** Couché : Ante et Blind perdus.
 - **Tables** (dans `DEFAULT_CONFIG` du moteur, surchargeables par `training_config` clé `uth`) — Blind : quinte flush royale 500, quinte flush 50, carré 10, full 3, couleur 3 pour 2, quinte 1. Trips : 50, 40, 30, 8, 7, 4, brelan 3. JP1 : full 10, carré 100, quinte flush 300, quinte flush royale « communautaire » (le board seul) 1000 ; la quinte flush royale du joueur paie **100 % du jackpot** (montant variable, validé par le superviseur après vidéo, donc non calculable : le moteur renvoie `result: 'jackpot'`) ; lot de consolation 100 pour 1 pour tous les joueurs JP1 quand un autre joueur reçoit la quinte flush royale.
 - **Hypothèses à connaître** : « X pour 1 » est lu comme un gain de X fois la mise, la mise étant rendue (comme « 35 pour 1 » à la roulette). Trips est évalué sur les 7 cartes du joueur, indépendamment du résultat contre le croupier, y compris s'il se couche (la réglementation fournie ne le détaille pas : à confirmer). Mise minimale 5 € à Bordeaux (donc couleur au Blind = 7,50 €, payable en pièces de 2,50 €). Le montant de la mise JP1 n'est pas encore connu.
+- **Module Meilleure main** (`uth_main.*`, game `uth-main`, sans chronomètre) : 10 questions, une touche par combinaison (10). Facile = 5 cartes ; Médium = 2 cartes du joueur + board de 5 ; Expert = mêmes 7 cartes mais **pièges** (`UTH.TRAPS` dans le moteur : roue A-2-3-4-5, couleur ET quinte, deux brelans, trois paires, carré + brelan, brelan + deux paires, quinte + paire, couleur + paire). Chaque piège vérifie que la situation décrite est réellement présente (`valid`) avant d'être affiché : l'explication montrée ne doit jamais contredire les cartes. Bonne réponse simple = enchaînement automatique ; erreur ou piège = bouton « Suivant » pour lire l'explication. Les 5 cartes de la meilleure main sont surlignées, les autres atténuées. `scenario` enregistré : `{cards, level, best, trap}` ; `correct_answer`/`user_answer` = index de combinaison (0 carte haute … 9 quinte flush royale) ; `meta.level` posé sur la session.
 - **Décisions de cadrage** : le jeu s'appelle « Ultimate Texas Hold'em » (la tuile « Ultimate Poker » du hub sera renommée). Niveaux facile/médium/expert sans chronomètre au départ. Trips inclus dès la v1. Les cartes utilisent les libellés du Blackjack (J/Q/K, ♠♥♦♣).
 - **Tests** : le moteur est vérifié par `uth_engine.test.js` — cas connus, évaluateur de référence indépendant sur 200 000 mains, fréquences théoriques du poker à 7 cartes, règlement de chaque cas de la réglementation. Un évaluateur faux enseignerait de fausses règles : ne pas modifier le moteur sans relancer les tests.
 

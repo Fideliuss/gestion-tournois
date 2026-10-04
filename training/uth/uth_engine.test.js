@@ -164,6 +164,44 @@ test('makeHand5 produit exactement la combinaison demandée', function () {
   }
 });
 
+test('pièges experts : combinaison attendue garantie, 7 cartes distinctes, explication fournie', function () {
+  UTH.TRAPS.forEach(function (t) {
+    for (let i = 0; i < 400; i++) {
+      const r = UTH.expertTrap(Math.random, t.id);
+      assert.ok(r && r.id === t.id, 'aucun tirage pour ' + t.id);
+      assert.strictEqual(r.cards.length, 7);
+      assert.strictEqual(new Set(r.cards.map(function (c) { return c.rank + c.suit; })).size, 7, t.id + ' : cartes en double');
+      assert.strictEqual(UTH.bestHand(r.cards).category, t.expected, t.id + ' : mauvaise combinaison');
+      assert.ok(r.text && r.text.length > 20);
+    }
+  });
+});
+
+test('pièges experts : la situation décrite est bien présente dans les cartes', function () {
+  const countsOf = function (cs) { const m = {}; cs.forEach(function (c) { m[c.rank] = (m[c.rank] || 0) + 1; }); return Object.values(m); };
+  const hasSubset = function (cs, cat) { return UTH.combinations(cs, 5).some(function (c) { return UTH.evaluate5(c).category === cat; }); };
+  const checks = {
+    roue:              function (cs) { return [14, 2, 3, 4, 5].every(function (r) { return cs.some(function (c) { return c.rank === r; }); }) && UTH.bestHand(cs).tiebreak[0] === 5; },   // et aucune quinte plus haute
+    couleur_et_quinte: function (cs) { return hasSubset(cs, CAT.STRAIGHT) && hasSubset(cs, CAT.FLUSH); },
+    deux_brelans:      function (cs) { return countsOf(cs).filter(function (n) { return n === 3; }).length === 2; },
+    trois_paires:      function (cs) { return countsOf(cs).filter(function (n) { return n === 2; }).length === 3; },
+    carre_brelan:      function (cs) { const c = countsOf(cs); return c.includes(4) && c.includes(3); },
+    full_deux_paires:  function (cs) { const c = countsOf(cs); return c.includes(3) && c.filter(function (n) { return n === 2; }).length === 2; },
+    quinte_et_paire:   function (cs) { return hasSubset(cs, CAT.STRAIGHT) && countsOf(cs).includes(2); },
+    couleur_et_paire:  function (cs) { return hasSubset(cs, CAT.FLUSH) && countsOf(cs).includes(2); },
+  };
+  assert.deepStrictEqual(Object.keys(checks).sort(), UTH.TRAPS.map(function (t) { return t.id; }).sort(), 'un piège sans vérification');
+  UTH.TRAPS.forEach(function (t) {
+    for (let i = 0; i < 300; i++) assert.ok(checks[t.id](UTH.expertTrap(Math.random, t.id).cards), t.id + ' : situation absente');
+  });
+});
+
+test('expertTrap sans filtre : tous les pièges sortent', function () {
+  const seen = new Set();
+  for (let i = 0; i < 400; i++) seen.add(UTH.expertTrap().id);
+  assert.strictEqual(seen.size, UTH.TRAPS.length);
+});
+
 // ══ 4. Règlement d'une donne (réglementation) ═════════
 function round(over) {
   return Object.assign({ ante: 10, blind: 10, trips: 0, jp1: 0, street: 'river' }, over);
