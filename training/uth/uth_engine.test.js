@@ -85,6 +85,12 @@ test('descriptions françaises', function () {
   assert.strictEqual(UTH.describe(best('QH 9H 8H 4H 2H')), 'Couleur à la Dame');
   assert.strictEqual(UTH.describe(best('KH KS KD 7C 7H')), 'Full aux Rois par les 7');
   assert.strictEqual(UTH.describe(best('8H 8S 8D 8C 2H')), 'Carré de 8');
+  // élision : « d'As », jamais « de As »
+  assert.strictEqual(UTH.describe(best('AH AS 4D 5C 2H')), 'Paire d\'As');
+  assert.strictEqual(UTH.describe(best('AH AS AD 5C 2H')), 'Brelan d\'As');
+  assert.strictEqual(UTH.describe(best('AH AS AD AC 2H')), 'Carré d\'As');
+  assert.strictEqual(UTH.describe(best('AH AS KD KC 2H')), 'Double paire As et Rois');
+  assert.strictEqual(UTH.describe(best('AH AS AD KC KH')), 'Full aux As par les Rois');
   assert.strictEqual(UTH.describe(best('AS KS QS JS TS')), 'Quinte flush royale');
 });
 
@@ -200,6 +206,67 @@ test('expertTrap sans filtre : tous les pièges sortent', function () {
   const seen = new Set();
   for (let i = 0; i < 400; i++) seen.add(UTH.expertTrap().id);
   assert.strictEqual(seen.size, UTH.TRAPS.length);
+});
+
+// ══ « Qui gagne ? » : explications et donnes par niveau ═════
+const P = function (s) { return UTH.bestHand(cards(s)); };
+
+test('explainCompare : combinaisons différentes', function () {
+  assert.strictEqual(UTH.explainCompare(P('AH AS KD 5C 2H'), P('KH QS JD 9C 2S')), 'Le joueur gagne : Paire d\'As bat Carte haute Roi.');
+  assert.strictEqual(UTH.explainCompare(P('3H 5S 7D 9C JH'), P('KH KS 4D 5C 2H')), 'La banque gagne : Paire de Rois bat Carte haute Valet.');
+});
+
+test('explainCompare : même combinaison, ce qui décide (paire, kicker, double paire, full, couleur, quinte)', function () {
+  assert.strictEqual(UTH.explainCompare(P('AH AS KD 5C 2H'), P('AD AC QD 5H 2S')), 'Le joueur gagne : même combinaison (Paire), le kicker décide — Roi contre Dame.');
+  assert.strictEqual(UTH.explainCompare(P('KH KS 4D 4C 2H'), P('QH QS JD JC 2S')), 'Le joueur gagne : même combinaison (Double paire), la plus haute paire décide — Roi contre Dame.');
+  assert.strictEqual(UTH.explainCompare(P('QH QS 4D 4C 2H'), P('QD QC 4H 4S 9S')), 'La banque gagne : même combinaison (Double paire), le kicker décide — 9 contre 2.');
+  assert.strictEqual(UTH.explainCompare(P('KH KS KD 2C 2H'), P('KC KS KD 3C 3H')), 'La banque gagne : même combinaison (Full), la paire décide — 3 contre 2.');
+  assert.strictEqual(UTH.explainCompare(P('AH JH 8H 4H 2H'), P('AD JD 8D 5D 2D')), 'La banque gagne : même combinaison (Couleur), la 4e carte décide — 5 contre 4.');
+  assert.strictEqual(UTH.explainCompare(P('9H 8S 7D 6C 5H'), P('AH 2S 3D 4C 5H')), 'Le joueur gagne : même combinaison (Quinte), la hauteur de la quinte décide — 9 contre 5.');
+});
+
+test('explainCompare : égalité', function () {
+  assert.ok(/^Égalité/.test(UTH.explainCompare(P('AH KS QD JC 9H'), P('AD KC QH JS 9S'))));
+});
+
+test('playsBoard : détecte le joueur qui joue le board', function () {
+  const board = cards('5C 6D 7H 8S 9D');
+  assert.strictEqual(UTH.playsBoard(UTH.bestHand(cards('2H 3S').concat(board)), board), true);
+  assert.strictEqual(UTH.playsBoard(UTH.bestHand(cards('TH 3S').concat(board)), board), false);   // la quinte à 10 utilise le 10
+});
+
+const duelOk = function (d) {   // cohérence interne d'une donne, quel que soit son type
+  assert.strictEqual(d.cmp, UTH.compare(UTH.bestHand(d.player.concat(d.board)), UTH.bestHand(d.dealer.concat(d.board))));
+  assert.strictEqual(d.qualified, UTH.bestHand(d.dealer.concat(d.board)).category >= CAT.PAIR);
+  assert.strictEqual(new Set(d.player.concat(d.dealer, d.board).map(function (c) { return c.rank + c.suit; })).size, 9, 'cartes en double');
+};
+
+test('duelRound : chaque type imposé respecte sa définition (300 tirages par type)', function () {
+  for (let i = 0; i < 300; i++) {
+    let d = UTH.duelRound(Math.random, 'category');
+    duelOk(d); assert.ok(d.cmp !== 0 && d.qualified && d.pEv.category !== d.dEv.category && d.kind === 'category');
+    d = UTH.duelRound(Math.random, 'kicker');
+    duelOk(d); assert.ok(d.cmp !== 0 && d.pEv.category === d.dEv.category && d.pEv.category >= CAT.PAIR && d.qualified);
+    d = UTH.duelRound(Math.random, 'unqualified');
+    duelOk(d); assert.ok(d.cmp !== 0 && !d.qualified && d.dEv.category === CAT.HIGH_CARD);
+    d = UTH.duelRound(Math.random, 'tie');
+    duelOk(d); assert.strictEqual(d.cmp, 0);
+  }
+});
+
+test('duelRound sans type : mélange au hasard, tous les cas présents dans les bonnes proportions (3 000 tirages)', function () {
+  const N = 3000, seen = { category: 0, kicker: 0, unqualified: 0, tie: 0 }, playerCats = new Set(), winners = { '1': 0, '0': 0, '-1': 0 };
+  for (let i = 0; i < N; i++) {
+    const d = UTH.duelRound();
+    duelOk(d); seen[d.kind]++; playerCats.add(d.pEv.category); winners[d.cmp]++;
+  }
+  // poids visés : 30 / 25 / 30 / 15 %
+  [['category', 0.30], ['kicker', 0.25], ['unqualified', 0.30], ['tie', 0.15]].forEach(function (k) {
+    assert.ok(Math.abs(seen[k[0]] / N - k[1]) < 0.04, k[0] + ' : ' + (seen[k[0]] / N).toFixed(3) + ' au lieu de ' + k[1]);
+  });
+  assert.ok(playerCats.size >= 7, 'trop peu de combinaisons différentes côté joueur : ' + playerCats.size);
+  // les deux camps gagnent régulièrement : pas de biais vers une réponse
+  assert.ok(winners['1'] > 600 && winners['-1'] > 600 && winners['0'] > 300, JSON.stringify(winners));
 });
 
 // ══ 4. Règlement d'une donne (réglementation) ═════════
