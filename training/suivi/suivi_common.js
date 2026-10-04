@@ -132,7 +132,11 @@ function stat(label, val) {
 }
 
 function trendInline(trend) {
-  if (trend === null) return '<span class="sv-flat">—</span>';
+  if (trend === null) {
+    // Message explicite plutôt qu'un tiret : il faut SV_RECENT sessions récentes + SV_MIN_PREV de comparaison
+    return '<span class="sv-flat sv-trend-none" title="Il faut au moins ' + (SV_RECENT + SV_MIN_PREV)
+      + ' sessions pour comparer les ' + SV_RECENT + ' dernières aux précédentes">Pas assez de sessions</span>';
+  }
   if (trend > 0) return '<span class="sv-up">▲ ' + trend + '<small>pts</small></span>';
   if (trend < 0) return '<span class="sv-down">▼ ' + Math.abs(trend) + '<small>pts</small></span>';
   return '<span class="sv-flat">= 0<small>pt</small></span>';
