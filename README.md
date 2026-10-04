@@ -76,7 +76,10 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 - **Tables de multiplication** — vraies flashcards qui se retournent pour révéler la réponse. Choix d'une table (×35, ×17, ×11, ×8, ×5), puis les 20 multiplications ×1 à ×20 mélangées. Pas de niveau ni de timer par carte : un chronomètre libre tourne sur l'ensemble des 20 cartes, l'objectif étant d'aller le plus vite possible
 - **Ordre Paiement** — *bientôt disponible*
 
-### Ultimate Poker — *bientôt disponible*
+### Ultimate Texas Hold'em
+
+- **Meilleure main** — le croupier identifie la meilleure combinaison. *Facile* : 5 cartes. *Médium* : 2 cartes du joueur + board. *Expert* : mêmes 7 cartes avec des pièges (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqués après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
+- **Qui gagne ?** et **Calcul des gains** (Ante, Blind, Play, Trips, jackpot JP1) — *bientôt disponibles*
 
 ### Suivi des résultats
 
@@ -172,6 +175,11 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   │   ├── suivi_manager.html / .js   — Suivi équipe (panel training-suivi)
 │   │   ├── suivi_common.js            — Modules suivis, calculs et blocs d'affichage partagés
 │   │   └── suivi.css                  — Styles des pages de suivi
+│   ├── uth/
+│   │   ├── uth_hub.html               — Sous-hub Ultimate Texas Hold'em
+│   │   ├── uth_main.html / .js        — Meilleure main
+│   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
+│   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
 │   ├── blackjack/
 │   │   ├── blackjack_hub.html         — Sous-hub Blackjack + config admin
 │   │   ├── blackjack.html / .js       — BJ Paiement
