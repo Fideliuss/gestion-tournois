@@ -80,7 +80,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 
 - **Meilleure main** — pas de niveaux : comme à la table, le croupier voit 7 cartes (les 2 du joueur et le board, présentés comme dans « Qui gagne ? ») et identifie la meilleure combinaison. Donnes au hasard, avec environ une sur trois qui est un piège (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
 - **Qui gagne ?** — pas de niveaux : des donnes au hasard, de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). La table est affichée en trois encadrés : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier annonce d'abord si la banque est qualifiée, puis qui gagne. Après chaque donne : les deux meilleures mains et l'explication de ce qui décide
-- **Calcul des gains** (Ante, Blind, Play, Trips, jackpot JP1) — *bientôt disponible*
+- **Calcul des gains** — pas de niveaux : à chaque donne, le croupier répond mise par mise (Ante, Blind, Play, Trips, JP1) : « Je paie » (avec le montant du gain), « Je laisse » (mise rendue) ou « Je ramasse » (mise perdue). Situations au hasard : banque non qualifiée, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents. Mises par multiples de 5 € jusqu'à 50 € (maximum modifiable par un admin via « ⚙ Config UTH »). Le jackpot JP1 est seulement indiqué, sans calcul
 
 ### Suivi des résultats
 
@@ -180,6 +180,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   │   ├── uth_hub.html               — Sous-hub Ultimate Texas Hold'em
 │   │   ├── uth_main.html / .js        — Meilleure main
 │   │   ├── uth_gagnant.html / .js     — Qui gagne ?
+│   │   ├── uth_gains.html / .js       — Calcul des gains
 │   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
 │   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
 │   ├── blackjack/

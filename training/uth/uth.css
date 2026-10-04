@@ -72,9 +72,46 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 .uth-trap { margin-top: 8px; font-size: 12px; line-height: 1.5; opacity: .9; }
 .uth-next { margin: 14px auto 0; display: block; }
 
+/* ── Calcul des gains : mises et réponses mise par mise ── */
+.uc-situation { width: 100%; max-width: 640px; margin: 0 auto 14px; text-align: center; }
+.uc-action { font-size: 14px; color: var(--cream); margin-bottom: 10px; }
+.uc-stakes { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+.uc-chip {
+  padding: 5px 12px; border: 1px solid var(--gold-bd); border-radius: 999px; background: var(--gold-bg);
+  font-size: 12px; font-weight: 500; letter-spacing: .04em; color: var(--cream);
+}
+.uc-bets { width: 100%; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.uc-bet { padding: 10px 12px 12px; border: 1px solid var(--gold-bd); border-left-width: 3px; border-radius: 6px; background: var(--bg-card); }
+.uc-bet.ok { border-color: #6dcc8e; }
+.uc-bet.ko { border-color: #e07a68; }
+body.light .uc-bet.ok { border-color: #2e7d4f; }
+body.light .uc-bet.ko { border-color: #b5483a; }
+.uc-bet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.uc-bet-name { font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.uc-bet-stake { font-size: 14px; font-weight: 500; color: var(--cream); text-align: right; }
+.uc-stake-note { font-size: 11px; font-weight: 400; color: var(--text-muted); }
+.uc-bet .uth-ans { padding: 10px 6px; }
+.uc-amount { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--text-muted); }
+.uc-amount input {
+  width: 90px; padding: 8px 10px; text-align: right; font-family: var(--f-ui); font-size: 14px; color: var(--cream);
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 4px;
+}
+.uc-amount input.bad { border-color: #e07a68; }
+.uc-amount input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.uc-bet-fb { margin-top: 8px; font-size: 12px; line-height: 1.5; color: var(--cream); opacity: .85; }
+.uc-bet-fb:empty { display: none; }
+.uc-bet.ko .uc-bet-fb { opacity: 1; }
+.uc-jackpot {
+  width: 100%; max-width: 640px; box-sizing: border-box; margin: 14px auto 0; padding: 10px 14px;
+  border: 1px solid var(--gold); border-radius: 6px; background: var(--gold-bg); font-size: 13px; line-height: 1.5; color: var(--cream);
+}
+.uc-jackpot b { color: var(--gold); }
+.uth-next:disabled { opacity: .4; cursor: not-allowed; }
+
 @media (max-width: 620px) {
   .uth-answers { grid-template-columns: repeat(2, 1fr); }
   .uth-answers-3 { grid-template-columns: 1fr; }
+  .uc-bet .uth-answers-3 { grid-template-columns: repeat(3, 1fr); }
   .uth-duel { gap: 12px; }
   .uth-frame { padding: 8px 8px 10px; }
   .uth-slot { padding: 3px; }

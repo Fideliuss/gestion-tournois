@@ -496,6 +496,119 @@ const UTH = (function () {
     return null;
   }
 
+
+  // ── Donne pour « Calcul des gains » ─────────────────
+  // Pas de niveaux : un mélange au hasard de toutes les situations que le croupier rencontre.
+  // Mises : Ante (= Blind) en multiples de 5 € jusqu'à `maxBet` (50 € par défaut, configurable par un admin),
+  // Play selon le moment où le joueur joue (ou couché), Trips parfois absent, JP1 (5 € fixe) parfois absent.
+  //   kind : 'win'         le joueur bat une banque qualifiée avec moins qu'une quinte (le Blind est rendu)
+  //          'blind'       le joueur bat la banque avec quinte ou mieux (le Blind paie)
+  //          'unqualified' banque non qualifiée (l'Ante est rendu)
+  //          'tie'         égalité (tout est rendu)
+  //          'lose'        la banque gagne
+  //          'fold'        le joueur se couche (Ante et Blind perdus)
+  //          'jackpot'     quinte flush royale du joueur avec JP1 (indiqué seulement ; tirage rare, ou demandé)
+  const BET_STEP = 5, DEFAULT_MAX_BET = 50, JP1_STAKE = 5;
+  const GAINS_KINDS = [['win', 22], ['blind', 12], ['unqualified', 16], ['tie', 8], ['lose', 22], ['fold', 20]];
+  const GAINS_STREETS = [['pre4', 30], ['pre3', 15], ['flop', 30], ['river', 25]];
+
+  function weightedPick(table, rng) {
+    let r = rng() * table.reduce(function (a, w) { return a + w[1]; }, 0);
+    for (let i = 0; i < table.length; i++) { r -= table[i][1]; if (r < 0) return table[i][0]; }
+    return table[0][0];
+  }
+
+  function clampMaxBet(n) {
+    n = Math.round(Number(n) / BET_STEP) * BET_STEP;
+    return Number.isFinite(n) ? Math.min(Math.max(n, BET_STEP), 500) : DEFAULT_MAX_BET;
+  }
+
+  // opts : { maxBet, kind, config, rng }
+  function gainsRound(opts) {
+    opts = opts || {};
+    const rng = opts.rng || Math.random;
+    const maxBet = opts.maxBet != null ? clampMaxBet(opts.maxBet) : DEFAULT_MAX_BET;
+    const kind = opts.kind || weightedPick(GAINS_KINDS, rng);
+    const amount = function () { return BET_STEP * (1 + Math.floor(rng() * (maxBet / BET_STEP))); };
+
+    const ante = amount();
+    const street = kind === 'fold' ? 'fold' : weightedPick(GAINS_STREETS, rng);
+    const trips = rng() < 0.55 ? amount() : 0;
+    const jp1 = kind === 'jackpot' || rng() < 0.45 ? JP1_STAKE : 0;
+
+    const finish = function (r) {
+      const round = Object.assign({ ante: ante, blind: ante, trips: trips, jp1: jp1, street: street, kind: kind }, r);
+      round.res = settle(round, opts.config);
+      return round;
+    };
+
+    // Quinte flush royale du joueur (2 % des donnes avec JP1, ou kind 'jackpot') : le jackpot est seulement indiqué, sans calcul
+    if (kind === 'jackpot' || (jp1 && !opts.kind && rng() < 0.02)) {
+      for (let i = 0; i < 50; i++) {
+        const seven = sevenWithBest(CAT.ROYAL_FLUSH, rng);
+        if (!seven) break;
+        const board = seven.slice(2);
+        if (evaluate5(board).category === CAT.ROYAL_FLUSH) continue;     // royale « communautaire » : autre cas
+        const used = function (c) { return seven.some(function (x) { return x.rank === c.rank && x.suit === c.suit; }); };
+        const dealer = shuffle(newDeck().filter(function (c) { return !used(c); }), rng).slice(0, 2);
+        return finish({ player: seven.slice(0, 2), dealer: dealer, board: board, kind: 'jackpot', jp1: JP1_STAKE, street: street === 'fold' ? 'river' : street });
+      }
+    }
+
+    const accept = function (pEv, dEv, cmp, q) {
+      switch (kind) {
+        case 'win':         return cmp > 0 && q && pEv.category < CAT.STRAIGHT;
+        case 'blind':       return cmp > 0 && pEv.category >= CAT.STRAIGHT;
+        case 'unqualified': return !q;
+        case 'tie':         return cmp === 0;
+        case 'lose':        return cmp < 0;
+        default:            return true;
+      }
+    };
+    // On favorise les cas où Trips / JP1 paient (sinon ils sont presque toujours perdus) ; sinon tirage libre
+    // (jamais pour l'égalité, trop rare ; pas de full pour « win », qui exclut déjà la quinte et mieux)
+    const wantTrips = kind !== 'tie' && trips && rng() < 0.3;
+    const wantJp1   = kind !== 'tie' && kind !== 'win' && jp1 && rng() < 0.2;
+    for (let pass = 0; pass < 2; pass++) {
+      const boost = pass === 0 && (wantTrips || wantJp1);
+      if (pass === 1 && !(wantTrips || wantJp1)) break;
+      for (let i = 0; i < (boost ? 4000 : 20000); i++) {
+        const r = dealRound(rng);
+        const pEv = bestHand(r.player.concat(r.board)), dEv = bestHand(r.dealer.concat(r.board));
+        const q = dealerQualifies(dEv);
+        if (!accept(pEv, dEv, compare(pEv, dEv), q)) continue;
+        if (boost && ((wantTrips && pEv.category < CAT.TRIPS) || (wantJp1 && pEv.category < CAT.FULL_HOUSE))) continue;
+        return finish(r);
+      }
+    }
+    return null;
+  }
+
+  // Réponse attendue pour une mise : 'pay' (je paie `amount`, gain hors mise), 'push' (je laisse), 'take' (je ramasse)
+  const GAINS_ACTION = { win: 'pay', push: 'push', lose: 'take' };
+
+  function gainsExpected(line) {
+    const action = GAINS_ACTION[line.result];
+    return { action: action, amount: action === 'pay' ? line.net : action === 'take' ? line.stake : 0 };
+  }
+
+  // Corrige les réponses du croupier. answers : { ante: { action, amount? }, … } ; seules les mises avec question sont corrigées
+  // (le jackpot est seulement indiqué). Renvoie { rows, allOk, userNet, correctNet } ; userNet = net du joueur selon les réponses.
+  function gradeGains(res, answers) {
+    answers = answers || {};
+    let userNet = 0, correctNet = 0, allOk = true;
+    const rows = res.lines.filter(function (l) { return l.result !== 'jackpot'; }).map(function (l) {
+      const expected = gainsExpected(l), given = answers[l.bet] || { action: null };
+      const ok = given.action === expected.action && (expected.action !== 'pay' || round2(Number(given.amount)) === round2(expected.amount));
+      if (!ok) allOk = false;
+      correctNet += l.net;
+      if (given.action === 'pay' && Number.isFinite(Number(given.amount))) userNet += Number(given.amount);
+      else if (given.action === 'take') userNet -= l.stake;
+      return { bet: l.bet, ok: ok, expected: expected, given: given, line: l };
+    });
+    return { rows: rows, allOk: allOk, userNet: round2(userNet), correctNet: round2(correctNet) };
+  }
+
   return {
     explainCompare: explainCompare, playsBoard: playsBoard, duelRound: duelRound,
     TRAPS: TRAPS, expertTrap: expertTrap,
@@ -505,6 +618,8 @@ const UTH = (function () {
     dealerQualifies: dealerQualifies, describe: describe, evaluateJp1: evaluateJp1, settle: settle,
     mergeConfig: mergeConfig, formatRate: formatRate, dealRound: dealRound, sampleRound: sampleRound,
     makeHand5: makeHand5, sevenWithBest: sevenWithBest, combinations: combinations,
+    gainsRound: gainsRound, gradeGains: gradeGains, gainsExpected: gainsExpected, clampMaxBet: clampMaxBet,
+    GAINS_KINDS: GAINS_KINDS, BET_STEP: BET_STEP, DEFAULT_MAX_BET: DEFAULT_MAX_BET, JP1_STAKE: JP1_STAKE,
   };
 })();
 
