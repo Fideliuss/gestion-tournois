@@ -65,6 +65,7 @@
 .uth-ans:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .uth-ans:disabled { cursor: default; opacity: .55; }
 .uth-ans.sel { border-color: var(--gold); background: var(--gold-bg); color: var(--gold); }
+.uth-ans.sel:disabled { opacity: 1; }   /* la réponse choisie reste lisible une fois verrouillée */
 .uth-answers-3 { grid-template-columns: repeat(3, 1fr); }
 .uth-answers-2 { grid-template-columns: repeat(2, 1fr); }
 .uth-ans.ok { opacity: 1; border-color: #6dcc8e; background: rgba(109,204,142,.14); color: #6dcc8e; }

@@ -79,7 +79,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 ### Ultimate Texas Hold'em
 
 - **Meilleure main** — le croupier identifie la meilleure combinaison. *Facile* : 5 cartes. *Médium* : 2 cartes du joueur + board. *Expert* : mêmes 7 cartes avec des pièges (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqués après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
-- **Qui gagne ?** — la table est affichée en trois encadrés qui épousent les cartes : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier désigne le gagnant : joueur, égalité ou banque. *Facile* : combinaisons nettement différentes. *Médium* : même combinaison, départage au kicker. *Expert* : égalités (board), banque non qualifiée, et il faut aussi dire si la banque est qualifiée. Après chaque réponse : les deux meilleures mains et l'explication de ce qui décide
+- **Qui gagne ?** — pas de niveaux : des donnes au hasard, de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). La table est affichée en trois encadrés : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier annonce d'abord si la banque est qualifiée, puis qui gagne. Après chaque donne : les deux meilleures mains et l'explication de ce qui décide
 - **Calcul des gains** (Ante, Blind, Play, Trips, jackpot JP1) — *bientôt disponible*
 
 ### Suivi des résultats

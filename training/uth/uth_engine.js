@@ -462,23 +462,24 @@ const UTH = (function () {
     return ev.cards.every(function (c) { return board.some(function (b) { return b.rank === c.rank && b.suit === c.suit; }); });
   }
 
-  // Donne ciblée selon le niveau. Renvoie { player, dealer, board, pEv, dEv, cmp, qualified, kind }
-  //   kind : 'category' (combinaisons différentes) · 'kicker' (même combinaison, départage) · 'tie' (égalité) · 'unqualified'
-  // Facile : combinaisons nettement différentes, banque qualifiée. Médium : même combinaison, départage au kicker.
-  // Expert : mélange d'égalités, de banques non qualifiées, de départages et de cas nets.
-  const DUEL_EXPERT_WEIGHTS = [['tie', 25], ['unqualified', 35], ['kicker', 25], ['category', 15]];
+  // Donne pour « Qui gagne ? » : pas de niveau, un mélange au hasard de tous les cas que le croupier rencontre.
+  // L'UTH est un jeu simple, il doit être maîtrisé en entier : cas nets, départages au kicker, banque non
+  // qualifiée (l'Ante est rendu) et égalités (souvent « les deux jouent le board »).
+  //   kind : 'category' (combinaisons différentes, banque qualifiée) · 'kicker' (même combinaison, départage)
+  //          'unqualified' (banque sans paire) · 'tie' (égalité)
+  // Renvoie { player, dealer, board, pEv, dEv, cmp, qualified, kind } ; `kind` peut être imposé (tests, entraînement ciblé).
+  const DUEL_WEIGHTS = [['category', 30], ['kicker', 25], ['unqualified', 30], ['tie', 15]];
 
-  function duelRound(level, rng) {
+  function duelRound(rng, forcedKind) {
     rng = rng || Math.random;
-    let kind = level === 'facile' ? 'category' : level === 'medium' ? 'kicker' : null;
+    let kind = forcedKind;
     if (!kind) {
-      let r = rng() * DUEL_EXPERT_WEIGHTS.reduce(function (a, w) { return a + w[1]; }, 0);
-      kind = DUEL_EXPERT_WEIGHTS[0][0];
-      for (let i = 0; i < DUEL_EXPERT_WEIGHTS.length; i++) { r -= DUEL_EXPERT_WEIGHTS[i][1]; if (r < 0) { kind = DUEL_EXPERT_WEIGHTS[i][0]; break; } }
+      let r = rng() * DUEL_WEIGHTS.reduce(function (a, w) { return a + w[1]; }, 0);
+      kind = DUEL_WEIGHTS[0][0];
+      for (let i = 0; i < DUEL_WEIGHTS.length; i++) { r -= DUEL_WEIGHTS[i][1]; if (r < 0) { kind = DUEL_WEIGHTS[i][0]; break; } }
     }
     const accept = function (pEv, dEv, cmp) {
       const gap = Math.abs(pEv.category - dEv.category);
-      if (level === 'facile') return cmp !== 0 && dEv.category >= CAT.PAIR && gap >= 2;
       if (kind === 'tie')         return cmp === 0;
       if (kind === 'unqualified') return cmp !== 0 && dEv.category === CAT.HIGH_CARD;
       if (kind === 'kicker')      return cmp !== 0 && gap === 0 && pEv.category >= CAT.PAIR;

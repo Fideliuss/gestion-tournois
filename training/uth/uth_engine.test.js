@@ -235,34 +235,38 @@ test('playsBoard : détecte le joueur qui joue le board', function () {
   assert.strictEqual(UTH.playsBoard(UTH.bestHand(cards('TH 3S').concat(board)), board), false);   // la quinte à 10 utilise le 10
 });
 
-test('duelRound facile : vainqueur net, croupier qualifié, combinaisons éloignées (500 tirages)', function () {
-  for (let i = 0; i < 500; i++) {
-    const d = UTH.duelRound('facile');
-    assert.ok(d.cmp !== 0 && d.qualified && Math.abs(d.pEv.category - d.dEv.category) >= 2 && d.kind === 'category');
-    assert.strictEqual(new Set(d.player.concat(d.dealer, d.board).map(function (c) { return c.rank + c.suit; })).size, 9, 'cartes en double');
+const duelOk = function (d) {   // cohérence interne d'une donne, quel que soit son type
+  assert.strictEqual(d.cmp, UTH.compare(UTH.bestHand(d.player.concat(d.board)), UTH.bestHand(d.dealer.concat(d.board))));
+  assert.strictEqual(d.qualified, UTH.bestHand(d.dealer.concat(d.board)).category >= CAT.PAIR);
+  assert.strictEqual(new Set(d.player.concat(d.dealer, d.board).map(function (c) { return c.rank + c.suit; })).size, 9, 'cartes en double');
+};
+
+test('duelRound : chaque type imposé respecte sa définition (300 tirages par type)', function () {
+  for (let i = 0; i < 300; i++) {
+    let d = UTH.duelRound(Math.random, 'category');
+    duelOk(d); assert.ok(d.cmp !== 0 && d.qualified && d.pEv.category !== d.dEv.category && d.kind === 'category');
+    d = UTH.duelRound(Math.random, 'kicker');
+    duelOk(d); assert.ok(d.cmp !== 0 && d.pEv.category === d.dEv.category && d.pEv.category >= CAT.PAIR && d.qualified);
+    d = UTH.duelRound(Math.random, 'unqualified');
+    duelOk(d); assert.ok(d.cmp !== 0 && !d.qualified && d.dEv.category === CAT.HIGH_CARD);
+    d = UTH.duelRound(Math.random, 'tie');
+    duelOk(d); assert.strictEqual(d.cmp, 0);
   }
 });
 
-test('duelRound médium : même combinaison (paire ou mieux), jamais d\'égalité (500 tirages)', function () {
-  for (let i = 0; i < 500; i++) {
-    const d = UTH.duelRound('medium');
-    assert.ok(d.pEv.category === d.dEv.category && d.pEv.category >= CAT.PAIR && d.cmp !== 0 && d.kind === 'kicker' && d.qualified);
+test('duelRound sans type : mélange au hasard, tous les cas présents dans les bonnes proportions (3 000 tirages)', function () {
+  const N = 3000, seen = { category: 0, kicker: 0, unqualified: 0, tie: 0 }, playerCats = new Set(), winners = { '1': 0, '0': 0, '-1': 0 };
+  for (let i = 0; i < N; i++) {
+    const d = UTH.duelRound();
+    duelOk(d); seen[d.kind]++; playerCats.add(d.pEv.category); winners[d.cmp]++;
   }
-});
-
-test('duelRound expert : égalités, croupiers non qualifiés, départages et cas nets, tous cohérents (2 000 tirages)', function () {
-  const seen = { tie: 0, unqualified: 0, kicker: 0, category: 0 };
-  for (let i = 0; i < 2000; i++) {
-    const d = UTH.duelRound('expert');
-    seen[d.kind]++;
-    assert.strictEqual(d.cmp, UTH.compare(UTH.bestHand(d.player.concat(d.board)), UTH.bestHand(d.dealer.concat(d.board))));
-    assert.strictEqual(d.qualified, UTH.bestHand(d.dealer.concat(d.board)).category >= CAT.PAIR);
-    if (d.kind === 'tie') assert.strictEqual(d.cmp, 0);
-    if (d.kind === 'unqualified') assert.ok(d.cmp !== 0 && !d.qualified);
-    if (d.kind === 'kicker') assert.ok(d.cmp !== 0 && d.pEv.category === d.dEv.category);
-    if (d.kind === 'category') assert.ok(d.cmp !== 0 && d.qualified && d.pEv.category !== d.dEv.category);
-  }
-  Object.keys(seen).forEach(function (k) { assert.ok(seen[k] > 100, 'type « ' + k + ' » trop rare : ' + seen[k]); });
+  // poids visés : 30 / 25 / 30 / 15 %
+  [['category', 0.30], ['kicker', 0.25], ['unqualified', 0.30], ['tie', 0.15]].forEach(function (k) {
+    assert.ok(Math.abs(seen[k[0]] / N - k[1]) < 0.04, k[0] + ' : ' + (seen[k[0]] / N).toFixed(3) + ' au lieu de ' + k[1]);
+  });
+  assert.ok(playerCats.size >= 7, 'trop peu de combinaisons différentes côté joueur : ' + playerCats.size);
+  // les deux camps gagnent régulièrement : pas de biais vers une réponse
+  assert.ok(winners['1'] > 600 && winners['-1'] > 600 && winners['0'] > 300, JSON.stringify(winners));
 });
 
 // ══ 4. Règlement d'une donne (réglementation) ═════════
