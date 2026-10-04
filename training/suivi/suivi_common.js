@@ -3,10 +3,11 @@
 //  Utilisé par suivi_croupier (Mes résultats) et, à l'étape 3, suivi_manager
 // ══════════════════════════════════════════════════════
 
-// Jeux (regroupement des modules). À compléter en Phase 4 (Ultimate Texas Hold'em).
+// Jeux (regroupement des modules).
 const SV_FAMILIES = [
   { id: 'blackjack', name: 'Black',    em: 'Jack'     },
   { id: 'roulette',  name: 'Roulette', em: 'Anglaise' },
+  { id: 'uth',       name: 'Ultimate', em: "Texas Hold'em" },
 ];
 
 // Modules suivis. `game` = clé en base (training_sessions.game), `family` = jeu parent.
@@ -19,6 +20,9 @@ const SV_MODULES = [
   { game: 'roulette-couleur',    family: 'roulette',  name: 'Couleur',    em: 'Numéro',         levels: true  },
   { game: 'roulette-pointage',   family: 'roulette',  name: 'Pointage',   em: 'Numéro',         levels: true  },
   { game: 'roulette-tables',     family: 'roulette',  name: 'Tables',     em: 'Multiplication', levels: false, timed: true },
+  { game: 'uth-main',            family: 'uth',       name: 'Meilleure',  em: 'Main',           levels: false },
+  { game: 'uth-gagnant',         family: 'uth',       name: 'Qui',        em: 'Gagne ?',        levels: false },
+  { game: 'uth-gains',           family: 'uth',       name: 'Calcul des', em: 'Gains',          levels: false },
 ];
 
 const SV_LEVELS = [['facile', 'Facile'], ['medium', 'Médium'], ['expert', 'Expert']];
