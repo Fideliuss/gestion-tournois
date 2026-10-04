@@ -1,14 +1,18 @@
 // ══════════════════════════════════════════════════════
 //  SUIVI CROUPIER — « Mes résultats »
-//  Historique, record et tendance de l'utilisateur connecté, par module
+//  Historique, record et tendance de l'utilisateur connecté.
+//  Navigation : Vue d'ensemble → jeu (Black Jack / Roulette) → module.
+//  La vue courante est portée par le hash de l'URL (retour arrière et lien direct) :
+//    #  (ensemble) · #roulette · #roulette/roulette-tables
 // ══════════════════════════════════════════════════════
 
 const SVC_HISTORY_PAGE = 8;   // sessions listées avant « Tout voir »
 const SVC_BARS = 12;          // sessions dans le mini-histogramme
 
-let _svcByGame = {};          // game → sessions (plus récente d'abord)
-const _svcLevel = {};         // game → filtre de niveau ('all' | 'facile' | ...)
-const _svcExpanded = {};      // game → historique déplié
+let _svcByGame = {};          // clé module (training_sessions.game) → sessions (plus récente d'abord)
+const _svcLevel = {};         // clé module → filtre de niveau ('all' | 'facile' | ...)
+const _svcExpanded = {};      // clé module → historique déplié
+let _svcView = { family: null, module: null };
 
 async function initSuiviCroupier() {
   const root = document.getElementById('svc-root');
@@ -31,25 +35,128 @@ async function initSuiviCroupier() {
       + 'Lance un module depuis <a href="../training.html">Training Croupier</a> : tes résultats apparaîtront ici.</div>';
     return;
   }
+
+  window.addEventListener('hashchange', function() { svcSyncView(true); });
+  svcSyncView(false);
+}
+
+// ── Navigation ───────────────────────────────────────
+function svcParseHash() {
+  const parts = decodeURIComponent((location.hash || '').replace(/^#/, '')).split('/');
+  const family = svFamily(parts[0]) ? parts[0] : null;
+  const mod = svModule(parts[1]);
+  return { family: family, module: (family && mod && mod.family === family) ? mod.game : null };
+}
+
+function svcSyncView(scrollTop) {
+  const prev = _svcView.family;
+  _svcView = svcParseHash();
   renderSuiviCroupier();
+  if (scrollTop && prev !== _svcView.family) window.scrollTo(0, 0);
+}
+
+function svcGo(family, module) {
+  location.hash = family ? family + (module ? '/' + module : '') : '';
+}
+
+// ── Rendu ────────────────────────────────────────────
+function svcSessionsOf(familyId) {
+  const out = [];
+  svModulesOf(familyId).forEach(function(m) {
+    if (_svcByGame[m.game]) out.push.apply(out, _svcByGame[m.game]);
+  });
+  return out;
 }
 
 function renderSuiviCroupier() {
-  const played = SV_MODULES.filter(function(m) { return _svcByGame[m.game]; });
-  const untried = SV_MODULES.filter(function(m) { return !_svcByGame[m.game]; });
-
-  let html = renderGlobalMetrics(played);
-  html += played.map(renderModuleCard).join('');
-  if (untried.length) {
-    html += '<div class="sv-untried">Pas encore essayé : '
-      + untried.map(function(m) { return m.name + ' ' + m.em; }).join(' · ') + '</div>';
-  }
+  const html = renderTabs() + (_svcView.family ? renderFamily(_svcView.family, _svcView.module) : renderOverview());
   document.getElementById('svc-root').innerHTML = html;
 }
 
-function renderGlobalMetrics(played) {
+function renderTabs() {
+  const tabs = [{ id: null, label: 'Vue d\'ensemble' }].concat(SV_FAMILIES.map(function(f) {
+    return { id: f.id, label: f.name + ' ' + f.em, n: svcSessionsOf(f.id).length };
+  }));
+  return '<div class="sv-tabs">' + tabs.map(function(t) {
+    const on = t.id === _svcView.family;
+    return '<button class="sv-tab' + (on ? ' on' : '') + '" onclick="svcGo(' + (t.id ? '\'' + t.id + '\'' : '') + ')">'
+      + t.label + (t.n !== undefined ? '<span class="sv-tab-n">' + t.n + '</span>' : '') + '</button>';
+  }).join('') + '</div>';
+}
+
+// Vue d'ensemble : chiffres globaux + un bloc par jeu avec un tableau cliquable des modules
+function renderOverview() {
   const all = [];
-  played.forEach(function(m) { all.push.apply(all, _svcByGame[m.game]); });
+  Object.keys(_svcByGame).forEach(function(g) { all.push.apply(all, _svcByGame[g]); });
+  const played = SV_MODULES.filter(function(m) { return _svcByGame[m.game]; });
+  let html = renderMetrics(all, played.length, SV_MODULES.length);
+
+  SV_FAMILIES.forEach(function(f) {
+    html += '<div class="card"><div class="sv-head"><div class="sv-title">' + f.name + ' <em>' + f.em + '</em></div>'
+      + '<button class="btn btn-ghost" onclick="svcGo(\'' + f.id + '\')">Ouvrir →</button></div>'
+      + '<div class="sv-mrow sv-mhead"><span>Module</span><span>Sessions</span><span>Record</span><span>Moy.</span><span>Tendance</span></div>'
+      + svModulesOf(f.id).map(renderModuleRow).join('') + '</div>';
+  });
+  return html;
+}
+
+function renderModuleRow(m) {
+  const list = _svcByGame[m.game];
+  const name = m.name + ' <em>' + m.em + '</em>';
+  if (!list) {
+    return '<div class="sv-mrow sv-none"><span class="sv-mname">' + name + '</span>'
+      + '<span class="sv-mnone">Pas encore essayé</span></div>';
+  }
+  const st = svStats(list);
+  return '<button class="sv-mrow" onclick="svcGo(\'' + m.family + '\',\'' + m.game + '\')">'
+    + '<span class="sv-mname">' + name + '</span>'
+    + '<span class="sv-mval">' + st.count + '</span>'
+    + '<span class="sv-mval">' + st.best + '<small>%</small></span>'
+    + '<span class="sv-mval">' + st.avg + '<small>%</small></span>'
+    + '<span class="sv-mval">' + trendInline(st.trend) + '</span></button>';
+}
+
+// Vue d'un jeu : chiffres du jeu, sélecteur de module, puis les cartes (toutes, ou celle choisie)
+function renderFamily(familyId, moduleKey) {
+  const mods = svModulesOf(familyId);
+  const played = mods.filter(function(m) { return _svcByGame[m.game]; });
+  const untried = mods.filter(function(m) { return !_svcByGame[m.game]; });
+
+  let html = renderMetrics(svcSessionsOf(familyId), played.length, mods.length);
+  html += renderModulePills(familyId, mods, moduleKey);
+
+  if (moduleKey) {
+    html += _svcByGame[moduleKey]
+      ? renderModuleCard(svModule(moduleKey))
+      : '<div class="sv-empty">Pas encore de session sur ce module.</div>';
+  } else if (!played.length) {
+    html += '<div class="sv-empty">Aucune session sur ce jeu pour l\'instant.</div>';
+  } else {
+    html += played.map(renderModuleCard).join('');
+    if (untried.length) {
+      html += '<div class="sv-untried">Pas encore essayé : '
+        + untried.map(function(m) { return m.name + ' ' + m.em; }).join(' · ') + '</div>';
+    }
+  }
+  return html;
+}
+
+function renderModulePills(familyId, mods, current) {
+  const pill = function(key, label, n, dim) {
+    const on = (key || null) === (current || null);
+    return '<button class="sv-chip' + (on ? ' on' : '') + (dim ? ' dim' : '') + '"'
+      + (dim ? ' disabled' : ' onclick="svcGo(\'' + familyId + '\'' + (key ? ',\'' + key + '\'' : '') + ')"') + '>'
+      + label + (n !== null ? ' <span class="sv-chip-n">' + n + '</span>' : '') + '</button>';
+  };
+  return '<div class="sv-chips sv-pills">' + pill(null, 'Tous les modules', null, false)
+    + mods.map(function(m) {
+        const n = (_svcByGame[m.game] || []).length;
+        return pill(m.game, m.name + ' ' + m.em, n, n === 0);
+      }).join('') + '</div>';
+}
+
+// Chiffres clés pour un ensemble de sessions
+function renderMetrics(all, playedCount, moduleCount) {
   const total   = all.reduce(function(a, s) { return a + (s.total || 0); }, 0);
   const correct = all.reduce(function(a, s) { return a + (s.correct || 0); }, 0);
   const last    = all.reduce(function(a, s) { return s.started_at > a ? s.started_at : a; }, '');
@@ -57,10 +164,10 @@ function renderGlobalMetrics(played) {
 
   return '<div class="sv-metrics">'
     + metric('Sessions', all.length)
-    + metric('Précision globale', pct + '<small>%</small>')
-    + metric('Modules essayés', played.length + '<small>/ ' + SV_MODULES.length + '</small>')
+    + metric('Précision globale', all.length ? pct + '<small>%</small>' : '—')
+    + metric('Modules essayés', playedCount + '<small>/ ' + moduleCount + '</small>')
     + '<div class="sv-metric"><div class="sv-metric-label">Dernière session</div>'
-    + '<div class="sv-metric-val sv-sm">' + svFormatDay(last) + '</div></div>'
+    + '<div class="sv-metric-val sv-sm">' + (last ? svFormatDay(last) : '—') + '</div></div>'
     + '</div>';
 }
 
@@ -102,13 +209,15 @@ function stat(label, val) {
   return '<div><div class="sv-stat-label">' + label + '</div><div class="sv-stat-val">' + val + '</div></div>';
 }
 
+function trendInline(trend) {
+  if (trend === null) return '<span class="sv-flat">—</span>';
+  if (trend > 0) return '<span class="sv-up">▲ ' + trend + '<small>pts</small></span>';
+  if (trend < 0) return '<span class="sv-down">▼ ' + Math.abs(trend) + '<small>pts</small></span>';
+  return '<span class="sv-flat">= 0<small>pt</small></span>';
+}
+
 function renderTrend(trend) {
-  let val;
-  if (trend === null) val = '<span class="sv-flat">—</span>';
-  else if (trend > 0) val = '<span class="sv-up">▲ ' + trend + '<small>pts</small></span>';
-  else if (trend < 0) val = '<span class="sv-down">▼ ' + Math.abs(trend) + '<small>pts</small></span>';
-  else val = '<span class="sv-flat">= 0<small>pt</small></span>';
-  return '<div><div class="sv-stat-label">Tendance</div><div class="sv-stat-val">' + val + '</div></div>';
+  return '<div><div class="sv-stat-label">Tendance</div><div class="sv-stat-val">' + trendInline(trend) + '</div></div>';
 }
 
 function renderLevelChips(m, all, current) {

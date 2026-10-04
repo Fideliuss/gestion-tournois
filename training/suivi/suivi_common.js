@@ -3,15 +3,22 @@
 //  Utilisé par suivi_croupier (Mes résultats) et, à l'étape 3, suivi_manager
 // ══════════════════════════════════════════════════════
 
-// Modules suivis. `legacy` (roulette-mixte, module abandonné) n'y figure volontairement pas.
+// Jeux (regroupement des modules). À compléter en Phase 4 (Ultimate Texas Hold'em).
+const SV_FAMILIES = [
+  { id: 'blackjack', name: 'Black',    em: 'Jack'     },
+  { id: 'roulette',  name: 'Roulette', em: 'Anglaise' },
+];
+
+// Modules suivis. `game` = clé en base (training_sessions.game), `family` = jeu parent.
+// roulette-mixte (module abandonné) n'y figure volontairement pas.
 const SV_MODULES = [
-  { game: 'blackjack',           name: 'BJ',         em: 'Paiement',       levels: false },
-  { game: 'blackjack-score',     name: 'BJ',         em: 'Score',          levels: true  },
-  { game: 'roulette-paiement',   name: 'Calcul',     em: 'Paiement',       levels: true  },
-  { game: 'roulette-conversion', name: 'Conversion', em: 'Pièces',         levels: true  },
-  { game: 'roulette-couleur',    name: 'Couleur',    em: 'Numéro',         levels: true  },
-  { game: 'roulette-pointage',   name: 'Pointage',   em: 'Numéro',         levels: true  },
-  { game: 'roulette-tables',     name: 'Tables',     em: 'Multiplication', levels: false, timed: true },
+  { game: 'blackjack',           family: 'blackjack', name: 'BJ',         em: 'Paiement',       levels: false },
+  { game: 'blackjack-score',     family: 'blackjack', name: 'BJ',         em: 'Score',          levels: true  },
+  { game: 'roulette-paiement',   family: 'roulette',  name: 'Calcul',     em: 'Paiement',       levels: true  },
+  { game: 'roulette-conversion', family: 'roulette',  name: 'Conversion', em: 'Pièces',         levels: true  },
+  { game: 'roulette-couleur',    family: 'roulette',  name: 'Couleur',    em: 'Numéro',         levels: true  },
+  { game: 'roulette-pointage',   family: 'roulette',  name: 'Pointage',   em: 'Numéro',         levels: true  },
+  { game: 'roulette-tables',     family: 'roulette',  name: 'Tables',     em: 'Multiplication', levels: false, timed: true },
 ];
 
 const SV_LEVELS = [['facile', 'Facile'], ['medium', 'Médium'], ['expert', 'Expert']];
@@ -20,6 +27,14 @@ const SV_RATIOS = [35, 17, 11, 8, 5];
 // Tendance : moyenne des 5 dernières sessions vs les 5 précédentes (il faut au moins 3 sessions de référence)
 const SV_RECENT = 5;
 const SV_MIN_PREV = 3;
+
+function svFamily(id) {
+  return SV_FAMILIES.find(function(f) { return f.id === id; }) || null;
+}
+
+function svModulesOf(familyId) {
+  return SV_MODULES.filter(function(m) { return m.family === familyId; });
+}
 
 function svModule(game) {
   return SV_MODULES.find(function(m) { return m.game === game; }) || null;
