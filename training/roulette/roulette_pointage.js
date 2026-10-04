@@ -52,7 +52,7 @@ async function startPointageLevel(level) {
   document.getElementById('pt-training-screen').style.display = '';
 
   try {
-    const s = await SB.startTrainingSession('roulette-pointage');
+    const s = await SB.startTrainingSession('roulette-pointage', { level: _ptLevel });
     _ptSessionId = s.id;
   } catch(e) {}
 
