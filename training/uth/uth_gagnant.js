@@ -1,15 +1,16 @@
 // ══════════════════════════════════════════════════════
 //  UTH — QUI GAGNE ?
-//  Le croupier désigne le gagnant entre le joueur et lui-même (ou l'égalité). Pas de chronomètre.
+//  Le croupier désigne le gagnant entre le joueur et la banque (ou l'égalité). Pas de chronomètre.
+//  La banque ne « joue » pas : c'est elle qui a une main, on ne dit jamais « le croupier gagne ».
 //    Facile : combinaisons nettement différentes · Médium : même combinaison, départage au kicker
-//    Expert : égalités (board), croupier non qualifié, départages — et il faut aussi dire si le croupier est qualifié
+//    Expert : égalités (board), banque non qualifiée, départages — et il faut aussi dire si la banque est qualifiée
 //  Dépend de uth_engine.js et uth_ui.js.
 // ══════════════════════════════════════════════════════
 
 const UG_QUESTIONS = 10;
 const UG_LEVEL_LABELS = { facile: 'Facile', medium: 'Médium', expert: 'Expert' };
-// Codes de résultat enregistrés en base : 1 = le joueur gagne, 0 = égalité, -1 = le croupier gagne
-const UG_WINNER_LABEL = { '1': 'Le joueur gagne', '0': 'Égalité', '-1': 'Le croupier gagne' };
+// Codes de résultat enregistrés en base : 1 = le joueur gagne, 0 = égalité, -1 = la banque gagne
+const UG_WINNER_LABEL = { '1': 'Le joueur gagne', '0': 'Égalité', '-1': 'La banque gagne' };
 
 let _ugSessionId = null;
 let _ugUserId    = null;
@@ -19,7 +20,7 @@ let _ugCorrect   = 0;
 let _ugAnswered  = false;
 let _ugQuestion  = null;    // résultat de UTH.duelRound
 let _ugWinner    = null;    // choix du gagnant (expert : en attente de validation)
-let _ugQualified = null;    // choix « croupier qualifié ? » (expert uniquement)
+let _ugQualified = null;    // choix « banque qualifiée ? » (expert uniquement)
 
 // ── Init ─────────────────────────────────────────────
 async function initUthGagnant() {
@@ -51,9 +52,8 @@ function ugNext() {
   const q = UTH.duelRound(_ugLevel);
   _ugQuestion = q;
 
-  document.getElementById('ug-table').innerHTML =
-    uthLabeledRow('Board', q.board)
-    + '<div class="uth-duel">' + uthLabeledRow('Joueur', q.player) + uthLabeledRow('Croupier', q.dealer) + '</div>';
+  // De haut en bas : le joueur (cartes en quinconce), le board (flop · turn · river), la banque (deux cartes côte à côte)
+  document.getElementById('ug-table').innerHTML = uthPlayerZone(q.player) + uthBoardZone(q.board) + uthBankZone(q.dealer);
   document.getElementById('ug-result').innerHTML = '';
 
   document.querySelectorAll('#ug-winner-btns .uth-ans, #ug-qualif-btns .uth-ans').forEach(function (b) { b.disabled = false; b.className = 'uth-ans'; });
@@ -130,8 +130,8 @@ async function ugSubmit() {
   // Les deux meilleures mains de 5 cartes, côte à côte : on voit d'où vient chaque combinaison
   document.getElementById('ug-result').innerHTML =
     '<div class="uth-duel">'
-    + uthLabeledRow('Joueur — ' + UTH.describe(q.pEv), q.pEv.cards)
-    + uthLabeledRow('Croupier — ' + UTH.describe(q.dEv), q.dEv.cards)
+    + uthFrame('Joueur — ' + UTH.describe(q.pEv), uthCardsRow(q.pEv.cards))
+    + uthFrame('Banque — ' + UTH.describe(q.dEv), uthCardsRow(q.dEv.cards))
     + '</div>';
 
   // Explication : textes issus du moteur (constantes et rangs), sans saisie utilisateur
@@ -140,9 +140,9 @@ async function ugSubmit() {
     why = 'Égalité : les deux joueurs jouent le board (' + UTH.describe(q.pEv) + ').';
   }
   if (!q.qualified) {
-    why += ' Le croupier n\'est pas qualifié (' + UTH.describe(q.dEv) + ') : l\'Ante est rendu, le Play et le Blind suivent le résultat.';
+    why += ' La banque n\'est pas qualifiée (' + UTH.describe(q.dEv) + ') : l\'Ante est rendu, le Play et le Blind suivent le résultat.';
   } else if (_ugLevel === 'expert') {
-    why += ' Le croupier est qualifié (' + UTH.describe(q.dEv) + ').';
+    why += ' La banque est qualifiée (' + UTH.describe(q.dEv) + ').';
   }
   const fb = document.getElementById('ug-feedback');
   fb.className = 'feedback-bar ' + (isCorrect ? 'correct' : 'wrong');
@@ -162,7 +162,7 @@ async function ugSubmit() {
   _ugQIndex++;
   ugProgress();
 
-  // Cas simple bien traité : on enchaîne. Sinon (erreur, départage, égalité, croupier non qualifié) : le temps de lire.
+  // Cas simple bien traité : on enchaîne. Sinon (erreur, départage, égalité, banque non qualifiée) : le temps de lire.
   if (isCorrect && _ugLevel !== 'expert' && q.kind === 'category') {
     setTimeout(ugNext, 1500);
   } else {

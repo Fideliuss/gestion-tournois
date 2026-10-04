@@ -5,8 +5,8 @@
 
 /* ── Table : cartes du joueur et board ── */
 .uth-table {
-  width: 100%; max-width: 640px; margin: 4px auto 24px;
-  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  width: 100%; max-width: 640px; margin: 4px auto 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
 }
 .uth-row-label {
   font-size: 10px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase;
@@ -18,8 +18,37 @@
 .playing-card.uth-dim  { opacity: .3; filter: saturate(.5); }
 .playing-card.uth-best { box-shadow: 0 0 0 2px var(--gold), 2px 4px 12px rgba(0,0,0,.4); }
 
-/* ── Duel : joueur et croupier côte à côte ── */
-.uth-duel { display: flex; justify-content: center; align-items: flex-start; gap: 36px; flex-wrap: wrap; width: 100%; }
+/* ── Duel : joueur et banque côte à côte ── */
+.uth-duel { display: flex; justify-content: center; align-items: stretch; gap: 14px; flex-wrap: wrap; width: 100%; }
+.uth-duel .uth-frame { flex: 0 1 auto; }
+
+/* ── Encadrés de la table (Joueur · Board · Banque) ──
+   Ils épousent la zone des cartes : largeur au plus juste (fit-content), centrés, marges réduites.
+   Fond légèrement teinté, filet fin, titre centré en couleur d'accent. */
+.uth-frame {
+  width: fit-content; max-width: 100%; box-sizing: border-box; margin: 0 auto;
+  background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: 6px;
+  padding: 8px 12px 12px;
+}
+.uth-frame-label {
+  text-align: center; margin-bottom: 8px;
+  font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--gold);
+}
+
+/* Joueur : deux cartes en quinconce (hauteur = carte + décalage vertical, rien de plus) */
+.uth-fan { display: flex; justify-content: center; align-items: center; height: 118px; }
+.uth-fan .playing-card { margin-left: 0; }
+.uth-fan .playing-card:first-child { transform: translate(-4px, 14px) rotate(-5deg); }
+.uth-fan .playing-card:last-child  { margin-left: -18px; transform: translate(4px, -12px) rotate(5deg); z-index: 3; }
+
+/* Board : une case par carte, flop · turn · river séparés discrètement */
+.uth-board { display: flex; justify-content: center; align-items: flex-end; }
+.uth-street { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.uth-street-label { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-muted); }
+.uth-street-cards { display: flex; gap: 5px; }
+.uth-slot { padding: 4px; border: 1px dashed var(--gold-bd); border-radius: 7px; }
+.uth-slot .playing-card { margin-left: 0; }
+.uth-sep { width: 1px; align-self: stretch; margin: 18px 14px 0; background: var(--gold-bd); }
 
 /* ── Grille de réponses (une touche par combinaison) ── */
 .uth-answers {
@@ -49,7 +78,16 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 @media (max-width: 620px) {
   .uth-answers { grid-template-columns: repeat(2, 1fr); }
   .uth-answers-3 { grid-template-columns: 1fr; }
-  .uth-duel { gap: 18px; }
+  .uth-duel { gap: 12px; }
+  .uth-frame { padding: 8px 8px 10px; }
+  .uth-slot { padding: 3px; }
+  .uth-sep { margin: 16px 7px 0; }
+  .uth-frame .playing-card { width: 44px; height: 64px; }
+  .uth-frame .card-center { font-size: 18px; }
+  .uth-frame .card-rank { font-size: 11px; }
+  .uth-frame .card-suit { font-size: 9px; }
+  .uth-fan { height: 100px; }
+  .uth-fan .playing-card { width: 52px; height: 74px; }
   .uth-cards { gap: 6px; }
   .uth-cards .playing-card { width: 52px; height: 74px; }
   .uth-cards .card-center { font-size: 20px; }

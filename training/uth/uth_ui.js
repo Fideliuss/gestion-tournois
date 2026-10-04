@@ -28,3 +28,32 @@ function uthCardsRow(cards, best) {
 function uthLabeledRow(label, cards, best) {
   return '<div class="uth-group"><div class="uth-row-label">' + label + '</div>' + uthCardsRow(cards, best) + '</div>';
 }
+
+// ── Table du module « Qui gagne ? » : trois encadrés, de haut en bas ──
+// Encadré avec son libellé (Joueur, Board, Banque)
+function uthFrame(label, inner) {
+  return '<div class="uth-frame"><div class="uth-frame-label">' + label + '</div>' + inner + '</div>';
+}
+
+// Joueur : deux cartes en quinconce (décalées en hauteur, légèrement superposées)
+function uthPlayerZone(cards) {
+  return uthFrame('Joueur', '<div class="uth-fan">' + cards.map(function (c) { return uthCardHtml(c); }).join('') + '</div>');
+}
+
+// Board : une case par carte, séparées discrètement en flop (3) · turn (1) · river (1)
+function uthBoardZone(board) {
+  const slot = function (c) { return '<div class="uth-slot">' + uthCardHtml(c) + '</div>'; };
+  const street = function (name, cs) {
+    return '<div class="uth-street"><div class="uth-street-label">' + name + '</div>'
+      + '<div class="uth-street-cards">' + cs.map(slot).join('') + '</div></div>';
+  };
+  return uthFrame('Board', '<div class="uth-board">'
+    + street('Flop', board.slice(0, 3)) + '<div class="uth-sep"></div>'
+    + street('Turn', board.slice(3, 4)) + '<div class="uth-sep"></div>'
+    + street('River', board.slice(4, 5)) + '</div>');
+}
+
+// Banque : ses deux cartes côte à côte
+function uthBankZone(cards) {
+  return uthFrame('Banque', uthCardsRow(cards));
+}

@@ -98,7 +98,7 @@ const UTH = (function () {
     return best;
   }
 
-  // Le croupier est qualifié à partir d'une paire
+  // La banque est qualifiée à partir d'une paire
   function dealerQualifies(ev) { return ev.category >= CAT.PAIR; }
 
   // ── Libellés français ──────────────────────────────
@@ -161,7 +161,7 @@ const UTH = (function () {
     return r + ' pour 1';
   }
 
-  // ── JP1 : gain bonus du joueur (indépendant du résultat contre le croupier) ──
+  // ── JP1 : gain bonus du joueur (indépendant du résultat contre la banque) ──
   // Renvoie { type, rate } ; rate = null pour la quinte flush royale (100 % du jackpot, via le superviseur)
   function evaluateJp1(playerHole, board, cfg) {
     cfg = mergeConfig(cfg);
@@ -200,15 +200,15 @@ const UTH = (function () {
       add('ante',  ante,  'lose', -ante,  'Le joueur se couche : il perd l\'Ante.');
       add('blind', blind, 'lose', -blind, 'Le joueur se couche : il perd le Blind.');
     } else {
-      // Ante : rendu si le croupier n'est pas qualifié, sinon suit le résultat
-      if (!qualified)      add('ante', ante, 'push', 0, 'Croupier non qualifié (' + describe(dEv) + ') : l\'Ante est rendu.');
-      else if (cmp > 0)    add('ante', ante, 'win',  ante,  'Le joueur bat le croupier : Ante payé 1 pour 1.');
-      else if (cmp < 0)    add('ante', ante, 'lose', -ante, 'Le croupier gagne : l\'Ante est perdu.');
+      // Ante : rendu si la banque n'est pas qualifiée, sinon suit le résultat
+      if (!qualified)      add('ante', ante, 'push', 0, 'Banque non qualifiée (' + describe(dEv) + ') : l\'Ante est rendu.');
+      else if (cmp > 0)    add('ante', ante, 'win',  ante,  'Le joueur bat la banque : Ante payé 1 pour 1.');
+      else if (cmp < 0)    add('ante', ante, 'lose', -ante, 'La banque gagne : l\'Ante est perdu.');
       else                 add('ante', ante, 'push', 0, 'Égalité : l\'Ante est rendu.');
 
       // Play
-      if (cmp > 0)         add('play', play, 'win',  play,  'Le joueur bat le croupier : Play payé 1 pour 1.');
-      else if (cmp < 0)    add('play', play, 'lose', -play, 'Le croupier gagne : le Play est perdu.');
+      if (cmp > 0)         add('play', play, 'win',  play,  'Le joueur bat la banque : Play payé 1 pour 1.');
+      else if (cmp < 0)    add('play', play, 'lose', -play, 'La banque gagne : le Play est perdu.');
       else                 add('play', play, 'push', 0, 'Égalité : le Play est rendu.');
 
       // Blind : ne paie qu'à partir de la quinte, sinon rendu
@@ -216,11 +216,11 @@ const UTH = (function () {
         const rate = pEv.category >= CAT.STRAIGHT ? cfg.blind[pEv.key] : 0;
         if (rate) add('blind', blind, 'win', blind * rate, 'Le joueur gagne avec ' + describe(pEv) + ' : Blind payé ' + formatRate(rate) + '.');
         else      add('blind', blind, 'push', 0, 'Le joueur gagne avec moins qu\'une quinte (' + describe(pEv) + ') : le Blind est rendu.');
-      } else if (cmp < 0)  add('blind', blind, 'lose', -blind, 'Le croupier gagne : le Blind est perdu.');
+      } else if (cmp < 0)  add('blind', blind, 'lose', -blind, 'La banque gagne : le Blind est perdu.');
       else                 add('blind', blind, 'push', 0, 'Égalité : le Blind est rendu.');
     }
 
-    // Trips : sur la main du joueur seule (7 cartes), quel que soit le résultat contre le croupier
+    // Trips : sur la main du joueur seule (7 cartes), quel que soit le résultat contre la banque
     if (round.trips) {
       const rate = pEv.category >= CAT.TRIPS ? cfg.trips[pEv.key] : 0;
       if (rate) add('trips', round.trips, 'win', round.trips * rate, 'Trips : ' + describe(pEv) + ' payé ' + formatRate(rate) + '.');
@@ -432,11 +432,11 @@ const UTH = (function () {
   }
 
   // ── Duel « Qui gagne ? » ────────────────────────────
-  // Explique en français pourquoi le joueur ou le croupier gagne (ou l'égalité). p = main du joueur, d = main du croupier.
+  // Explique en français pourquoi le joueur ou la banque gagne (ou l'égalité). p = main du joueur, d = main de la banque.
   function explainCompare(p, d) {
     const c = compare(p, d);
     if (c === 0) return 'Égalité : les deux joueurs ont la même combinaison de 5 cartes (' + describe(p) + ').';
-    const w = c > 0 ? p : d, l = c > 0 ? d : p, who = c > 0 ? 'Le joueur' : 'Le croupier';
+    const w = c > 0 ? p : d, l = c > 0 ? d : p, who = c > 0 ? 'Le joueur' : 'La banque';
     if (p.category !== d.category) return who + ' gagne : ' + describe(w) + ' bat ' + describe(l) + '.';
 
     let i = 0;
@@ -464,8 +464,8 @@ const UTH = (function () {
 
   // Donne ciblée selon le niveau. Renvoie { player, dealer, board, pEv, dEv, cmp, qualified, kind }
   //   kind : 'category' (combinaisons différentes) · 'kicker' (même combinaison, départage) · 'tie' (égalité) · 'unqualified'
-  // Facile : combinaisons nettement différentes, croupier qualifié. Médium : même combinaison, départage au kicker.
-  // Expert : mélange d'égalités, de croupiers non qualifiés, de départages et de cas nets.
+  // Facile : combinaisons nettement différentes, banque qualifiée. Médium : même combinaison, départage au kicker.
+  // Expert : mélange d'égalités, de banques non qualifiées, de départages et de cas nets.
   const DUEL_EXPERT_WEIGHTS = [['tie', 25], ['unqualified', 35], ['kicker', 25], ['category', 15]];
 
   function duelRound(level, rng) {

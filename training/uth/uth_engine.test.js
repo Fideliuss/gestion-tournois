@@ -213,15 +213,15 @@ const P = function (s) { return UTH.bestHand(cards(s)); };
 
 test('explainCompare : combinaisons différentes', function () {
   assert.strictEqual(UTH.explainCompare(P('AH AS KD 5C 2H'), P('KH QS JD 9C 2S')), 'Le joueur gagne : Paire d\'As bat Carte haute Roi.');
-  assert.strictEqual(UTH.explainCompare(P('3H 5S 7D 9C JH'), P('KH KS 4D 5C 2H')), 'Le croupier gagne : Paire de Rois bat Carte haute Valet.');
+  assert.strictEqual(UTH.explainCompare(P('3H 5S 7D 9C JH'), P('KH KS 4D 5C 2H')), 'La banque gagne : Paire de Rois bat Carte haute Valet.');
 });
 
 test('explainCompare : même combinaison, ce qui décide (paire, kicker, double paire, full, couleur, quinte)', function () {
   assert.strictEqual(UTH.explainCompare(P('AH AS KD 5C 2H'), P('AD AC QD 5H 2S')), 'Le joueur gagne : même combinaison (Paire), le kicker décide — Roi contre Dame.');
   assert.strictEqual(UTH.explainCompare(P('KH KS 4D 4C 2H'), P('QH QS JD JC 2S')), 'Le joueur gagne : même combinaison (Double paire), la plus haute paire décide — Roi contre Dame.');
-  assert.strictEqual(UTH.explainCompare(P('QH QS 4D 4C 2H'), P('QD QC 4H 4S 9S')), 'Le croupier gagne : même combinaison (Double paire), le kicker décide — 9 contre 2.');
-  assert.strictEqual(UTH.explainCompare(P('KH KS KD 2C 2H'), P('KC KS KD 3C 3H')), 'Le croupier gagne : même combinaison (Full), la paire décide — 3 contre 2.');
-  assert.strictEqual(UTH.explainCompare(P('AH JH 8H 4H 2H'), P('AD JD 8D 5D 2D')), 'Le croupier gagne : même combinaison (Couleur), la 4e carte décide — 5 contre 4.');
+  assert.strictEqual(UTH.explainCompare(P('QH QS 4D 4C 2H'), P('QD QC 4H 4S 9S')), 'La banque gagne : même combinaison (Double paire), le kicker décide — 9 contre 2.');
+  assert.strictEqual(UTH.explainCompare(P('KH KS KD 2C 2H'), P('KC KS KD 3C 3H')), 'La banque gagne : même combinaison (Full), la paire décide — 3 contre 2.');
+  assert.strictEqual(UTH.explainCompare(P('AH JH 8H 4H 2H'), P('AD JD 8D 5D 2D')), 'La banque gagne : même combinaison (Couleur), la 4e carte décide — 5 contre 4.');
   assert.strictEqual(UTH.explainCompare(P('9H 8S 7D 6C 5H'), P('AH 2S 3D 4C 5H')), 'Le joueur gagne : même combinaison (Quinte), la hauteur de la quinte décide — 9 contre 5.');
 });
 

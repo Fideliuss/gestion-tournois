@@ -43,7 +43,7 @@
       </div>
       <div class="level-card" onclick="startUthGagnant('expert')">
         <div class="level-name expert">Expert</div>
-        <div class="level-timer" style="font-size:15px;line-height:1.4">Égalités<br>croupier qualifié ?</div>
+        <div class="level-timer" style="font-size:15px;line-height:1.4">Égalités<br>banque qualifiée ?</div>
         <div class="level-unit">&nbsp;</div>
       </div>
     </div>
@@ -66,12 +66,12 @@
     <div class="uth-answers uth-answers-3" id="ug-winner-btns">
       <button class="uth-ans" data-v="1"  onclick="ugPickWinner(1)">Le joueur</button>
       <button class="uth-ans" data-v="0"  onclick="ugPickWinner(0)">Égalité</button>
-      <button class="uth-ans" data-v="-1" onclick="ugPickWinner(-1)">Le croupier</button>
+      <button class="uth-ans" data-v="-1" onclick="ugPickWinner(-1)">La banque</button>
     </div>
 
-    <!-- Expert uniquement : qualification du croupier -->
+    <!-- Expert uniquement : qualification de la banque -->
     <div id="ug-qualif-zone" style="display:none;margin-top:14px">
-      <div class="answer-question" style="margin-bottom:10px">Le croupier est-il qualifié ?</div>
+      <div class="answer-question" style="margin-bottom:10px">La banque est-elle qualifiée ?</div>
       <div class="uth-answers uth-answers-2" id="ug-qualif-btns">
         <button class="uth-ans" data-v="1" onclick="ugPickQualified(true)">Oui — au moins une paire</button>
         <button class="uth-ans" data-v="0" onclick="ugPickQualified(false)">Non — carte haute</button>
