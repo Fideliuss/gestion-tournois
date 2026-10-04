@@ -24,7 +24,7 @@ function uthCardsRow(cards, best) {
   }).join('') + '</div>';
 }
 
-// ── Table du module « Qui gagne ? » : trois encadrés, de haut en bas ──
+// ── Table des modules UTH (Qui gagne ?, Meilleure main) : encadrés qui épousent les cartes, de haut en bas ──
 // Encadré avec son libellé (Joueur, Board, Banque)
 function uthFrame(label, inner) {
   return '<div class="uth-frame"><div class="uth-frame-label">' + label + '</div>' + inner + '</div>';
