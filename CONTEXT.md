@@ -25,7 +25,7 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 - **Phase 1** — Training Croupier : Blackjack (BJ Paiement, BJ Score). Livrée.
 - **Phase 2** — Training Croupier : Roulette Anglaise (Couleur, Pointage, Conversion, Calcul Paiement). Livrée, taguée `v2.0.0` (2026-07-03).
 - **Phase 3** — Suivi résultats : vue historique croupier (« Mes résultats ») + vue manager (« Suivi équipe »). Développée (étapes 1 à 3, mergées dans `develop` ou en PR), **release prévue à la fin de la phase** (pas avant).
-- **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet (3 modules : Calcul des gains, Meilleure main, Qui gagne ?). **En cours** : moteur (étape 1), hub + Meilleure main (étape 2), Qui gagne ? (étape 3) faits ; Calcul des gains (étape 4) et intégration au suivi (étape 5) faits. Reste la release v2.4.0 (sur feu vert explicite).
+- **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet (3 modules : Calcul des gains, Meilleure main, Qui gagne ?). **Livrée** — `v2.4.0` en prod le 2026-10-04 (PR de release #111, tag sur le commit de fusion 036a938) : moteur, hub, Meilleure main, Qui gagne ?, Calcul des gains et intégration au suivi.
 
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
 
