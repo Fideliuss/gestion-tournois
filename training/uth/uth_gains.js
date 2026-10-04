@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════
 //  UTH — CALCUL DES GAINS
 //  Pas de niveaux, pas de chronomètre. À chaque donne, le croupier voit un tapis : la banque, le board, les cases de
-//  mises du joueur avec leurs jetons (Bonus en losange et voyant du Prog de part et d'autre du board, cartes du joueur, Play, Blind = Ante).
+//  mises du joueur avec leurs jetons (de haut en bas : Bonus en losange et voyant du Prog, Blind = Ante, Play, puis les cartes du joueur).
 //  (En France : « Bonus » = option Trips, « Prog » = jackpot progressif JP1.) Il répond MISE PAR MISE : un clic sur une mise ouvre, à côté des jetons, une fenêtre « Je paie » (avec le montant
 //  du gain) / « Je laisse » (la mise est rendue) / « Je ramasse » (la mise est perdue). Les situations sont tirées au
 //  hasard : banque qualifiée ou non, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents.
@@ -104,19 +104,15 @@ function ucSpotHtml(bet, shape, q) {
 }
 
 function ucFeltHtml(q) {
-  // Bonus (Trips, en losange) et Prog (voyant rouge, allumé si misé) de part et d'autre du board ; puis, de haut en bas,
-  // les cartes du client, le rond Play et les ronds Blind = Ante sur une même ligne
-  return uthBankZone(q.dealer)
-    + '<div class="uc-boardrow">'
-    + ucSpotHtml('trips', 'diamond', q)
-    + '<div class="uc-board-slot">' + uthBoardZone(q.board) + '</div>'
-    + ucSpotHtml('jp1', 'led', q)
+  // De haut en bas : la banque, le board, Bonus (losange) et Prog (voyant), Blind = Ante, Play, puis les cartes du client.
+  // Deux colonnes : Bonus, Blind et Play sont alignés sur la colonne de gauche ; Prog et Ante sur celle de droite.
+  return uthBankZone(q.dealer) + uthBoardZone(q.board)
+    + '<div class="uc-spots">'
+    + ucSpotHtml('trips', 'diamond', q) + '<div></div>' + ucSpotHtml('jp1', 'led', q)
+    + ucSpotHtml('blind', 'round mid', q) + '<div class="uc-eq" aria-label="égale">=</div>' + ucSpotHtml('ante', 'round mid', q)
+    + ucSpotHtml('play', 'round mid', q) + '<div></div><div></div>'
     + '</div>'
     + uthPlayerZone(q.player)
-    + '<div class="uc-spots">'
-    + '<div class="uc-row">' + ucSpotHtml('play', 'round big', q) + '</div>'
-    + '<div class="uc-row">' + ucSpotHtml('blind', 'round mid', q) + '<div class="uc-eq" aria-label="égale">=</div>' + ucSpotHtml('ante', 'round mid', q) + '</div>'
-    + '</div>'
     + '<div class="uc-pop-backdrop" id="uc-pop-backdrop" onclick="ucClose()" style="display:none"></div>'
     + '<div class="uc-pop" id="uc-pop" role="dialog" style="display:none"></div>';
 }

@@ -78,7 +78,7 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 /* Tapis (feutre vert, identique en mode jour) : banque, board, cases de mises, joueur — de haut en bas */
 .uc-felt {
   --felt-line: rgba(232,196,120,.55);
-  position: relative; width: 100%; max-width: 760px; box-sizing: border-box; margin: 0 auto;
+  position: relative; width: 100%; max-width: 640px; box-sizing: border-box; margin: 0 auto;
   padding: 18px 14px 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;
   background: radial-gradient(ellipse at 50% 38%, #1b6b4b 0%, #11513a 55%, #0b3a29 100%);
   border: 2px solid var(--gold-bd); border-radius: 18px 18px 90px 90px / 18px 18px 54px 54px;
@@ -91,14 +91,12 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 .uc-felt .uth-slot { border-color: var(--felt-line); }
 .uc-felt .uth-sep { background: var(--felt-line); }
 
-/* Bonus (losange) et Prog (voyant) de part et d'autre du board ; dessous : cartes du client, rond Play, ronds Blind = Ante */
-.uc-boardrow { width: 100%; display: grid; grid-template-columns: 1fr auto 1fr; grid-template-areas: "bonus board prog"; align-items: center; justify-items: center; gap: 6px; }
-.uc-boardrow .uc-c-trips { grid-area: bonus; }
-.uc-boardrow .uc-c-jp1 { grid-area: prog; }
-.uc-board-slot { grid-area: board; }
-.uc-spots { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.uc-row { display: flex; justify-content: center; align-items: flex-start; gap: 18px; }
-.uc-eq { align-self: flex-start; margin-top: 18px; height: 88px; display: flex; align-items: center; font-size: 30px; font-weight: 600; line-height: 1; color: #f0c879; }
+/* Cases de mises, de haut en bas : Bonus (losange) et Prog (voyant), Blind = Ante, Play. Deux colonnes séparées par la
+   colonne du « = » : Bonus, Blind et Play sont alignés verticalement à gauche ; Prog et Ante à droite */
+.uc-spots {
+  display: grid; grid-template-columns: 110px 36px 110px; justify-items: center; align-items: start; gap: 2px 0;
+}
+.uc-eq { align-self: start; margin-top: 18px; height: 88px; display: flex; align-items: center; font-size: 30px; font-weight: 600; line-height: 1; color: #f0c879; }
 .uc-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
 .uc-spot-label { font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #f0c879; }
 .uc-spot-amount { min-height: 14px; font-size: 12px; font-weight: 500; color: #fff; }
@@ -119,7 +117,6 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 .uc-led-dot { width: 18px; height: 18px; border-radius: 50%; background: #4a1410; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
 .uc-spot.led:not(.empty) .uc-led-dot { background: radial-gradient(circle at 35% 30%, #ff9a8c, #e8281a 55%, #a30f06); box-shadow: 0 0 10px 3px rgba(255,64,44,.85), 0 0 22px 6px rgba(255,64,44,.4); }
 .uc-spot.led.empty { opacity: .7; border-style: solid; }
-.uc-spot.big    { width: 96px; height: 96px; }
 .uc-spot:hover:not(:disabled) { border-color: #f0c879; background: rgba(240,200,121,.14); }
 .uc-spot:focus-visible { outline: 2px solid #f0c879; outline-offset: 3px; }
 .uc-spot.open { border-color: #f0c879; box-shadow: 0 0 0 3px rgba(240,200,121,.35); }
@@ -203,20 +200,15 @@ body.light .uc-d.ko { border-left-color: #b5483a; }
 .uc-jackpot b { color: var(--gold); }
 .uth-next:disabled { opacity: .4; cursor: not-allowed; }
 
-@media (max-width: 760px) {
-  .uc-boardrow { grid-template-columns: 1fr 1fr; grid-template-areas: "board board" "bonus prog"; }
-}
-
 @media (max-width: 620px) {
   .uth-answers { grid-template-columns: repeat(2, 1fr); }
   .uth-answers-3 { grid-template-columns: 1fr; }
   .uc-felt { padding: 14px 8px 18px; border-radius: 14px 14px 60px 60px / 14px 14px 40px 40px; }
   .uc-spot { width: 64px; height: 64px; }
-  .uc-spot.big { width: 74px; height: 74px; }
   .uc-spot.mid { width: 76px; height: 76px; }
   .uc-spot.diamond { width: 52px; height: 52px; margin: 11px; }
   .uc-spot.led { width: 32px; height: 32px; margin: 21px 0; }
-  .uc-row { gap: 12px; }
+  .uc-spots { grid-template-columns: 90px 28px 90px; }
   .uc-eq { height: 76px; }
   .uc-chip { width: 24px; height: 24px; font-size: 8px; border-width: 1.5px; }
   .uc-chip + .uc-chip { margin-bottom: -18px; }
