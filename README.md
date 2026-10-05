@@ -160,6 +160,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── admin_tournois.html        — Sous-hub Administration Tournois
 │   ├── config_tournois.html       — CRUD tournois + semainier + barème de points
 │   ├── comptes.html               — Gestion Comptes : CRUD comptes + rôles + permissions par panneau
+│   ├── config_training.html / .js / .css — Config Training : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
 │   │   ├── declaration.html       — Déclaration Tournois DTPJ
 │   │   ├── declaration.css / .js
@@ -185,11 +186,11 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
 │   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
 │   ├── blackjack/
-│   │   ├── blackjack_hub.html         — Sous-hub Blackjack + config admin
+│   │   ├── blackjack_hub.html         — Sous-hub Blackjack
 │   │   ├── blackjack.html / .js       — BJ Paiement
 │   │   └── blackjack_score.html / .js — BJ Score
 │   └── roulette/
-│       ├── roulette_hub.html          — Sous-hub Roulette + config admin
+│       ├── roulette_hub.html          — Sous-hub Roulette
 │       ├── roulette.css               — Styles partagés roulette (tapis, chips, badges)
 │       ├── roulette_tapis.js          — Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
 │       ├── roulette_paiement.html / .js    — Calcul Paiement

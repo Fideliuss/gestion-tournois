@@ -3,7 +3,8 @@
 //  Injectée par AUTH.guard une fois l'accès validé (auth.js charge ce fichier et nav.css).
 //
 //  Structure : des ESPACES (Outils Tournois, Training Croupier…) qui ont chacun leurs pages ; un lanceur d'espaces ;
-//  des menus déroulants pour les pages qui regroupent des modules ; un menu Administration (admin) à droite.
+//  des menus déroulants pour les pages qui regroupent des modules ; un menu Administration (admin) à droite
+//  (gestion des comptes, config Training).
 //
 //  La barre s'adapte aux droits de l'utilisateur (admin = tout, sinon les panels de son rôle) :
 //   · un seul espace accessible  → pas de lanceur, le nom de l'espace est un simple titre ;
@@ -53,10 +54,8 @@ const NAV = (function () {
 
   // Menu Administration (réservé aux admins), à droite de la barre
   const ADMIN = { label: 'Administration', items: [
-    { label: 'Gestion des comptes',   href: 'admin/comptes.html' },
-    { label: 'Config Black Jack',     href: BJ + 'blackjack_hub.html#config' },
-    { label: 'Config Roulette',       href: RO + 'roulette_hub.html#config' },
-    { label: 'Config Ultimate',       href: UTH + 'uth_hub.html#config' },
+    { label: 'Gestion des comptes', href: 'admin/comptes.html' },
+    { label: 'Config Training',     href: 'admin/config_training.html' },
   ] };
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -92,7 +91,8 @@ const NAV = (function () {
   }
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
-  const PAGES = { 'index.html': {}, 'admin/comptes.html': { admin: true } };
+  const PAGES = { 'index.html': {} };
+  ADMIN.items.forEach(function (it) { PAGES[it.href] = { admin: true }; });
   SPACES.forEach(function (s) {
     PAGES[s.href] = { s: s.id };
     s.items.forEach(function (it) {
@@ -218,7 +218,7 @@ const NAV = (function () {
     if (opts.isAdmin) {
       const abtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('gear'), el('span', { class: 'nav-btn-label', text: ADMIN.label })]);
       if (page.admin) abtn.setAttribute('aria-current', 'page');
-      tools.push(dropdown(abtn, ADMIN.items.map(function (it) { return row(it.label, it.href, key === it.href && !/#/.test(it.href)); }), true));
+      tools.push(dropdown(abtn, ADMIN.items.map(function (it) { return row(it.label, it.href, key === it.href); }), true));
     }
     const themeBtn = el('button', { class: 'nav-btn nav-theme', type: 'button', 'aria-label': 'Changer de thème', on: { click: function () { toggleTheme(); } } }, [
       icon('sun', 'i-sun'), icon('moon', 'i-moon'),
@@ -250,7 +250,7 @@ const NAV = (function () {
       });
       return group(spaces.length > 1 ? s.label : null, links);
     });
-    if (opts.isAdmin) groups.push(group(ADMIN.label, ADMIN.items.map(function (it) { return plink(it.label, it.href, key === it.href && !/#/.test(it.href)); })));
+    if (opts.isAdmin) groups.push(group(ADMIN.label, ADMIN.items.map(function (it) { return plink(it.label, it.href, key === it.href); })));
     const panel = el('div', { class: 'nav-panel', id: 'nav-panel' }, groups.concat([el('div', { class: 'grp acts' }, [
       el('div', { class: 'who', text: opts.email + ' · ' + roleLabel(opts.role) }),
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),

@@ -1,0 +1,74 @@
+/* ═══════════════════════════════════════════════
+   Config Training — page de réglages (admin)
+   Lignes et groupes simples, champs arrondis : pas de panneaux encadrés
+═══════════════════════════════════════════════ */
+
+.app { padding: 52px 20px 80px; align-items: stretch; }
+.app > .hdr, .app > .ct-tabs, .app > .ct-panel { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
+
+/* ── Onglets : un par jeu ── */
+.ct-tabs {
+  display: flex; gap: 4px; padding: 4px; margin-bottom: 28px; width: fit-content !important; max-width: 100%;
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 999px; overflow-x: auto;
+}
+.ct-tab-btn {
+  flex: none; padding: 8px 18px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font-family: var(--f-ui); font-size: 12px; font-weight: 600; font-style: italic; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-dim); transition: color .15s, background .15s;
+}
+.ct-tab-btn:hover { color: var(--cream); }
+.ct-tab-btn[aria-selected="true"] { background: var(--gold-solid); color: #1A1208; }
+
+/* ── Groupes de réglages ── */
+.ct-panel[hidden] { display: none; }
+.ct-group { padding: 22px 0; border-bottom: 1px solid var(--gold-bd); }
+.ct-group:first-child { padding-top: 4px; }
+.ct-h { margin: 0 0 6px; font-family: var(--f-ui); font-size: 15px; font-weight: 600; color: var(--cream); }
+.ct-h2 { margin: 20px 0 10px; font-family: var(--f-ui); font-size: 13px; font-weight: 600; color: var(--cream); }
+.ct-hint { margin: 0 0 14px; font-size: 12px; line-height: 1.5; color: var(--text-dim); }
+.ct-note { margin: 18px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+
+/* Champs numériques */
+.ct-panel input[type="number"] {
+  width: 84px; padding: 9px 10px; text-align: center; box-sizing: border-box;
+  font-family: var(--f-num); font-size: 14px; color: var(--cream);
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 10px; outline: none;
+}
+.ct-panel input[type="number"]:focus { border-color: var(--gold); }
+
+.ct-levels { display: flex; flex-wrap: wrap; gap: 14px; }
+.ct-levels label { display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: var(--text-dim); }
+.ct-levels.ct-one input { width: 110px; }
+
+.ct-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ct-table th { padding: 0 8px 8px; text-align: center; font-size: 11px; font-weight: 500; color: var(--text-dim); }
+.ct-table th:first-child, .ct-table td:first-child { text-align: left; padding-left: 0; color: var(--text); }
+.ct-table td { padding: 5px 8px; text-align: center; }
+
+.ct-checks { display: flex; flex-wrap: wrap; gap: 8px; }
+.ct-checks label {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--gold-bd); border-radius: 999px; font-size: 13px; color: var(--cream);
+}
+.ct-checks label:has(input:checked) { border-color: var(--gold); background: var(--gold-bg); }
+
+/* ── Enregistrer ── */
+.ct-actions { display: flex; align-items: center; gap: 16px; padding-top: 24px; }
+.ct-save {
+  padding: 11px 28px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--gold-solid); color: #1A1208;
+  font-family: var(--f-ui); font-size: 13px; font-weight: 600; letter-spacing: .04em;
+  transition: filter .15s;
+}
+.ct-save:hover { filter: brightness(1.08); }
+.ct-save:disabled { opacity: .5; cursor: default; }
+.ct-msg { font-size: 12px; }
+.ct-msg.ok  { color: #6dcc8e; }
+.ct-msg.err { color: #e07a68; }
+body.light .ct-msg.ok  { color: #2e7d4f; }
+body.light .ct-msg.err { color: #b5483a; }
+
+@media (max-width: 620px) {
+  .ct-table { font-size: 12px; }
+  .ct-panel input[type="number"] { width: 64px; padding: 8px 6px; }
+}

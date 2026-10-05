@@ -246,6 +246,14 @@ body.light .hdr-logo { border-bottom-color: rgba(135,50,0,.2); }
   text-transform: uppercase; color: var(--gold-dim);
 }
 
+/* ── En-tête de page avec la barre de navigation ──
+   Le logo est déjà dans la barre : plus de surtitre « Barrière Casino · Bordeaux ». Titre plus compact,
+   description en phrase lisible plutôt qu'en capitales espacées. */
+body.has-nav .hdr { margin-bottom: 32px; }
+body.has-nav .hdr-logo { display: none; }
+body.has-nav .hdr-title { font-size: clamp(26px, 4vw, 38px); line-height: 1.15; }
+body.has-nav .hdr-sub { margin-top: 8px; font-size: 13px; letter-spacing: .01em; text-transform: none; color: var(--text-dim); }
+
 /* ── Card ── */
 .card {
   background: var(--bg-card);

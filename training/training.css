@@ -239,28 +239,6 @@
 .level-timer { font-family: var(--f-num); font-size: 32px; font-weight: 700; color: var(--cream); line-height: 1; }
 .level-unit  { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: var(--f-ui); letter-spacing: .08em; }
 
-/* ── Config admin — grille timers par module/niveau (modals hub) ── */
-.cfg-module-title {
-  font-size: 9px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--gold-dim); font-family: var(--f-ui); margin: 16px 0 10px;
-}
-.cfg-module-title:first-of-type { margin-top: 4px; }
-.cfg-timers {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;
-}
-.cfg-timer-cell { text-align: center; }
-.cfg-timer-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; font-family: var(--f-ui); }
-.cfg-timer-input {
-  width: 100%; padding: 8px; text-align: center; font-family: var(--f-num); font-size: 16px;
-  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 3px;
-  color: var(--cream); outline: none;
-}
-.cfg-timer-input:focus { border-color: rgba(195,120,20,.5); }
-.cfg-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 16px; }
-.cfg-msg { font-size: 11px; font-family: var(--f-ui); }
-.cfg-msg.ok  { color: #6dcc8e; }
-.cfg-msg.err { color: #e07a68; }
-
 /* ── Light mode ── */
 body.light .tapis { border-color: rgba(135,50,0,.35); }
 body.light .tapis::before { border-color: rgba(135,50,0,.15); }

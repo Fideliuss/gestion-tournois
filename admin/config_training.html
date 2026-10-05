@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Config Training — Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="config_training.css" />
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="../index.html" class="back">← Menu</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Config <em>Training</em></div>
+    <div class="hdr-sub">Réglages des modules d'entraînement, appliqués à la prochaine session de chaque croupier</div>
+  </div>
+
+  <div class="ct-tabs" role="tablist" aria-label="Jeu">
+    <button class="ct-tab-btn" role="tab" data-tab="blackjack" onclick="ctShow('blackjack')">Black Jack</button>
+    <button class="ct-tab-btn" role="tab" data-tab="roulette"  onclick="ctShow('roulette')">Roulette Anglaise</button>
+    <button class="ct-tab-btn" role="tab" data-tab="uth"       onclick="ctShow('uth')">Ultimate Texas Hold'em</button>
+  </div>
+
+  <!-- ══ Black Jack ══ -->
+  <section class="ct-panel" id="tab-blackjack" role="tabpanel">
+
+    <div class="ct-group">
+      <h2 class="ct-h">Plages de mises</h2>
+      <p class="ct-hint">Poids relatifs : 80 / 20 signifie que 80 % des mises tombent dans la première plage. Mettre un poids de 0 à la deuxième plage la désactive.</p>
+      <table class="ct-table">
+        <thead><tr><th></th><th>Min (€)</th><th>Max (€)</th><th>Pas (€)</th><th>Poids</th></tr></thead>
+        <tbody>
+          <tr><td>Plage 1</td>
+            <td><input type="number" id="r1-min"    value="10"   min="1" step="1" /></td>
+            <td><input type="number" id="r1-max"    value="100"  min="1" step="1" /></td>
+            <td><input type="number" id="r1-step"   value="10"   min="1" step="1" /></td>
+            <td><input type="number" id="r1-weight" value="80"   min="1" step="1" /></td></tr>
+          <tr><td>Plage 2</td>
+            <td><input type="number" id="r2-min"    value="200"  min="1" step="1" /></td>
+            <td><input type="number" id="r2-max"    value="1000" min="1" step="1" /></td>
+            <td><input type="number" id="r2-step"   value="100"  min="1" step="1" /></td>
+            <td><input type="number" id="r2-weight" value="20"   min="0" step="1" /></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ct-group">
+      <h2 class="ct-h">BJ Paiement — chronomètre par niveau</h2>
+      <p class="ct-hint">En secondes, minimum 3.</p>
+      <div class="ct-levels">
+        <label><span>Facile</span><input type="number" id="lvl-facile" value="15" min="3" max="60" step="1" /></label>
+        <label><span>Médium</span><input type="number" id="lvl-medium" value="10" min="3" max="60" step="1" /></label>
+        <label><span>Expert</span><input type="number" id="lvl-expert" value="5"  min="3" max="60" step="1" /></label>
+      </div>
+    </div>
+
+    <div class="ct-group">
+      <h2 class="ct-h">BJ Score — nombre de cartes par niveau</h2>
+      <p class="ct-hint">Seuil d'arrêt : 17 = règle de la banque (elle tire sous 17), 20 = règle du client (il tire sous 20). Max à 0 = illimité, borné par le dépassement de 21.</p>
+      <table class="ct-table">
+        <thead><tr><th>Niveau</th><th>Min</th><th>Max (0 = illimité)</th><th>Seuil d'arrêt</th></tr></thead>
+        <tbody>
+          <tr><td>Facile</td>
+            <td><input type="number" id="cards-facile-min"  value="2"  min="2"  max="10" step="1" /></td>
+            <td><input type="number" id="cards-facile-max"  value="3"  min="0"  max="10" step="1" /></td>
+            <td><input type="number" id="cards-facile-stop" value="17" min="12" max="21" step="1" /></td></tr>
+          <tr><td>Médium</td>
+            <td><input type="number" id="cards-medium-min"  value="3"  min="2"  max="10" step="1" /></td>
+            <td><input type="number" id="cards-medium-max"  value="5"  min="0"  max="10" step="1" /></td>
+            <td><input type="number" id="cards-medium-stop" value="17" min="12" max="21" step="1" /></td></tr>
+          <tr><td>Expert</td>
+            <td><input type="number" id="cards-expert-min"  value="4"  min="2"  max="10" step="1" /></td>
+            <td><input type="number" id="cards-expert-max"  value="0"  min="0"  max="10" step="1" /></td>
+            <td><input type="number" id="cards-expert-stop" value="20" min="12" max="21" step="1" /></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ct-actions">
+      <button class="ct-save" onclick="ctSave('blackjack')">Enregistrer</button>
+      <span class="ct-msg" id="msg-blackjack" role="status"></span>
+    </div>
+  </section>
+
+  <!-- ══ Roulette ══ -->
+  <section class="ct-panel" id="tab-roulette" role="tabpanel" hidden>
+
+    <div class="ct-group">
+      <h2 class="ct-h">Couleur du numéro — chronomètre par niveau</h2>
+      <p class="ct-hint">En secondes, minimum 2.</p>
+      <div class="ct-levels">
+        <label><span>Facile</span><input type="number" id="col-facile" value="5" min="2" max="30" step="1" /></label>
+        <label><span>Médium</span><input type="number" id="col-medium" value="3" min="2" max="30" step="1" /></label>
+        <label><span>Expert</span><input type="number" id="col-expert" value="2" min="2" max="30" step="1" /></label>
+      </div>
+    </div>
+
+    <div class="ct-group">
+      <h2 class="ct-h">Pointage numéro — chronomètre par niveau</h2>
+      <p class="ct-hint">En secondes, minimum 2.</p>
+      <div class="ct-levels">
+        <label><span>Facile</span><input type="number" id="pt-facile" value="10" min="2" max="60" step="1" /></label>
+        <label><span>Médium</span><input type="number" id="pt-medium" value="6"  min="2" max="60" step="1" /></label>
+        <label><span>Expert</span><input type="number" id="pt-expert" value="3"  min="2" max="60" step="1" /></label>
+      </div>
+    </div>
+
+    <div class="ct-group">
+      <h2 class="ct-h">Conversion pièces — chronomètre par niveau</h2>
+      <p class="ct-hint">En secondes, minimum 2.</p>
+      <div class="ct-levels">
+        <label><span>Facile</span><input type="number" id="cv-facile" value="12" min="2" max="60" step="1" /></label>
+        <label><span>Médium</span><input type="number" id="cv-medium" value="8"  min="2" max="60" step="1" /></label>
+        <label><span>Expert</span><input type="number" id="cv-expert" value="4"  min="2" max="60" step="1" /></label>
+      </div>
+      <h3 class="ct-h2">Valeurs de pièces proposées</h3>
+      <div class="ct-checks">
+        <label><input type="checkbox" id="cv-val-2" /> 2 €</label>
+        <label><input type="checkbox" id="cv-val-2.5" checked /> 2,50 €</label>
+        <label><input type="checkbox" id="cv-val-5" checked /> 5 €</label>
+        <label><input type="checkbox" id="cv-val-10" checked /> 10 €</label>
+        <label><input type="checkbox" id="cv-val-20" checked /> 20 €</label>
+        <label><input type="checkbox" id="cv-val-50" checked /> 50 €</label>
+      </div>
+    </div>
+
+    <p class="ct-note">Calcul paiement : pas de chronomètre, la difficulté dépend du nombre de pièces par niveau (non configurable). Tables de multiplication : pas de niveau, chronomètre libre sur les 20 cartes.</p>
+
+    <div class="ct-actions">
+      <button class="ct-save" onclick="ctSave('roulette')">Enregistrer</button>
+      <span class="ct-msg" id="msg-roulette" role="status"></span>
+    </div>
+  </section>
+
+  <!-- ══ Ultimate Texas Hold'em ══ -->
+  <section class="ct-panel" id="tab-uth" role="tabpanel" hidden>
+
+    <div class="ct-group">
+      <h2 class="ct-h">Calcul des gains — montant maximum des mises</h2>
+      <p class="ct-hint">Les mises Ante, Blind et Bonus sont tirées par multiples de 5 € (minimum 5 €) jusqu'à ce montant, de 5 à 200 €. Le Prog reste fixé à 5 €.</p>
+      <div class="ct-levels ct-one">
+        <label><span>Montant maximum (€)</span><input type="number" id="gains-max" value="50" min="5" max="200" step="5" /></label>
+      </div>
+    </div>
+
+    <p class="ct-note">Meilleure main et Qui gagne ? : pas de niveau ni de chronomètre, rien à régler. Les tables de paiement suivent la réglementation.</p>
+
+    <div class="ct-actions">
+      <button class="ct-save" onclick="ctSave('uth')">Enregistrer</button>
+      <span class="ct-msg" id="msg-uth" role="status"></span>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="config_training.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', role: 'admin' }).then(function(user) {
+  if (!user) return;
+  initConfigTraining();
+});
+</script>
+</body>
+</html>
