@@ -1,65 +1,74 @@
 // ══════════════════════════════════════════════════════
 //  NAV — barre de navigation commune
 //  Injectée par AUTH.guard une fois l'accès validé (auth.js charge ce fichier et nav.css).
-//  Trois niveaux : sections · pages de la section · fil d'Ariane (pour les pages de 3e niveau).
-//  Les entrées suivent les droits de l'utilisateur : admin = tout, sinon panels du rôle (app_roles).
-//  Pour ajouter une page : la déclarer dans PAGES (et dans SECTIONS si elle doit apparaître dans le menu).
+//
+//  Structure : des ESPACES (Outils Tournois, Training Croupier…) qui ont chacun leurs pages ; un lanceur d'espaces ;
+//  des menus déroulants pour les pages qui regroupent des modules ; un menu Administration (admin) à droite.
+//
+//  La barre s'adapte aux droits de l'utilisateur (admin = tout, sinon les panels de son rôle) :
+//   · un seul espace accessible  → pas de lanceur, le nom de l'espace est un simple titre ;
+//   · à l'ouverture (index.html) → un seul espace : on y entre directement ;
+//   · espace Outils Tournois avec une seule page accessible → on arrive directement sur cette page ;
+//   · un droit sur une sous-page seule suffit à afficher l'espace, avec cette page.
+//
+//  Pour ajouter une page : la déclarer dans SPACES (menu) ; pour un nouvel espace, ajouter une entrée à SPACES.
 // ══════════════════════════════════════════════════════
 
 const NAV = (function () {
 
-  // Chemins relatifs à la racine du site
-  const SECTIONS = [
-    { id: 'tournois', label: 'Outils Tournois', href: 'outils_tournois.html', panel: 'tournois', children: [
-      { label: 'Prize Pool',     href: 'prize_pool/prize_pool.html',  panel: 'prize-pool' },
-      { label: 'Leaderboard',    href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
-      { label: 'Administration', href: 'admin/admin_tournois.html',   panel: 'admin-tournois' },
+  // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
+  const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/';
+  const SPACES = [
+    { id: 'tournois', label: 'Outils Tournois', note: 'Prize pool, classement, administration', href: 'outils_tournois.html', panel: 'tournois', items: [
+      { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
+      { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
+      { label: 'Administration', href: 'admin/admin_tournois.html', panel: 'admin-tournois', menu: [
+        { label: 'Déclaration DTPJ',   href: 'admin/declaration/declaration.html' },
+        { label: 'Courriers PN',       href: 'admin/declaration/courriers.html' },
+        { label: 'Déclaration Extras', href: 'admin/extras/extras.html' },
+        { label: 'Config tournois',    href: 'admin/config_tournois.html' },
+      ] },
     ] },
-    { id: 'training', label: 'Training Croupier', href: 'training/training.html', panel: 'training', children: [
-      { label: 'Black Jack',             href: 'training/blackjack/blackjack_hub.html' },
-      { label: 'Roulette Anglaise',      href: 'training/roulette/roulette_hub.html' },
-      { label: 'Ultimate Texas Hold\'em', href: 'training/uth/uth_hub.html' },
-      { label: 'Mes résultats',          href: 'training/suivi/suivi_croupier.html' },
-      { label: 'Suivi équipe',           href: 'training/suivi/suivi_manager.html', panel: 'training-suivi' },
+    { id: 'training', label: 'Training Croupier', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
+      { label: 'Black Jack', href: BJ + 'blackjack_hub.html', menu: [
+        { label: 'BJ Paiement', href: BJ + 'blackjack.html' },
+        { label: 'BJ Score',    href: BJ + 'blackjack_score.html' },
+      ] },
+      { label: 'Roulette Anglaise', href: RO + 'roulette_hub.html', menu: [
+        { label: 'Calcul paiement',          href: RO + 'roulette_paiement.html' },
+        { label: 'Conversion pièces',        href: RO + 'roulette_conversion.html' },
+        { label: 'Couleur du numéro',        href: RO + 'roulette_couleur.html' },
+        { label: 'Pointage numéro',          href: RO + 'roulette_pointage.html' },
+        { label: 'Tables de multiplication', href: RO + 'roulette_tables.html' },
+      ] },
+      { label: 'Ultimate Texas Hold\'em', href: UTH + 'uth_hub.html', menu: [
+        { label: 'Meilleure main',   href: UTH + 'uth_main.html' },
+        { label: 'Qui gagne ?',      href: UTH + 'uth_gagnant.html' },
+        { label: 'Calcul des gains', href: UTH + 'uth_gains.html' },
+      ] },
+      { label: 'Mes résultats', href: T + 'suivi/suivi_croupier.html' },
+      { label: 'Suivi équipe',  href: T + 'suivi/suivi_manager.html', panel: 'training-suivi' },
     ] },
-    { id: 'comptes', label: 'Comptes', href: 'admin/comptes.html', role: 'admin' },
   ];
 
-  // Page → section (s), entrée active du 2e niveau (c), chemin sous cette entrée (t : [libellé, lien?]).
-  // Le fil d'Ariane s'affiche à partir de deux éléments dans t (page de 3e niveau).
-  const BJ = 'training/blackjack/blackjack_hub.html', RO = 'training/roulette/roulette_hub.html', UTH = 'training/uth/uth_hub.html';
-  const AD = 'admin/admin_tournois.html', DECL = 'admin/declaration/declaration.html';
-  const mod = function (hub, hubLabel, label) { return { s: 'training', c: hub, t: [[hubLabel, hub], [label]] }; };
-  const PAGES = {
-    'index.html': {},
-    'outils_tournois.html': { s: 'tournois' },
-    'prize_pool/prize_pool.html': { s: 'tournois', c: 'prize_pool/prize_pool.html' },
-    'leaderboard/leaderboard.html': { s: 'tournois', c: 'leaderboard/leaderboard.html' },
-    'admin/admin_tournois.html': { s: 'tournois', c: AD },
-    'admin/config_tournois.html': { s: 'tournois', c: AD, t: [['Administration', AD], ['Config tournois']] },
-    'admin/declaration/declaration.html': { s: 'tournois', c: AD, t: [['Administration', AD], ['Déclaration DTPJ']] },
-    'admin/extras/extras.html': { s: 'tournois', c: AD, t: [['Administration', AD], ['Déclaration Extras']] },
-    'admin/declaration/courriers.html': { s: 'tournois', c: AD, t: [['Administration', AD], ['Déclaration DTPJ', DECL], ['Courriers PN']] },
-    'admin/comptes.html': { s: 'comptes' },
-    'training/training.html': { s: 'training' },
-    'training/blackjack/blackjack_hub.html': { s: 'training', c: BJ },
-    'training/blackjack/blackjack.html': mod(BJ, 'Black Jack', 'BJ Paiement'),
-    'training/blackjack/blackjack_score.html': mod(BJ, 'Black Jack', 'BJ Score'),
-    'training/roulette/roulette_hub.html': { s: 'training', c: RO },
-    'training/roulette/roulette_paiement.html': mod(RO, 'Roulette Anglaise', 'Calcul paiement'),
-    'training/roulette/roulette_conversion.html': mod(RO, 'Roulette Anglaise', 'Conversion pièces'),
-    'training/roulette/roulette_couleur.html': mod(RO, 'Roulette Anglaise', 'Couleur du numéro'),
-    'training/roulette/roulette_pointage.html': mod(RO, 'Roulette Anglaise', 'Pointage numéro'),
-    'training/roulette/roulette_tables.html': mod(RO, 'Roulette Anglaise', 'Tables de multiplication'),
-    'training/uth/uth_hub.html': { s: 'training', c: UTH },
-    'training/uth/uth_main.html': mod(UTH, 'Ultimate Texas Hold\'em', 'Meilleure main'),
-    'training/uth/uth_gagnant.html': mod(UTH, 'Ultimate Texas Hold\'em', 'Qui gagne ?'),
-    'training/uth/uth_gains.html': mod(UTH, 'Ultimate Texas Hold\'em', 'Calcul des gains'),
-    'training/suivi/suivi_croupier.html': { s: 'training', c: 'training/suivi/suivi_croupier.html' },
-    'training/suivi/suivi_manager.html': { s: 'training', c: 'training/suivi/suivi_manager.html' },
-  };
+  // Menu Administration (réservé aux admins), à droite de la barre
+  const ADMIN = { label: 'Administration', items: [
+    { label: 'Gestion des comptes',   href: 'admin/comptes.html' },
+    { label: 'Config Black Jack',     href: BJ + 'blackjack_hub.html#config' },
+    { label: 'Config Roulette',       href: RO + 'roulette_hub.html#config' },
+    { label: 'Config Ultimate',       href: UTH + 'uth_hub.html#config' },
+  ] };
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
+  const ICONS = {
+    sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',
+    moon:  '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    user:  '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/>',
+    gear:  '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+    menu:  '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    x:     '<path d="M6 6l12 12M18 6L6 18"/>',
+    down:  '<path d="M6 9l6 6 6-6"/>',
+  };
 
   function el(tag, attrs, kids) {
     const n = document.createElement(tag);
@@ -72,19 +81,25 @@ const NAV = (function () {
     return n;
   }
 
-  function icon(paths) {
+  function icon(name, cls) {
     const s = document.createElementNS(SVG_NS, 'svg');
     s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor');
     s.setAttribute('stroke-width', '1.6'); s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round');
     s.setAttribute('aria-hidden', 'true');
-    s.innerHTML = paths;                 // constantes ci-dessous, jamais de données utilisateur
+    if (cls) s.setAttribute('class', cls);
+    s.innerHTML = ICONS[name];            // constantes ci-dessus, jamais de données utilisateur
     return s;
   }
-  const ICON_SUN  = '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>';
-  const ICON_MOON = '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>';
-  const ICON_USER = '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/>';
-  const ICON_MENU = '<path d="M4 7h16M4 12h16M4 17h16"/>';
-  const ICON_X    = '<path d="M6 6l12 12M18 6L6 18"/>';
+
+  // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
+  const PAGES = { 'index.html': {}, 'admin/comptes.html': { admin: true } };
+  SPACES.forEach(function (s) {
+    PAGES[s.href] = { s: s.id };
+    s.items.forEach(function (it) {
+      PAGES[it.href] = { s: s.id, i: it.href };
+      (it.menu || []).forEach(function (m) { PAGES[m.href] = { s: s.id, i: it.href }; });
+    });
+  });
 
   // Le chemin peut s'afficher sans « .html » (serveurs locaux) : on compare sans l'extension
   function pageKey() {
@@ -101,90 +116,142 @@ const NAV = (function () {
     return role === 'admin' ? 'Admin' : role === 'mcd' ? 'MCD' : role === 'floor' ? 'Floor' : role.charAt(0).toUpperCase() + role.slice(1);
   }
 
-  // opts : { root, loginUrl, email, role, isAdmin, panels, color }
-  function mount(opts) {
-    const root = opts.root, panels = opts.panels || [];
-    const can = function (item) {
-      if (opts.isAdmin) return true;
-      if (item.role) return item.role === opts.role;
-      return !item.panel || panels.indexOf(item.panel) >= 0;
-    };
-    const sections = SECTIONS.filter(can).map(function (s) {
-      return Object.assign({}, s, { children: (s.children || []).filter(function (c) { return can(Object.assign({ panel: s.panel }, c)); }) });
+  // Espaces et pages visibles pour cet utilisateur
+  function visibleSpaces(opts) {
+    const panels = opts.panels || [];
+    const has = function (p) { return opts.isAdmin || !p || panels.indexOf(p) >= 0; };
+    const out = [];
+    SPACES.forEach(function (s) {
+      const items = s.items.filter(function (it) { return has(it.panel || s.panel); });
+      const parent = has(s.panel);
+      if (!parent && !items.length) return;
+      // Sans le droit sur l'espace lui-même, on n'affiche que les pages dont on a le droit propre
+      out.push(Object.assign({}, s, { items: parent ? items : s.items.filter(function (it) { return it.panel && has(it.panel); }), parent: parent }));
     });
+    return out.filter(function (s) { return s.items.length || s.parent; });
+  }
 
-    const key = pageKey(), page = (key && PAGES[key]) || {};
-    const current = sections.find(function (s) { return s.id === page.s; }) || null;
+  // Page d'entrée d'un espace : sa page d'accueil si l'on y a droit, sinon la seule page accessible
+  function entryOf(space) {
+    if (space.items.length === 1) return space.items[0].href;
+    return space.parent ? space.href : (space.items[0] && space.items[0].href) || space.href;
+  }
+
+  // opts : { root, loginUrl, email, role, isAdmin, panels, color }
+  // Renvoie true si la barre est en place (ou si l'on est redirigé), false pour retomber sur l'ancienne interface
+  function mount(opts) {
+    const root = opts.root, key = pageKey(), page = (key && PAGES[key]) || {};
+    const spaces = visibleSpaces(opts);
     const href = function (p) { return root + p; };
-    const mark = function (a, on) { if (on) a.setAttribute('aria-current', 'page'); return a; };
+
+    // ── Redirections d'entrée ──
+    if (key === 'index.html' && spaces.length === 1) { location.replace(href(entryOf(spaces[0]))); return true; }
+    if (page.s && !page.i && spaces.length) {                       // page d'accueil d'un espace
+      const sp = spaces.find(function (s) { return s.id === page.s; });
+      if (sp && sp.items.length === 1 && sp.items[0].href !== key) { location.replace(href(sp.items[0].href)); return true; }
+    }
+
+    const current = spaces.find(function (s) { return s.id === page.s; }) || null;
 
     // Ancienne interface flottante (retour, thème, badge) : remplacée par la barre
     document.querySelectorAll('.back, .theme-toggle, #auth-badge').forEach(function (n) { n.remove(); });
 
-    // ── Ligne 1 ──
+    // ── Menus déroulants : un seul ouvert à la fois ──
+    const dropdowns = [];
+    const closeAll = function (except) {
+      dropdowns.forEach(function (d) { if (d !== except) { d.pop.hidden = true; d.btn.setAttribute('aria-expanded', 'false'); } });
+    };
+    const dropdown = function (btn, popContent, alignRight) {
+      const pop = el('div', { class: 'nav-pop-wrap' + (alignRight ? ' right' : ''), hidden: true }, [el('div', { class: 'nav-pop', role: 'menu' }, popContent)]);
+      const d = { btn: btn, pop: pop };
+      dropdowns.push(d);
+      btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const open = pop.hidden;
+        closeAll(d);
+        pop.hidden = !open;
+        btn.setAttribute('aria-expanded', String(open));
+      });
+      return el('div', { class: 'nav-dd' }, [btn, pop]);
+    };
+    document.addEventListener('click', function (e) { if (!e.target.closest('.nav-pop-wrap')) closeAll(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+
+    const row = function (label, to, on, sub) {
+      const a = el('a', { class: 'nav-row', href: href(to), role: 'menuitem' }, [el('span', { text: label }), sub ? el('small', { text: sub }) : null]);
+      if (on) a.setAttribute('aria-current', 'page');
+      return a;
+    };
+
+    // ── Marque ──
     const logo = function (file, cls) { return el('img', { src: href('shared/logos/' + file), alt: '', class: cls }); };
     const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino — Accueil' },
       [logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark')]);
 
-    const links = el('nav', { class: 'nav-sections', 'aria-label': 'Sections' }, sections.map(function (s) {
-      return mark(el('a', { class: 'nav-link', href: href(s.href), text: s.label }), current && current.id === s.id);
-    }));
+    // ── Espace courant : lanceur (plusieurs espaces) ou simple titre (un seul) ──
+    let spaceEl = null;
+    if (spaces.length > 1) {
+      const label = current ? current.label : 'Espaces';
+      const btn = el('button', { class: 'nav-pill', type: 'button' }, [el('span', { text: label }), icon('down')]);
+      spaceEl = dropdown(btn, spaces.map(function (s) {
+        return row(s.label, entryOf(s), current && current.id === s.id, s.note);
+      }));
+    } else if (spaces.length === 1) {
+      spaceEl = el('span', { class: 'nav-title', text: spaces[0].label });
+    }
 
-    const themeBtn = el('button', { class: 'nav-btn nav-theme', type: 'button', on: { click: function () { toggleTheme(); } } }, [
-      icon(ICON_SUN), icon(ICON_MOON),
-      el('span', { id: 'theme-icon', hidden: true }), el('span', { id: 'theme-label', text: 'Mode jour' }),
+    // ── Pages de l'espace ──
+    const items = el('nav', { class: 'nav-items', 'aria-label': 'Pages' }, (current ? current.items : []).map(function (it) {
+      const on = page.i === it.href;
+      if (!it.menu) return mark(el('a', { class: 'nav-item', href: href(it.href), text: it.label }), on);
+      const btn = el('button', { class: 'nav-item', type: 'button' }, [el('span', { text: it.label }), icon('down')]);
+      if (on) btn.setAttribute('aria-current', 'page');
+      const entries = [row('Vue d\'ensemble', it.href, key === it.href)]
+        .concat(it.menu.map(function (m) { return row(m.label, m.href, key === m.href); }));
+      return dropdown(btn, entries);
+    }));
+    function mark(a, on) { if (on) a.setAttribute('aria-current', 'page'); return a; }
+
+    // ── Outils à droite : Administration (admin), thème, utilisateur ──
+    const tools = [];
+    if (opts.isAdmin) {
+      const abtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('gear'), el('span', { class: 'nav-btn-label', text: ADMIN.label })]);
+      if (page.admin) abtn.setAttribute('aria-current', 'page');
+      tools.push(dropdown(abtn, ADMIN.items.map(function (it) { return row(it.label, it.href, key === it.href && !/#/.test(it.href)); }), true));
+    }
+    const themeBtn = el('button', { class: 'nav-btn nav-theme', type: 'button', 'aria-label': 'Changer de thème', on: { click: function () { toggleTheme(); } } }, [
+      icon('sun', 'i-sun'), icon('moon', 'i-moon'),
+      el('span', { id: 'theme-icon', hidden: true }), el('span', { id: 'theme-label', class: 'nav-btn-label', text: 'Mode jour' }),
     ]);
-    themeBtn.querySelectorAll('svg')[0].classList.add('i-sun');
-    themeBtn.querySelectorAll('svg')[1].classList.add('i-moon');
+    tools.push(themeBtn);
 
     const color = /^#[0-9a-f]{3,8}$/i.test(opts.color || '') ? opts.color : '#C37814';
-    const chip = function () { const c = el('span', { class: 'nav-chip', text: roleLabel(opts.role) }); c.style.background = color + '28'; c.style.color = color; return c; };
-    const short = opts.email.split('@')[0];
+    const chip = el('span', { class: 'nav-chip', text: roleLabel(opts.role) });
+    chip.style.background = color + '28'; chip.style.color = color;
+    const userBtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('user'), el('span', { class: 'nav-btn-label nav-user-name', text: opts.email.split('@')[0] })]);
+    tools.push(dropdown(userBtn, [
+      el('div', { class: 'nav-id' }, [el('b', { text: opts.email }), chip]),
+      el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { closeAll(); AUTH._openChangePwd(); } } }, [el('span', { text: 'Changer le mot de passe' })]),
+      el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }, [el('span', { text: 'Déconnexion' })]),
+    ], true));
 
-    const menu = el('div', { class: 'nav-menu', id: 'nav-menu', role: 'menu', hidden: true }, [
-      el('div', { class: 'nav-menu-id' }, [el('b', { text: opts.email }), el('span', {}, [chip()])]),
-      el('button', { type: 'button', role: 'menuitem', text: 'Changer le mot de passe', on: { click: function () { closeMenu(); AUTH._openChangePwd(); } } }),
-      el('button', { type: 'button', role: 'menuitem', text: 'Déconnexion', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }),
-    ]);
-    const userBtn = el('button', { class: 'nav-btn', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'nav-menu' },
-      [icon(ICON_USER), el('span', { class: 'nav-user-name', text: short })]);
-    const closeMenu = function () { menu.hidden = true; userBtn.setAttribute('aria-expanded', 'false'); };
-    userBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      menu.hidden = !menu.hidden;
-      userBtn.setAttribute('aria-expanded', String(!menu.hidden));
-    });
-    document.addEventListener('click', function (e) { if (!menu.hidden && !menu.contains(e.target)) closeMenu(); });
-
-    const burger = el('button', { class: 'nav-btn nav-burger', type: 'button', 'aria-label': 'Menu', 'aria-expanded': 'false', 'aria-controls': 'nav-panel' }, [icon(ICON_MENU)]);
-    const main = el('div', { class: 'nav-main' }, [brand, links, el('div', { class: 'nav-tools' }, [themeBtn, userBtn]), burger]);
-
-    // ── Ligne 2 : pages de la section ──
-    let sub = null;
-    if (current && current.children.length) {
-      sub = el('nav', { class: 'nav-sub', 'aria-label': current.label }, current.children.map(function (c) {
-        return mark(el('a', { href: href(c.href), text: c.label }), page.c === c.href);
-      }));
-    }
-
-    // ── Ligne 3 : fil d'Ariane (pages de 3e niveau) ──
-    let crumbs = null;
-    if (current && page.t && page.t.length >= 2) {
-      const parts = [el('a', { href: href(current.href), text: current.label })];
-      page.t.forEach(function (p, i) {
-        parts.push(el('span', { class: 'sep', 'aria-hidden': 'true', text: '›' }));
-        parts.push(i < page.t.length - 1 && p[1] ? el('a', { href: href(p[1]), text: p[0] }) : mark(el('span', { text: p[0] }), i === page.t.length - 1));
+    // ── Menu replié (téléphone, tablette) : toute l'arborescence ──
+    const burger = el('button', { class: 'nav-btn nav-burger', type: 'button', 'aria-label': 'Menu', 'aria-expanded': 'false', 'aria-controls': 'nav-panel' }, [icon('menu')]);
+    const group = function (title, links) {
+      return el('div', { class: 'grp' }, [title ? el('div', { class: 'gt', text: title }) : null].concat(links));
+    };
+    const plink = function (label, to, on) { return mark(el('a', { href: href(to), text: label }), on); };
+    const groups = spaces.map(function (s) {
+      const links = [];
+      s.items.forEach(function (it) {
+        links.push(plink(it.label, it.href, page.i === it.href && key === it.href));
+        (it.menu || []).forEach(function (m) { links.push(el('a', { class: 'sub', href: href(m.href), text: m.label, 'aria-current': key === m.href ? 'page' : null })); });
       });
-      crumbs = el('nav', { class: 'nav-crumbs', 'aria-label': 'Fil d\'Ariane' }, parts);
-    }
-
-    // ── Menu replié (mobile) ──
-    const panel = el('div', { class: 'nav-panel', id: 'nav-panel' }, sections.map(function (s) {
-      return el('div', { class: 'grp' }, [
-        mark(el('a', { href: href(s.href), text: s.label }), current && current.id === s.id && !page.c),
-        s.children.length ? el('div', { class: 'sub' }, s.children.map(function (c) { return mark(el('a', { href: href(c.href), text: c.label }), page.c === c.href); })) : null,
-      ]);
-    }).concat([el('div', { class: 'acts' }, [
+      return group(spaces.length > 1 ? s.label : null, links);
+    });
+    if (opts.isAdmin) groups.push(group(ADMIN.label, ADMIN.items.map(function (it) { return plink(it.label, it.href, key === it.href && !/#/.test(it.href)); })));
+    const panel = el('div', { class: 'nav-panel', id: 'nav-panel' }, groups.concat([el('div', { class: 'grp acts' }, [
       el('div', { class: 'who', text: opts.email + ' · ' + roleLabel(opts.role) }),
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),
       el('button', { type: 'button', text: 'Changer le mot de passe', on: { click: function () { AUTH._openChangePwd(); } } }),
@@ -194,16 +261,15 @@ const NAV = (function () {
       const open = !panel.classList.contains('open');
       panel.classList.toggle('open', open);
       burger.setAttribute('aria-expanded', String(open));
-      burger.replaceChildren(icon(open ? ICON_X : ICON_MENU));
+      burger.replaceChildren(icon(open ? 'x' : 'menu'));
     });
 
-    const nav = el('header', { class: 'nav' }, [main, sub, crumbs, panel, menu]);
+    const main = el('div', { class: 'nav-main' }, [brand, spaceEl, items, el('div', { class: 'nav-tools' }, tools), burger]);
     document.body.classList.add('has-nav');
-    document.body.insertBefore(nav, document.body.firstChild);
+    document.body.insertBefore(el('header', { class: 'nav' }, [main, panel]), document.body.firstChild);
     if (typeof applyTheme === 'function') applyTheme(document.body.classList.contains('light'));
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
     return true;
   }
 
-  return { mount: mount, pageKey: pageKey, SECTIONS: SECTIONS, PAGES: PAGES };
+  return { mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf };
 })();

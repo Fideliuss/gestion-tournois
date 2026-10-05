@@ -158,6 +158,7 @@ AUTH.guard({ loginUrl: '../../login.html', panel: 'training' }).then(async funct
   if (!user) return;
   if ((user.user_metadata?.role || '') === 'admin') {
     document.getElementById('admin-cfg-btn').style.display = 'block';
+    if (location.hash === '#config') openConfig();      // lien « Configuration » du menu Administration
     await loadConfig();
   }
 });

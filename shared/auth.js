@@ -89,7 +89,8 @@ const AUTH = {
     }
 
     // Auth OK
-    overlay.remove();
+    // La barre est montée avant de retirer l'overlay : une redirection d'entrée (un seul espace accessible)
+    // ne laisse alors voir aucune page intermédiaire
     let navOk = false;
     if (nav) {
       try {
@@ -100,6 +101,7 @@ const AUTH = {
         });
       } catch (e) { navOk = false; }
     }
+    overlay.remove();
     if (!navOk) AUTH._addBadge(loginUrl, session.user.email, userRole);   // repli : ancienne interface
     return session.user;
   },
