@@ -140,6 +140,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── tournaments.js             — TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               — Widget partagé : sélecteur de tournoi par jour de semaine
 │   ├── supabase.js                — Client Supabase + objet SB (CRUD complet + auth + app_roles + training + mappers)
+│   ├── nav.js / nav.css           — Barre de navigation commune (sections, pages, fil d'Ariane, menu mobile)
 │   ├── auth.js                    — AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), badge utilisateur, cache panels
 │   ├── changelog.js                — Mis à jour manuellement avant chaque PR de release
 │   ├── logos/                     — Logos (écran + impression)
