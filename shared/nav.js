@@ -63,7 +63,6 @@ const NAV = (function () {
     sun:   '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',
     moon:  '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
     user:  '<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/>',
-    gear:  '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
     menu:  '<path d="M4 7h16M4 12h16M4 17h16"/>',
     x:     '<path d="M6 6l12 12M18 6L6 18"/>',
     down:  '<path d="M6 9l6 6 6-6"/>',
@@ -216,7 +215,7 @@ const NAV = (function () {
     // ── Outils à droite : Administration (admin), thème, utilisateur ──
     const tools = [];
     if (opts.isAdmin) {
-      const abtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('gear'), el('span', { class: 'nav-btn-label', text: ADMIN.label })]);
+      const abtn = el('button', { class: 'nav-btn', type: 'button' }, [el('span', { class: 'nav-btn-label', text: ADMIN.label }), icon('down')]);
       if (page.admin) abtn.setAttribute('aria-current', 'page');
       tools.push(dropdown(abtn, ADMIN.items.map(function (it) { return row(it.label, it.href, key === it.href); }), true));
     }

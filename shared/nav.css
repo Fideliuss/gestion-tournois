@@ -64,29 +64,36 @@ body.light .nav-theme .i-moon { display: block; }
 
 /* ── Cartes déroulantes : très arrondies, encoche sur le bord droit ── */
 .nav-pop-wrap { position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; filter: drop-shadow(0 10px 20px rgba(0,0,0,.4)); }
+body.light .nav-pop-wrap { filter: drop-shadow(0 8px 16px rgba(0,0,0,.16)); }
 .nav-tools .nav-pop-wrap, .nav-pop-wrap.right { left: auto; right: 0; }
 .nav-dd:has(.nav-btn) .nav-pop-wrap { top: calc(100% + 6px); }
 .nav-pop {
   min-width: 250px; padding: 8px; border-radius: 22px;
-  background: #F4EFE6; color: #1A1208;
+  /* mode nuit : carte sombre ; mode jour : carte crème (voir plus bas) */
+  background: #17130E; color: var(--cream); box-shadow: inset 0 0 0 1px var(--gold-bd);
   -webkit-mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000); mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000);
 }
+body.light .nav-pop { background: #F4EFE6; color: #1A1208; box-shadow: none; }
 .nav-row {
   display: block; width: 100%; box-sizing: border-box; padding: 10px 16px; border: 0; border-radius: 14px; background: none; text-align: left; cursor: pointer;
-  font-size: 13px; font-weight: 500; color: #1A1208; text-decoration: none; transition: background .12s;
+  font-size: 13px; font-weight: 500; color: var(--cream); text-decoration: none; transition: background .12s;
 }
-.nav-row small { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: #5A4830; }
-.nav-row:hover { background: #E7DFD0; }
-.nav-row[aria-current] { background: var(--gold-solid); }
+body.light .nav-row { color: #1A1208; }
+.nav-row small { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--text-dim); }
+body.light .nav-row small { color: #5A4830; }
+.nav-row:hover { background: rgba(195,120,20,.16); }
+body.light .nav-row:hover { background: #E7DFD0; }
+.nav-row[aria-current] { background: var(--gold-solid); color: #1A1208; }
 .nav-row[aria-current] small { color: #1A1208; }
-.nav-id { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 16px 12px; margin-bottom: 4px; border-bottom: 1px solid #D9CFBC; }
+.nav-id { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 16px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--gold-bd); }
+body.light .nav-id { border-bottom-color: #D9CFBC; }
 .nav-id b { font-size: 13px; font-weight: 500; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .nav-chip { border-radius: 999px; padding: 2px 9px; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 
 /* ── Téléphone et tablette : menu replié ── */
 .nav-burger { display: none; margin-left: auto; }
 .nav-panel { display: none; }
-@media (max-width: 1100px) {
+@media (max-width: 1300px) {
   .nav-main { padding: 0 16px; gap: 12px; }
   .nav-items, .nav-tools { display: none; }
   .nav-burger { display: inline-flex; padding: 0 10px; }
@@ -106,6 +113,12 @@ body.light .nav-theme .i-moon { display: block; }
   .nav-panel .who { padding: 4px 0 2px; font-size: 12px; color: var(--text-dim); }
 }
 @media (max-width: 700px) { .nav-pill, .nav-title { display: none; } }
-@media (min-width: 1101px) and (max-width: 1280px) { .nav-theme .nav-btn-label { display: none; } }
+/* Barre complète (5 pages + lanceur + outils) : on gagne de la place avant de basculer en menu replié */
+@media (min-width: 1301px) and (max-width: 1500px) { .nav-theme .nav-btn-label, .nav-user-name { display: none; } }
+@media (min-width: 1301px) and (max-width: 1380px) {
+  .nav-main { gap: 16px; }
+  .nav-item { padding: 0 10px; }
+  .nav-item[aria-current]::after { left: 10px; right: 10px; }
+}
 
 @media print { .nav { display: none !important; } }
