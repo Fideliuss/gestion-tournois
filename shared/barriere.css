@@ -566,3 +566,36 @@ body.light .tool-card.c-cobalt   { --accent: 31,63,138; }
   font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-family: var(--f-ui);
 }
+
+/* ── Cartes de navigation : cartes claires très arrondies, encoche sur le bord droit (style du site Barrière) ──
+   Même carte en mode nuit et en mode jour. Les accents sont les teintes foncées de la charte, lisibles sur fond crème. */
+.tool-card            { --ink: 135,50,0; }
+.tool-card.c-cognac   { --ink: 168,66,10; }
+.tool-card.c-sauterne { --ink: 150,92,0; }
+.tool-card.c-jean     { --ink: 0,48,91; }
+.tool-card.c-teal     { --ink: 10,90,110; }
+.tool-card.c-cobalt   { --ink: 31,63,138; }
+.tool-card, body.light .tool-card {
+  align-items: flex-start; justify-content: flex-start; text-align: left;
+  min-height: 200px; padding: 22px 22px 22px;
+  background: #F4EFE6; border: 0; border-radius: 22px; box-shadow: none;
+  -webkit-mask: radial-gradient(circle 9px at 100% 50%, #0000 97%, #000); mask: radial-gradient(circle 9px at 100% 50%, #0000 97%, #000);
+  transition: transform .16s, background .2s;
+}
+.tool-card:hover, body.light .tool-card:hover { background: #FBF8F2; transform: translateY(-3px); border: 0; box-shadow: none; }
+.tool-card::before { display: none; }
+.tool-card::after {
+  content: 'Ouvrir'; position: static; width: auto; height: auto; margin-top: auto; opacity: 1;
+  padding: 7px 14px; border: 0; border-radius: 8px; background: #1A1208; color: #fff;
+  font-family: var(--f-ui); font-size: 12px; font-weight: 500; letter-spacing: .02em; line-height: 1;
+}
+.tool-card:hover::after { opacity: 1; background: rgb(var(--ink)); }
+.tool-card .tool-badge, body.light .tool-badge, .tool-card:hover .tool-badge {
+  width: 52px; height: 52px; margin-bottom: 26px; border: 0; border-radius: 16px; background: rgba(var(--ink), .1);
+}
+.tool-badge.picto::before { width: 26px; height: 26px; background: rgb(var(--ink)); }
+.tool-name { margin-bottom: 18px; font-size: 20px; color: #1A1208; }
+.tool-name em { color: rgb(var(--ink)); }
+.tool-card.disabled { opacity: .5; }
+.tool-card.disabled::after { display: none; }
+.tool-soon { margin-top: -6px; margin-bottom: 6px; font-size: 10px; color: #5A4830; }
