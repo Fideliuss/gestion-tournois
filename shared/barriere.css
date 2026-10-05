@@ -567,35 +567,46 @@ body.light .tool-card.c-cobalt   { --accent: 31,63,138; }
   color: var(--text-muted); font-family: var(--f-ui);
 }
 
-/* ── Cartes de navigation : cartes claires très arrondies, encoche sur le bord droit (style du site Barrière) ──
-   Même carte en mode nuit et en mode jour. Les accents sont les teintes foncées de la charte, lisibles sur fond crème. */
-.tool-card            { --ink: 135,50,0; }
-.tool-card.c-cognac   { --ink: 168,66,10; }
-.tool-card.c-sauterne { --ink: 150,92,0; }
-.tool-card.c-jean     { --ink: 0,48,91; }
-.tool-card.c-teal     { --ink: 10,90,110; }
-.tool-card.c-cobalt   { --ink: 31,63,138; }
-.tool-card, body.light .tool-card {
-  align-items: flex-start; justify-content: flex-start; text-align: left;
-  min-height: 200px; padding: 22px 22px 22px;
-  background: #F4EFE6; border: 0; border-radius: 22px; box-shadow: none;
-  -webkit-mask: radial-gradient(circle 9px at 100% 50%, #0000 97%, #000); mask: radial-gradient(circle 9px at 100% 50%, #0000 97%, #000);
-  transition: transform .16s, background .2s;
+/* ── Cartes de navigation : rectangles très arrondis, encoche sur le bord droit (style du site Barrière) ──
+   Mode nuit : carte sombre, accents vifs de la charte. Mode jour : carte crème, mêmes accents en teintes foncées. */
+.grid { grid-template-columns: repeat(auto-fit, minmax(260px, 330px)); }
+.tool-card {
+  --ink: 135,50,0;
+  display: grid; grid-template-columns: 56px 1fr; column-gap: 18px; align-items: center; justify-content: stretch;
+  min-height: 96px; padding: 18px 28px 18px 20px; text-align: left;
+  border: 0; border-radius: 20px; background: var(--bg-card); box-shadow: inset 0 0 0 1px rgba(var(--accent), .22);
+  -webkit-mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000); mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000);
+  transition: transform .16s, background .2s, box-shadow .2s;
 }
-.tool-card:hover, body.light .tool-card:hover { background: #FBF8F2; transform: translateY(-3px); border: 0; box-shadow: none; }
-.tool-card::before { display: none; }
-.tool-card::after {
-  content: 'Ouvrir'; position: static; width: auto; height: auto; margin-top: auto; opacity: 1;
-  padding: 7px 14px; border: 0; border-radius: 8px; background: #1A1208; color: #fff;
-  font-family: var(--f-ui); font-size: 12px; font-weight: 500; letter-spacing: .02em; line-height: 1;
+/* liseret de couleur discret sur le bord gauche */
+.tool-card::before {
+  content: ''; position: absolute; left: 0; top: 22%; bottom: 22%; width: 4px; height: auto; border: 0;
+  border-radius: 0 4px 4px 0; background: rgb(var(--accent)); opacity: .9;
 }
-.tool-card:hover::after { opacity: 1; background: rgb(var(--ink)); }
-.tool-card .tool-badge, body.light .tool-badge, .tool-card:hover .tool-badge {
-  width: 52px; height: 52px; margin-bottom: 26px; border: 0; border-radius: 16px; background: rgba(var(--ink), .1);
+.tool-card::after { display: none; }
+.tool-card:hover::before { opacity: 1; }
+.tool-card:hover { background: rgba(var(--accent), .08); box-shadow: inset 0 0 0 1px rgba(var(--accent), .5); transform: translateY(-2px); }
+.tool-card .tool-badge, .tool-card:hover .tool-badge {
+  grid-row: 1 / span 2; width: 56px; height: 56px; margin: 0; border: 0; border-radius: 16px; background: rgba(var(--accent), .13);
 }
-.tool-badge.picto::before { width: 26px; height: 26px; background: rgb(var(--ink)); }
-.tool-name { margin-bottom: 18px; font-size: 20px; color: #1A1208; }
-.tool-name em { color: rgb(var(--ink)); }
-.tool-card.disabled { opacity: .5; }
-.tool-card.disabled::after { display: none; }
-.tool-soon { margin-top: -6px; margin-bottom: 6px; font-size: 10px; color: #5A4830; }
+.tool-badge.picto::before { width: 26px; height: 26px; }
+.tool-name { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 18px; }
+.tool-card:has(.tool-soon) .tool-name { grid-row: 1; align-self: end; }
+.tool-soon { grid-column: 2; grid-row: 2; align-self: start; margin: 4px 0 0; font-size: 10px; }
+.tool-card.disabled { opacity: .45; }
+
+body.light .tool-card {
+  background: #F4EFE6; box-shadow: inset 0 0 0 1px rgba(135,50,0,.10);
+}
+body.light .tool-card:hover { background: #FBF8F2; box-shadow: inset 0 0 0 1px rgba(var(--ink), .4); }
+body.light .tool-card.c-cognac   { --ink: 168,66,10; }
+body.light .tool-card.c-sauterne { --ink: 150,92,0; }
+body.light .tool-card.c-jean     { --ink: 0,48,91; }
+body.light .tool-card.c-teal     { --ink: 10,90,110; }
+body.light .tool-card.c-cobalt   { --ink: 31,63,138; }
+body.light .tool-card .tool-badge, body.light .tool-card:hover .tool-badge { background: rgba(var(--ink), .1); }
+body.light .tool-badge.picto::before { background: rgb(var(--ink)); }
+body.light .tool-card::before { background: rgb(var(--ink)); }
+body.light .tool-name { color: #1A1208; }
+body.light .tool-name em { color: rgb(var(--ink)); }
+body.light .tool-soon { color: #5A4830; }
