@@ -171,7 +171,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │       └── extras.css / .js
 │
 ├── training/
-│   ├── training.html              — Sous-hub Training Croupier
+│   ├── training.html              — Training Croupier : tous les modules, groupés par jeu
 │   ├── training.css               — Styles partagés training
 │   ├── suivi/
 │   │   ├── suivi_croupier.html / .js  — Mes résultats
@@ -179,18 +179,15 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   │   ├── suivi_common.js            — Modules suivis, calculs et blocs d'affichage partagés
 │   │   └── suivi.css                  — Styles des pages de suivi
 │   ├── uth/
-│   │   ├── uth_hub.html               — Sous-hub Ultimate Texas Hold'em
 │   │   ├── uth_main.html / .js        — Meilleure main
 │   │   ├── uth_gagnant.html / .js     — Qui gagne ?
 │   │   ├── uth_gains.html / .js       — Calcul des gains
 │   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
 │   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
 │   ├── blackjack/
-│   │   ├── blackjack_hub.html         — Sous-hub Blackjack
 │   │   ├── blackjack.html / .js       — BJ Paiement
 │   │   └── blackjack_score.html / .js — BJ Score
 │   └── roulette/
-│       ├── roulette_hub.html          — Sous-hub Roulette
 │       ├── roulette.css               — Styles partagés roulette (tapis, chips, badges)
 │       ├── roulette_tapis.js          — Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
 │       ├── roulette_paiement.html / .js    — Calcul Paiement

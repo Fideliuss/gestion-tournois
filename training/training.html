@@ -8,7 +8,10 @@
   <link rel="stylesheet" href="training.css" />
   <style>
     .app { padding: 64px 20px 80px; }
-    .hdr { margin-bottom: 52px; }
+    .hdr { margin-bottom: 36px; }
+    .grp { width: 100%; max-width: 1000px; margin: 0 auto 34px; scroll-margin-top: 80px; }
+    .grp-title { margin: 0 0 14px 4px; font-family: var(--f-ui); font-size: 11px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+    .grp .grid { justify-content: start; }
     .footer { margin-top: 52px; text-align: center; font-size: 10px; letter-spacing: .14em; color: var(--text-muted); }
   </style>
 </head>
@@ -25,35 +28,84 @@
     <div class="hdr-title">Training <em>Croupier</em></div>
   </div>
 
-  <div class="grid">
+  <!-- Tous les modules sur une seule page, groupés par jeu : les menus de la barre mènent aux mêmes pages -->
+  <section class="grp" id="blackjack">
+    <h2 class="grp-title">Black Jack</h2>
+    <div class="grid">
+      <a href="blackjack/blackjack.html" class="tool-card">
+        <div class="tool-badge picto" data-icon="wallet"></div>
+        <div class="tool-name">BJ <em>Paiement</em></div>
+      </a>
+      <a href="blackjack/blackjack_score.html" class="tool-card c-teal">
+        <div class="tool-badge picto" data-icon="card_diamond"></div>
+        <div class="tool-name">BJ <em>Score</em></div>
+      </a>
+    </div>
+  </section>
 
-    <a href="blackjack/blackjack_hub.html" class="tool-card c-teal">
-      <div class="tool-badge picto" data-icon="card_heart"></div>
-      <div class="tool-name">Black <em>Jack</em></div>
-    </a>
+  <section class="grp" id="roulette">
+    <h2 class="grp-title">Roulette Anglaise</h2>
+    <div class="grid">
+      <a href="roulette/roulette_paiement.html" class="tool-card">
+        <div class="tool-badge picto" data-icon="roulette"></div>
+        <div class="tool-name">Calcul <em>Paiement</em></div>
+      </a>
+      <a href="roulette/roulette_conversion.html" class="tool-card c-jean">
+        <div class="tool-badge picto" data-icon="chip"></div>
+        <div class="tool-name">Conversion <em>Pièces</em></div>
+      </a>
+      <div class="tool-card c-cobalt disabled">
+        <div class="tool-badge picto" data-icon="pen"></div>
+        <div class="tool-name">Ordre <em>Paiement</em></div>
+        <div class="tool-soon">Bientôt disponible</div>
+      </div>
+      <a href="roulette/roulette_pointage.html" class="tool-card c-teal">
+        <div class="tool-badge picto" data-icon="magnifier"></div>
+        <div class="tool-name">Pointage <em>Numéro</em></div>
+      </a>
+      <a href="roulette/roulette_couleur.html" class="tool-card c-cognac">
+        <div class="tool-badge picto" data-icon="circle"></div>
+        <div class="tool-name">Couleur <em>Numéro</em></div>
+      </a>
+      <a href="roulette/roulette_tables.html" class="tool-card c-sauterne">
+        <div class="tool-badge" style="font-family:var(--f-display);font-weight:700;font-style:italic;color:rgb(var(--accent));">✕</div>
+        <div class="tool-name">Tables <em>Multiplication</em></div>
+      </a>
+    </div>
+  </section>
 
-    <a href="roulette/roulette_hub.html" class="tool-card c-jean">
-      <div class="tool-badge picto" data-icon="roulette"></div>
-      <div class="tool-name">Roulette <em>Anglaise</em></div>
-    </a>
+  <section class="grp" id="uth">
+    <h2 class="grp-title">Ultimate Texas Hold'em</h2>
+    <div class="grid">
+      <a href="uth/uth_main.html" class="tool-card c-jean">
+        <div class="tool-badge picto" data-icon="diamond"></div>
+        <div class="tool-name">Meilleure <em>Main</em></div>
+      </a>
+      <a href="uth/uth_gagnant.html" class="tool-card c-teal">
+        <div class="tool-badge picto" data-icon="account"></div>
+        <div class="tool-name">Qui <em>Gagne ?</em></div>
+      </a>
+      <a href="uth/uth_gains.html" class="tool-card c-cobalt">
+        <div class="tool-badge picto" data-icon="wallet"></div>
+        <div class="tool-name">Calcul des <em>Gains</em></div>
+      </a>
+    </div>
+  </section>
 
-    <a href="uth/uth_hub.html" class="tool-card c-cobalt">
-      <div class="tool-badge picto" data-icon="card_spade"></div>
-      <div class="tool-name">Ultimate <em>Texas Hold'em</em></div>
-    </a>
-
-    <a href="suivi/suivi_croupier.html" class="tool-card c-sauterne">
-      <div class="tool-badge picto" data-icon="checklist"></div>
-      <div class="tool-name">Mes <em>Résultats</em></div>
-    </a>
-
-    <!-- Affichée uniquement si le rôle a le panel 'training-suivi' (ou admin) — voir script ci-dessous -->
-    <a href="suivi/suivi_manager.html" class="tool-card c-teal" id="tile-suivi-equipe" style="display:none">
-      <div class="tool-badge picto" data-icon="account"></div>
-      <div class="tool-name">Suivi <em>Équipe</em></div>
-    </a>
-
-  </div>
+  <section class="grp" id="suivi">
+    <h2 class="grp-title">Suivi</h2>
+    <div class="grid">
+      <a href="suivi/suivi_croupier.html" class="tool-card c-sauterne">
+        <div class="tool-badge picto" data-icon="checklist"></div>
+        <div class="tool-name">Mes <em>Résultats</em></div>
+      </a>
+      <!-- Affichée uniquement si le rôle a le panel 'training-suivi' (ou admin) — voir script ci-dessous -->
+      <a href="suivi/suivi_manager.html" class="tool-card c-teal" id="tile-suivi-equipe" style="display:none">
+        <div class="tool-badge picto" data-icon="account"></div>
+        <div class="tool-name">Suivi <em>Équipe</em></div>
+      </a>
+    </div>
+  </section>
 
   <div class="footer">Barrière Casino Bordeaux · Training Croupier</div>
 </div>

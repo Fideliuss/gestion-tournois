@@ -31,18 +31,18 @@ const NAV = (function () {
       ] },
     ] },
     { id: 'training', label: 'Training Croupier', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
-      { label: 'Black Jack', href: BJ + 'blackjack_hub.html', menu: [
+      { label: 'Black Jack', id: 'blackjack', menu: [
         { label: 'BJ Paiement', href: BJ + 'blackjack.html' },
         { label: 'BJ Score',    href: BJ + 'blackjack_score.html' },
       ] },
-      { label: 'Roulette Anglaise', href: RO + 'roulette_hub.html', menu: [
+      { label: 'Roulette Anglaise', id: 'roulette', menu: [
         { label: 'Calcul paiement',          href: RO + 'roulette_paiement.html' },
         { label: 'Conversion pièces',        href: RO + 'roulette_conversion.html' },
         { label: 'Couleur du numéro',        href: RO + 'roulette_couleur.html' },
         { label: 'Pointage numéro',          href: RO + 'roulette_pointage.html' },
         { label: 'Tables de multiplication', href: RO + 'roulette_tables.html' },
       ] },
-      { label: 'Ultimate Texas Hold\'em', href: UTH + 'uth_hub.html', menu: [
+      { label: 'Ultimate Texas Hold\'em', id: 'uth', menu: [
         { label: 'Meilleure main',   href: UTH + 'uth_main.html' },
         { label: 'Qui gagne ?',      href: UTH + 'uth_gagnant.html' },
         { label: 'Calcul des gains', href: UTH + 'uth_gains.html' },
@@ -95,8 +95,9 @@ const NAV = (function () {
   SPACES.forEach(function (s) {
     PAGES[s.href] = { s: s.id };
     s.items.forEach(function (it) {
-      PAGES[it.href] = { s: s.id, i: it.href };
-      (it.menu || []).forEach(function (m) { PAGES[m.href] = { s: s.id, i: it.href }; });
+      const id = it.id || it.href;                      // entrée de la barre : un lien (href) ou un menu de pages (id + menu)
+      if (it.href) PAGES[it.href] = { s: s.id, i: id };
+      (it.menu || []).forEach(function (m) { PAGES[m.href] = { s: s.id, i: id }; });
     });
   });
 
@@ -130,10 +131,13 @@ const NAV = (function () {
     return out.filter(function (s) { return s.items.length || s.parent; });
   }
 
+  // Page d'une entrée de la barre : son lien, ou la première page de son menu déroulant
+  function itemHref(it) { return it.href || (it.menu && it.menu[0] && it.menu[0].href); }
+
   // Page d'entrée d'un espace : sa page d'accueil si l'on y a droit, sinon la seule page accessible
   function entryOf(space) {
-    if (space.items.length === 1) return space.items[0].href;
-    return space.parent ? space.href : (space.items[0] && space.items[0].href) || space.href;
+    if (space.items.length === 1) return itemHref(space.items[0]);
+    return space.parent ? space.href : (space.items[0] && itemHref(space.items[0])) || space.href;
   }
 
   // opts : { root, loginUrl, email, role, isAdmin, panels, color }
@@ -147,7 +151,7 @@ const NAV = (function () {
     if (key === 'index.html' && spaces.length === 1) { location.replace(href(entryOf(spaces[0]))); return true; }
     if (page.s && !page.i && spaces.length) {                       // page d'accueil d'un espace
       const sp = spaces.find(function (s) { return s.id === page.s; });
-      if (sp && sp.items.length === 1 && sp.items[0].href !== key) { location.replace(href(sp.items[0].href)); return true; }
+      if (sp && sp.items.length === 1 && itemHref(sp.items[0]) !== key) { location.replace(href(itemHref(sp.items[0]))); return true; }
     }
 
     const current = spaces.find(function (s) { return s.id === page.s; }) || null;
@@ -202,11 +206,11 @@ const NAV = (function () {
 
     // ── Pages de l'espace ──
     const items = el('nav', { class: 'nav-items', 'aria-label': 'Pages' }, (current ? current.items : []).map(function (it) {
-      const on = page.i === it.href;
+      const on = page.i === (it.id || it.href);
       if (!it.menu) return mark(el('a', { class: 'nav-item', href: href(it.href), text: it.label }), on);
       const btn = el('button', { class: 'nav-item', type: 'button' }, [el('span', { text: it.label }), icon('down')]);
       if (on) btn.setAttribute('aria-current', 'page');
-      const entries = [row('Vue d\'ensemble', it.href, key === it.href)]
+      const entries = (it.href ? [row('Vue d\'ensemble', it.href, key === it.href)] : [])
         .concat(it.menu.map(function (m) { return row(m.label, m.href, key === m.href); }));
       return dropdown(btn, entries);
     }));
@@ -244,7 +248,7 @@ const NAV = (function () {
     const groups = spaces.map(function (s) {
       const links = [];
       s.items.forEach(function (it) {
-        links.push(plink(it.label, it.href, page.i === it.href && key === it.href));
+        links.push(it.href ? plink(it.label, it.href, key === it.href) : el('div', { class: 'gt', text: it.label }));
         (it.menu || []).forEach(function (m) { links.push(el('a', { class: 'sub', href: href(m.href), text: m.label, 'aria-current': key === m.href ? 'page' : null })); });
       });
       return group(spaces.length > 1 ? s.label : null, links);

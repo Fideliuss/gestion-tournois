@@ -105,6 +105,7 @@ body.light .nav-id { border-bottom-color: #D9CFBC; }
   .nav-panel.open { display: block; }
   .nav-panel .grp { padding: 10px 0; border-bottom: 1px solid var(--gold-bd); }
   .nav-panel .gt { padding: 4px 0 6px; font-size: 11px; font-weight: 600; font-style: italic; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  .nav-panel .grp > .gt:not(:first-child) { padding: 12px 0 4px; font-size: 14px; font-weight: 600; letter-spacing: .02em; text-transform: none; font-style: normal; color: var(--cream); }
   .nav-panel .grp > a { display: block; padding: 10px 0; font-size: 15px; font-weight: 500; color: var(--cream); text-decoration: none; }
   .nav-panel .grp > a.sub { padding: 8px 0 8px 16px; font-size: 14px; font-weight: 400; color: var(--text-dim); }
   .nav-panel .grp > a[aria-current] { color: var(--gold); }
