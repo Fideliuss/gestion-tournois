@@ -100,8 +100,8 @@ async function svmRender() {
 }
 
 function svmTabs() {
-  return '<div class="sv-tabs">' + SVM_TABS.map(function(t) {
-    return '<button class="sv-tab' + (t.id === _svm.tab ? ' on' : '') + '" onclick="svmGo(\'' + t.id + '\')">' + t.label + '</button>';
+  return '<div class="sv-tabs seg">' + SVM_TABS.map(function(t) {
+    return '<button class="sv-tab seg-btn' + (t.id === _svm.tab ? ' on' : '') + '" onclick="svmGo(\'' + t.id + '\')">' + t.label + '</button>';
   }).join('') + '</div>';
 }
 

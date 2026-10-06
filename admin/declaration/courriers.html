@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Courriers PN — Barrière Casino Bordeaux</title>
+  <title>Générateur de courrier — Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../../shared/barriere.css"/>
   <link rel="stylesheet" href="courriers.css"/>
 </head>
@@ -16,18 +16,18 @@
 <!-- ── Interface (masquée à l'impression) ── -->
 <div class="app no-print">
 
-  <a href="declaration.html" class="back">← Déclaration</a>
+  <a href="../../outils_tournois.html" class="back">← Outils Tournois</a>
 
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
-    <div class="hdr-title">Courriers <em>PN</em></div>
+    <div class="hdr-title">Générateur de <em>courrier</em></div>
 
   </div>
 
   <!-- ── Sélecteur de type de document ── -->
-  <div class="doc-type-bar">
-    <button class="doc-type-btn active" id="dtype-mensuel" onclick="selectDocType('mensuel')">✉ Courriers mensuels</button>
-    <button class="doc-type-btn" id="dtype-annulation" onclick="selectDocType('annulation')">✕ Annulation de tournoi</button>
+  <div class="doc-type-bar seg">
+    <button class="doc-type-btn seg-btn active" id="dtype-mensuel" onclick="selectDocType('mensuel')">Courriers mensuels</button>
+    <button class="doc-type-btn seg-btn" id="dtype-annulation" onclick="selectDocType('annulation')">Annulation de tournoi</button>
   </div>
 
   <!-- ══════════════════════════════
@@ -68,10 +68,10 @@
 
     <!-- Sélecteur de courrier -->
     <div style="max-width:1000px;width:100%;margin-top:12px">
-      <div class="tabs-bar">
-        <button class="tab-btn active" id="tab-ministre"   onclick="selectTab('ministre')">Ministre de l'Intérieur</button>
-        <button class="tab-btn"        id="tab-sipj"       onclick="selectTab('sipj')">Police Judiciaire (SIPJ 33)</button>
-        <button class="tab-btn"        id="tab-prefecture" onclick="selectTab('prefecture')">Préfecture de la Gironde</button>
+      <div class="tabs-bar seg">
+        <button class="tab-btn seg-btn active" id="tab-ministre"   onclick="selectTab('ministre')">Ministre de l'Intérieur</button>
+        <button class="tab-btn seg-btn"        id="tab-sipj"       onclick="selectTab('sipj')">Police Judiciaire (SIPJ 33)</button>
+        <button class="tab-btn seg-btn"        id="tab-prefecture" onclick="selectTab('prefecture')">Préfecture de la Gironde</button>
       </div>
       <div class="print-bar">
         <button class="btn btn-gold" onclick="printCurrent()">🖨&nbsp; Imprimer / Exporter PDF</button>
@@ -86,10 +86,10 @@
         <span class="tpl-accordion-chevron" id="tpl-accordion-chevron">›</span>
       </button>
       <div class="tpl-accordion-body" id="tpl-accordion-body">
-        <div class="tabs-bar" style="margin-bottom:20px">
-          <button class="tab-btn tpl-tab active" data-tpl="ministre"   onclick="showTplTab('ministre')">Ministre de l'Intérieur</button>
-          <button class="tab-btn tpl-tab"        data-tpl="sipj"       onclick="showTplTab('sipj')">SIPJ 33</button>
-          <button class="tab-btn tpl-tab"        data-tpl="prefecture" onclick="showTplTab('prefecture')">Préfecture de la Gironde</button>
+        <div class="tabs-bar seg sm" style="margin-bottom:20px">
+          <button class="tab-btn seg-btn tpl-tab active" data-tpl="ministre"   onclick="showTplTab('ministre')">Ministre de l'Intérieur</button>
+          <button class="tab-btn seg-btn tpl-tab"        data-tpl="sipj"       onclick="showTplTab('sipj')">SIPJ 33</button>
+          <button class="tab-btn seg-btn tpl-tab"        data-tpl="prefecture" onclick="showTplTab('prefecture')">Préfecture de la Gironde</button>
         </div>
         <div id="tpl-editor"></div>
         <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">

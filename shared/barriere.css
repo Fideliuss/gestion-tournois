@@ -246,6 +246,42 @@ body.light .hdr-logo { border-bottom-color: rgba(135,50,0,.2); }
   text-transform: uppercase; color: var(--gold-dim);
 }
 
+/* ── En-tête de page avec la barre de navigation ──
+   Le logo est déjà dans la barre : plus de surtitre « Barrière Casino · Bordeaux ». Titre plus compact,
+   description en phrase lisible plutôt qu'en capitales espacées. */
+body.has-nav .hdr { margin-bottom: 32px; }
+body.has-nav .hdr-logo { display: none; }
+body.has-nav .hdr-title { font-size: clamp(26px, 4vw, 38px); line-height: 1.15; }
+body.has-nav .hdr-sub { margin-top: 8px; font-size: 13px; letter-spacing: .01em; text-transform: none; color: var(--text-dim); }
+
+/* ── Pastille segmentée : onglets d'une page (même données, vues différentes) ──
+   Composant unique de l'application : `.seg` (conteneur) + `.seg-btn` (boutons). Compacte et centrée ; défile
+   horizontalement si les onglets ne tiennent pas. Actif = classe `.active`, `.on` ou aria-selected="true".
+   `.seg.sm` : variante réduite (sous-onglets). Les classes propres à chaque page (.tab, .xt-tab…) ne servent
+   plus qu'aux scripts. */
+.seg {
+  display: flex; gap: 4px; padding: 4px; width: fit-content; max-width: 100%; box-sizing: border-box; margin: 0 auto 24px;
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 999px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.seg::-webkit-scrollbar { display: none; }
+.seg-btn {
+  flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font-family: var(--f-ui); font-size: 12px; font-weight: 600; font-style: italic; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  color: var(--text-dim); transition: color .15s, background .15s;
+}
+.seg-btn:hover { color: var(--cream); }
+.seg-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.seg-btn.active, .seg-btn.on, .seg-btn[aria-selected="true"] { background: var(--gold-solid); color: #1A1208; }
+.seg-n {
+  font-family: var(--f-num); font-style: normal; font-size: 10px; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 999px;
+  background: var(--gold-bg); color: var(--text-dim); font-variant-numeric: tabular-nums;
+}
+.seg-btn.active .seg-n, .seg-btn.on .seg-n, .seg-btn[aria-selected="true"] .seg-n { background: rgba(26,18,8,.16); color: #1A1208; }
+.seg.sm { padding: 3px; margin-bottom: 16px; }
+.seg.sm .seg-btn { padding: 6px 14px; font-size: 11px; }
+@media print { .seg { display: none !important; } }
+
 /* ── Card ── */
 .card {
   background: var(--bg-card);
@@ -558,3 +594,48 @@ body.light .tool-card.c-cobalt   { --accent: 31,63,138; }
   font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
   color: var(--text-muted); font-family: var(--f-ui);
 }
+
+/* ── Cartes de navigation : rectangles très arrondis, encoche sur le bord droit (style du site Barrière) ──
+   Mode nuit : carte sombre, accents vifs de la charte. Mode jour : carte crème, mêmes accents en teintes foncées. */
+/* toutes les tuiles ont exactement la même taille, même seule sur sa ligne */
+.grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 300px)); }
+.tool-card {
+  --ink: 135,50,0;
+  display: grid; grid-template-columns: 56px 1fr; column-gap: 18px; align-items: center; justify-content: stretch;
+  height: 92px; min-height: 0; box-sizing: border-box; padding: 0 30px 0 20px; text-align: center;
+  border: 0; border-radius: 20px; background: var(--bg-card); box-shadow: inset 0 0 0 1px rgba(var(--accent), .22);
+  -webkit-mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000); mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000);
+  transition: transform .16s, background .2s, box-shadow .2s;
+}
+/* liseret de couleur discret sur le bord gauche */
+.tool-card::before {
+  content: ''; position: absolute; left: 0; top: 22%; bottom: 22%; width: 4px; height: auto; border: 0;
+  border-radius: 0 4px 4px 0; background: rgb(var(--accent)); opacity: .9;
+}
+.tool-card::after { display: none; }
+.tool-card:hover::before { opacity: 1; }
+.tool-card:hover { background: rgba(var(--accent), .08); box-shadow: inset 0 0 0 1px rgba(var(--accent), .5); transform: translateY(-2px); }
+.tool-card .tool-badge, .tool-card:hover .tool-badge {
+  grid-row: 1 / span 2; width: 56px; height: 56px; margin: 0; border: 0; border-radius: 16px; background: rgba(var(--accent), .13);
+}
+.tool-badge.picto::before { width: 26px; height: 26px; }
+.tool-name { grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-self: center; font-size: 18px; line-height: 1.2; text-align: center; }
+.tool-card:has(.tool-soon) .tool-name { grid-row: 1; align-self: end; }
+.tool-soon { grid-column: 2; grid-row: 2; align-self: start; justify-self: center; margin: 4px 0 0; font-size: 10px; }
+.tool-card.disabled { opacity: .45; }
+
+body.light .tool-card {
+  background: #F4EFE6; box-shadow: inset 0 0 0 1px rgba(135,50,0,.10);
+}
+body.light .tool-card:hover { background: #FBF8F2; box-shadow: inset 0 0 0 1px rgba(var(--ink), .4); }
+body.light .tool-card.c-cognac   { --ink: 168,66,10; }
+body.light .tool-card.c-sauterne { --ink: 150,92,0; }
+body.light .tool-card.c-jean     { --ink: 0,48,91; }
+body.light .tool-card.c-teal     { --ink: 10,90,110; }
+body.light .tool-card.c-cobalt   { --ink: 31,63,138; }
+body.light .tool-card .tool-badge, body.light .tool-card:hover .tool-badge { background: rgba(var(--ink), .1); }
+body.light .tool-badge.picto::before { background: rgb(var(--ink)); }
+body.light .tool-card::before { background: rgb(var(--ink)); }
+body.light .tool-name { color: #1A1208; }
+body.light .tool-name em { color: rgb(var(--ink)); }
+body.light .tool-soon { color: #5A4830; }

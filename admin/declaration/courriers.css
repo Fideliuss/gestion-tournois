@@ -14,38 +14,6 @@
 .period-row .fg-date { flex: 2; min-width: 220px; max-width: 340px; }
 .period-row .btn { flex-shrink: 0; align-self: flex-end; }
 
-/* ── Sélecteur de type de document ── */
-.doc-type-bar {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-  max-width: 1000px;
-  margin-bottom: 20px;
-}
-.doc-type-btn {
-  flex: 1;
-  padding: 14px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  background: var(--bg-card);
-  border: 1px solid rgba(195,120,20,.14);
-  border-radius: 3px;
-  font-family: var(--f-ui);
-  cursor: pointer;
-  transition: all .18s;
-  text-align: center;
-}
-.doc-type-btn:hover:not(.active) { color: var(--text); border-color: rgba(195,120,20,.35); }
-.doc-type-btn.active {
-  background: rgba(195,120,20,.13);
-  color: var(--gold);
-  border: 1px solid rgba(195,120,20,.38);
-}
-body.light .doc-type-btn { background: rgba(247,243,233,.97); }
-
 /* ── Annulation : chips de dates ── */
 .annul-date-list {
   display: flex;
@@ -115,42 +83,6 @@ body.light .doc-type-btn { background: rgba(247,243,233,.97); }
   color: var(--text-muted);
   margin-left: 4px;
 }
-
-/* ── Sélecteur de courrier ── */
-.tabs-bar {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  background: rgba(10,9,7,.6);
-  border: 1px solid rgba(195,120,20,.12);
-  border-radius: 4px;
-  padding: 4px;
-  width: 100%;
-}
-.tab-btn {
-  flex: 1;
-  min-width: 120px;
-  padding: 9px 8px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  background: none;
-  border: none;
-  border-radius: 3px;
-  font-family: var(--f-ui);
-  cursor: pointer;
-  transition: all .18s;
-  text-align: center;
-}
-.tab-btn:hover:not(.active) { color: var(--text); background: rgba(195,120,20,.06); }
-.tab-btn.active {
-  background: rgba(195,120,20,.15);
-  color: var(--gold);
-  border: 1px solid rgba(195,120,20,.25);
-}
-body.light .tabs-bar { background: rgba(200,185,150,.25); border-color: rgba(135,50,0,.15); }
 
 .print-bar {
   display: flex;
