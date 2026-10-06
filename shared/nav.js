@@ -95,7 +95,9 @@ const NAV = (function () {
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
   const PAGES = { 'index.html': {} };
   GESTION.groups.forEach(function (g) { g.items.forEach(function (it) { PAGES[it.href] = { admin: true }; }); });
-  PAGES[T + 'suivi/suivi_manager.html'].s = 'training';   // le suivi d'équipe reste dans le contexte Training (barre de l'espace affichée)
+  // Suivi équipe et Configuration des modules restent dans le contexte Training : la barre de l'espace est affichée, « Gestion » surligné
+  PAGES[T + 'suivi/suivi_manager.html'].s = 'training';
+  PAGES['admin/config_training.html'].s = 'training';
   SPACES.forEach(function (s) {
     PAGES[s.href] = { s: s.id };
     s.items.forEach(function (it) {
