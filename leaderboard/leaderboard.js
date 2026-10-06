@@ -71,7 +71,7 @@ async function init() {
 function setLbUser(user) {
   const role = (user.app_metadata && user.app_metadata.role) || (user.user_metadata && user.user_metadata.role);
   _isAdmin = role === 'admin';
-  renderSeasonAdmin();
+  renderSeasonBar();
 }
 
 // ══════════════════════════════════════════════════════
@@ -96,23 +96,17 @@ async function listSeasons() {
 async function renderSeasonBar() {
   const seasons = await listSeasons();
   const ctl = document.getElementById('season-ctl');
-  const state = isClosed(_season) ? 'Clôturée' : (_season === _seasonOf(_todayStr()) ? 'En cours' : 'Terminée');
+  const closed = isClosed(_season);
+  const state = closed ? 'Clôturée' : (_season === _seasonOf(_todayStr()) ? 'En cours' : 'Terminée');
   const picker = seasons.length > 1
     ? `<select id="season-select" class="season-select" onchange="setSeason(parseInt(this.value))" aria-label="Saison">${
         seasons.map(s => `<option value="${s}"${s === _season ? ' selected' : ''}>Saison ${_seasonLabel(s)}</option>`).join('')}</select>`
     : `<span class="season-pill">Saison ${_seasonLabel(_season)}</span>`;
-  ctl.innerHTML = `${picker}<span class="season-state${isClosed(_season) ? ' closed' : ''}">${state}</span>`;
-  document.getElementById('hdr-season').textContent = `Saison ${_seasonLabel(_season)} · 1er nov. ${_season} → 31 oct. ${_season + 1}`;
-  renderSeasonAdmin();
-}
-
-function renderSeasonAdmin() {
-  const el = document.getElementById('season-admin');
-  if (!el) return;
-  if (!_isAdmin) { el.innerHTML = ''; return; }
-  el.innerHTML = isClosed(_season)
-    ? `<button class="btn btn-ghost" onclick="reopenSeason()">Rouvrir la saison</button>`
-    : `<button class="btn btn-ghost" onclick="openCloseSeason()">Clôturer la saison</button>`;
+  // Action de clôture (admin) : discrète, sous le sélecteur
+  const admin = !_isAdmin ? ''
+    : closed ? `<button class="season-admin" onclick="reopenSeason()">Rouvrir la saison</button>`
+             : `<button class="season-admin" onclick="openCloseSeason()">Clôturer la saison</button>`;
+  ctl.innerHTML = `<div class="season-line">${picker}<span class="season-state${closed ? ' closed' : ''}">${state}</span></div>${admin}`;
 }
 
 async function setSeason(season) {
