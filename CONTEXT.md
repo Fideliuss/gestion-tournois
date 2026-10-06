@@ -202,6 +202,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 11 | leaderboard.js | Impression classement en ordre ligne — CSS Grid (ordre lignes) remplacé par CSS `columns` (ordre colonnes) |
 | 12 | roulette_tapis.js | Positionnement chips par formules de grille (`ZERO_W` + % colonnes) fragile aux changements de CSS → remplacé par `getBoundingClientRect()` sur les cellules `[data-num]` réellement rendues |
 | 13 | roulette_tapis.js | Carré 0-1-2-3 positionné au centre vertical de la colonne 0 (chevauchait le plein) → repositionné au coin supérieur (bord 0/col1 × bord supérieur du tapis), conforme à la vraie position casino |
+| 14 | barriere.css | Modaux collés en haut du document après défilement (toutes les pages) — l'animation d'entrée de `body` en `animation-fill-mode: both` laissait un `transform` permanent sur `body`, qui devient le repère des éléments `position:fixed` → `backwards` |
 
 ---
 
