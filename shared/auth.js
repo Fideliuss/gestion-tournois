@@ -96,7 +96,7 @@ const AUTH = {
       try {
         const cached = _rolePanelsCache[userRole] || {};
         navOk = (await _loadNav()) && NAV.mount({
-          root, loginUrl, email: session.user.email, role: userRole, isAdmin,
+          root, loginUrl, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
           panels: cached.panels || [], color: cached.color || null,
         });
       } catch (e) { navOk = false; }
@@ -104,6 +104,30 @@ const AUTH = {
     overlay.remove();
     if (!navOk) AUTH._addBadge(loginUrl, session.user.email, userRole);   // repli : ancienne interface
     return session.user;
+  },
+
+  /**
+   * Prénom à afficher. Métadonnée `first_name` / `prenom` si elle existe, sinon le début de l'e-mail (prenom.nom@…).
+   * Vide si on ne peut pas le déduire (identifiant sans point, ou simple initiale comme « b.nom »).
+   */
+  firstName(user) {
+    const meta  = (user && user.user_metadata) || {};
+    const local = ((user && user.email) || '').split('@')[0];
+    const raw   = (meta.first_name || meta.prenom || (local.indexOf('.') > 0 ? local.split('.')[0] : '') || '').trim();
+    if (raw.replace(/[^a-zà-ÿ]/gi, '').length < 2) return '';
+    return raw.split(/([-' ])/).map(function (p) { return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(); }).join('');
+  },
+
+  /** « Prénom Nom » si les deux sont renseignés (métadonnées), sinon vide */
+  fullName(user) {
+    const meta = (user && user.user_metadata) || {};
+    return [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim();
+  },
+
+  /** « Bonjour » le jour, « Bonsoir » de 18 h à 4 h */
+  salutation() {
+    const h = new Date().getHours();
+    return h >= 18 || h < 4 ? 'Bonsoir' : 'Bonjour';
   },
 
   async signOut(loginUrl = 'login.html') {
@@ -150,10 +174,10 @@ const AUTH = {
           onkeydown="if(event.key==='Enter') AUTH._saveNewPwd()" />
 
         <div class="auth-pwd-actions">
-          <button class="auth-pwd-save" id="auth-pwd-save-btn" onclick="AUTH._saveNewPwd()">
+          <button class="btn btn-gold" id="auth-pwd-save-btn" onclick="AUTH._saveNewPwd()">
             Enregistrer →
           </button>
-          <button class="auth-pwd-cancel" onclick="AUTH._closeChangePwd()">Annuler</button>
+          <button class="btn btn-ghost" onclick="AUTH._closeChangePwd()">Annuler</button>
         </div>
         <div class="auth-pwd-msg" id="auth-pwd-msg"></div>
       </div>`;

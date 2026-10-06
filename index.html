@@ -48,7 +48,7 @@
 <div class="app">
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
-    <div class="hdr-title">Service <em>Jeux Traditionnels</em></div>
+    <div class="hdr-title" id="hello">Bonjour</div>
   </div>
 
   <div class="grid">
@@ -87,6 +87,11 @@ AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
   if (!user) return;
   const role = user.user_metadata?.role || 'floor';
   const isAdmin = role === 'admin';
+
+  // « Bonjour, Prénom » (ou « Bonsoir » à partir de 18 h) ; sans prénom déductible, la salutation seule
+  const hello = document.getElementById('hello'), first = AUTH.firstName(user);
+  hello.textContent = AUTH.salutation();
+  if (first) { const em = document.createElement('em'); em.textContent = first; hello.append(', ', em); }
 
   if (!isAdmin) {
     document.querySelectorAll('[data-role="admin"]').forEach(function(el) {

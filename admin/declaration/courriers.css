@@ -27,7 +27,7 @@
   gap: 10px;
   background: var(--bg-card);
   border: 1px solid rgba(195,120,20,.2);
-  border-radius: 3px;
+  border-radius: 10px;
   padding: 8px 12px;
   font-size: 12px;
   color: var(--text);
@@ -66,7 +66,7 @@
 .annul-objet-preview {
   background: rgba(195,120,20,.08);
   border: 1px solid rgba(195,120,20,.25);
-  border-radius: 3px;
+  border-radius: var(--r-box);
   padding: 8px 12px;
   font-size: 12px;
   color: var(--gold);

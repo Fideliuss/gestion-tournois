@@ -23,7 +23,7 @@
       <button class="tab seg-btn" data-tab="ranking" onclick="showTab('ranking')">Ranking</button>
     </div>
     <div class="page-bar-r">
-      <button class="btn-pill lb-saisir" data-tab="saisir" aria-pressed="false" onclick="showTab('saisir')">＋ Saisir</button>
+      <button class="btn btn-gold btn-lg" data-tab="saisir" aria-pressed="false" onclick="showTab('saisir')">＋ Saisir</button>
     </div>
   </div>
 
@@ -31,7 +31,7 @@
   <div id="tab-classement" class="card card-ranking">
     <div class="search-row" style="margin-bottom:0">
       <input type="text" id="search-player" placeholder="Rechercher un joueur…" oninput="renderClassement()" />
-      <button class="btn btn-ghost" onclick="printClassement()">🖨 Imprimer</button>
+      <button class="btn btn-ghost" onclick="printClassement()"><i class="ico ico-print"></i> Imprimer</button>
     </div>
     <div id="classement-content"></div>
     <div id="classement-empty" class="empty" style="display:none">
@@ -82,10 +82,10 @@
         <span>Place</span><span>Joueur</span><span style="text-align:center">Points</span>
       </div>
       <div class="placement-rows" id="placement-rows"></div>
-      <button class="btn-add-place" id="btn-add-place" onclick="addExtraPlace()">
-        ＋ Ajouter une place supplémentaire
+      <button class="btn btn-ghost btn-dashed btn-block btn-add-place" id="btn-add-place" onclick="addExtraPlace()">
+        <i class="ico ico-plus"></i> Ajouter une place supplémentaire
       </button>
-      <button class="btn-validate" onclick="validateTournament()">✓ Valider les résultats du tournoi</button>
+      <button class="btn btn-gold btn-lg btn-block" onclick="validateTournament()"><i class="ico ico-check"></i> Valider les résultats du tournoi</button>
     </div>
   </div>
 
@@ -110,7 +110,7 @@
     <div class="ranking-doc-wrapper">
       <div class="ranking-doc" id="ranking-doc-screen"></div>
     </div>
-    <button class="btn-print-ranking" onclick="printRanking()">🖨 Imprimer le document ranking</button>
+    <button class="btn btn-gold btn-lg btn-block" onclick="printRanking()"><i class="ico ico-print"></i> Imprimer le document ranking</button>
   </div>
 
 </div>

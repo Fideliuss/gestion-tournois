@@ -27,7 +27,7 @@
       <button class="seg-btn"        role="tab" data-tab="roles"   aria-selected="false" onclick="showTab('roles')">Rôles &amp; accès <span class="seg-n" id="n-roles"></span></button>
     </div>
     <div class="page-bar-r">
-      <button class="btn-pill" id="btn-primary" onclick="primaryAction()">＋ Nouveau compte</button>
+      <button class="btn btn-gold btn-lg" id="btn-primary" onclick="primaryAction()">＋ Nouveau compte</button>
     </div>
   </div>
 
@@ -61,10 +61,21 @@
   <div class="modal-box">
     <div class="sec" id="form-sec" style="margin-bottom:24px">Nouveau compte</div>
 
+    <div class="form-row2">
+      <div class="fg form-field">
+        <div class="fl">Prénom</div>
+        <input type="text" id="inp-first" placeholder="Prénom" autocomplete="off" oninput="onNameInput()" />
+      </div>
+      <div class="fg form-field">
+        <div class="fl">Nom</div>
+        <input type="text" id="inp-last" placeholder="Nom" autocomplete="off" oninput="onNameInput()" />
+      </div>
+    </div>
     <div class="fg form-field">
       <div class="fl">Adresse e-mail</div>
-      <input type="email" id="inp-email" placeholder="prenom.nom@casinobarriere.com"
+      <input type="email" id="inp-email" placeholder="Proposée automatiquement" oninput="onEmailInput()"
              onkeydown="if(event.key==='Enter') document.getElementById('inp-password').focus()" />
+      <div class="fsub" id="email-hint">Proposée à partir du prénom et du nom : initiale du prénom + nom</div>
     </div>
     <div class="fg form-field" id="fg-password">
       <div class="fl">Mot de passe</div>
@@ -81,6 +92,7 @@
       <button class="btn btn-gold"  id="btn-save" onclick="saveForm()">Créer le compte →</button>
       <button class="btn btn-ghost" onclick="closeForm()">Annuler</button>
     </div>
+    <div id="form-err" class="form-err"></div>
   </div>
 </div>
 

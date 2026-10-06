@@ -45,14 +45,6 @@
 
 /* ── Enregistrer ── */
 .ct-actions { display: flex; align-items: center; gap: 16px; padding-top: 24px; }
-.ct-save {
-  padding: 11px 28px; border: 0; border-radius: 999px; cursor: pointer;
-  background: var(--gold-solid); color: #1A1208;
-  font-family: var(--f-ui); font-size: 13px; font-weight: 600; letter-spacing: .04em;
-  transition: filter .15s;
-}
-.ct-save:hover { filter: brightness(1.08); }
-.ct-save:disabled { opacity: .5; cursor: default; }
 .ct-msg { font-size: 12px; }
 .ct-msg.ok  { color: #6dcc8e; }
 .ct-msg.err { color: #e07a68; }

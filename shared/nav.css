@@ -16,8 +16,17 @@ body.has-nav .app { padding-top: 36px; min-height: calc(100vh - 56px); }
 .nav-main { display: flex; align-items: center; height: 56px; padding: 0 24px; gap: 22px; }
 
 /* ── Marque ── */
-.nav-brand { display: flex; align-items: center; flex: none; line-height: 0; }
+.nav-brand { display: flex; align-items: center; flex: none; gap: 10px; text-decoration: none; }
 .nav-brand img { height: 14px; width: auto; }
+/* « BORDEAUX » dans le prolongement du logo, puis le service sur deux lignes derrière un filet */
+.nav-star { width: 9px; height: 9px; color: var(--gold); margin: 0 -1px; }   /* éclat de la charte : sépare le logo de la ville */
+.nav-city { font-size: 14px; font-weight: 400; letter-spacing: .18em; text-transform: uppercase; line-height: 1; color: var(--cream); }
+.nav-service {
+  display: flex; flex-direction: column; justify-content: center; gap: 1px; padding-left: 12px; border-left: 1px solid var(--gold-bd);
+  font-size: 10px; font-weight: 500; letter-spacing: .1em; line-height: 1.15; color: var(--text-dim); white-space: nowrap;
+}
+.nav-service span:first-child { text-transform: uppercase; letter-spacing: .18em; font-size: 9px; color: var(--gold); }
+body.light .nav-service span:first-child { color: #873200; }
 .nav-brand .logo-dark { display: none; }
 body.light .nav-brand .logo-light { display: none; }
 body.light .nav-brand .logo-dark { display: block; }
@@ -90,6 +99,8 @@ body.light .nav-row:hover { background: #E7DFD0; }
 .nav-row[aria-current] small { color: #1A1208; }
 .nav-id { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 16px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--gold-bd); }
 body.light .nav-id { border-bottom-color: #D9CFBC; }
+.nav-id small { margin-top: -4px; font-size: 11px; color: var(--text-dim); max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+body.light .nav-id small { color: #5A4830; }
 .nav-id b { font-size: 13px; font-weight: 500; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .nav-chip { border-radius: 999px; padding: 2px 9px; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 
@@ -126,3 +137,5 @@ body.light .nav-id { border-bottom-color: #D9CFBC; }
 }
 
 @media print { .nav { display: none !important; } }
+/* Le service (2 lignes) s'efface quand la place manque : barre complète étroite, et téléphone */
+@media (min-width: 1301px) and (max-width: 1620px), (max-width: 700px) { .nav-service { display: none; } }

@@ -195,8 +195,12 @@ const NAV = (function () {
 
     // ── Marque ──
     const logo = function (file, cls) { return el('img', { src: href('shared/logos/' + file), alt: '', class: cls }); };
-    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino — Accueil' },
-      [logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark')]);
+    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels — Accueil' }, [
+      logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark'),
+      el('i', { class: 'ico ico-star nav-star', 'aria-hidden': 'true' }),
+      el('span', { class: 'nav-city', text: 'Bordeaux' }),
+      el('span', { class: 'nav-service' }, [el('span', { text: 'Service' }), el('span', { text: 'Jeux traditionnels' })]),
+    ]);
 
     // ── Espace courant : lanceur (plusieurs espaces) ou simple titre (un seul) ──
     let spaceEl = null;
@@ -246,9 +250,9 @@ const NAV = (function () {
     const color = /^#[0-9a-f]{3,8}$/i.test(opts.color || '') ? opts.color : '#C37814';
     const chip = el('span', { class: 'nav-chip', text: roleLabel(opts.role) });
     chip.style.background = color + '28'; chip.style.color = color;
-    const userBtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('user'), el('span', { class: 'nav-btn-label nav-user-name', text: opts.email.split('@')[0] })]);
+    const userBtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('user'), el('span', { class: 'nav-btn-label nav-user-name', text: opts.name || opts.email.split('@')[0] })]);
     tools.push(dropdown(userBtn, [
-      el('div', { class: 'nav-id' }, [el('b', { text: opts.email }), chip]),
+      el('div', { class: 'nav-id' }, [el('b', { text: opts.name || opts.email }), opts.name ? el('small', { text: opts.email }) : null, chip]),
       el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { closeAll(); AUTH._openChangePwd(); } } }, [el('span', { text: 'Changer le mot de passe' })]),
       el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }, [el('span', { text: 'Déconnexion' })]),
     ], true));
@@ -269,7 +273,7 @@ const NAV = (function () {
     });
     gestion.forEach(function (g) { groups.push(group(GESTION.label + ' · ' + g.title, g.items.map(function (it) { return plink(it.label, it.href, key === it.href); }))); });
     const panel = el('div', { class: 'nav-panel', id: 'nav-panel' }, groups.concat([el('div', { class: 'grp acts' }, [
-      el('div', { class: 'who', text: opts.email + ' · ' + roleLabel(opts.role) }),
+      el('div', { class: 'who', text: (opts.name ? opts.name + ' · ' : '') + opts.email + ' · ' + roleLabel(opts.role) }),
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),
       el('button', { type: 'button', text: 'Changer le mot de passe', on: { click: function () { AUTH._openChangePwd(); } } }),
       el('button', { type: 'button', text: 'Déconnexion', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }),

@@ -104,8 +104,8 @@ async function renderSeasonBar() {
     : `<span class="season-pill">Saison ${_seasonLabel(_season)}</span>`;
   // Action de clôture (admin) : discrète, sous le sélecteur
   const admin = !_isAdmin ? ''
-    : closed ? `<button class="season-admin" onclick="reopenSeason()">Rouvrir la saison</button>`
-             : `<button class="season-admin" onclick="openCloseSeason()">Clôturer la saison</button>`;
+    : closed ? `<button class="btn btn-red btn-sm season-admin" onclick="reopenSeason()">Rouvrir la saison</button>`
+             : `<button class="btn btn-red btn-sm season-admin" onclick="openCloseSeason()">Clôturer la saison</button>`;
   ctl.innerHTML = `<div class="season-line">${picker}<span class="season-state${closed ? ' closed' : ''}">${state}</span></div>${admin}`;
 }
 
@@ -143,7 +143,7 @@ async function openCloseSeason() {
     <div class="alert-warn" style="display:flex;margin:18px 0 6px">⚠ Après la clôture, plus aucun résultat ni tournoi ne peut être ajouté, modifié ou supprimé pour cette saison. Seul un administrateur peut la rouvrir.</div>
     ${early ? `<div class="alert-warn" style="display:flex;margin:6px 0">La saison ne se termine que le ${fmtDate(end)}.</div>` : ''}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-      <button class="btn btn-ghost" onclick="_closeModal();printClassement()">🖨 Imprimer le classement final</button>
+      <button class="btn btn-ghost" onclick="_closeModal();printClassement()"><i class="ico ico-print"></i> Imprimer le classement final</button>
       <button class="btn btn-gold" id="btn-close-season" onclick="confirmCloseSeason()">Clôturer la saison</button>
     </div>
     <div id="close-err" style="color:#e07a68;font-size:12px;margin-top:10px"></div>`;
@@ -547,11 +547,11 @@ async function renderHistorique() {
   const hasNext  = _histCurrentMonth < maxMonth;
   const navHtml  = `
     <div class="hist-nav">
-      <button class="hist-nav-btn" onclick="histGoMonth('${_ymPrev(_histCurrentMonth)}')"
-        ${hasPrev ? '' : 'disabled'} title="Mois précédent">‹</button>
+      <button class="btn-icon hist-nav-btn" onclick="histGoMonth('${_ymPrev(_histCurrentMonth)}')"
+        ${hasPrev ? '' : 'disabled'} title="Mois précédent" aria-label="Mois précédent"><i class="ico ico-chev-l"></i></button>
       <span class="hist-nav-label">${_MONTHS_FR[mo - 1]} <span class="hist-nav-year">${y}</span></span>
-      <button class="hist-nav-btn" onclick="histGoMonth('${_ymNext(_histCurrentMonth)}')"
-        ${hasNext ? '' : 'disabled'} title="Mois suivant">›</button>
+      <button class="btn-icon hist-nav-btn" onclick="histGoMonth('${_ymNext(_histCurrentMonth)}')"
+        ${hasNext ? '' : 'disabled'} title="Mois suivant" aria-label="Mois suivant"><i class="ico ico-chev-r"></i></button>
     </div>`;
 
   if (sessions.length === 0) {
@@ -665,9 +665,9 @@ function _renderCalDetail(s, results, search = '') {
         <span class="session-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>
       </div>
       <div class="cal-detail-acts">
-        ${isClosed(_season) ? '' : `<button class="btn-sess-edit" title="Modifier les entrées" onclick="editSession(${s.id})">✎</button>
-        <button class="btn-red" title="Supprimer" onclick="deleteSession(${s.id})">✕</button>`}
-        <button class="btn-cancel-sm" onclick="toggleCalSession(${s.id})">Fermer</button>
+        ${isClosed(_season) ? '' : `<button class="btn-icon" title="Modifier les entrées" aria-label="Modifier les entrées" onclick="editSession(${s.id})"><i class="ico ico-edit"></i></button>
+        <button class="btn-icon danger" title="Supprimer" aria-label="Supprimer la session" onclick="deleteSession(${s.id})"><i class="ico ico-del"></i></button>`}
+        <button class="btn btn-ghost btn-sm" onclick="toggleCalSession(${s.id})">Fermer</button>
       </div>
     </div>
     <div class="sess-results">${
@@ -688,8 +688,8 @@ function _renderResultRow(r, search = '') {
     <span class="res-name">${name}${extra}</span>
     <span class="pts-badge">+${r.points}</span>
     ${isClosed(_season) ? '' : `<span class="res-acts">
-      <button class="btn-edit-sm" onclick="editResult(${r.id})">✎</button>
-      <button class="btn-red" onclick="deleteResult(${r.id})">✕</button>
+      <button class="btn-icon" title="Modifier" aria-label="Modifier ce résultat" onclick="editResult(${r.id})"><i class="ico ico-edit"></i></button>
+      <button class="btn-icon danger" title="Supprimer" aria-label="Supprimer ce résultat" onclick="deleteResult(${r.id})"><i class="ico ico-del"></i></button>
     </span>`}
   </div>`;
 }
@@ -713,8 +713,8 @@ function editResult(id) {
     <input type="text"   class="edit-name"  id="en-${id}" value="${cap(r.player)}" />
     <input type="number" class="edit-pts"   id="ept-${id}" value="${r.points}" min="0" />
     <span class="res-acts">
-      <button class="btn-save-sm"   onclick="saveResultEdit(${id})">✓</button>
-      <button class="btn-cancel-sm" onclick="renderHistorique()">✕</button>
+      <button class="btn-icon" title="Enregistrer" aria-label="Enregistrer" onclick="saveResultEdit(${id})"><i class="ico ico-check"></i></button>
+      <button class="btn-icon danger" title="Annuler" aria-label="Annuler" onclick="renderHistorique()"><i class="ico ico-x"></i></button>
     </span>`;
 
   const inp = document.getElementById(`en-${id}`);
@@ -752,8 +752,8 @@ async function editSession(id) {
     <input type="number" id="se-${id}" value="${s.entries || 0}" min="0"
       onclick="event.stopPropagation()" />
     entrées
-    <button class="btn-save-sm"   onclick="event.stopPropagation();saveSessionEdit(${id})">✓</button>
-    <button class="btn-cancel-sm" onclick="event.stopPropagation();renderHistorique()">✕</button>`;
+    <button class="btn-icon" title="Enregistrer" aria-label="Enregistrer" onclick="event.stopPropagation();saveSessionEdit(${id})"><i class="ico ico-check"></i></button>
+    <button class="btn-icon danger" title="Annuler" aria-label="Annuler" onclick="event.stopPropagation();renderHistorique()"><i class="ico ico-x"></i></button>`;
 
   const inp = document.getElementById(`se-${id}`);
   if (inp) {
