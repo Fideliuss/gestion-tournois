@@ -8,7 +8,7 @@ L'application est organisée en 3 grands panneaux d'accès, chacun filtrable par
 
 | Panneau | Description |
 |---------|-------------|
-| 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration Tournois (déclarations DTPJ, courriers, extras, config) |
+| 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes — dans le menu de la barre) |
 | 🎓 **Training Croupier** | Modules d'entraînement Blackjack et Roulette Anglaise |
 | 👤 **Gestion Comptes** | Création de comptes, rôles personnalisables, permissions par panneau *(admin uniquement)* |
 
@@ -37,7 +37,7 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Fiche joueur détaillée (points, meilleur résultat, historique)
 - Données sauvegardées dans **Supabase** (cloud) — synchronisées en temps réel
 
-### Administration Tournois *(sous-hub)*
+### Administration tournois *(menu de la barre)*
 
 **Déclaration DTPJ** — formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
 - Tableau généré automatiquement depuis une configuration par jour de semaine
@@ -45,18 +45,18 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Annexes Prize Pool éditables avec répartition configurable
 - Impression A4 paysage optimisée (tableau + annexes en 1 page)
 
-**Courriers mensuels** *(accessible depuis Déclaration DTPJ)* — génération des 3 courriers officiels d'accompagnement : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde.
+**Générateur de courrier** — génération des 3 courriers officiels d'accompagnement : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde.
 - Triangle des destinataires respecté (chaque courrier mentionne les 2 autres en copie)
 - Date auto-calculée à J-21 du début du mois déclaré, destinataires/signatures éditables
 - Export PDF natif via l'impression navigateur (A4 portrait, style administratif français)
 
-**Déclaration Extras** — gestion des croupiers extras.
+**Gestion des Extras** — gestion des croupiers extras.
 - CRUD complet de la liste des extras (nom, prénom, date/lieu de naissance, adresse)
 - **Déclaration mensuelle** imprimable A4 paysage, sélecteur calendrier natif
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, horaires par défaut configurables + overrides ad-hoc
 - Liste des extras persistée dans **Supabase**
 
-**Config Tournois** — calendrier des tournois (CRUD), un semainier par jour + section événements, barème de points éditable par tournoi.
+**Calendrier & barèmes** — calendrier des tournois (CRUD), un semainier par jour + section événements, barème de points éditable par tournoi.
 
 ---
 
@@ -157,17 +157,16 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   └── leaderboard.js
 │
 ├── admin/
-│   ├── admin_tournois.html        — Sous-hub Administration Tournois
 │   ├── config_tournois.html       — CRUD tournois + semainier + barème de points
 │   ├── comptes.html               — Gestion Comptes : CRUD comptes + rôles + permissions par panneau
 │   ├── config_training.html / .js / .css — Config Training : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
 │   │   ├── declaration.html       — Déclaration Tournois DTPJ
 │   │   ├── declaration.css / .js
-│   │   ├── courriers.html         — Courriers PN (accès via declaration.html)
+│   │   ├── courriers.html         — Générateur de courrier (menu Administration tournois)
 │   │   └── courriers.css / .js
 │   └── extras/
-│       ├── extras.html            — Déclaration Extras & Émargement
+│       ├── extras.html            — Gestion des Extras & Émargement
 │       └── extras.css / .js
 │
 ├── training/
@@ -238,7 +237,7 @@ Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
 | Sunday 40K | Dimanche | 180 € | 20 € | 200 € | 17 |
 | Le 33 (VSD) | Événement | 295 € | 35 € | 330 € | 20 |
 
-Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessible. Les tournois réels sont entièrement configurables depuis **Outils Tournois → Administration Tournois → Config Tournois**.
+Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessible. Les tournois réels sont entièrement configurables depuis **Outils Tournois → Administration tournois → Calendrier & barèmes**.
 
 ---
 

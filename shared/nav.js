@@ -23,11 +23,11 @@ const NAV = (function () {
     { id: 'tournois', label: 'Outils Tournois', note: 'Prize pool, classement, administration', href: 'outils_tournois.html', panel: 'tournois', items: [
       { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
       { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
-      { label: 'Administration', href: 'admin/admin_tournois.html', panel: 'admin-tournois', menu: [
-        { label: 'Déclaration DTPJ',   href: 'admin/declaration/declaration.html' },
-        { label: 'Courriers PN',       href: 'admin/declaration/courriers.html' },
-        { label: 'Déclaration Extras', href: 'admin/extras/extras.html' },
-        { label: 'Config tournois',    href: 'admin/config_tournois.html' },
+      { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
+        { label: 'Déclaration DTPJ',      href: 'admin/declaration/declaration.html' },
+        { label: 'Générateur de courrier', href: 'admin/declaration/courriers.html' },
+        { label: 'Gestion des Extras',    href: 'admin/extras/extras.html' },
+        { label: 'Calendrier & barèmes',  href: 'admin/config_tournois.html' },
       ] },
     ] },
     { id: 'training', label: 'Training Croupier', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [

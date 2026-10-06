@@ -34,8 +34,8 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 ## Architecture
 
 ```
-index.html                    Hub principal — 3 panneaux (Outils Tournois / Training Croupier / Gestion Comptes)
-outils_tournois.html          Sous-hub Outils Tournois (Prize Pool, Leaderboard, Administration Tournois)
+index.html                    Accueil — 2 espaces (Outils Tournois / Training Croupier) ; Gestion Comptes n'a plus de tuile : elle est dans le menu Administration de la barre (admin)
+outils_tournois.html          Page Outils Tournois (Prize Pool, Leaderboard) — l'administration des tournois n'a plus de tuile ni de page intermédiaire : elle est dans la barre, sous « Administration tournois »
 login.html                    Page de connexion (e-mail + mot de passe, charte graphique, redirect par rôle)
 
 shared/
@@ -63,14 +63,13 @@ prize_pool/
   prize_pool.js     Logique React
 
 admin/
-  admin_tournois.html   Sous-hub Administration Tournois (Déclaration DTPJ, Extras, Config Tournois)
   config_tournois.html  CRUD tournois — semainier par jour, barème de points, guard panel:'admin-tournois'
   config_training.html/.js/.css  Config Training (admin) — réglages de tous les modules de training, un onglet par jeu
   comptes.html           Gestion Comptes — CRUD comptes + rôles personnalisables + permissions par panneau, guard role:'admin' (intentionnellement admin-only, pas de panel)
   declaration/
     declaration.html  Déclaration mensuelle PN, guard panel:'admin-tournois'
     declaration.css / declaration.js
-    courriers.html    Générateur de courriers PN — accessible depuis declaration.html uniquement, guard panel:'admin-tournois'
+    courriers.html    Générateur de courrier — accessible uniquement par le menu « Administration tournois » de la barre (plus de bouton dans Déclaration DTPJ), guard panel:'admin-tournois'
     courriers.css / courriers.js
   extras/
     extras.html   Déclaration extras & émargement, guard panel:'admin-tournois'
@@ -216,8 +215,10 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - 12% des joueurs payés (ajustable manuellement)
 - Impression du tableau
 
-### Administration Tournois
-**Config Tournois** — semainier CRUD (cartes édition/suppression par jour + section événements), formulaire nom/jour/PP/frais/buy-in auto + barème de points éditable slot par slot.
+### Administration tournois
+Pages regroupées dans le menu **Administration tournois** de la barre (panel `admin-tournois`) : **Déclaration DTPJ**, **Générateur de courrier**, **Gestion des Extras**, **Calendrier & barèmes** (fichiers `declaration.html`, `courriers.html`, `extras.html`, `config_tournois.html` : les noms de fichiers n'ont pas changé, seuls les libellés).
+
+**Calendrier & barèmes** (`config_tournois.html`) — semainier CRUD (cartes édition/suppression par jour + section événements), formulaire nom/jour/PP/frais/buy-in auto + barème de points éditable slot par slot.
 
 **Déclaration DTPJ**
 - Tableau mensuel généré automatiquement depuis une config par jour de semaine (lun–dim)
@@ -227,15 +228,15 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Gestion ponctuelle : annuler ou modifier un tournoi sur un jour précis (restaurable)
 - Persistance localStorage (`decl_cfg`, `decl_staff`, `decl_annexes`, `decl_adhoc_Y_M`, `decl_exc_Y_M`)
 
-**Courriers mensuels**
+**Générateur de courrier** (courriers mensuels)
 - Génération des 3 courriers officiels : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde
 - Lit la même config localStorage que la Déclaration DTPJ — aucune saisie supplémentaire
 - Mise en page A4 portrait stricte (1 page), style administratif français
 - Date courrier auto-calculée à J-21 du début du mois déclaré
 - Triangle des destinataires : chaque courrier liste les 2 autres destinataires
-- Accessible uniquement depuis declaration.html (bouton "✉ Courriers") — non listé dans le hub
+- Accessible uniquement par le menu « Administration tournois » de la barre
 
-**Déclaration Extras**
+**Gestion des Extras**
 - Liste des croupiers extras avec infos personnelles CRUD (nom, prénom, date/lieu naissance, adresse)
 - **Déclaration mensuelle** : tableau officiel imprimable A4 paysage
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, sélecteur `<input type="week">`
@@ -248,7 +249,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Saisie des résultats par tournoi (semainier + places standards + places supplémentaires)
 - **Blocage doublon** : validation impossible si même tournoi + même date déjà saisi
 - **Historique vue calendrier** : grille mensuelle 7 colonnes, mois les plus récents en premier, édition inline
-- Gestion des tournois (CRUD complet + barèmes de points) — désormais via Administration Tournois
+- Gestion des tournois (CRUD complet + barèmes de points) — désormais via Administration tournois → Calendrier & barèmes
 - **Document ranking imprimable** (A4 portrait, encadré doré, typographie Cormorant Garamond)
 - **Impression classement one-page** (A4 portrait, podium 3 marches, coupure stricte à 150)
 - Fiche joueur détaillée (modal)
@@ -257,7 +258,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 ### Gestion Comptes
 - CRUD comptes (email + mot de passe + rôle) via Edge Function sécurisée
 - CRUD rôles personnalisés : label, couleur (nuancier), liste de panneaux autorisés
-- Panneaux hiérarchiques dans le formulaire d'édition de rôle : cocher un parent affiche ses enfants (ex : "Outils Tournois" → Prize Pool / Leaderboard / Administration Tournois)
+- Panneaux hiérarchiques dans le formulaire d'édition de rôle : cocher un parent affiche ses enfants (ex : "Outils Tournois" → Prize Pool / Leaderboard / Administration tournois)
 - Table croisée permissions (rôles × panneaux) avec renommage inline
 - Stats par rôle (nombre de comptes)
 
