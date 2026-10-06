@@ -76,10 +76,10 @@ function renderTabs() {
   const tabs = [{ id: null, label: 'Vue d\'ensemble' }].concat(SV_FAMILIES.map(function(f) {
     return { id: f.id, label: f.name + ' ' + f.em, n: svcSessionsOf(f.id).length };
   }));
-  return '<div class="sv-tabs">' + tabs.map(function(t) {
+  return '<div class="sv-tabs seg">' + tabs.map(function(t) {
     const on = t.id === _svcView.family;
-    return '<button class="sv-tab' + (on ? ' on' : '') + '" onclick="svcGo(' + (t.id ? '\'' + t.id + '\'' : '') + ')">'
-      + t.label + (t.n !== undefined ? '<span class="sv-tab-n">' + t.n + '</span>' : '') + '</button>';
+    return '<button class="sv-tab seg-btn' + (on ? ' on' : '') + '" onclick="svcGo(' + (t.id ? '\'' + t.id + '\'' : '') + ')">'
+      + t.label + (t.n !== undefined ? '<span class="sv-tab-n seg-n">' + t.n + '</span>' : '') + '</button>';
   }).join('') + '</div>';
 }
 

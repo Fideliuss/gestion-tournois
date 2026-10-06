@@ -9,23 +9,6 @@
   display: flex; flex-direction: column; align-items: center;
 }
 
-/* ── Onglets ── */
-.xt-tabs {
-  display: flex; gap: 4px; margin-bottom: 20px;
-  background: rgba(10,9,7,.6); border: 1px solid rgba(195,120,20,.12);
-  border-radius: 4px; padding: 4px;
-  width: 100%; max-width: 860px; flex-wrap: wrap;
-}
-.xt-tab {
-  flex: 1; min-width: 100px; padding: 9px 8px;
-  font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
-  color: var(--text-dim); background: none; border: none; border-radius: 3px;
-  cursor: pointer; transition: all .18s; text-align: center;
-}
-.xt-tab.active          { background: rgba(195,120,20,.15); color: var(--gold); border: 1px solid rgba(195,120,20,.25); }
-.xt-tab:hover:not(.active) { color: var(--text); background: rgba(195,120,20,.06); }
-body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(135,50,0,.15); }
-
 /* ── Période ── */
 .period-row {
   display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;

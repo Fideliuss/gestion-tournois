@@ -254,6 +254,34 @@ body.has-nav .hdr-logo { display: none; }
 body.has-nav .hdr-title { font-size: clamp(26px, 4vw, 38px); line-height: 1.15; }
 body.has-nav .hdr-sub { margin-top: 8px; font-size: 13px; letter-spacing: .01em; text-transform: none; color: var(--text-dim); }
 
+/* ── Pastille segmentée : onglets d'une page (même données, vues différentes) ──
+   Composant unique de l'application : `.seg` (conteneur) + `.seg-btn` (boutons). Compacte et centrée ; défile
+   horizontalement si les onglets ne tiennent pas. Actif = classe `.active`, `.on` ou aria-selected="true".
+   `.seg.sm` : variante réduite (sous-onglets). Les classes propres à chaque page (.tab, .xt-tab…) ne servent
+   plus qu'aux scripts. */
+.seg {
+  display: flex; gap: 4px; padding: 4px; width: fit-content; max-width: 100%; box-sizing: border-box; margin: 0 auto 24px;
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 999px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.seg::-webkit-scrollbar { display: none; }
+.seg-btn {
+  flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  font-family: var(--f-ui); font-size: 12px; font-weight: 600; font-style: italic; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  color: var(--text-dim); transition: color .15s, background .15s;
+}
+.seg-btn:hover { color: var(--cream); }
+.seg-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.seg-btn.active, .seg-btn.on, .seg-btn[aria-selected="true"] { background: var(--gold-solid); color: #1A1208; }
+.seg-n {
+  font-family: var(--f-num); font-style: normal; font-size: 10px; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 999px;
+  background: var(--gold-bg); color: var(--text-dim); font-variant-numeric: tabular-nums;
+}
+.seg-btn.active .seg-n, .seg-btn.on .seg-n, .seg-btn[aria-selected="true"] .seg-n { background: rgba(26,18,8,.16); color: #1A1208; }
+.seg.sm { padding: 3px; margin-bottom: 16px; }
+.seg.sm .seg-btn { padding: 6px 14px; font-size: 11px; }
+@media print { .seg { display: none !important; } }
+
 /* ── Card ── */
 .card {
   background: var(--bg-card);

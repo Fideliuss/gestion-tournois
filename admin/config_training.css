@@ -4,20 +4,7 @@
 ═══════════════════════════════════════════════ */
 
 .app { padding: 52px 20px 80px; align-items: stretch; }
-.app > .hdr, .app > .ct-tabs, .app > .ct-panel { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
-
-/* ── Onglets : un par jeu ── */
-.ct-tabs {
-  display: flex; gap: 4px; padding: 4px; margin-bottom: 28px; width: fit-content !important; max-width: 100%;
-  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 999px; overflow-x: auto;
-}
-.ct-tab-btn {
-  flex: none; padding: 8px 18px; border: 0; border-radius: 999px; background: none; cursor: pointer;
-  font-family: var(--f-ui); font-size: 12px; font-weight: 600; font-style: italic; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--text-dim); transition: color .15s, background .15s;
-}
-.ct-tab-btn:hover { color: var(--cream); }
-.ct-tab-btn[aria-selected="true"] { background: var(--gold-solid); color: #1A1208; }
+.app > .hdr, .app > .ct-panel { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
 
 /* ── Groupes de réglages ── */
 .ct-panel[hidden] { display: none; }
