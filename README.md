@@ -10,7 +10,7 @@ L'application est organisée en 3 grands panneaux d'accès, chacun filtrable par
 |---------|-------------|
 | 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes — dans le menu de la barre) |
 | 🎓 **Training Croupier** | Modules d'entraînement Blackjack et Roulette Anglaise |
-| 👤 **Gestion Comptes** | Création de comptes, rôles personnalisables, permissions par panneau *(admin uniquement)* |
+| 👤 **Gestion des comptes** | Comptes (liste filtrable), rôles personnalisables et accès par page *(admin uniquement)* |
 
 ---
 
@@ -91,11 +91,11 @@ Toutes les sessions et résultats de training sont enregistrés dans **Supabase*
 
 ---
 
-## 👤 Gestion Comptes *(admin uniquement)*
+## 👤 Gestion des comptes *(admin uniquement)*
 
-- **Comptes** : création / édition / suppression (e-mail + mot de passe) via une Edge Function Supabase sécurisée (vérification admin côté serveur, jamais côté client)
+- **Comptes** : création / édition / suppression (e-mail + mot de passe) via une Edge Function Supabase sécurisée (vérification admin côté serveur, jamais côté client). La liste se filtre par recherche, par rôle ou par « inactifs », se trie par colonne et peut se regrouper par rôle
 - **Rôles personnalisables** : au-delà des rôles par défaut (Admin, MCD, Floor), création de rôles sur mesure avec libellé et couleur
-- **Permissions par panneau** : chaque rôle a une liste de panneaux autorisés (Outils Tournois et ses sous-panneaux, Training) — un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
+- **Rôles & accès** : un tableau rôles × pages à cocher, enregistré d'un coup ; chaque rôle a une liste de panneaux autorisés (Outils Tournois et ses sous-panneaux, Training) — un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
 - Les admins ont toujours accès à tout, quels que soient les panneaux configurés
 
 ---
@@ -111,7 +111,7 @@ L'application est sécurisée par **e-mail + mot de passe** (Supabase Auth). Les
 4. Changement de mot de passe disponible depuis le badge utilisateur (icône 🔑)
 
 ### Gestion des comptes et permissions
-Accessible depuis **Gestion Comptes** (réservé aux admins) :
+Accessible depuis le menu **Gestion** de la barre (réservé aux admins) :
 - Création / édition / suppression de comptes
 - Création / édition / suppression de rôles, avec couleur et libellé personnalisés
 - Configuration des panneaux accessibles par rôle (table `app_roles` Supabase)
@@ -158,7 +158,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │
 ├── admin/
 │   ├── config_tournois.html       — CRUD tournois + semainier + barème de points
-│   ├── comptes.html               — Gestion Comptes : CRUD comptes + rôles + permissions par panneau
+│   ├── comptes.html / .css / .js  — Gestion des comptes : liste filtrable + matrice des accès par rôle
 │   ├── config_training.html / .js / .css — Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
 │   │   ├── declaration.html       — Déclaration Tournois DTPJ
