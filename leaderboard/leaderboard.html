@@ -9,24 +9,22 @@
 </head>
 <body>
 
-<button class="theme-toggle" onclick="toggleTheme()">
-  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
-</button>
-
 <div class="app">
-  <a href="../outils_tournois.html" class="back">← Menu</a>
-
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Challenge <em>Saisonnier</em></div>
-    <div class="hdr-season">Saison 2025 / 2026 · 1er nov → 31 oct</div>
   </div>
 
-  <div class="tabs seg">
-    <button class="tab seg-btn active" onclick="showTab('classement')">Classement</button>
-    <button class="tab seg-btn" onclick="showTab('saisir')">Saisir</button>
-    <button class="tab seg-btn" onclick="showTab('historique')">Historique</button>
-    <button class="tab seg-btn" onclick="showTab('ranking')">Ranking</button>
+  <div class="lb-bar">
+    <div class="lb-bar-l" id="season-ctl"></div>
+    <div class="tabs seg">
+      <button class="tab seg-btn active" data-tab="classement" onclick="showTab('classement')">Classement</button>
+      <button class="tab seg-btn" data-tab="historique" onclick="showTab('historique')">Historique</button>
+      <button class="tab seg-btn" data-tab="ranking" onclick="showTab('ranking')">Ranking</button>
+    </div>
+    <div class="lb-bar-r">
+      <button class="lb-saisir" data-tab="saisir" aria-pressed="false" onclick="showTab('saisir')">＋ Saisir</button>
+    </div>
   </div>
 
   <!-- CLASSEMENT -->
@@ -47,6 +45,7 @@
     <div id="alert-success" class="alert-success" style="display:none"></div>
     <div id="alert-warn"    class="alert-warn"    style="display:none"></div>
     <div id="alert-dup"     class="alert-dup"     style="display:none"></div>
+    <div id="alert-lock"    class="alert-warn"    style="display:none"></div>
 
     <div class="form-grid" style="margin-bottom:12px">
       <div class="fg">
@@ -135,6 +134,6 @@
 <script src="../shared/semainier.js"></script>
 <script src="../shared/auth.js"></script>
 <script src="leaderboard.js"></script>
-<script>AUTH.guard({ loginUrl: '../login.html', panel: 'leaderboard' });</script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'leaderboard' }).then(function (u) { if (u) setLbUser(u); });</script>
 </body>
 </html>

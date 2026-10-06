@@ -27,7 +27,7 @@ Calcule automatiquement la répartition des gains selon le nombre de joueurs et 
 - Impression directe du tableau
 
 ### Challenge Saisonnier
-Classement général de la saison 2025/2026 avec saisie et historique des résultats.
+Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et historique des résultats. La saison se déduit de la date : à partir du 1er novembre, la nouvelle saison démarre à zéro et les saisons précédentes restent consultables (sélecteur de saison). Un administrateur peut **clôturer** une saison : elle est alors verrouillée (plus aucune saisie, modification ni suppression), et peut être rouverte.
 
 - Classement en temps réel avec podium visuel
 - Saisie des résultats par tournoi (semainier, places standards + places supplémentaires)
@@ -201,7 +201,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     └── migrations/
         ├── training_tables.sql              — training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         — migration des policies vers app_metadata (rôle non modifiable client-side)
-        └── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
+        ├── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
+        └── saisons_cloturees.sql            — clôture des saisons du challenge (table + verrouillage par triggers)
 ```
 
 ---
@@ -241,9 +242,9 @@ Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessibl
 
 ---
 
-## Saison en cours
+## Saison
 
-**2025 / 2026** — 1er novembre 2025 → 31 octobre 2026
+Du 1er novembre au 31 octobre. Saison en cours : **2025 / 2026** (clôture à prévoir après le 31 octobre 2026).
 
 - Cagnotte : 2 € par entrée (joueurs + rebuys)
 - Ranking fin de saison : 1er = 10% · 2ème = 5% de la cagnotte totale

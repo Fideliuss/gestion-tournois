@@ -202,6 +202,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 11 | leaderboard.js | Impression classement en ordre ligne — CSS Grid (ordre lignes) remplacé par CSS `columns` (ordre colonnes) |
 | 12 | roulette_tapis.js | Positionnement chips par formules de grille (`ZERO_W` + % colonnes) fragile aux changements de CSS → remplacé par `getBoundingClientRect()` sur les cellules `[data-num]` réellement rendues |
 | 13 | roulette_tapis.js | Carré 0-1-2-3 positionné au centre vertical de la colonne 0 (chevauchait le plein) → repositionné au coin supérieur (bord 0/col1 × bord supérieur du tapis), conforme à la vraie position casino |
+| 14 | barriere.css | Modaux collés en haut du document après défilement (toutes les pages) — l'animation d'entrée de `body` en `animation-fill-mode: both` laissait un `transform` permanent sur `body`, qui devient le repère des éléments `position:fixed` → `backwards` |
 
 ---
 
@@ -255,6 +256,9 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - **Impression classement one-page** (A4 portrait, podium 3 marches, coupure stricte à 150)
 - Fiche joueur détaillée (modal)
 - Données sauvegardées dans Supabase
+- **Saisons** (octobre 2026) : la saison se **déduit de la date** (1er nov → 31 oct ; clé = année de début, `2025` = saison 2025 / 2026) — aucune colonne dans `results` / `sessions`, la saison suivante démarre toute seule avec le premier résultat daté du 1er novembre. Points et cagnotte repartent donc de 0. Le classement, l'historique, le ranking et les impressions ne montrent que la **saison affichée** (`_season` dans `leaderboard.js`) ; le sélecteur (pastille à gauche de la ligne d'onglets, avec « En cours / Terminée / Clôturée ») liste les saisons qui ont des sessions. Les anciennes saisons restent consultables ; les textes « 2025 / 2026 » ne sont plus en dur. Le contrôle de doublon porte sur toutes les saisons.
+- **Clôture / verrouillage** : un admin voit, en petit sous le sélecteur de saison, « Clôturer la saison » (résumé : joueurs, tournois, ranking, podium, impression du classement final) puis « Rouvrir la saison ». Table `saisons_cloturees` (migration `saisons_cloturees.sql`, lecture pour tous, écriture admin) + triggers `trg_results_saison_cloturee` / `trg_sessions_saison_cloturee` : **toute insertion, modification ou suppression** de résultat ou de session dont la date est dans une saison clôturée est refusée en base (y compris via l'API ; fonction `saison_de(date)`). L'interface suit : historique en lecture seule, saisie bloquée avec message. Si la table est absente, aucune saison n'est verrouillée (le challenge reste utilisable). Une saison clôturée affiche « Classement final au <date de clôture> ».
+- **Barre de la page** (plus de sous-titre sous « Challenge Saisonnier » : la saison est dans le sélecteur) : saison à gauche · onglets Classement / Historique / Ranking au centre · bouton **« ＋ Saisir »** à part, à droite (même page, simple onglet : `showTab('saisir')`, onglets repérés par `data-tab`).
 
 ### Gestion Comptes
 - CRUD comptes (email + mot de passe + rôle) via Edge Function sécurisée
