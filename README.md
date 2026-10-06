@@ -8,9 +8,9 @@ L'application est organisée en 3 grands panneaux d'accès, chacun filtrable par
 
 | Panneau | Description |
 |---------|-------------|
-| 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration Tournois (déclarations DTPJ, courriers, extras, config) |
+| 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes — dans le menu de la barre) |
 | 🎓 **Training Croupier** | Modules d'entraînement Blackjack et Roulette Anglaise |
-| 👤 **Gestion Comptes** | Création de comptes, rôles personnalisables, permissions par panneau *(admin uniquement)* |
+| 👤 **Gestion des comptes** | Comptes (liste filtrable), rôles personnalisables et accès par page *(admin uniquement)* |
 
 ---
 
@@ -27,7 +27,7 @@ Calcule automatiquement la répartition des gains selon le nombre de joueurs et 
 - Impression directe du tableau
 
 ### Challenge Saisonnier
-Classement général de la saison 2025/2026 avec saisie et historique des résultats.
+Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et historique des résultats. La saison se déduit de la date : à partir du 1er novembre, la nouvelle saison démarre à zéro et les saisons précédentes restent consultables (sélecteur de saison). Un administrateur peut **clôturer** une saison : elle est alors verrouillée (plus aucune saisie, modification ni suppression), et peut être rouverte.
 
 - Classement en temps réel avec podium visuel
 - Saisie des résultats par tournoi (semainier, places standards + places supplémentaires)
@@ -37,7 +37,7 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Fiche joueur détaillée (points, meilleur résultat, historique)
 - Données sauvegardées dans **Supabase** (cloud) — synchronisées en temps réel
 
-### Administration Tournois *(sous-hub)*
+### Administration tournois *(menu de la barre)*
 
 **Déclaration DTPJ** — formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
 - Tableau généré automatiquement depuis une configuration par jour de semaine
@@ -45,18 +45,18 @@ Classement général de la saison 2025/2026 avec saisie et historique des résul
 - Annexes Prize Pool éditables avec répartition configurable
 - Impression A4 paysage optimisée (tableau + annexes en 1 page)
 
-**Courriers mensuels** *(accessible depuis Déclaration DTPJ)* — génération des 3 courriers officiels d'accompagnement : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde.
+**Générateur de courrier** — génération des 3 courriers officiels d'accompagnement : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde.
 - Triangle des destinataires respecté (chaque courrier mentionne les 2 autres en copie)
 - Date auto-calculée à J-21 du début du mois déclaré, destinataires/signatures éditables
 - Export PDF natif via l'impression navigateur (A4 portrait, style administratif français)
 
-**Déclaration Extras** — gestion des croupiers extras.
+**Gestion des Extras** — gestion des croupiers extras.
 - CRUD complet de la liste des extras (nom, prénom, date/lieu de naissance, adresse)
 - **Déclaration mensuelle** imprimable A4 paysage, sélecteur calendrier natif
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, horaires par défaut configurables + overrides ad-hoc
 - Liste des extras persistée dans **Supabase**
 
-**Config Tournois** — calendrier des tournois (CRUD), un semainier par jour + section événements, barème de points éditable par tournoi.
+**Calendrier & barèmes** — calendrier des tournois (CRUD), un semainier par jour + section événements, barème de points éditable par tournoi.
 
 ---
 
@@ -91,11 +91,11 @@ Toutes les sessions et résultats de training sont enregistrés dans **Supabase*
 
 ---
 
-## 👤 Gestion Comptes *(admin uniquement)*
+## 👤 Gestion des comptes *(admin uniquement)*
 
-- **Comptes** : création / édition / suppression (e-mail + mot de passe) via une Edge Function Supabase sécurisée (vérification admin côté serveur, jamais côté client)
+- **Comptes** : création / édition / suppression (e-mail + mot de passe) via une Edge Function Supabase sécurisée (vérification admin côté serveur, jamais côté client). La liste se filtre par recherche, par rôle ou par « inactifs », se trie par colonne et peut se regrouper par rôle
 - **Rôles personnalisables** : au-delà des rôles par défaut (Admin, MCD, Floor), création de rôles sur mesure avec libellé et couleur
-- **Permissions par panneau** : chaque rôle a une liste de panneaux autorisés (Outils Tournois et ses sous-panneaux, Training) — un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
+- **Rôles & accès** : un tableau rôles × pages à cocher, enregistré d'un coup ; chaque rôle a une liste de panneaux autorisés (Outils Tournois et ses sous-panneaux, Training) — un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
 - Les admins ont toujours accès à tout, quels que soient les panneaux configurés
 
 ---
@@ -111,7 +111,7 @@ L'application est sécurisée par **e-mail + mot de passe** (Supabase Auth). Les
 4. Changement de mot de passe disponible depuis le badge utilisateur (icône 🔑)
 
 ### Gestion des comptes et permissions
-Accessible depuis **Gestion Comptes** (réservé aux admins) :
+Accessible depuis le menu **Gestion** de la barre (réservé aux admins) :
 - Création / édition / suppression de comptes
 - Création / édition / suppression de rôles, avec couleur et libellé personnalisés
 - Configuration des panneaux accessibles par rôle (table `app_roles` Supabase)
@@ -140,6 +140,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── tournaments.js             — TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               — Widget partagé : sélecteur de tournoi par jour de semaine
 │   ├── supabase.js                — Client Supabase + objet SB (CRUD complet + auth + app_roles + training + mappers)
+│   ├── nav.js / nav.css           — Barre de navigation commune (lanceur d'espaces, pages, menu Gestion, menu mobile), adaptée aux droits
 │   ├── auth.js                    — AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), badge utilisateur, cache panels
 │   ├── changelog.js                — Mis à jour manuellement avant chaque PR de release
 │   ├── logos/                     — Logos (écran + impression)
@@ -156,20 +157,20 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   └── leaderboard.js
 │
 ├── admin/
-│   ├── admin_tournois.html        — Sous-hub Administration Tournois
 │   ├── config_tournois.html       — CRUD tournois + semainier + barème de points
-│   ├── comptes.html               — Gestion Comptes : CRUD comptes + rôles + permissions par panneau
+│   ├── comptes.html / .css / .js  — Gestion des comptes : liste filtrable + matrice des accès par rôle
+│   ├── config_training.html / .js / .css — Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
 │   │   ├── declaration.html       — Déclaration Tournois DTPJ
 │   │   ├── declaration.css / .js
-│   │   ├── courriers.html         — Courriers PN (accès via declaration.html)
+│   │   ├── courriers.html         — Générateur de courrier (menu Administration tournois)
 │   │   └── courriers.css / .js
 │   └── extras/
-│       ├── extras.html            — Déclaration Extras & Émargement
+│       ├── extras.html            — Gestion des Extras & Émargement
 │       └── extras.css / .js
 │
 ├── training/
-│   ├── training.html              — Sous-hub Training Croupier
+│   ├── training.html              — Training Croupier : tous les modules, groupés par jeu
 │   ├── training.css               — Styles partagés training
 │   ├── suivi/
 │   │   ├── suivi_croupier.html / .js  — Mes résultats
@@ -177,18 +178,15 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   │   ├── suivi_common.js            — Modules suivis, calculs et blocs d'affichage partagés
 │   │   └── suivi.css                  — Styles des pages de suivi
 │   ├── uth/
-│   │   ├── uth_hub.html               — Sous-hub Ultimate Texas Hold'em
 │   │   ├── uth_main.html / .js        — Meilleure main
 │   │   ├── uth_gagnant.html / .js     — Qui gagne ?
 │   │   ├── uth_gains.html / .js       — Calcul des gains
 │   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
 │   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
 │   ├── blackjack/
-│   │   ├── blackjack_hub.html         — Sous-hub Blackjack + config admin
 │   │   ├── blackjack.html / .js       — BJ Paiement
 │   │   └── blackjack_score.html / .js — BJ Score
 │   └── roulette/
-│       ├── roulette_hub.html          — Sous-hub Roulette + config admin
 │       ├── roulette.css               — Styles partagés roulette (tapis, chips, badges)
 │       ├── roulette_tapis.js          — Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
 │       ├── roulette_paiement.html / .js    — Calcul Paiement
@@ -203,7 +201,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     └── migrations/
         ├── training_tables.sql              — training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         — migration des policies vers app_metadata (rôle non modifiable client-side)
-        └── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
+        ├── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
+        └── saisons_cloturees.sql            — clôture des saisons du challenge (table + verrouillage par triggers)
 ```
 
 ---
@@ -239,13 +238,13 @@ Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
 | Sunday 40K | Dimanche | 180 € | 20 € | 200 € | 17 |
 | Le 33 (VSD) | Événement | 295 € | 35 € | 330 € | 20 |
 
-Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessible. Les tournois réels sont entièrement configurables depuis **Outils Tournois → Administration Tournois → Config Tournois**.
+Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessible. Les tournois réels sont entièrement configurables depuis **Outils Tournois → Administration tournois → Calendrier & barèmes**.
 
 ---
 
-## Saison en cours
+## Saison
 
-**2025 / 2026** — 1er novembre 2025 → 31 octobre 2026
+Du 1er novembre au 31 octobre. Saison en cours : **2025 / 2026** (clôture à prévoir après le 31 octobre 2026).
 
 - Cagnotte : 2 € par entrée (joueurs + rebuys)
 - Ranking fin de saison : 1er = 10% · 2ème = 5% de la cagnotte totale

@@ -182,7 +182,7 @@ function buildTableBody(effSpots) {
           </div>
           <span id="pp-hint-${i}" class="amt-hint" style="display:none"></span>
           ${isFirst
-            ? `<button class="btn-fill-first" id="btn-fill-first"
+            ? `<button class="btn btn-ghost btn-sm btn-fill-first" id="btn-fill-first"
                  onclick="affecterPremier()" title="Affecter le restant au 1er"
                  style="display:none">← restant</button>`
             : ''}

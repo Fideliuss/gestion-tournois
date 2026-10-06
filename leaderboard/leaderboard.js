@@ -4,19 +4,31 @@
 //  navigateur, puis relues depuis le cache.
 //  invalidateCache() vide le cache après toute mutation.
 // ══════════════════════════════════════════════════════
-let _cacheResults      = null;   // tous les résultats — pour le classement
-let _cacheSessions     = null;   // toutes les sessions — pour la navigation
+let _cacheResults      = null;   // tous les résultats, toutes saisons confondues
+let _cacheSessions     = null;   // toutes les sessions, toutes saisons confondues
 let _cacheByMonth      = {};     // { 'YYYY-MM': [...results] } — pour l'historique
 let _histCurrentMonth  = null;   // mois affiché dans l'historique
 
-async function getResults(force = false) {
+// ── Saison : du 1er novembre au 31 octobre, déduite de la date (clé = année de début : 2025 → 2025 / 2026) ──
+const _seasonOf    = d => { const [y, m] = d.split('-').map(Number); return m >= 11 ? y : y - 1; };
+const _seasonLabel = s => `${s} / ${s + 1}`;
+const _todayStr    = () => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; };
+let _season   = _seasonOf(_todayStr());   // saison affichée
+let _closures = {};                       // { saison: date ISO de clôture } — saisons verrouillées
+let _isAdmin  = false;
+let _tab      = 'classement';
+
+async function getAllResults(force = false) {
   if (!_cacheResults || force) _cacheResults = await SB.getResults();
   return _cacheResults;
 }
-async function getSessions(force = false) {
+async function getAllSessions(force = false) {
   if (!_cacheSessions || force) _cacheSessions = await SB.getSessions();
   return _cacheSessions;
 }
+/* Vues de la saison affichée */
+async function getResults(force = false)  { return (await getAllResults(force)).filter(r => _seasonOf(r.date) === _season); }
+async function getSessions(force = false) { return (await getAllSessions(force)).filter(s => _seasonOf(s.date) === _season); }
 async function getResultsForMonth(ym) {
   if (!_cacheByMonth[ym]) _cacheByMonth[ym] = await SB.getResultsByMonth(ym);
   return _cacheByMonth[ym];
@@ -49,10 +61,125 @@ async function getTournaments() {
 //  INIT
 // ══════════════════════════════════════════════════════
 async function init() {
-  document.getElementById('inp-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('inp-date').value = _todayStr();
+  await loadClosures();
   await populateTournoiSelects();
+  await renderSeasonBar();
   await renderClassement();
 }
+
+function setLbUser(user) {
+  const role = (user.app_metadata && user.app_metadata.role) || (user.user_metadata && user.user_metadata.role);
+  _isAdmin = role === 'admin';
+  renderSeasonBar();
+}
+
+// ══════════════════════════════════════════════════════
+//  SAISONS — sélecteur, clôture, verrouillage
+//  Table saisons_cloturees absente / illisible : aucune saison n'est verrouillée (le challenge reste utilisable)
+// ══════════════════════════════════════════════════════
+async function loadClosures() {
+  try {
+    _closures = {};
+    (await SB.getSeasonClosures()).forEach(c => { _closures[c.season] = String(c.closedAt).substring(0, 10); });
+  } catch (e) { _closures = {}; }
+}
+const isClosed = season => Object.prototype.hasOwnProperty.call(_closures, season);
+
+/* Saisons proposées : celles qui ont des sessions + la saison en cours, de la plus récente à la plus ancienne */
+async function listSeasons() {
+  const set = new Set((await getAllSessions()).map(s => _seasonOf(s.date)));
+  set.add(_seasonOf(_todayStr()));
+  return [...set].sort((a, b) => b - a);
+}
+
+async function renderSeasonBar() {
+  const seasons = await listSeasons();
+  const ctl = document.getElementById('season-ctl');
+  const closed = isClosed(_season);
+  const state = closed ? 'Clôturée' : (_season === _seasonOf(_todayStr()) ? 'En cours' : 'Terminée');
+  const picker = seasons.length > 1
+    ? `<select id="season-select" class="season-select" onchange="setSeason(parseInt(this.value))" aria-label="Saison">${
+        seasons.map(s => `<option value="${s}"${s === _season ? ' selected' : ''}>Saison ${_seasonLabel(s)}</option>`).join('')}</select>`
+    : `<span class="season-pill">Saison ${_seasonLabel(_season)}</span>`;
+  // Action de clôture (admin) : discrète, sous le sélecteur
+  const admin = !_isAdmin ? ''
+    : closed ? `<button class="btn btn-red btn-sm season-admin" onclick="reopenSeason()">Rouvrir la saison</button>`
+             : `<button class="btn btn-red btn-sm season-admin" onclick="openCloseSeason()">Clôturer la saison</button>`;
+  ctl.innerHTML = `<div class="season-line">${picker}<span class="season-state${closed ? ' closed' : ''}">${state}</span></div>${admin}`;
+}
+
+async function setSeason(season) {
+  _season = season;
+  _histCurrentMonth = null;
+  _histExpandedIds.clear();
+  await renderSeasonBar();
+  await showTab(_tab);
+}
+
+/* Résumé de la saison affichée : classement, nombre de tournois, cagnotte */
+async function seasonSummary() {
+  const results = await getResults(), sessions = await getSessions();
+  const map = {};
+  results.forEach(r => { map[r.player] = (map[r.player] || 0) + r.points; });
+  const ranking = Object.keys(map).map(p => ({ player: p, points: map[p] })).sort((a, b) => b.points - a.points);
+  return { ranking, tournois: sessions.length, cagnotte: sessions.reduce((a, s) => a + (s.cagnotte || 0), 0) };
+}
+
+async function openCloseSeason() {
+  const sum = await seasonSummary();
+  const end = `${_season + 1}-10-31`;
+  const early = _todayStr() <= end;
+  const podium = sum.ranking.slice(0, 3).map((p, i) =>
+    `<div style="display:flex;gap:10px;padding:5px 0;font-size:14px"><span>${['🥇','🥈','🥉'][i]}</span><span style="flex:1">${cap(p.player)}</span><span class="pts-badge">${p.points} pts</span></div>`).join('');
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-name">Clôturer la saison ${_seasonLabel(_season)}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 18px">
+      <div class="stat-item"><div class="stat-v">${sum.ranking.length}</div><div class="stat-k">Joueurs</div></div>
+      <div class="stat-item"><div class="stat-v">${sum.tournois}</div><div class="stat-k">Tournois</div></div>
+      <div class="stat-item"><div class="stat-v">${sum.cagnotte.toLocaleString('fr-FR')} €</div><div class="stat-k">Ranking</div></div>
+    </div>
+    ${podium ? `<div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Podium</div>${podium}` : ''}
+    <div class="alert-warn" style="display:flex;margin:18px 0 6px">⚠ Après la clôture, plus aucun résultat ni tournoi ne peut être ajouté, modifié ou supprimé pour cette saison. Seul un administrateur peut la rouvrir.</div>
+    ${early ? `<div class="alert-warn" style="display:flex;margin:6px 0">La saison ne se termine que le ${fmtDate(end)}.</div>` : ''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+      <button class="btn btn-ghost" onclick="_closeModal();printClassement()"><i class="ico ico-print"></i> Imprimer le classement final</button>
+      <button class="btn btn-gold" id="btn-close-season" onclick="confirmCloseSeason()">Clôturer la saison</button>
+    </div>
+    <div id="close-err" style="color:#e07a68;font-size:12px;margin-top:10px"></div>`;
+  const overlay = document.getElementById('modal');
+  overlay.scrollTop = 0;
+  overlay.style.display = 'flex';
+  document.body.classList.add('modal-open');
+}
+
+async function confirmCloseSeason() {
+  if (!confirm(`Clôturer définitivement la saison ${_seasonLabel(_season)} ?`)) return;
+  const btn = document.getElementById('btn-close-season');
+  btn.disabled = true;
+  try {
+    await SB.closeSeason(_season);
+  } catch (e) {
+    btn.disabled = false;
+    document.getElementById('close-err').textContent = 'Impossible de clôturer : ' + (e.message || 'réessaie dans quelques instants');
+    return;
+  }
+  await loadClosures();
+  _closeModal();
+  await renderSeasonBar();
+  await showTab(_tab);
+}
+
+async function reopenSeason() {
+  if (!confirm(`Rouvrir la saison ${_seasonLabel(_season)} ? Les saisies et modifications seront de nouveau possibles.`)) return;
+  try { await SB.reopenSeason(_season); } catch (e) { alert('Impossible de rouvrir la saison : ' + (e.message || '')); return; }
+  await loadClosures();
+  await renderSeasonBar();
+  await showTab(_tab);
+}
+
+/* Date de référence des documents : clôture pour une saison clôturée, sinon aujourd'hui */
+function _asOfDate() { return isClosed(_season) ? new Date(_closures[_season] + 'T12:00:00') : new Date(); }
 
 async function populateTournoiSelects() {
   const tournaments = await getTournaments();
@@ -89,12 +216,16 @@ function _renderSaisirSemainier(selectedId) {
 // ══════════════════════════════════════════════════════
 const TAB_NAMES = ['classement','saisir','historique','ranking'];
 async function showTab(name) {
+  _tab = name;
   TAB_NAMES.forEach(t => {
     document.getElementById('tab-'+t).style.display = t===name?'block':'none';
   });
-  document.querySelectorAll('.tab').forEach((el,i) => {
-    el.classList.toggle('active', TAB_NAMES[i]===name);
+  document.querySelectorAll('[data-tab]').forEach(el => {
+    const on = el.dataset.tab === name;
+    el.classList.toggle('active', on);
+    el.setAttribute('aria-pressed', String(on));
   });
+  if (name==='saisir')     await checkDuplicate();
   if (name==='classement') await renderClassement();
   if (name==='historique') await renderHistorique();
   if (name==='ranking')    await renderRankingDoc();
@@ -107,8 +238,13 @@ async function checkDuplicate() {
   const date=document.getElementById('inp-date').value;
   const tid =document.getElementById('inp-tournoi').value;
   const el  =document.getElementById('alert-dup');
+  const lock=document.getElementById('alert-lock');
+  if (date && isClosed(_seasonOf(date))) {
+    lock.innerHTML=`⛔ <strong>Saison ${_seasonLabel(_seasonOf(date))} clôturée</strong> — aucune saisie possible à cette date. Un administrateur peut rouvrir la saison.`;
+    lock.style.display='flex';
+  } else { lock.style.display='none'; }
   if (!date||!tid) { el.style.display='none'; return; }
-  const sessions=await getSessions();
+  const sessions=await getAllSessions();
   const dup=sessions.find(s=>s.date===date&&s.tournamentId===tid);
   if (dup) {
     el.innerHTML=`⚠️ <strong>Doublon détecté</strong> — ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats, ${dup.entries} entrées).`;
@@ -152,7 +288,7 @@ function updateCagnotte() {
 }
 
 async function refreshPlayersDl() {
-  const results=await getResults();
+  const results=await getAllResults();
   const names=[...new Set(results.map(r=>r.player))].sort();
   document.getElementById('players-dl').innerHTML=names.map(n=>`<option value="${n}">`).join('');
 }
@@ -220,8 +356,15 @@ async function validateTournament() {
 
   if (!date||!tid) { warnEl.innerHTML='⚠ Sélectionne une date et un type de tournoi.'; warnEl.style.display='flex'; return; }
 
-  // Blocage doublon
-  const allSessions=await getSessions();
+  // Saison clôturée : verrouillée aussi côté base
+  if (isClosed(_seasonOf(date))) {
+    warnEl.innerHTML=`⛔ <strong>Saison ${_seasonLabel(_seasonOf(date))} clôturée</strong> — impossible d'ajouter un tournoi à cette date.`;
+    warnEl.style.display='flex';
+    return;
+  }
+
+  // Blocage doublon (toutes saisons : un même tournoi ne peut pas être saisi deux fois à la même date)
+  const allSessions=await getAllSessions();
   const dup=allSessions.find(s=>s.date===date&&s.tournamentId===tid);
   if (dup) {
     warnEl.innerHTML=`⛔ <strong>Doublon bloqué</strong> — ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats). Supprime la session existante dans l'Historique avant de re-saisir.`;
@@ -257,7 +400,7 @@ async function validateTournament() {
 
   document.getElementById('inp-tournoi').value='';
   document.getElementById('inp-entrees').value='';
-  document.getElementById('inp-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('inp-date').value=_todayStr();
   // Relance la suggestion pour la nouvelle date (aujourd'hui)
   await autoSuggestByDate();
   document.getElementById('placement-placeholder').style.display='block';
@@ -267,10 +410,12 @@ async function validateTournament() {
   currentPlaceCount=0;
 
   const extras=newEntries.filter(e=>e.extra).length;
-  succEl.innerHTML=`✓ ${newEntries.length} résultat(s) enregistré(s)${extras>0?` dont ${extras} place(s) supplémentaire(s)`:''}${entries>0?` · Cagnotte +${entries*2} €`:''}`;
+  const otherSeason=_seasonOf(date)!==_season?` · enregistré dans la saison ${_seasonLabel(_seasonOf(date))}`:'';
+  succEl.innerHTML=`✓ ${newEntries.length} résultat(s) enregistré(s)${extras>0?` dont ${extras} place(s) supplémentaire(s)`:''}${entries>0?` · Cagnotte +${entries*2} €`:''}${otherSeason}`;
   succEl.style.display='flex';
   setTimeout(()=>succEl.style.display='none',5000);
   await refreshPlayersDl();
+  await renderSeasonBar();
 }
 
 // ══════════════════════════════════════════════════════
@@ -293,7 +438,7 @@ async function renderClassement() {
   if (sorted.length===0) { content.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
 
-  const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const today=_asOfDate().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const isFiltered=!!search;
 
   const esc=s=>s.replace(/'/g,"\\x27");
@@ -314,8 +459,8 @@ async function renderClassement() {
   let html='';
   if (!isFiltered) {
     html+=`<div class="class-header">
-      <div class="class-title">Classement Challenge 2025 / 2026</div>
-      <div class="class-date">Au ${today} — ${sorted.length} joueur${sorted.length>1?'s':''}</div>
+      <div class="class-title">Classement Challenge ${_seasonLabel(_season)}</div>
+      <div class="class-date">${isClosed(_season)?'Classement final au':'Au'} ${today} — ${sorted.length} joueur${sorted.length>1?'s':''}</div>
       <div class="class-cagnotte"><span class="class-cagnotte-label">Ranking</span><span class="class-cagnotte-val">${cagnotte.toLocaleString('fr-FR')} €</span></div>
     </div>`;
     if (sorted.length>=1) {
@@ -355,14 +500,15 @@ async function renderClassement() {
 async function renderHistorique() {
   await refreshTournamentsCache();
 
-  const allSessions = (await getSessions()).slice();
+  const allSessions = (await getSessions()).slice();   // saison affichée
   const search  = (document.getElementById('search-hist')?.value  || '').toLowerCase().trim();
   const filterT = (document.getElementById('filter-tournoi-hist')?.value || '');
 
   /* Bornes de navigation : premier et dernier mois avec des sessions */
   const sessionMonths = [...new Set(allSessions.map(s => s.date.substring(0, 7)))].sort();
   const minMonth  = sessionMonths[0] || new Date().toISOString().substring(0, 7);
-  const nowMonth  = new Date().toISOString().substring(0, 7);
+  const nowMonth  = _todayStr().substring(0, 7);
+  const maxMonth  = nowMonth < `${_season + 1}-10` ? nowMonth : `${_season + 1}-10`;   // pas au-delà de la fin de saison
 
   /* Initialisation au mois le plus récent avec des sessions */
   if (!_histCurrentMonth) {
@@ -398,14 +544,14 @@ async function renderHistorique() {
   /* Barre de navigation */
   const [y, mo] = _histCurrentMonth.split('-').map(Number);
   const hasPrev  = _histCurrentMonth > minMonth;
-  const hasNext  = _histCurrentMonth < nowMonth;
+  const hasNext  = _histCurrentMonth < maxMonth;
   const navHtml  = `
     <div class="hist-nav">
-      <button class="hist-nav-btn" onclick="histGoMonth('${_ymPrev(_histCurrentMonth)}')"
-        ${hasPrev ? '' : 'disabled'} title="Mois précédent">‹</button>
+      <button class="btn-icon hist-nav-btn" onclick="histGoMonth('${_ymPrev(_histCurrentMonth)}')"
+        ${hasPrev ? '' : 'disabled'} title="Mois précédent" aria-label="Mois précédent"><i class="ico ico-chev-l"></i></button>
       <span class="hist-nav-label">${_MONTHS_FR[mo - 1]} <span class="hist-nav-year">${y}</span></span>
-      <button class="hist-nav-btn" onclick="histGoMonth('${_ymNext(_histCurrentMonth)}')"
-        ${hasNext ? '' : 'disabled'} title="Mois suivant">›</button>
+      <button class="btn-icon hist-nav-btn" onclick="histGoMonth('${_ymNext(_histCurrentMonth)}')"
+        ${hasNext ? '' : 'disabled'} title="Mois suivant" aria-label="Mois suivant"><i class="ico ico-chev-r"></i></button>
     </div>`;
 
   if (sessions.length === 0) {
@@ -519,9 +665,9 @@ function _renderCalDetail(s, results, search = '') {
         <span class="session-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>
       </div>
       <div class="cal-detail-acts">
-        <button class="btn-sess-edit" title="Modifier les entrées" onclick="editSession(${s.id})">✎</button>
-        <button class="btn-red" title="Supprimer" onclick="deleteSession(${s.id})">✕</button>
-        <button class="btn-cancel-sm" onclick="toggleCalSession(${s.id})">Fermer</button>
+        ${isClosed(_season) ? '' : `<button class="btn-icon" title="Modifier les entrées" aria-label="Modifier les entrées" onclick="editSession(${s.id})"><i class="ico ico-edit"></i></button>
+        <button class="btn-icon danger" title="Supprimer" aria-label="Supprimer la session" onclick="deleteSession(${s.id})"><i class="ico ico-del"></i></button>`}
+        <button class="btn btn-ghost btn-sm" onclick="toggleCalSession(${s.id})">Fermer</button>
       </div>
     </div>
     <div class="sess-results">${
@@ -541,10 +687,10 @@ function _renderResultRow(r, search = '') {
     <span class="place-badge-sm ${pc}">${r.place}</span>
     <span class="res-name">${name}${extra}</span>
     <span class="pts-badge">+${r.points}</span>
-    <span class="res-acts">
-      <button class="btn-edit-sm" onclick="editResult(${r.id})">✎</button>
-      <button class="btn-red" onclick="deleteResult(${r.id})">✕</button>
-    </span>
+    ${isClosed(_season) ? '' : `<span class="res-acts">
+      <button class="btn-icon" title="Modifier" aria-label="Modifier ce résultat" onclick="editResult(${r.id})"><i class="ico ico-edit"></i></button>
+      <button class="btn-icon danger" title="Supprimer" aria-label="Supprimer ce résultat" onclick="deleteResult(${r.id})"><i class="ico ico-del"></i></button>
+    </span>`}
   </div>`;
 }
 
@@ -567,8 +713,8 @@ function editResult(id) {
     <input type="text"   class="edit-name"  id="en-${id}" value="${cap(r.player)}" />
     <input type="number" class="edit-pts"   id="ept-${id}" value="${r.points}" min="0" />
     <span class="res-acts">
-      <button class="btn-save-sm"   onclick="saveResultEdit(${id})">✓</button>
-      <button class="btn-cancel-sm" onclick="renderHistorique()">✕</button>
+      <button class="btn-icon" title="Enregistrer" aria-label="Enregistrer" onclick="saveResultEdit(${id})"><i class="ico ico-check"></i></button>
+      <button class="btn-icon danger" title="Annuler" aria-label="Annuler" onclick="renderHistorique()"><i class="ico ico-x"></i></button>
     </span>`;
 
   const inp = document.getElementById(`en-${id}`);
@@ -606,8 +752,8 @@ async function editSession(id) {
     <input type="number" id="se-${id}" value="${s.entries || 0}" min="0"
       onclick="event.stopPropagation()" />
     entrées
-    <button class="btn-save-sm"   onclick="event.stopPropagation();saveSessionEdit(${id})">✓</button>
-    <button class="btn-cancel-sm" onclick="event.stopPropagation();renderHistorique()">✕</button>`;
+    <button class="btn-icon" title="Enregistrer" aria-label="Enregistrer" onclick="event.stopPropagation();saveSessionEdit(${id})"><i class="ico ico-check"></i></button>
+    <button class="btn-icon danger" title="Annuler" aria-label="Annuler" onclick="event.stopPropagation();renderHistorique()"><i class="ico ico-x"></i></button>`;
 
   const inp = document.getElementById(`se-${id}`);
   if (inp) {
@@ -654,7 +800,7 @@ async function renderRankingDoc() {
   const total  = await totalCagnotte();
   const prize1 = Math.round(total * 0.10 * 100) / 100;
   const prize2 = Math.round(total * 0.05 * 100) / 100;
-  const today  = new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  const today  = _asOfDate().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   const todayCap = today.charAt(0).toUpperCase() + today.slice(1);
 
   const inner = `
@@ -662,7 +808,7 @@ async function renderRankingDoc() {
       <img class="rp-logo" src="../shared/logos/barriere_casino-logo-black.svg" alt="Barrière Casino Bordeaux" />
       <div class="rp-hr"></div>
       <div class="rp-main-title">Montant du Ranking</div>
-      <div class="rp-challenge">Challenge Saisonnier · 2025 / 2026</div>
+      <div class="rp-challenge">Challenge Saisonnier · ${_seasonLabel(_season)}</div>
       <div class="rp-date">Au ${todayCap}</div>
     </div>
     <div class="rp-center">
@@ -706,7 +852,7 @@ async function printClassement() {
   const sorted = Object.values(map).sort((a,b) => b.points - a.points);
   if (sorted.length === 0) return;
 
-  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const today = _asOfDate().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
 
   /* ── Podium ── */
   const medals = ['🥇','🥈','🥉'];
@@ -741,9 +887,9 @@ async function printClassement() {
     <div class="cp-header">
       <div>
         <div class="cp-logo">Barrière Casino · Bordeaux</div>
-        <div class="cp-title">Classement Challenge 2025 / 2026</div>
+        <div class="cp-title">Classement Challenge ${_seasonLabel(_season)}</div>
       </div>
-      <div class="cp-meta">Au ${today}<br>${sorted.length} joueur${sorted.length>1?'s':''}</div>
+      <div class="cp-meta">${isClosed(_season)?'Classement final au':'Au'} ${today}<br>${sorted.length} joueur${sorted.length>1?'s':''}</div>
       <div class="cp-cag">Ranking<br><strong>${cagnotte.toLocaleString('fr-FR')} €</strong></div>
     </div>
 
@@ -788,7 +934,7 @@ async function openPlayerModal(playerName) {
       <div class="stat-item"><div class="stat-v">${results.length}</div><div class="stat-k">Tournois</div></div>
       <div class="stat-item"><div class="stat-v">${best<99?best+(best===1?'er':'ème'):'—'}</div><div class="stat-k">Meilleur résultat</div></div>
     </div>
-    <div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Historique</div>
+    <div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Historique · ${_seasonLabel(_season)}</div>
     <table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>
   `;
   const overlay = document.getElementById('modal');

@@ -100,8 +100,8 @@ async function svmRender() {
 }
 
 function svmTabs() {
-  return '<div class="sv-tabs">' + SVM_TABS.map(function(t) {
-    return '<button class="sv-tab' + (t.id === _svm.tab ? ' on' : '') + '" onclick="svmGo(\'' + t.id + '\')">' + t.label + '</button>';
+  return '<div class="sv-tabs seg">' + SVM_TABS.map(function(t) {
+    return '<button class="sv-tab seg-btn' + (t.id === _svm.tab ? ' on' : '') + '" onclick="svmGo(\'' + t.id + '\')">' + t.label + '</button>';
   }).join('') + '</div>';
 }
 
@@ -110,9 +110,9 @@ function svmModuleChips(current, fn, onlyKeys) {
   return SV_FAMILIES.map(function(f) {
     const mods = svModulesOf(f.id).filter(function(m) { return !onlyKeys || onlyKeys.indexOf(m.game) >= 0; });
     if (!mods.length) return '';
-    return '<div class="svm-group"><span class="svm-group-label">' + f.name + ' ' + f.em + '</span><div class="sv-chips">'
+    return '<div class="svm-group"><span class="svm-group-label">' + f.name + ' ' + f.em + '</span><div class="fchips">'
       + mods.map(function(m) {
-          return '<button class="sv-chip' + (m.game === current ? ' on' : '') + '" onclick="' + fn + '(\'' + m.game + '\')">' + m.name + ' ' + m.em + '</button>';
+          return '<button class="fchip' + (m.game === current ? ' on' : '') + '" onclick="' + fn + '(\'' + m.game + '\')">' + m.name + ' ' + m.em + '</button>';
         }).join('') + '</div></div>';
   }).join('');
 }
@@ -120,9 +120,9 @@ function svmModuleChips(current, fn, onlyKeys) {
 function svmLevelChips(current, fn, presentKeys) {
   const levels = SV_LEVELS.filter(function(l) { return !presentKeys || presentKeys.indexOf(l[0]) >= 0; });
   const chips = [['', 'Tous niveaux']].concat(levels);
-  return '<div class="svm-group"><span class="svm-group-label">Niveau</span><div class="sv-chips">'
+  return '<div class="svm-group"><span class="svm-group-label">Niveau</span><div class="fchips">'
     + chips.map(function(c) {
-        return '<button class="sv-chip' + ((current || '') === c[0] ? ' on' : '') + '" onclick="' + fn + '(\'' + c[0] + '\')">' + c[1] + '</button>';
+        return '<button class="fchip' + ((current || '') === c[0] ? ' on' : '') + '" onclick="' + fn + '(\'' + c[0] + '\')">' + c[1] + '</button>';
       }).join('') + '</div></div>';
 }
 
@@ -152,9 +152,9 @@ async function svmClassement() {
   let controls = '<div class="svm-controls">' + svmModuleChips(m.game, 'svmSetRankGame');
   if (m.levels) controls += svmLevelChips(_svm.rankLevel, 'svmSetRankLevel');
   if (m.timed) {
-    controls += '<div class="svm-group"><span class="svm-group-label">Table</span><div class="sv-chips">'
+    controls += '<div class="svm-group"><span class="svm-group-label">Table</span><div class="fchips">'
       + SV_RATIOS.map(function(r) {
-          return '<button class="sv-chip' + (r === _svm.rankRatio ? ' on' : '') + '" onclick="svmSetRankRatio(' + r + ')">× ' + r + '</button>';
+          return '<button class="fchip' + (r === _svm.rankRatio ? ' on' : '') + '" onclick="svmSetRankRatio(' + r + ')">× ' + r + '</button>';
         }).join('') + '</div></div>';
   }
   controls += '</div>';
@@ -381,9 +381,9 @@ async function svmActivite() {
   const inactive = users.filter(function(u) { return (Date.now() - new Date(u.last_at).getTime()) / 86400000 > SVM_INACTIVE_DAYS; }).length;
   const last = users.reduce(function(a, u) { return u.last_at > a ? u.last_at : a; }, '');
 
-  let html = '<div class="svm-controls"><div class="svm-group"><span class="svm-group-label">Période</span><div class="sv-chips">'
+  let html = '<div class="svm-controls"><div class="svm-group"><span class="svm-group-label">Période</span><div class="fchips">'
     + [7, 30, 90].map(function(n) {
-        return '<button class="sv-chip' + (n === _svm.actDays ? ' on' : '') + '" onclick="svmSetActDays(' + n + ')">' + n + ' jours</button>';
+        return '<button class="fchip' + (n === _svm.actDays ? ' on' : '') + '" onclick="svmSetActDays(' + n + ')">' + n + ' jours</button>';
       }).join('') + '</div></div></div>';
 
   html += '<div class="sv-metrics">'

@@ -17,7 +17,7 @@
       width: 100%; max-width: 400px;
       background: var(--bg-card);
       border: 1px solid var(--gold-bd);
-      border-radius: 4px;
+      border-radius: var(--r-card);
       padding: 48px 40px 36px;
       position: relative;
     }
@@ -58,7 +58,7 @@
     .login-input {
       width: 100%; padding: 11px 14px;
       background: var(--bg-input); color: var(--text);
-      border: 1px solid rgba(195,120,20,.15); border-radius: 3px;
+      border: 1px solid rgba(195,120,20,.15); border-radius: var(--r-field);
       font-family: var(--f-ui); font-size: 14px;
       box-sizing: border-box; margin-bottom: 16px;
       outline: none; transition: border-color .2s;
@@ -66,18 +66,6 @@
     .login-input:focus    { border-color: var(--gold); }
     .login-input::placeholder { color: var(--text-muted); opacity: .6; }
     body.light .login-input { background: var(--bg-input); }
-
-    .login-btn {
-      width: 100%; padding: 13px;
-      background: var(--gold-solid, #C37814); color: #0A0A0A;
-      border: none; border-radius: 3px;
-      font-family: var(--f-ui); font-size: 13px; font-weight: 600;
-      letter-spacing: .04em; cursor: pointer;
-      transition: opacity .2s, transform .1s;
-    }
-    .login-btn:hover    { opacity: .88; }
-    .login-btn:active   { transform: scale(.99); }
-    .login-btn:disabled { opacity: .35; cursor: not-allowed; }
 
     .login-msg { margin-top: 12px; font-size: 12px; text-align: center; min-height: 16px; }
     .login-msg.err { color: var(--red); }
@@ -155,7 +143,7 @@
       autocomplete="current-password"
       onkeydown="if(event.key==='Enter') signIn()" />
 
-    <button class="login-btn" id="login-btn" onclick="signIn()">
+    <button class="btn btn-gold btn-lg btn-block" id="login-btn" onclick="signIn()">
       Se connecter →
     </button>
     <div class="login-msg" id="login-msg"></div>
@@ -169,7 +157,7 @@
       placeholder="prenom.nom@groupebarriere.com"
       autocomplete="email"
       onkeydown="if(event.key==='Enter') sendReset()" />
-    <button class="login-btn" id="reset-btn" onclick="sendReset()">
+    <button class="btn btn-gold btn-lg btn-block" id="reset-btn" onclick="sendReset()">
       Envoyer le lien de réinitialisation →
     </button>
     <div class="login-msg" id="reset-msg"></div>
@@ -188,7 +176,7 @@
       placeholder="••••••••"
       autocomplete="new-password"
       onkeydown="if(event.key==='Enter') saveNewPassword()" />
-    <button class="login-btn" id="new-password-btn" onclick="saveNewPassword()">
+    <button class="btn btn-gold btn-lg btn-block" id="new-password-btn" onclick="saveNewPassword()">
       Enregistrer le mot de passe →
     </button>
     <div class="login-msg" id="new-password-msg"></div>

@@ -23,7 +23,7 @@
    Fond légèrement teinté, filet fin, titre centré en couleur d'accent. */
 .uth-frame {
   width: fit-content; max-width: 100%; box-sizing: border-box; margin: 0 auto;
-  background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: 6px;
+  background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: var(--r-box);
   padding: 8px 12px 12px;
 }
 .uth-frame-label {
@@ -52,7 +52,7 @@
   width: 100%; max-width: 640px; margin: 0 auto;
 }
 .uth-ans {
-  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 4px;
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: var(--r-field);
   padding: 14px 6px; font-family: var(--f-ui); font-size: 13px; font-weight: 500;
   color: var(--cream); cursor: pointer; text-align: center; line-height: 1.25;
   transition: border-color .15s, background .15s;
@@ -157,7 +157,7 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 .uc-pop-backdrop { position: absolute; inset: 0; z-index: 5; border-radius: inherit; background: rgba(0,0,0,.28); }
 .uc-pop {
   position: absolute; z-index: 6; width: 230px; box-sizing: border-box; padding: 12px 14px 14px;
-  background: var(--bg-card); border: 1px solid var(--gold); border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.5);
+  background: var(--bg-card); border: 1px solid var(--gold); border-radius: var(--r-box); box-shadow: 0 10px 28px rgba(0,0,0,.5);
   color: var(--cream);
 }
 .uc-pop-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
@@ -170,11 +170,11 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 .uc-amount-row { display: flex; align-items: center; gap: 6px; }
 .uc-amount-row input {
   width: 72px; padding: 8px 10px; text-align: right; font-family: var(--f-ui); font-size: 14px; color: var(--cream);
-  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 4px;
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: var(--r-field);
 }
 .uc-amount-row input.bad { border-color: #e07a68; }
 .uc-amount-row input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
-.uc-amount-row .btn { padding: 8px 14px; font-size: 12px; margin-left: auto; }
+.uc-amount-row .btn { margin-left: auto; }
 .uc-pop-info, .uc-pop-res { font-size: 12px; line-height: 1.5; }
 .uc-pop-res.ok { color: #6dcc8e; }
 .uc-pop-res.ko { color: #e07a68; }

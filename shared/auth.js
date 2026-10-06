@@ -4,6 +4,23 @@
 // ══════════════════════════════════════════════════════
 
 let _rolePanelsCache = null;
+// Dossier de ce script : nav.js et nav.css s'y trouvent
+const _AUTH_BASE = document.currentScript ? document.currentScript.src.replace(/auth\.js[^/]*$/, '') : '';
+
+// Charge la barre de navigation (nav.css + nav.js) une seule fois ; résout false si le chargement échoue
+function _loadNav() {
+  if (typeof NAV !== 'undefined') return Promise.resolve(true);
+  return new Promise(function (resolve) {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = _AUTH_BASE + 'nav.css';
+    document.head.appendChild(css);
+    const js = document.createElement('script');
+    js.src = _AUTH_BASE + 'nav.js';
+    js.onload = function () { resolve(typeof NAV !== 'undefined'); };
+    js.onerror = function () { resolve(false); };
+    document.head.appendChild(js);
+  });
+}
 
 async function _loadRolePanels() {
   if (_rolePanelsCache) return _rolePanelsCache;
@@ -27,8 +44,9 @@ const AUTH = {
    *   loginUrl    {string}              — chemin relatif vers login.html depuis cette page
    *   role        {string|string[]|null} — 'admin', ['admin','mcd'], ou null = tout connecté
    *   panel       {string|string[]|null} — panel(s) requis ; les admins passent toujours
+   *   nav         {boolean}             — barre de navigation commune (true par défaut) ; false = ancienne interface flottante
    */
-  async guard({ loginUrl = 'login.html', role = null, panel = null } = {}) {
+  async guard({ loginUrl = 'login.html', role = null, panel = null, nav = true } = {}) {
     // Overlay immédiat pour éviter le flash de contenu
     const overlay = document.createElement('div');
     overlay.id = 'auth-overlay';
@@ -71,9 +89,45 @@ const AUTH = {
     }
 
     // Auth OK
+    // La barre est montée avant de retirer l'overlay : une redirection d'entrée (un seul espace accessible)
+    // ne laisse alors voir aucune page intermédiaire
+    let navOk = false;
+    if (nav) {
+      try {
+        const cached = _rolePanelsCache[userRole] || {};
+        navOk = (await _loadNav()) && NAV.mount({
+          root, loginUrl, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
+          panels: cached.panels || [], color: cached.color || null,
+        });
+      } catch (e) { navOk = false; }
+    }
     overlay.remove();
-    AUTH._addBadge(loginUrl, session.user.email, userRole);
+    if (!navOk) AUTH._addBadge(loginUrl, session.user.email, userRole);   // repli : ancienne interface
     return session.user;
+  },
+
+  /**
+   * Prénom à afficher. Métadonnée `first_name` / `prenom` si elle existe, sinon le début de l'e-mail (prenom.nom@…).
+   * Vide si on ne peut pas le déduire (identifiant sans point, ou simple initiale comme « b.nom »).
+   */
+  firstName(user) {
+    const meta  = (user && user.user_metadata) || {};
+    const local = ((user && user.email) || '').split('@')[0];
+    const raw   = (meta.first_name || meta.prenom || (local.indexOf('.') > 0 ? local.split('.')[0] : '') || '').trim();
+    if (raw.replace(/[^a-zà-ÿ]/gi, '').length < 2) return '';
+    return raw.split(/([-' ])/).map(function (p) { return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(); }).join('');
+  },
+
+  /** « Prénom Nom » si les deux sont renseignés (métadonnées), sinon vide */
+  fullName(user) {
+    const meta = (user && user.user_metadata) || {};
+    return [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim();
+  },
+
+  /** « Bonjour » le jour, « Bonsoir » de 18 h à 4 h */
+  salutation() {
+    const h = new Date().getHours();
+    return h >= 18 || h < 4 ? 'Bonsoir' : 'Bonjour';
   },
 
   async signOut(loginUrl = 'login.html') {
@@ -120,10 +174,10 @@ const AUTH = {
           onkeydown="if(event.key==='Enter') AUTH._saveNewPwd()" />
 
         <div class="auth-pwd-actions">
-          <button class="auth-pwd-save" id="auth-pwd-save-btn" onclick="AUTH._saveNewPwd()">
+          <button class="btn btn-gold" id="auth-pwd-save-btn" onclick="AUTH._saveNewPwd()">
             Enregistrer →
           </button>
-          <button class="auth-pwd-cancel" onclick="AUTH._closeChangePwd()">Annuler</button>
+          <button class="btn btn-ghost" onclick="AUTH._closeChangePwd()">Annuler</button>
         </div>
         <div class="auth-pwd-msg" id="auth-pwd-msg"></div>
       </div>`;

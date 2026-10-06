@@ -25,7 +25,9 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 - **Phase 1** — Training Croupier : Blackjack (BJ Paiement, BJ Score). Livrée.
 - **Phase 2** — Training Croupier : Roulette Anglaise (Couleur, Pointage, Conversion, Calcul Paiement). Livrée, taguée `v2.0.0` (2026-07-03).
 - **Phase 3** — Suivi résultats : vue historique croupier (« Mes résultats ») + vue manager (« Suivi équipe »). Développée (étapes 1 à 3, mergées dans `develop` ou en PR), **release prévue à la fin de la phase** (pas avant).
-- **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet (3 modules : Calcul des gains, Meilleure main, Qui gagne ?). **En cours** : moteur (étape 1), hub + Meilleure main (étape 2), Qui gagne ? (étape 3) faits ; Calcul des gains (étape 4) et intégration au suivi (étape 5) faits. Reste la release v2.4.0 (sur feu vert explicite).
+- **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet (3 modules : Calcul des gains, Meilleure main, Qui gagne ?). **Livrée** — `v2.4.0` en prod le 2026-10-04 (PR de release #111, tag sur le commit de fusion 036a938) : moteur, hub, Meilleure main, Qui gagne ?, Calcul des gains et intégration au suivi.
+
+- **Refonte d'octobre 2026** — `v3.0.0` (2026-10-06) : navigation (barre, espaces, menu Gestion), saisons du challenge avec clôture, Gestion des comptes (liste filtrable, rôles & accès, prénom / nom), nouvelle charte (cartes arrondies, boutons et icônes uniques), émargement imprimé en pages de 4 lignes.
 
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
 
@@ -34,8 +36,8 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 ## Architecture
 
 ```
-index.html                    Hub principal — 3 panneaux (Outils Tournois / Training Croupier / Gestion Comptes)
-outils_tournois.html          Sous-hub Outils Tournois (Prize Pool, Leaderboard, Administration Tournois)
+index.html                    Accueil — 2 espaces (Outils Tournois / Training Croupier) ; Gestion Comptes n'a plus de tuile : elle est dans le menu « Gestion » de la barre (admin)
+outils_tournois.html          Page Outils Tournois (Prize Pool, Leaderboard) — l'administration des tournois n'a plus de tuile ni de page intermédiaire : elle est dans la barre, sous « Administration tournois »
 login.html                    Page de connexion (e-mail + mot de passe, charte graphique, redirect par rôle)
 
 shared/
@@ -44,7 +46,8 @@ shared/
   tournaments.js    TOURNAMENT_DEFAULTS (fallback) + TournamentsStore (lecture/écriture Supabase, source de vérité)
   semainier.js      buildSemainier() — widget sélecteur de tournoi par jour, utilisé par prize_pool + leaderboard
   supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats/sessions/tournois/extras/app_roles/training + auth + Edge Function manage-users)
-  auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), AUTH._addBadge(), AUTH.clearRolesCache() — chargé après supabase.js
+  nav.js / nav.css  Barre de navigation commune — injectée par AUTH.guard ; voir section « Navigation »
+  auth.js           AUTH.guard({loginUrl, role, panel, nav}), AUTH.signOut(), AUTH._addBadge(), AUTH.clearRolesCache() — chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
   fonts/            Jost auto-hébergée (variable, normal + italique) — @font-face déclaré dans barriere.css
   icons/            Pictogrammes vectoriels de la charte, extraits en PNG à masque alpha (recolorables via CSS mask)
@@ -62,20 +65,20 @@ prize_pool/
   prize_pool.js     Logique React
 
 admin/
-  admin_tournois.html   Sous-hub Administration Tournois (Déclaration DTPJ, Extras, Config Tournois)
   config_tournois.html  CRUD tournois — semainier par jour, barème de points, guard panel:'admin-tournois'
-  comptes.html           Gestion Comptes — CRUD comptes + rôles personnalisables + permissions par panneau, guard role:'admin' (intentionnellement admin-only, pas de panel)
+  config_training.html/.js/.css  Configuration des modules (admin) — réglages de tous les modules de training, un onglet par jeu
+  comptes.html/.css/.js  Gestion des comptes — onglets Comptes (liste filtrable) et Rôles & accès (matrice des accès), guard role:'admin' (intentionnellement admin-only, pas de panel)
   declaration/
     declaration.html  Déclaration mensuelle PN, guard panel:'admin-tournois'
     declaration.css / declaration.js
-    courriers.html    Générateur de courriers PN — accessible depuis declaration.html uniquement, guard panel:'admin-tournois'
+    courriers.html    Générateur de courrier — accessible uniquement par le menu « Administration tournois » de la barre (plus de bouton dans Déclaration DTPJ), guard panel:'admin-tournois'
     courriers.css / courriers.js
   extras/
     extras.html   Déclaration extras & émargement, guard panel:'admin-tournois'
     extras.css / extras.js
 
 training/
-  training.html          Sous-hub Training Croupier (Blackjack / Roulette / Ultimate Texas Hold'em / Mes résultats / Suivi équipe)
+  training.html          Page Training Croupier : tous les modules sur une seule page, groupés par jeu (ancres #blackjack, #roulette, #uth, #suivi) — il n'y a plus de page de jeu (hubs supprimés en octobre 2026)
   training.css            Styles partagés training (level-card, game-card, answer-zone, feedback-bar)
   suivi/                  Phase 3 — Suivi résultats (voir section Suivi résultats)
     suivi_croupier.html/.js  « Mes résultats » : historique, record, tendance de l'utilisateur connecté, guard panel:'training'
@@ -84,7 +87,6 @@ training/
     suivi.css                Styles des pages de suivi (.sv-*)
   uth/                    Phase 4 — Ultimate Texas Hold'em
     uth_engine.js            Moteur pur (sans DOM) : paquet, meilleure main de 5 parmi 7, comparaison, qualification de la banque, règlement d'une donne (Ante/Blind/Play/Trips/JP1), générateurs de donnes ciblées
-    uth_hub.html             Sous-hub Ultimate Texas Hold'em (les 3 modules actifs ; bouton « ⚙ Config UTH » pour les admins : montant maximum des mises du Calcul des gains)
     uth_main.html/.js        Module Meilleure main (clé de session `uth-main`)
     uth_gagnant.html/.js     Module Qui gagne ? (clé de session `uth-gagnant`)
     uth_gains.html/.js       Module Calcul des gains (clé de session `uth-gains`)
@@ -92,11 +94,9 @@ training/
     uth.css                  Styles des modules UTH (table, grille de réponses, états juste/faux)
     uth_engine.test.js       Tests Node (`node training/uth/uth_engine.test.js`, ~50 s) — à relancer après toute modification du moteur ou des tables
   blackjack/
-    blackjack_hub.html      Sous-hub Blackjack + modal config admin (plages de mise, timers, cartes/niveau)
     blackjack.html / .js    BJ Paiement
     blackjack_score.html / .js  BJ Score
   roulette/
-    roulette_hub.html       Sous-hub Roulette + modal config admin (timers, valeurs de pièces par module)
     roulette.css            Styles partagés tapis + chips + badges (tous modules roulette)
     roulette_tapis.js       Composant partagé : renderTapis(), génération de mises (buildBetPool/weightedPickPool), positionnement DOM des chips (chipPosFromDOM), renderChips()
     roulette_paiement.html / .js    Calcul Paiement
@@ -120,8 +120,11 @@ supabase/
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
 
 **Composants CSS partagés (ripolinage juillet 2026)** — training/ avait dérivé stylistiquement de l'app générale (réimplémentation parallèle des cartes de nav, modals dupliquées 3×, styles inline trop longs). Centralisés :
-- `.modal-overlay`/`.modal-box`/`.modal-wide` (avec coins dorés) → `shared/barriere.css`, utilisé par `admin/comptes.html` + tous les hubs training. Les modals plus larges utilisent un override scoped (`#modal-cfg .modal-box { max-width: ... }`) plutôt que de dupliquer le composant.
-- `.tool-card`/`.tool-badge`/`.tool-name` (cartes de navigation hub, avec `--accent` par carte) → seul composant de nav card dans toute l'app, y compris les hubs training (`training.html`, `blackjack_hub.html`, `roulette_hub.html`). Étendu avec `.tool-card.disabled` + `.tool-soon` pour les cartes "bientôt disponible". **Ne plus créer de variante `.game-card` ou équivalent** — toujours réutiliser `.tool-card`.
+- **Cartes, modales et champs arrondis** (`barriere.css`, octobre 2026, choix « B sans encoche ») : trois jetons dans `:root` — `--r-card` (24 px : `.card`, `.modal-box`, fenêtres), `--r-box` (16 px : encadrés, alertes, blocs intérieurs), `--r-field` (14 px : `input`, `select`, `textarea`, boutons de choix) — à utiliser plutôt qu'un rayon en dur. `.card` et `.modal-box` ont un **liseret doré inséré sur le bord gauche** (comme les tuiles) et plus de repères d'angle. Pour changer l'allure de toutes les cartes, modifier ces jetons et le bloc `.card`.
+- `.modal-overlay`/`.modal-box`/`.modal-wide` (carte arrondie à liseret) → `shared/barriere.css`, utilisé par `admin/comptes.html`, avec la correction du `transform` permanent sur `body` (voir historique des bugs n°14). Les modals plus larges utilisent un override scoped (`#modal-cfg .modal-box { max-width: ... }`) plutôt que de dupliquer le composant.
+- **Boutons** (`barriere.css`, octobre 2026) → **une seule famille en pastilles pour toute l'application**, qu'on compose : `class="btn btn-gold"`. Trois variantes, une par rôle : `.btn-gold` **principal, doré plein** (l'action de la vue : Enregistrer, Valider, Créer ; **un seul par vue ou modale**), `.btn-ghost` **secondaire**, contour doré discret (Annuler, Imprimer, Fermer, Effacer), `.btn-red` **destructif**, gris puis rouge au survol (Supprimer, Clôturer). Tailles : normale, `.btn-sm` (dans une ligne ou un tableau), `.btn-lg` (action de page, écran de jeu, connexion) ; `.btn-block` = pleine largeur ; `.btn-dashed` = tirets (« + Ajouter »). **`.btn-icon`** (+ `.danger`) = bouton rond, icône seule (modifier, supprimer, valider, fermer ; toujours avec `title` et `aria-label`). **Icônes** : `<i class="ico ico-edit"></i>` — masques SVG qui prennent la couleur du texte (`edit`, `del`, `cog`, `print`, `check`, `x`, `plus`, `minus`, `chev-l`, `chev-r`) ; pour en ajouter une, déclarer `.ico-<nom> { --ico: url(...) }` dans le même bloc. **Rien n'est redéfini dans les pages** : une page ne gère que la position (ex. `.season-admin`, `.btn-fill-first` qui règle `--btn-py/--btn-px/--btn-fs`). Pour changer l'apparence de tous les boutons de l'application, modifier le bloc « Boutons » de `barriere.css` (les dimensions passent par les variables `--btn-py`, `--btn-px`, `--btn-fs`). Masqués à l'impression. Les boutons de jeu (réponses UTH `.uth-ans`, couleurs de la roulette), les onglets (`.seg-btn`), les filtres (`.fchip`) et les éléments de la barre de navigation sont d'autres composants.
+- `.seg` / `.seg-btn` (+ `.seg.sm`, `.seg-n`) → **pastille segmentée, composant unique des onglets de page** (`barriere.css`) : compacte et centrée, coins très arrondis, actif en ambre plein (`.active`, `.on` ou `aria-selected="true"`), défile horizontalement si trop large, masquée à l'impression, **sans emoji**. Utilisée par Classement (leaderboard), Gestion des Extras, Déclaration DTPJ, Générateur de courrier (type de document, lettre, sous-onglets des destinataires), Suivi des résultats (onglets par jeu et par vue) et Config Training. Pour un nouvel onglet : ajouter `seg` au conteneur et `seg-btn` aux boutons ; les classes propres à la page (`.tab`, `.xt-tab`…) ne servent qu'aux scripts. Les filtres (`.sv-chip` du suivi) gardent leur propre style, plus discret.
+- `.tool-card`/`.tool-badge`/`.tool-name` (cartes de navigation, avec `--accent` par carte : rectangles très arrondis 300×92 px, toutes de même taille, picto à gauche et nom centré, liseret de couleur sur le bord gauche, encoche sur le bord droit, sombres en mode nuit et crème en mode jour, sans bouton) → seul composant de nav card dans toute l'app, y compris les hubs training (`training.html`, `blackjack_hub.html`, `roulette_hub.html`). Étendu avec `.tool-card.disabled` + `.tool-soon` pour les cartes "bientôt disponible". **Ne plus créer de variante `.game-card` ou équivalent** — toujours réutiliser `.tool-card`.
 - `.cfg-module-title`/`.cfg-timers`/`.cfg-timer-cell`/`.cfg-timer-label`/`.cfg-timer-input`/`.cfg-hint`/`.cfg-msg` (grille de config timers par niveau, modals admin des hubs training) → `training/training.css`
 - CSS spécifique à un module (ex : flip 3D des flashcards `.tb-card`/`.tb-face`) → dans le `.css` partagé du jeu concerné (`roulette.css`), pas inline dans la page, dès que ça dépasse quelques règles
 
@@ -143,7 +146,7 @@ supabase/
   - Rôles : entièrement personnalisables via **Gestion Comptes** (table `app_roles`) — `admin`, `mcd`, `floor` sont les seeds par défaut, mais tout rôle custom (slug, label, couleur, panels) peut être créé/édité/supprimé
   - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable) — `raw_user_meta_data.role` conservé en fallback pendant la période de migration
   - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent) → `training-suivi` (enfant : voir les résultats de toute l'équipe, utilisé par la RLS via `can_view_training_stats()`). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé — **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
-  - Gestion des comptes : `admin/comptes.html` — CRUD comptes (email+password+role) + CRUD rôles (label, couleur, panels) + table croisée permissions
+  - Gestion des comptes : `admin/comptes.html` — CRUD comptes (email+password+role) + CRUD rôles (label, couleur) + matrice des accès rôles × pages
   - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin côté serveur avant d'utiliser `auth.admin.*`
   - Changement de mot de passe : modal 🔑 dans le badge utilisateur (`AUTH._openChangePwd()`)
   - Persistance session : JWT 7 jours (604800s) via localStorage (géré par supabase-js)
@@ -203,6 +206,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 11 | leaderboard.js | Impression classement en ordre ligne — CSS Grid (ordre lignes) remplacé par CSS `columns` (ordre colonnes) |
 | 12 | roulette_tapis.js | Positionnement chips par formules de grille (`ZERO_W` + % colonnes) fragile aux changements de CSS → remplacé par `getBoundingClientRect()` sur les cellules `[data-num]` réellement rendues |
 | 13 | roulette_tapis.js | Carré 0-1-2-3 positionné au centre vertical de la colonne 0 (chevauchait le plein) → repositionné au coin supérieur (bord 0/col1 × bord supérieur du tapis), conforme à la vraie position casino |
+| 14 | barriere.css | Modaux collés en haut du document après défilement (toutes les pages) — l'animation d'entrée de `body` en `animation-fill-mode: both` laissait un `transform` permanent sur `body`, qui devient le repère des éléments `position:fixed` → `backwards` |
 
 ---
 
@@ -217,8 +221,10 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - 12% des joueurs payés (ajustable manuellement)
 - Impression du tableau
 
-### Administration Tournois
-**Config Tournois** — semainier CRUD (cartes édition/suppression par jour + section événements), formulaire nom/jour/PP/frais/buy-in auto + barème de points éditable slot par slot.
+### Administration tournois
+Pages regroupées dans le menu **Administration tournois** de la barre (panel `admin-tournois`) : **Déclaration DTPJ**, **Générateur de courrier**, **Gestion des Extras**, **Calendrier & barèmes** (fichiers `declaration.html`, `courriers.html`, `extras.html`, `config_tournois.html` : les noms de fichiers n'ont pas changé, seuls les libellés).
+
+**Calendrier & barèmes** (`config_tournois.html`) — semainier CRUD (cartes édition/suppression par jour + section événements), formulaire nom/jour/PP/frais/buy-in auto + barème de points éditable slot par slot.
 
 **Déclaration DTPJ**
 - Tableau mensuel généré automatiquement depuis une config par jour de semaine (lun–dim)
@@ -228,20 +234,21 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Gestion ponctuelle : annuler ou modifier un tournoi sur un jour précis (restaurable)
 - Persistance localStorage (`decl_cfg`, `decl_staff`, `decl_annexes`, `decl_adhoc_Y_M`, `decl_exc_Y_M`)
 
-**Courriers mensuels**
+**Générateur de courrier** (courriers mensuels)
 - Génération des 3 courriers officiels : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde
 - Lit la même config localStorage que la Déclaration DTPJ — aucune saisie supplémentaire
 - Mise en page A4 portrait stricte (1 page), style administratif français
 - Date courrier auto-calculée à J-21 du début du mois déclaré
 - Triangle des destinataires : chaque courrier liste les 2 autres destinataires
-- Accessible uniquement depuis declaration.html (bouton "✉ Courriers") — non listé dans le hub
+- Accessible uniquement par le menu « Administration tournois » de la barre
 
-**Déclaration Extras**
+**Gestion des Extras**
 - Liste des croupiers extras avec infos personnelles CRUD (nom, prénom, date/lieu naissance, adresse)
 - **Déclaration mensuelle** : tableau officiel imprimable A4 paysage
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, sélecteur `<input type="week">`
   - Cochage des jours travaillés → heure auto (20:55 semaine, 16:55 dimanche, configurables)
   - Overrides d'horaires ad-hoc : par colonne (jour) et par cellule (extra × jour)
+  - **Pagination de l'impression** (octobre 2026) : une feuille = **4 colonnes × 4 lignes de fiches (16 extras)** (`EMARG_PER_PAGE`). Au-delà, les fiches passent sur une page suivante au lieu d'être écrasées dans une 5ᵉ ligne : chaque `.emarg-page` fait exactement une feuille (**209 mm** de haut, en-tête de 13 mm, rangées de 47 mm ; saut de page entre deux pages, pas après la dernière), l'en-tête est répété avec « Page n/N », les fiches gardent la même taille partout (une dernière page partielle ne s'étire pas), la dernière ligne est complétée par des fiches vierges. **À savoir** : pas d'unité `vh` ni de flex dans cette mise en page — Chrome fragmente mal ces structures à l'impression et repousse les fiches sur la page suivante ; et le `margin-top` en ligne de `#emarg-output` (HTML) doit être neutralisé en `!important`, sinon la page déborde de 16 px et chaque feuille est suivie d'une page blanche. Pour tester sans imprimante : `chrome --headless=new --print-to-pdf` sur une copie de la page avec `<body data-print="emargement">`.
 - Persistance : liste extras dans Supabase ; config horaire et émargements hebdo dans localStorage
 
 ### Challenge Saisonnier (Leaderboard)
@@ -249,22 +256,29 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Saisie des résultats par tournoi (semainier + places standards + places supplémentaires)
 - **Blocage doublon** : validation impossible si même tournoi + même date déjà saisi
 - **Historique vue calendrier** : grille mensuelle 7 colonnes, mois les plus récents en premier, édition inline
-- Gestion des tournois (CRUD complet + barèmes de points) — désormais via Administration Tournois
+- Gestion des tournois (CRUD complet + barèmes de points) — désormais via Administration tournois → Calendrier & barèmes
 - **Document ranking imprimable** (A4 portrait, encadré doré, typographie Cormorant Garamond)
 - **Impression classement one-page** (A4 portrait, podium 3 marches, coupure stricte à 150)
 - Fiche joueur détaillée (modal)
 - Données sauvegardées dans Supabase
+- **Saisons** (octobre 2026) : la saison se **déduit de la date** (1er nov → 31 oct ; clé = année de début, `2025` = saison 2025 / 2026) — aucune colonne dans `results` / `sessions`, la saison suivante démarre toute seule avec le premier résultat daté du 1er novembre. Points et cagnotte repartent donc de 0. Le classement, l'historique, le ranking et les impressions ne montrent que la **saison affichée** (`_season` dans `leaderboard.js`) ; le sélecteur (pastille à gauche de la ligne d'onglets, avec « En cours / Terminée / Clôturée ») liste les saisons qui ont des sessions. Les anciennes saisons restent consultables ; les textes « 2025 / 2026 » ne sont plus en dur. Le contrôle de doublon porte sur toutes les saisons.
+- **Clôture / verrouillage** : un admin voit, en petit sous le sélecteur de saison, « Clôturer la saison » (résumé : joueurs, tournois, ranking, podium, impression du classement final) puis « Rouvrir la saison ». Table `saisons_cloturees` (migration `saisons_cloturees.sql`, lecture pour tous, écriture admin) + triggers `trg_results_saison_cloturee` / `trg_sessions_saison_cloturee` : **toute insertion, modification ou suppression** de résultat ou de session dont la date est dans une saison clôturée est refusée en base (y compris via l'API ; fonction `saison_de(date)`). L'interface suit : historique en lecture seule, saisie bloquée avec message. Si la table est absente, aucune saison n'est verrouillée (le challenge reste utilisable). Une saison clôturée affiche « Classement final au <date de clôture> ».
+- **Barre de la page** (plus de sous-titre sous « Challenge Saisonnier » : la saison est dans le sélecteur) : saison à gauche · onglets Classement / Historique / Ranking au centre · bouton **« ＋ Saisir »** à part, à droite (même page, simple onglet : `showTab('saisir')`, onglets repérés par `data-tab`).
 
-### Gestion Comptes
-- CRUD comptes (email + mot de passe + rôle) via Edge Function sécurisée
-- CRUD rôles personnalisés : label, couleur (nuancier), liste de panneaux autorisés
-- Panneaux hiérarchiques dans le formulaire d'édition de rôle : cocher un parent affiche ses enfants (ex : "Outils Tournois" → Prize Pool / Leaderboard / Administration Tournois)
-- Table croisée permissions (rôles × panneaux) avec renommage inline
-- Stats par rôle (nombre de comptes)
+### Page d'accueil (`index.html`)
+Le titre est une salutation : **« Bonjour, Prénom »** (« Bonsoir » de 18 h à 4 h). `AUTH.firstName(user)` : métadonnée `first_name` / `prenom` si elle existe, sinon le début de l'e-mail (`prenom.nom@…`) ; **sans prénom déductible** (identifiant sans point, ou simple initiale comme `b.nom@…`) on affiche la salutation seule. Le nom du service est désormais dans la barre de navigation.
+
+### Gestion des comptes (`admin/comptes.html` / `.css` / `.js`)
+Deux onglets (pastille `.seg`, hash `#comptes` / `#roles`) ; l'action principale à droite (`.btn.btn-gold.btn-lg`) suit l'onglet : « Nouveau compte » ou « Nouveau rôle ». Barre `.page-bar` partagée avec le Classement.
+- **Comptes** (octobre 2026 : ~30 comptes) : liste unique, recherche (e-mail ou rôle), filtres en pastilles `.fchip` — Tous, un par rôle ayant des comptes (avec leur nombre), **Inactifs** (jamais connecté ou aucune connexion depuis plus de 60 jours, `INACTIVE_DAYS`) —, tri par colonne (Compte, Rôle, Dernière connexion ; la dernière connexion est affichée en relatif avec la date exacte en infobulle), bouton **« Grouper par rôle »** (mémorisé dans `localStorage` `cp_group`, colonne Rôle masquée dans ce mode). Modifier / supprimer par ligne (clics délégués, pas de `onclick` avec e-mail). Le filtre de rôle en cours est la valeur par défaut d'un nouveau compte. Sur mobile : une carte par compte.
+- **Prénom et nom** (octobre 2026) : champs du formulaire de compte, stockés dans `user_metadata` (`first_name`, `last_name`) par l'Edge Function `manage-users` (GET les renvoie en `firstName` / `lastName`, POST et PATCH les enregistrent — le PATCH repart des métadonnées existantes pour ne pas effacer le rôle ; 60 caractères max). À la création, l'e-mail est **proposé** (initiale du prénom + nom, sans accent ni espace, `@groupebarriere.com`, constante `EMAIL_DOMAIN`) tant qu'on ne l'a pas modifié à la main ; prénom et nom obligatoires pour un nouveau compte, facultatifs en modification. La liste affiche « Prénom Nom » avec l'e-mail en dessous (l'e-mail seul si pas de nom), la recherche et le tri (par nom) en tiennent compte, et la pastille **« Sans nom »** liste les comptes à compléter (les 30 comptes existants n'ont pas encore de nom). Le nom sert à la barre (bouton utilisateur, menu) et à « Bonjour, Prénom » (`AUTH.fullName`, `AUTH.firstName`) ; il est lu dans la session, donc visible après la prochaine connexion ou le prochain renouvellement du jeton.
+- **Rôles & accès** : matrice rôles × pages en deux niveaux (espace Outils Tournois : Espace, Prize Pool, Leaderboard, Admin. tournois ; espace Training Croupier : Espace, Suivi équipe). Les cases se modifient en brouillon (`_draft`), rien n'est envoyé avant **« Enregistrer les accès »** (seuls les rôles modifiés sont envoyés) ; « Annuler les modifications » le vide. Une page n'est cochable que si son espace l'est (décocher un espace décoche ses pages). La ligne Admin affiche « Accès total ». L'engrenage d'une ligne ouvre la modale du rôle (**nom, couleur, suppression** ; les accès ne s'y règlent plus). **Suppression d'un rôle refusée tant que des comptes l'ont.** Créer un rôle amène directement sur cet onglet pour lui donner ses accès.
+- L'ancienne modale « Gestion des rôles » (tableau jamais ouvert depuis l'interface et dont les colonnes ne correspondaient plus aux panneaux) est supprimée.
+- Composants partagés ajoutés à `barriere.css` : `.page-bar` (+ `-l`, `-r`), `.fchips` / `.fchip` / `.fchip-n` / `.fchip-dot`. Le Suivi (croupier et équipe) utilise les mêmes pastilles de filtre (`.fchip`, `.fchips`, `.fchip-n` ; `.dim` = indisponible) : plus de style de filtre propre au suivi.
 
 ### Training Croupier
 
-**Architecture partagée** : `training.css` (cartes de jeu, sélecteur de niveau, zone de réponse, barre de feedback) commune à tous les modules. Chaque hub (`blackjack_hub.html`, `roulette_hub.html`) a sa propre modal de config admin persistée dans `training_config`.
+**Architecture partagée** : `training.css` (cartes de jeu, sélecteur de niveau, zone de réponse, barre de feedback) commune à tous les modules. La configuration des modules (persistée dans `training_config`) se règle dans **une seule page admin, `admin/config_training.html`** (menu Gestion → Training → Configuration des modules) : un onglet par jeu (Black Jack : plages de mises, chronomètres par niveau, nombre de cartes par niveau ; Roulette : chronomètres par module et valeurs de pièces ; Ultimate : montant maximum des mises du Calcul des gains), hash `#blackjack` / `#roulette` / `#uth`, un enregistrement par jeu, validation claire avant envoi (rien n'est envoyé si une valeur est invalide). Les anciennes modales des hubs ont été supprimées.
 
 **Blackjack**
 - BJ Paiement : calcul du paiement selon la mise, plages de mise pondérées configurables (poids relatifs par tranche), timer par niveau
@@ -280,7 +294,7 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - **Pointage Numéro** : orientation aléatoire du tapis (miroir gauche/droite déterminé par le 0), numéros masqués pendant la question puis révélés
 - **Couleur Numéro** : identification rouge/noir/vert, timer par niveau
 - **Tables de multiplication** : vraies flashcards (carte 3D qui se retourne, `.tb-card.flipped`), sans tapis, sans niveau. Choix de la table (×35/×17/×11/×8/×5) puis 20 cartes = les 20 multiplications ×1 à ×20 mélangées (Fisher-Yates), chacune une seule fois. Pas de timer par question — un **chronomètre libre** tourne du début à la fin des 20 cartes (objectif : aller vite), affiché en direct et repris dans le résumé final. Taper la réponse retourne la carte pour révéler le résultat coloré (vert/rouge)
-- **Ordre Paiement** : non implémenté — carte "Bientôt disponible" dans le hub
+- **Ordre Paiement** : non implémenté — carte "Bientôt disponible" sur la page Training
 
 Sessions et résultats persistés dans `training_sessions` / `training_results` (Supabase), un enregistrement par question avec `scenario` (jsonb), réponse correcte/donnée, `is_correct`. Chaque session porte `meta` (jsonb : `level`, `ratio`, `chipValue`, `elapsedMs` selon le module — écrit par `SB.startTrainingSession(game, meta)` / `endTrainingSession(..., meta)`) et `user_label` (préfixe e-mail dénormalisé, car `auth.users` est illisible côté navigateur). Un croupier ne lit que ses lignes (`*_own`) ; les rôles avec le panel `training-suivi` (et les admins) lisent tout (`*_manager_read`).
 
@@ -301,7 +315,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - **Suivi des modules UTH** : mêmes vues que les autres jeux (historique, record, moyenne, tendance, classement, progression, activité). **Points faibles** (`training_weak_points`, migration `phase4_suivi_uth.sql`) : `uth-main` → *Combinaison* (celle à trouver, de carte haute à quinte flush royale) et *Piège* (roue, couleur et quinte…) ; `uth-gagnant` → *Situation* (combinaisons différentes, kicker, banque non qualifiée, égalité) ; `uth-gains` → *Situation* (Blind payé ou rendu, banque non qualifiée, égalité, la banque gagne, couché, jackpot) et *Mise* (Ante, Blind, Play, Bonus, Prog) : une donne compte une fois par mise corrigée, une mise est fausse si l'action ou, pour « je paie », le montant diffère de `scenario.expected`. Libellés français dans `SVM_LABELS` (`suivi_manager.js`).
 - `roulette-mixte` (module abandonné) est ignoré par les vues (absent de `SV_MODULES`) ; une session orpheline subsiste en base.
 - Source des données : `SB.getMyTrainingSessions()` ; aucun calcul serveur nécessaire pour la vue croupier (volume faible : un seul utilisateur).
-- **Vue manager — « Suivi équipe »** (`training/suivi/suivi_manager.html`, guard `panel: 'training-suivi'`, tuile `#tile-suivi-equipe` de `training.html` masquée tant que le rôle n'a pas le panel) : 4 onglets portés par le hash (`#classement`, `#progression/<user_id>`, `#faibles`, `#activite`). Une ligne de classement ou d'activité ouvre la progression du croupier.
+- **Vue manager — « Suivi équipe »** (`training/suivi/suivi_manager.html`, guard `panel: 'training-suivi'`, accessible par le menu « Gestion » → Training de la barre pour les rôles qui ont le panel ; plus de tuile ni d'entrée dans la barre de l'espace Training) : 4 onglets portés par le hash (`#classement`, `#progression/<user_id>`, `#faibles`, `#activite`). Une ligne de classement ou d'activité ouvre la progression du croupier.
   - **Classement** : moyenne des 5 dernières sessions par module et niveau ; au moins `SVM_MIN_RANKED` (3) sessions pour être numéroté, les autres sont listés dessous (« pas encore classés »). Tables × : meilleur temps par table (sessions sans erreur chronométrées).
   - **Progression** : courbe SVG (un point par session + moyenne glissante sur 5), stats, meilleurs temps pour les Tables ×.
   - **Points faibles** : taux d'erreur par facette (type de mise, valeur de pièce, table, numéro, nombre de cartes, tranche de mise) pour l'équipe ou un croupier ; seuil de 5 tentatives (3 pour un croupier seul). Pour Calcul Paiement, une question compte une fois par type de mise qu'elle contient.
@@ -340,6 +354,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - `training/roulette/roulette_tapis.js` est partagé par TOUS les modules roulette qui affichent un tapis (Paiement, Pointage, Couleur) — toute modif de `renderTapis`, `renderChips`, `buildBetPool` les impacte tous. Conversion et Tables de multiplication ne l'utilisent pas (pas de tapis)
 - `training/` est organisé en sous-dossiers par jeu (`blackjack/`, `roulette/`) depuis juillet 2026 — seuls `training.html` et `training.css` restent à la racine (partagés). `suivi/` (Phase 3) en place depuis octobre 2026 ; prévoir `uth/` (Phase 4) sur le même modèle
 - Positionnement des chips roulette : approche **DOM-based** (`getBoundingClientRect`), pas de formule de grille — voir `chipPosFromDOM` dans `roulette_tapis.js`
+- **Navigation** (`shared/nav.js` + `shared/nav.css`) : barre sticky **sur une ligne**, injectée par `AUTH.guard` une fois l'accès validé (`nav: false` pour la désactiver ; repli sur l'ancien badge si le chargement échoue). Elle remplace les éléments flottants `.back`, `.theme-toggle` et `#auth-badge`. Contenu : vrai logo (`shared/logos`, version claire/sombre selon le thème) suivi d'une étoile de la charte (`.ico-star`, éclat à quatre branches) puis de **BORDEAUX** puis, derrière un filet, **« Service / Jeux traditionnels »** sur deux lignes (le service disparaît entre 1301 et 1620 px où la barre complète manque de place, et sous 700 px) · **lanceur d'espaces** (pastille arrondie : Outils Tournois, Training Croupier ; prêt à accueillir de futurs espaces comme les jeux de tables) · **pages de l'espace** (soulignement ambre sur la page courante ; Black Jack, Roulette et Ultimate sont des menus déroulants listant leurs modules (une entrée sans lien propre), Administration (tournois) liste ses sous-pages) · à droite le **menu « Gestion »** (deux parties, chaque entrée selon les droits : **Comptes** → Gestion des comptes (admin) ; **Training** → Suivi équipe (admin et tout rôle ayant le panel `training-suivi`, ex. MCD) et Configuration des modules (admin). Les pages Suivi équipe et Configuration des modules restent dans le contexte de l'espace Training (la barre affiche le lanceur sur « Training Croupier » et ses pages, avec « Gestion » surligné). Un rôle sans aucune entrée n'a pas le menu ; à ne pas confondre avec « Administration tournois », dans la barre de l'espace Tournois), thème, menu utilisateur (e-mail, rôle, mot de passe, déconnexion). Les menus sont des cartes crème très arrondies à encoche sur le bord droit (style du site Barrière). Sous 1300 px : bouton ☰ qui déplie toute l'arborescence. **Adaptation aux droits** (la majorité des comptes n'a pas accès à tout ; en octobre 2026 : croupier 11, floor 7, chef de table 4, admin 3, caisse 3, MCD 2) : admin = tout, sinon `panels` du rôle ; un seul espace accessible → pas de lanceur (simple titre) et, depuis `index.html`, on entre directement dans cet espace ; un espace Outils Tournois avec une seule page accessible (ex. rôle caisse : Leaderboard) → arrivée directe sur cette page ; un droit sur une sous-page seule (ex. `prize-pool` sans `tournois`) suffit à afficher l'espace avec cette page. La barre est montée **avant** le retrait de l'overlay de `guard`, pour qu'une redirection d'entrée n'affiche aucune page intermédiaire. **Ajouter une page ou un espace** : le déclarer dans `SPACES` (ou `ADMIN`) de `nav.js` — c'est aussi ce qui sert à reconnaître la page courante (chemin avec ou sans `.html`). Masquée à l'impression. **Cartes de navigation** (`.tool-card`, `barriere.css`) : rectangles très arrondis (20 px), **tous exactement 300×92 px**, picto dans un carré arrondi à gauche, nom centré dans le reste de la tuile, liseret de couleur discret sur le bord gauche, encoche sur le bord droit (style du site Barrière), **sombres en mode nuit et crème en mode jour**, sans bouton ; les accents de la charte y sont utilisés vifs en nuit et foncés en jour (`--ink`). Style purement CSS. **Pages hub** : les pages de jeu (Black Jack, Roulette, Ultimate) sont **supprimées** — la page Training liste tous les modules, groupés par jeu, et les menus déroulants de la barre mènent aux mêmes pages (les liens « retour » des modules pointent vers `training.html#<jeu>`). Les pages d'espace Outils Tournois et Administration Tournois restent. **Titres de page** : avec la barre, le surtitre « Barrière Casino · Bordeaux » est masqué (`body.has-nav .hdr-logo`), le titre est plus compact (26 à 38 px) et la description (`.hdr-sub`) s'écrit en phrase lisible, plus en capitales espacées — règles dans `barriere.css`, valables pour toutes les pages sans les modifier. Menu Administration (admin) : Gestion des comptes, Config Training. À venir (décisions du 2026-10-05) : repenser les pages « hub » (tuiles redondantes avec les menus déroulants) — piste retenue : une page d'arrivée par espace, avec un contenu propre, et suppression des hubs de jeu ; les hubs de jeu ont été supprimés (voir ci-dessus) ; reste à décider s'il faut une vraie page d'arrivée par espace avec contenu propre.
 - Transitions de page (fade in/out) gérées dans `shared/barriere.js` — classe `is-leaving` sur `<body>`
 - Lien `.back` est `position:fixed` top-left sur toutes les pages
 - L'impression utilise `injectPageStyle()` pour injecter dynamiquement `@page` (portrait ou paysage) avant `window.print()`, puis nettoie avec un setTimeout

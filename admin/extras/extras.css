@@ -9,23 +9,6 @@
   display: flex; flex-direction: column; align-items: center;
 }
 
-/* ── Onglets ── */
-.xt-tabs {
-  display: flex; gap: 4px; margin-bottom: 20px;
-  background: rgba(10,9,7,.6); border: 1px solid rgba(195,120,20,.12);
-  border-radius: 4px; padding: 4px;
-  width: 100%; max-width: 860px; flex-wrap: wrap;
-}
-.xt-tab {
-  flex: 1; min-width: 100px; padding: 9px 8px;
-  font-size: 11px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
-  color: var(--text-dim); background: none; border: none; border-radius: 3px;
-  cursor: pointer; transition: all .18s; text-align: center;
-}
-.xt-tab.active          { background: rgba(195,120,20,.15); color: var(--gold); border: 1px solid rgba(195,120,20,.25); }
-.xt-tab:hover:not(.active) { color: var(--text); background: rgba(195,120,20,.06); }
-body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(135,50,0,.15); }
-
 /* ── Période ── */
 .period-row {
   display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;
@@ -145,7 +128,7 @@ body.light .xt-tabs     { background: rgba(200,185,150,.25); border-color: rgba(
 .emarg-header {
   width: 100%; margin-bottom: 12px;
   padding: 10px 14px; background: var(--bg-card);
-  border: 1px solid rgba(195,120,20,.2); border-radius: 3px;
+  border: 1px solid rgba(195,120,20,.2); border-radius: var(--r-box);
   text-align: center;
 }
 body.light .emarg-header { background: rgba(247,243,233,.97); }
@@ -166,6 +149,7 @@ body.light .emarg-header { background: rgba(247,243,233,.97); }
   width: 100%;
 }
 @media(max-width:640px) { .emarg-grid { grid-template-columns: 1fr; } }
+.emarg-page + .emarg-page { margin-top: 28px; }   /* à l'écran, les pages se suivent ; à l'impression, saut de page */
 
 /* Carte émargement */
 .emarg-card {
@@ -222,7 +206,7 @@ body.light .emarg-card { background: rgba(247,243,233,.97); }
 }
 .xt-modal {
   background: var(--bg-card); border: 1px solid rgba(195,120,20,.25);
-  border-radius: 4px; padding: 28px 30px; width: 100%; max-width: 640px;
+  border-radius: var(--r-card); padding: 28px 30px; width: 100%; max-width: 640px;
   position: relative; max-height: 90vh; overflow-y: auto;
 }
 body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px rgba(0,0,0,.12); }
@@ -276,26 +260,30 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print="emargement"] #emarg-controls,
   body[data-print="emargement"] #assign-card          { display: none !important; }
 
-  /* Cascade hauteur : html→body→app→panel→output→grid pour remplir la page */
+  /* Plusieurs pages possibles : le corps s'étend, c'est chaque `.emarg-page` qui fait exactement une feuille (100vh) */
   body[data-print="emargement"],
-  body[data-print="emargement"] .app          { height: 100vh !important; }
+  body[data-print="emargement"] .app          { height: auto !important; }
   body[data-print="emargement"] .xt-panel,
   body[data-print="emargement"] #tab-emargement {
     max-width: none !important; width: 100% !important;
     align-items: stretch !important; padding: 0 !important;
-    height: 100% !important;
-    display: flex !important; flex-direction: column;
+    height: auto !important; display: block !important;
   }
-  body[data-print="emargement"] #emarg-output {
-    margin: 0; padding: 5mm;
-    flex: 1; display: flex; flex-direction: column;
-    height: 100%; box-sizing: border-box;
+  body[data-print="emargement"] #emarg-output { margin: 0 !important; padding: 0 !important; }   /* neutralise le margin-top en ligne du HTML */
+
+  /* Une page = une feuille A4 paysage (209 mm de haut) : en-tête de 13 mm + grille de 4 × 4 fiches de hauteur fixe.
+     Hauteurs en mm (pas de vh ni de flex : Chrome fragmente mal ces mises en page à l'impression et repoussait les fiches sur la page suivante) ;
+     saut de page entre deux pages, pas après la dernière */
+  body[data-print="emargement"] .emarg-page {
+    display: block; height: 209mm; box-sizing: border-box; padding: 4mm 5mm; overflow: hidden; margin: 0;
+    break-after: page; page-break-after: always;
   }
+  body[data-print="emargement"] .emarg-page:last-child { break-after: auto; page-break-after: auto; }
 
   body[data-print="emargement"] .emarg-header {
     background: none !important; border: none !important; border-bottom: 1.5pt solid #000 !important;
-    border-radius: 0 !important; padding: 0 0 2mm 0 !important; margin-bottom: 3mm;
-    flex-shrink: 0;
+    border-radius: 0 !important; padding: 0 0 2mm 0 !important; margin: 0 !important;
+    height: 13mm; box-sizing: border-box; overflow: hidden;
   }
   body[data-print="emargement"] .emarg-header-title {
     font-size: 11pt; font-weight: 700; letter-spacing: .1em; color: #000 !important;
@@ -304,14 +292,14 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
     font-size: 8.5pt; color: #444 !important; margin-top: 1mm;
   }
 
-  /* Grille : flex:1 pour remplir la hauteur, rows répartis en 4 égaux */
+  /* Grille : flex:1 pour remplir la hauteur de la page, rows répartis en 4 égaux (jamais plus de 4 lignes par page) */
   body[data-print="emargement"] .emarg-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: calc((209mm - 8mm - 13mm) / 4);   /* rangées de 47 mm, identiques sur toutes les pages : une dernière page partielle ne s'étire pas */
     gap: 0;
     width: 100%;
-    flex: 1;
     border-top: 1px solid #000 !important;
     border-left: 1px solid #000 !important;
   }
@@ -346,7 +334,7 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
     border-right: 1px solid #bbb !important;
     border-bottom: 1px solid #bbb !important;
     color: #000 !important;
-    padding: 2px 3px; font-size: 7pt; overflow: hidden;
+    padding: 1.5px 3px; font-size: 7pt; overflow: hidden;
     font-family: Arial, sans-serif;
   }
   body[data-print="emargement"] .emarg-card tbody td:last-child { border-right: none !important; }

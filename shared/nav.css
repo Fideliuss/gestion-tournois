@@ -1,0 +1,141 @@
+/* ═══════════════════════════════════════════════
+   nav.css — Barre de navigation (injectée par nav.js)
+   Une ligne : marque · espace · pages · outils. Menus en cartes très arrondies à encoche.
+═══════════════════════════════════════════════ */
+
+body.has-nav .app { padding-top: 36px; min-height: calc(100vh - 56px); }
+
+.nav {
+  position: sticky; top: 0; z-index: 300;
+  background: var(--bg); border-bottom: 1px solid var(--gold-bd);
+  font-family: var(--f-ui);
+}
+.nav a, .nav button { font-family: inherit; }
+.nav [hidden] { display: none !important; }
+
+.nav-main { display: flex; align-items: center; height: 56px; padding: 0 24px; gap: 22px; }
+
+/* ── Marque ── */
+.nav-brand { display: flex; align-items: center; flex: none; gap: 10px; text-decoration: none; }
+.nav-brand img { height: 14px; width: auto; }
+/* « BORDEAUX » dans le prolongement du logo, puis le service sur deux lignes derrière un filet */
+.nav-star { width: 9px; height: 9px; color: var(--gold); margin: 0 -1px; }   /* éclat de la charte : sépare le logo de la ville */
+.nav-city { font-size: 14px; font-weight: 400; letter-spacing: .18em; text-transform: uppercase; line-height: 1; color: var(--cream); }
+.nav-service {
+  display: flex; flex-direction: column; justify-content: center; gap: 1px; padding-left: 12px; border-left: 1px solid var(--gold-bd);
+  font-size: 10px; font-weight: 500; letter-spacing: .1em; line-height: 1.15; color: var(--text-dim); white-space: nowrap;
+}
+.nav-service span:first-child { text-transform: uppercase; letter-spacing: .18em; font-size: 9px; color: var(--gold); }
+body.light .nav-service span:first-child { color: #873200; }
+.nav-brand .logo-dark { display: none; }
+body.light .nav-brand .logo-light { display: none; }
+body.light .nav-brand .logo-dark { display: block; }
+
+/* ── Espace : lanceur ou titre ── */
+.nav-pill {
+  display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; flex: none;
+  background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 999px; cursor: pointer;
+  font-size: 12px; font-weight: 600; font-style: italic; letter-spacing: .06em; text-transform: uppercase; color: var(--cream);
+  transition: border-color .15s;
+}
+.nav-pill:hover, .nav-pill[aria-expanded="true"] { border-color: var(--gold); }
+.nav-pill svg { width: 14px; height: 14px; }
+.nav-title { flex: none; font-size: 12px; font-weight: 600; font-style: italic; letter-spacing: .06em; text-transform: uppercase; color: var(--cream); }
+
+/* ── Pages de l'espace ── */
+.nav-items { display: flex; align-items: stretch; gap: 4px; height: 56px; flex: 1; min-width: 0; }
+.nav-dd { position: relative; display: flex; align-items: stretch; }
+.nav-item {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px;
+  background: none; border: 0; cursor: pointer; white-space: nowrap;
+  font-size: 13px; font-weight: 500; color: var(--text-dim); text-decoration: none; transition: color .15s;
+}
+.nav-item:hover, .nav-item[aria-expanded="true"] { color: var(--cream); }
+.nav-item svg { width: 13px; height: 13px; opacity: .7; }
+.nav-item[aria-current] { color: var(--cream); }
+.nav-item[aria-current]::after { content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; background: var(--gold-solid); }
+
+/* ── Outils à droite ── */
+.nav-tools { display: flex; align-items: center; gap: 2px; flex: none; margin-left: auto; }
+.nav-tools .nav-dd { align-items: center; }
+.nav-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px;
+  background: none; border: 1px solid transparent; border-radius: 999px;
+  font-size: 12px; font-weight: 500; letter-spacing: .03em; color: var(--text-dim); cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.nav-btn:hover, .nav-btn[aria-expanded="true"], .nav-btn[aria-current] { color: var(--cream); border-color: var(--gold-bd); }
+.nav-btn svg { width: 16px; height: 16px; flex: none; }
+.nav-theme .i-moon { display: none; }
+body.light .nav-theme .i-sun { display: none; }
+body.light .nav-theme .i-moon { display: block; }
+.nav-user-name { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Cartes déroulantes : très arrondies, encoche sur le bord droit ── */
+.nav-pop-wrap { position: absolute; top: calc(100% + 8px); left: 0; z-index: 10; filter: drop-shadow(0 10px 20px rgba(0,0,0,.4)); }
+body.light .nav-pop-wrap { filter: drop-shadow(0 8px 16px rgba(0,0,0,.16)); }
+.nav-tools .nav-pop-wrap, .nav-pop-wrap.right { left: auto; right: 0; }
+.nav-dd:has(.nav-btn) .nav-pop-wrap { top: calc(100% + 6px); }
+.nav-pop {
+  min-width: 250px; padding: 8px; border-radius: 22px;
+  /* mode nuit : carte sombre ; mode jour : carte crème (voir plus bas) */
+  background: #17130E; color: var(--cream); box-shadow: inset 0 0 0 1px var(--gold-bd);
+  -webkit-mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000); mask: radial-gradient(circle 8px at 100% 50%, #0000 97%, #000);
+}
+body.light .nav-pop { background: #F4EFE6; color: #1A1208; box-shadow: none; }
+.nav-row {
+  display: block; width: 100%; box-sizing: border-box; padding: 10px 16px; border: 0; border-radius: 14px; background: none; text-align: left; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--cream); text-decoration: none; transition: background .12s;
+}
+body.light .nav-row { color: #1A1208; }
+.nav-grp { padding: 10px 16px 4px; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+.nav-grp:first-child { padding-top: 6px; }
+body.light .nav-grp { color: #873200; }
+.nav-row small { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--text-dim); }
+body.light .nav-row small { color: #5A4830; }
+.nav-row:hover { background: rgba(195,120,20,.16); }
+body.light .nav-row:hover { background: #E7DFD0; }
+.nav-row[aria-current] { background: var(--gold-solid); color: #1A1208; }
+.nav-row[aria-current] small { color: #1A1208; }
+.nav-id { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 16px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--gold-bd); }
+body.light .nav-id { border-bottom-color: #D9CFBC; }
+.nav-id small { margin-top: -4px; font-size: 11px; color: var(--text-dim); max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+body.light .nav-id small { color: #5A4830; }
+.nav-id b { font-size: 13px; font-weight: 500; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.nav-chip { border-radius: 999px; padding: 2px 9px; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+
+/* ── Téléphone et tablette : menu replié ── */
+.nav-burger { display: none; margin-left: auto; }
+.nav-panel { display: none; }
+@media (max-width: 1300px) {
+  .nav-main { padding: 0 16px; gap: 12px; }
+  .nav-items, .nav-tools { display: none; }
+  .nav-burger { display: inline-flex; padding: 0 10px; }
+  .nav-pop-wrap { max-width: calc(100vw - 24px); }
+  .nav-panel {
+    position: absolute; left: 0; right: 0; top: 56px; max-height: calc(100vh - 56px); overflow-y: auto;
+    background: var(--bg); border-bottom: 1px solid var(--gold-bd); padding: 4px 16px 16px;
+  }
+  .nav-panel.open { display: block; }
+  .nav-panel .grp { padding: 10px 0; border-bottom: 1px solid var(--gold-bd); }
+  .nav-panel .gt { padding: 4px 0 6px; font-size: 11px; font-weight: 600; font-style: italic; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  .nav-panel .grp > .gt:not(:first-child) { padding: 12px 0 4px; font-size: 14px; font-weight: 600; letter-spacing: .02em; text-transform: none; font-style: normal; color: var(--cream); }
+  .nav-panel .grp > a { display: block; padding: 10px 0; font-size: 15px; font-weight: 500; color: var(--cream); text-decoration: none; }
+  .nav-panel .grp > a.sub { padding: 8px 0 8px 16px; font-size: 14px; font-weight: 400; color: var(--text-dim); }
+  .nav-panel .grp > a[aria-current] { color: var(--gold); }
+  .nav-panel .acts { border-bottom: 0; }
+  .nav-panel .acts button { display: block; width: 100%; text-align: left; padding: 11px 0; background: none; border: 0; font-size: 14px; color: var(--text); cursor: pointer; }
+  .nav-panel .who { padding: 4px 0 2px; font-size: 12px; color: var(--text-dim); }
+}
+@media (max-width: 700px) { .nav-pill, .nav-title { display: none; } }
+/* Barre complète (5 pages + lanceur + outils) : on gagne de la place avant de basculer en menu replié */
+@media (min-width: 1301px) and (max-width: 1500px) { .nav-theme .nav-btn-label, .nav-user-name { display: none; } }
+@media (min-width: 1301px) and (max-width: 1380px) {
+  .nav-main { gap: 16px; }
+  .nav-item { padding: 0 10px; }
+  .nav-item[aria-current]::after { left: 10px; right: 10px; }
+}
+
+@media print { .nav { display: none !important; } }
+/* Le service (2 lignes) s'efface quand la place manque : barre complète étroite, et téléphone */
+@media (min-width: 1301px) and (max-width: 1620px), (max-width: 700px) { .nav-service { display: none; } }

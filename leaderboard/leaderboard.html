@@ -9,31 +9,29 @@
 </head>
 <body>
 
-<button class="theme-toggle" onclick="toggleTheme()">
-  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
-</button>
-
 <div class="app">
-  <a href="../outils_tournois.html" class="back">← Menu</a>
-
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Challenge <em>Saisonnier</em></div>
-    <div class="hdr-season">Saison 2025 / 2026 · 1er nov → 31 oct</div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('classement')">🏆 Classement</button>
-    <button class="tab" onclick="showTab('saisir')">＋ Saisir</button>
-    <button class="tab" onclick="showTab('historique')">📋 Historique</button>
-    <button class="tab" onclick="showTab('ranking')">💰 Ranking</button>
+  <div class="page-bar lb-bar">
+    <div class="page-bar-l lb-bar-l" id="season-ctl"></div>
+    <div class="tabs seg">
+      <button class="tab seg-btn active" data-tab="classement" onclick="showTab('classement')">Classement</button>
+      <button class="tab seg-btn" data-tab="historique" onclick="showTab('historique')">Historique</button>
+      <button class="tab seg-btn" data-tab="ranking" onclick="showTab('ranking')">Ranking</button>
+    </div>
+    <div class="page-bar-r">
+      <button class="btn btn-gold btn-lg" data-tab="saisir" aria-pressed="false" onclick="showTab('saisir')">＋ Saisir</button>
+    </div>
   </div>
 
   <!-- CLASSEMENT -->
   <div id="tab-classement" class="card card-ranking">
     <div class="search-row" style="margin-bottom:0">
       <input type="text" id="search-player" placeholder="Rechercher un joueur…" oninput="renderClassement()" />
-      <button class="btn btn-ghost" onclick="printClassement()">🖨 Imprimer</button>
+      <button class="btn btn-ghost" onclick="printClassement()"><i class="ico ico-print"></i> Imprimer</button>
     </div>
     <div id="classement-content"></div>
     <div id="classement-empty" class="empty" style="display:none">
@@ -47,6 +45,7 @@
     <div id="alert-success" class="alert-success" style="display:none"></div>
     <div id="alert-warn"    class="alert-warn"    style="display:none"></div>
     <div id="alert-dup"     class="alert-dup"     style="display:none"></div>
+    <div id="alert-lock"    class="alert-warn"    style="display:none"></div>
 
     <div class="form-grid" style="margin-bottom:12px">
       <div class="fg">
@@ -83,10 +82,10 @@
         <span>Place</span><span>Joueur</span><span style="text-align:center">Points</span>
       </div>
       <div class="placement-rows" id="placement-rows"></div>
-      <button class="btn-add-place" id="btn-add-place" onclick="addExtraPlace()">
-        ＋ Ajouter une place supplémentaire
+      <button class="btn btn-ghost btn-dashed btn-block btn-add-place" id="btn-add-place" onclick="addExtraPlace()">
+        <i class="ico ico-plus"></i> Ajouter une place supplémentaire
       </button>
-      <button class="btn-validate" onclick="validateTournament()">✓ Valider les résultats du tournoi</button>
+      <button class="btn btn-gold btn-lg btn-block" onclick="validateTournament()"><i class="ico ico-check"></i> Valider les résultats du tournoi</button>
     </div>
   </div>
 
@@ -111,7 +110,7 @@
     <div class="ranking-doc-wrapper">
       <div class="ranking-doc" id="ranking-doc-screen"></div>
     </div>
-    <button class="btn-print-ranking" onclick="printRanking()">🖨 Imprimer le document ranking</button>
+    <button class="btn btn-gold btn-lg btn-block" onclick="printRanking()"><i class="ico ico-print"></i> Imprimer le document ranking</button>
   </div>
 
 </div>
@@ -135,6 +134,6 @@
 <script src="../shared/semainier.js"></script>
 <script src="../shared/auth.js"></script>
 <script src="leaderboard.js"></script>
-<script>AUTH.guard({ loginUrl: '../login.html', panel: 'leaderboard' });</script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'leaderboard' }).then(function (u) { if (u) setLbUser(u); });</script>
 </body>
 </html>

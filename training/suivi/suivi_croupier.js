@@ -76,10 +76,10 @@ function renderTabs() {
   const tabs = [{ id: null, label: 'Vue d\'ensemble' }].concat(SV_FAMILIES.map(function(f) {
     return { id: f.id, label: f.name + ' ' + f.em, n: svcSessionsOf(f.id).length };
   }));
-  return '<div class="sv-tabs">' + tabs.map(function(t) {
+  return '<div class="sv-tabs seg">' + tabs.map(function(t) {
     const on = t.id === _svcView.family;
-    return '<button class="sv-tab' + (on ? ' on' : '') + '" onclick="svcGo(' + (t.id ? '\'' + t.id + '\'' : '') + ')">'
-      + t.label + (t.n !== undefined ? '<span class="sv-tab-n">' + t.n + '</span>' : '') + '</button>';
+    return '<button class="sv-tab seg-btn' + (on ? ' on' : '') + '" onclick="svcGo(' + (t.id ? '\'' + t.id + '\'' : '') + ')">'
+      + t.label + (t.n !== undefined ? '<span class="sv-tab-n seg-n">' + t.n + '</span>' : '') + '</button>';
   }).join('') + '</div>';
 }
 
@@ -138,11 +138,11 @@ function renderFamily(familyId, moduleKey) {
 function renderModulePills(familyId, mods, current) {
   const pill = function(key, label, n, dim) {
     const on = (key || null) === (current || null);
-    return '<button class="sv-chip' + (on ? ' on' : '') + (dim ? ' dim' : '') + '"'
+    return '<button class="fchip' + (on ? ' on' : '') + (dim ? ' dim' : '') + '"'
       + (dim ? ' disabled' : ' onclick="svcGo(\'' + familyId + '\'' + (key ? ',\'' + key + '\'' : '') + ')"') + '>'
-      + label + (n !== null ? ' <span class="sv-chip-n">' + n + '</span>' : '') + '</button>';
+      + label + (n !== null ? ' <span class="fchip-n">' + n + '</span>' : '') + '</button>';
   };
-  return '<div class="sv-chips sv-pills">' + pill(null, 'Tous les modules', null, false)
+  return '<div class="fchips sv-pills">' + pill(null, 'Tous les modules', null, false)
     + mods.map(function(m) {
         const n = (_svcByGame[m.game] || []).length;
         return pill(m.game, m.name + ' ' + m.em, n, n === 0);
@@ -204,8 +204,8 @@ function renderLevelChips(m, all, current) {
   });
   if (present.length < 1) return '';
   const chips = [['all', 'Tous']].concat(present);
-  return '<div class="sv-chips">' + chips.map(function(c) {
-    return '<button class="sv-chip' + (c[0] === current ? ' on' : '') + '" onclick="setSuiviLevel(\'' + m.game + '\',\'' + c[0] + '\')">' + c[1] + '</button>';
+  return '<div class="fchips">' + chips.map(function(c) {
+    return '<button class="fchip' + (c[0] === current ? ' on' : '') + '" onclick="setSuiviLevel(\'' + m.game + '\',\'' + c[0] + '\')">' + c[1] + '</button>';
   }).join('') + '</div>';
 }
 
