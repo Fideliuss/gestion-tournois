@@ -246,6 +246,7 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, sélecteur `<input type="week">`
   - Cochage des jours travaillés → heure auto (20:55 semaine, 16:55 dimanche, configurables)
   - Overrides d'horaires ad-hoc : par colonne (jour) et par cellule (extra × jour)
+  - **Pagination de l'impression** (octobre 2026) : une feuille = **4 colonnes × 4 lignes de fiches (16 extras)** (`EMARG_PER_PAGE`). Au-delà, les fiches passent sur une page suivante au lieu d'être écrasées dans une 5ᵉ ligne : chaque `.emarg-page` fait exactement une feuille (`100vh`, saut de page entre deux pages, pas après la dernière), l'en-tête est répété avec « Page n/N », les fiches gardent la même taille partout, la dernière ligne est complétée par des fiches vierges.
 - Persistance : liste extras dans Supabase ; config horaire et émargements hebdo dans localStorage
 
 ### Challenge Saisonnier (Leaderboard)

@@ -149,6 +149,7 @@ body.light .emarg-header { background: rgba(247,243,233,.97); }
   width: 100%;
 }
 @media(max-width:640px) { .emarg-grid { grid-template-columns: 1fr; } }
+.emarg-page + .emarg-page { margin-top: 28px; }   /* à l'écran, les pages se suivent ; à l'impression, saut de page */
 
 /* Carte émargement */
 .emarg-card {
@@ -259,21 +260,24 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print="emargement"] #emarg-controls,
   body[data-print="emargement"] #assign-card          { display: none !important; }
 
-  /* Cascade hauteur : html→body→app→panel→output→grid pour remplir la page */
+  /* Plusieurs pages possibles : le corps s'étend, c'est chaque `.emarg-page` qui fait exactement une feuille (100vh) */
   body[data-print="emargement"],
-  body[data-print="emargement"] .app          { height: 100vh !important; }
+  body[data-print="emargement"] .app          { height: auto !important; }
   body[data-print="emargement"] .xt-panel,
   body[data-print="emargement"] #tab-emargement {
     max-width: none !important; width: 100% !important;
     align-items: stretch !important; padding: 0 !important;
-    height: 100% !important;
-    display: flex !important; flex-direction: column;
+    height: auto !important; display: block !important;
   }
-  body[data-print="emargement"] #emarg-output {
-    margin: 0; padding: 5mm;
-    flex: 1; display: flex; flex-direction: column;
-    height: 100%; box-sizing: border-box;
+  body[data-print="emargement"] #emarg-output { margin: 0; padding: 0; }
+
+  /* Une page = une feuille : en-tête + grille de 4 × 4 fiches ; saut de page entre deux pages (pas après la dernière) */
+  body[data-print="emargement"] .emarg-page {
+    height: 100vh; box-sizing: border-box; padding: 5mm; overflow: hidden;
+    display: flex; flex-direction: column; margin: 0;
+    break-after: page; page-break-after: always;
   }
+  body[data-print="emargement"] .emarg-page:last-child { break-after: auto; page-break-after: auto; }
 
   body[data-print="emargement"] .emarg-header {
     background: none !important; border: none !important; border-bottom: 1.5pt solid #000 !important;
@@ -287,14 +291,14 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
     font-size: 8.5pt; color: #444 !important; margin-top: 1mm;
   }
 
-  /* Grille : flex:1 pour remplir la hauteur, rows répartis en 4 égaux */
+  /* Grille : flex:1 pour remplir la hauteur de la page, rows répartis en 4 égaux (jamais plus de 4 lignes par page) */
   body[data-print="emargement"] .emarg-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
     gap: 0;
     width: 100%;
-    flex: 1;
+    flex: 1; min-height: 0;
     border-top: 1px solid #000 !important;
     border-left: 1px solid #000 !important;
   }
