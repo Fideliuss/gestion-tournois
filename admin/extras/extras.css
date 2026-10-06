@@ -149,6 +149,7 @@ body.light .emarg-header { background: rgba(247,243,233,.97); }
   width: 100%;
 }
 @media(max-width:640px) { .emarg-grid { grid-template-columns: 1fr; } }
+.emarg-page + .emarg-page { margin-top: 28px; }   /* à l'écran, les pages se suivent ; à l'impression, saut de page */
 
 /* Carte émargement */
 .emarg-card {
@@ -259,26 +260,30 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   body[data-print="emargement"] #emarg-controls,
   body[data-print="emargement"] #assign-card          { display: none !important; }
 
-  /* Cascade hauteur : html→body→app→panel→output→grid pour remplir la page */
+  /* Plusieurs pages possibles : le corps s'étend, c'est chaque `.emarg-page` qui fait exactement une feuille (100vh) */
   body[data-print="emargement"],
-  body[data-print="emargement"] .app          { height: 100vh !important; }
+  body[data-print="emargement"] .app          { height: auto !important; }
   body[data-print="emargement"] .xt-panel,
   body[data-print="emargement"] #tab-emargement {
     max-width: none !important; width: 100% !important;
     align-items: stretch !important; padding: 0 !important;
-    height: 100% !important;
-    display: flex !important; flex-direction: column;
+    height: auto !important; display: block !important;
   }
-  body[data-print="emargement"] #emarg-output {
-    margin: 0; padding: 5mm;
-    flex: 1; display: flex; flex-direction: column;
-    height: 100%; box-sizing: border-box;
+  body[data-print="emargement"] #emarg-output { margin: 0 !important; padding: 0 !important; }   /* neutralise le margin-top en ligne du HTML */
+
+  /* Une page = une feuille A4 paysage (209 mm de haut) : en-tête de 13 mm + grille de 4 × 4 fiches de hauteur fixe.
+     Hauteurs en mm (pas de vh ni de flex : Chrome fragmente mal ces mises en page à l'impression et repoussait les fiches sur la page suivante) ;
+     saut de page entre deux pages, pas après la dernière */
+  body[data-print="emargement"] .emarg-page {
+    display: block; height: 209mm; box-sizing: border-box; padding: 4mm 5mm; overflow: hidden; margin: 0;
+    break-after: page; page-break-after: always;
   }
+  body[data-print="emargement"] .emarg-page:last-child { break-after: auto; page-break-after: auto; }
 
   body[data-print="emargement"] .emarg-header {
     background: none !important; border: none !important; border-bottom: 1.5pt solid #000 !important;
-    border-radius: 0 !important; padding: 0 0 2mm 0 !important; margin-bottom: 3mm;
-    flex-shrink: 0;
+    border-radius: 0 !important; padding: 0 0 2mm 0 !important; margin: 0 !important;
+    height: 13mm; box-sizing: border-box; overflow: hidden;
   }
   body[data-print="emargement"] .emarg-header-title {
     font-size: 11pt; font-weight: 700; letter-spacing: .1em; color: #000 !important;
@@ -287,14 +292,14 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
     font-size: 8.5pt; color: #444 !important; margin-top: 1mm;
   }
 
-  /* Grille : flex:1 pour remplir la hauteur, rows répartis en 4 égaux */
+  /* Grille : flex:1 pour remplir la hauteur de la page, rows répartis en 4 égaux (jamais plus de 4 lignes par page) */
   body[data-print="emargement"] .emarg-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: calc((209mm - 8mm - 13mm) / 4);   /* rangées de 47 mm, identiques sur toutes les pages : une dernière page partielle ne s'étire pas */
     gap: 0;
     width: 100%;
-    flex: 1;
     border-top: 1px solid #000 !important;
     border-left: 1px solid #000 !important;
   }
@@ -329,7 +334,7 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
     border-right: 1px solid #bbb !important;
     border-bottom: 1px solid #bbb !important;
     color: #000 !important;
-    padding: 2px 3px; font-size: 7pt; overflow: hidden;
+    padding: 1.5px 3px; font-size: 7pt; overflow: hidden;
     font-family: Arial, sans-serif;
   }
   body[data-print="emargement"] .emarg-card tbody td:last-child { border-right: none !important; }

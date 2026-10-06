@@ -356,6 +356,7 @@ function setCellHour(extraId, dayKey, val) {
 }
 
 /* ── Émargement — grille imprimable ── */
+const EMARG_PER_PAGE = 16;   // 4 colonnes × 4 lignes de fiches par page imprimée
 function renderEmargement() {
   const year  = getEmargYear(), week = getEmargWeek();
   const days  = getWeekDays(week, year);
@@ -365,8 +366,11 @@ function renderEmargement() {
 
   /* Seuls les extras ayant au moins un jour coché */
   const sorted = sortedExtras().filter(e => DAY_KEYS.some(k => (emarg[e.id] || {})[k]));
-  const cards  = [...sorted];
-  while (cards.length % 4 !== 0) cards.push(null);
+
+  /* Une page = 4 colonnes × 4 lignes de fiches (16 extras) ; à partir de la 5e ligne, nouvelle page :
+     les fiches gardent leur taille au lieu d'être écrasées sur une seule feuille */
+  const pages = [];
+  for (let i = 0; i < Math.max(sorted.length, 1); i += EMARG_PER_PAGE) pages.push(sorted.slice(i, i + EMARG_PER_PAGE));
 
   const M      = ['jan.','fév.','mar.','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
   const MLONG  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -376,17 +380,23 @@ function renderEmargement() {
     ? `${mon.getDate()} au ${sun.getDate()} ${MLONG[sun.getMonth()]} ${sun.getFullYear()}`
     : `${mon.getDate()} ${MLONG[mon.getMonth()]} au ${sun.getDate()} ${MLONG[sun.getMonth()]} ${sun.getFullYear()}`;
 
-  el.innerHTML = `
-    <div class="emarg-header">
-      <div class="emarg-header-title">FEUILLE D'ÉMARGEMENT — CROUPIERS EXTRAS POKER</div>
-      <div class="emarg-header-meta">Barrière Casino Bordeaux &nbsp;·&nbsp; Semaine ${String(week).padStart(2,'0')} &nbsp;·&nbsp; du ${rangeStr}</div>
-    </div>
-    <div class="emarg-grid">
-      ${cards.map(e =>
-        e ? buildCard(e, week, days, emarg[e.id] || {}, emarg)
-          : buildBlankCard(week, days)
-      ).join('')}
-    </div>`;
+  el.innerHTML = pages.map((list, p) => {
+    const cards = [...list];
+    while (cards.length % 4 !== 0) cards.push(null);                  // complète la dernière ligne avec des fiches vierges
+    const pageNo = pages.length > 1 ? ` &nbsp;·&nbsp; Page ${p + 1}/${pages.length}` : '';
+    return `<section class="emarg-page">
+      <div class="emarg-header">
+        <div class="emarg-header-title">FEUILLE D'ÉMARGEMENT — CROUPIERS EXTRAS POKER</div>
+        <div class="emarg-header-meta">Barrière Casino Bordeaux &nbsp;·&nbsp; Semaine ${String(week).padStart(2,'0')} &nbsp;·&nbsp; du ${rangeStr}${pageNo}</div>
+      </div>
+      <div class="emarg-grid">
+        ${cards.map(e =>
+          e ? buildCard(e, week, days, emarg[e.id] || {}, emarg)
+            : buildBlankCard(week, days)
+        ).join('')}
+      </div>
+    </section>`;
+  }).join('');
 }
 
 function buildCard(e, week, days, eData, emarg) {

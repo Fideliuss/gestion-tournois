@@ -138,11 +138,11 @@ function renderFamily(familyId, moduleKey) {
 function renderModulePills(familyId, mods, current) {
   const pill = function(key, label, n, dim) {
     const on = (key || null) === (current || null);
-    return '<button class="sv-chip' + (on ? ' on' : '') + (dim ? ' dim' : '') + '"'
+    return '<button class="fchip' + (on ? ' on' : '') + (dim ? ' dim' : '') + '"'
       + (dim ? ' disabled' : ' onclick="svcGo(\'' + familyId + '\'' + (key ? ',\'' + key + '\'' : '') + ')"') + '>'
-      + label + (n !== null ? ' <span class="sv-chip-n">' + n + '</span>' : '') + '</button>';
+      + label + (n !== null ? ' <span class="fchip-n">' + n + '</span>' : '') + '</button>';
   };
-  return '<div class="sv-chips sv-pills">' + pill(null, 'Tous les modules', null, false)
+  return '<div class="fchips sv-pills">' + pill(null, 'Tous les modules', null, false)
     + mods.map(function(m) {
         const n = (_svcByGame[m.game] || []).length;
         return pill(m.game, m.name + ' ' + m.em, n, n === 0);
@@ -204,8 +204,8 @@ function renderLevelChips(m, all, current) {
   });
   if (present.length < 1) return '';
   const chips = [['all', 'Tous']].concat(present);
-  return '<div class="sv-chips">' + chips.map(function(c) {
-    return '<button class="sv-chip' + (c[0] === current ? ' on' : '') + '" onclick="setSuiviLevel(\'' + m.game + '\',\'' + c[0] + '\')">' + c[1] + '</button>';
+  return '<div class="fchips">' + chips.map(function(c) {
+    return '<button class="fchip' + (c[0] === current ? ' on' : '') + '" onclick="setSuiviLevel(\'' + m.game + '\',\'' + c[0] + '\')">' + c[1] + '</button>';
   }).join('') + '</div>';
 }
 
