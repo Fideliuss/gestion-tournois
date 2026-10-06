@@ -27,6 +27,8 @@ Conçue pour être **extensible au-delà des tournois** — architecture de pann
 - **Phase 3** — Suivi résultats : vue historique croupier (« Mes résultats ») + vue manager (« Suivi équipe »). Développée (étapes 1 à 3, mergées dans `develop` ou en PR), **release prévue à la fin de la phase** (pas avant).
 - **Phase 4** — Ultimate Texas Hold'em : nouveau jeu complet (3 modules : Calcul des gains, Meilleure main, Qui gagne ?). **Livrée** — `v2.4.0` en prod le 2026-10-04 (PR de release #111, tag sur le commit de fusion 036a938) : moteur, hub, Meilleure main, Qui gagne ?, Calcul des gains et intégration au suivi.
 
+- **Refonte d'octobre 2026** — `v3.0.0` (2026-10-06) : navigation (barre, espaces, menu Gestion), saisons du challenge avec clôture, Gestion des comptes (liste filtrable, rôles & accès, prénom / nom), nouvelle charte (cartes arrondies, boutons et icônes uniques), émargement imprimé en pages de 4 lignes.
+
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
 
 ---
