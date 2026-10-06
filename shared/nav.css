@@ -79,6 +79,9 @@ body.light .nav-pop { background: #F4EFE6; color: #1A1208; box-shadow: none; }
   font-size: 13px; font-weight: 500; color: var(--cream); text-decoration: none; transition: background .12s;
 }
 body.light .nav-row { color: #1A1208; }
+.nav-grp { padding: 10px 16px 4px; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+.nav-grp:first-child { padding-top: 6px; }
+body.light .nav-grp { color: #873200; }
 .nav-row small { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; color: var(--text-dim); }
 body.light .nav-row small { color: #5A4830; }
 .nav-row:hover { background: rgba(195,120,20,.16); }

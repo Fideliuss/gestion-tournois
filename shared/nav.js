@@ -48,14 +48,15 @@ const NAV = (function () {
         { label: 'Calcul des gains', href: UTH + 'uth_gains.html' },
       ] },
       { label: 'Mes résultats', href: T + 'suivi/suivi_croupier.html' },
-      { label: 'Suivi équipe',  href: T + 'suivi/suivi_manager.html', panel: 'training-suivi' },
     ] },
   ];
 
-  // Menu Administration (réservé aux admins), à droite de la barre
-  const ADMIN = { label: 'Administration', items: [
-    { label: 'Gestion des comptes', href: 'admin/comptes.html' },
-    { label: 'Config Training',     href: 'admin/config_training.html' },
+  // Menu « Gestion », à droite de la barre : trois parties, chaque entrée selon les droits
+  // (`role: 'admin'` = admins seulement ; `panel` = droit de l'espace, comme dans les gardes de page)
+  const GESTION = { label: 'Gestion', groups: [
+    { title: 'Comptes',  items: [ { label: 'Gestion des comptes',       href: 'admin/comptes.html',                 role: 'admin' } ] },
+    { title: 'Training', items: [ { label: 'Configuration des modules', href: 'admin/config_training.html',         role: 'admin' } ] },
+    { title: 'Suivi',    items: [ { label: 'Suivi équipe',              href: T + 'suivi/suivi_manager.html',       panel: 'training-suivi' } ] },
   ] };
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -91,7 +92,8 @@ const NAV = (function () {
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
   const PAGES = { 'index.html': {} };
-  ADMIN.items.forEach(function (it) { PAGES[it.href] = { admin: true }; });
+  GESTION.groups.forEach(function (g) { g.items.forEach(function (it) { PAGES[it.href] = { admin: true }; }); });
+  PAGES[T + 'suivi/suivi_manager.html'].s = 'training';   // le suivi d'équipe reste dans le contexte Training (barre de l'espace affichée)
   SPACES.forEach(function (s) {
     PAGES[s.href] = { s: s.id };
     s.items.forEach(function (it) {
@@ -216,12 +218,20 @@ const NAV = (function () {
     }));
     function mark(a, on) { if (on) a.setAttribute('aria-current', 'page'); return a; }
 
-    // ── Outils à droite : Administration (admin), thème, utilisateur ──
+    // ── Outils à droite : Gestion, thème, utilisateur ──
     const tools = [];
-    if (opts.isAdmin) {
-      const abtn = el('button', { class: 'nav-btn', type: 'button' }, [el('span', { class: 'nav-btn-label', text: ADMIN.label }), icon('down')]);
+    const gestion = GESTION.groups.map(function (g) {
+      return { title: g.title, items: g.items.filter(function (it) { return opts.isAdmin || (!it.role && (opts.panels || []).indexOf(it.panel) >= 0); }) };
+    }).filter(function (g) { return g.items.length; });
+    if (gestion.length) {
+      const abtn = el('button', { class: 'nav-btn', type: 'button' }, [el('span', { class: 'nav-btn-label', text: GESTION.label }), icon('down')]);
       if (page.admin) abtn.setAttribute('aria-current', 'page');
-      tools.push(dropdown(abtn, ADMIN.items.map(function (it) { return row(it.label, it.href, key === it.href); }), true));
+      const entries = [];
+      gestion.forEach(function (g) {
+        entries.push(el('div', { class: 'nav-grp', text: g.title }));
+        g.items.forEach(function (it) { entries.push(row(it.label, it.href, key === it.href)); });
+      });
+      tools.push(dropdown(abtn, entries, true));
     }
     const themeBtn = el('button', { class: 'nav-btn nav-theme', type: 'button', 'aria-label': 'Changer de thème', on: { click: function () { toggleTheme(); } } }, [
       icon('sun', 'i-sun'), icon('moon', 'i-moon'),
@@ -253,7 +263,7 @@ const NAV = (function () {
       });
       return group(spaces.length > 1 ? s.label : null, links);
     });
-    if (opts.isAdmin) groups.push(group(ADMIN.label, ADMIN.items.map(function (it) { return plink(it.label, it.href, key === it.href); })));
+    gestion.forEach(function (g) { groups.push(group(GESTION.label + ' · ' + g.title, g.items.map(function (it) { return plink(it.label, it.href, key === it.href); }))); });
     const panel = el('div', { class: 'nav-panel', id: 'nav-panel' }, groups.concat([el('div', { class: 'grp acts' }, [
       el('div', { class: 'who', text: opts.email + ' · ' + roleLabel(opts.role) }),
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),
