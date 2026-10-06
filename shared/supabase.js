@@ -277,8 +277,9 @@ const SB = {
     return (await this._callUsers('GET')).users;
   },
 
-  async createUser(email, password, role) {
-    return (await this._callUsers('POST', { email, password, role })).user;
+  // names : { firstName, lastName } (facultatif)
+  async createUser(email, password, role, names) {
+    return (await this._callUsers('POST', Object.assign({ email, password, role }, names || {}))).user;
   },
 
   async updateUser(id, changes) {

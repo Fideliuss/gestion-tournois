@@ -13,7 +13,9 @@ let _tab          = 'comptes';
 let _draft        = {};        // accès en cours d'édition dans la matrice : { slug: [id de page…] } (rien n'est envoyé avant « Enregistrer »)
 
 const INACTIVE_DAYS = 60;       // « inactif » : jamais connecté, ou aucune connexion depuis plus de 60 jours
-const f = { q: '', role: null, inactive: false, group: false, sort: { key: 'email', dir: 1 } };
+const f = { q: '', role: null, inactive: false, noname: false, group: false, sort: { key: 'email', dir: 1 } };
+const EMAIL_DOMAIN = '@groupebarriere.com';      // adresses : initiale du prénom + nom (bcuvelier@groupebarriere.com)
+let _emailTouched = false;                          // l'adresse proposée n'est plus recalculée dès qu'on la modifie à la main
 
 // `short` : intitulé de la colonne dans la matrice
 const PANELS = [
@@ -112,7 +114,15 @@ function slugify(str) {
 // ── Comptes : état d'un compte ───────────────────────
 function daysSince(iso) { return Math.floor((Date.now() - new Date(iso).getTime()) / 864e5); }
 function isInactive(u) { return !u.lastSignIn || daysSince(u.lastSignIn) > INACTIVE_DAYS; }
-function initials(email) {
+const isNoName = u => !u.firstName || !u.lastName;
+const fullName = u => [u.firstName, u.lastName].filter(Boolean).join(' ');
+const sortName = u => ((u.lastName || u.email) + ' ' + (u.firstName || '')).toLowerCase();
+const slug = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function initials(u) {
+  if (u.firstName && u.lastName) return (u.firstName[0] + u.lastName[0]).toUpperCase();
+  return initialsOfEmail(u.email);
+}
+function initialsOfEmail(email) {
   const parts = email.split('@')[0].split('.');
   return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
 }
@@ -129,19 +139,23 @@ function renderChips() {
   const counts = {};
   _users.forEach(u => { counts[u.role] = (counts[u.role] || 0) + 1; });
   if (f.role && !counts[f.role]) f.role = null;
+  const noName = _users.filter(isNoName).length;
+  if (f.noname && !noName) f.noname = false;
   const chip = (key, label, n, on, dot, title) =>
     '<button class="fchip' + (on ? ' on' : '') + '" data-chip="' + esc(key) + '" aria-pressed="' + on + '"' + (title ? ' title="' + esc(title) + '"' : '') + '>'
     + (dot ? '<i class="fchip-dot" style="background:' + dot + '"></i>' : '') + esc(label) + ' <span class="fchip-n">' + n + '</span></button>';
   $('chips').innerHTML =
-    chip('all', 'Tous', _users.length, !f.role && !f.inactive)
+    chip('all', 'Tous', _users.length, !f.role && !f.inactive && !f.noname)
     + sortedRoles().filter(r => counts[r.slug]).map(r => chip('role:' + r.slug, r.label, counts[r.slug], f.role === r.slug, roleColor(r.slug))).join('')
     + '<span class="fchip-sep"></span>'
-    + chip('inactive', 'Inactifs', _users.filter(isInactive).length, f.inactive, null, 'Jamais connectés ou sans connexion depuis plus de ' + INACTIVE_DAYS + ' jours');
+    + chip('inactive', 'Inactifs', _users.filter(isInactive).length, f.inactive, null, 'Jamais connectés ou sans connexion depuis plus de ' + INACTIVE_DAYS + ' jours')
+    + (noName ? chip('noname', 'Sans nom', noName, f.noname, null, 'Comptes dont le prénom ou le nom n\'est pas renseigné') : '');
 }
 
 function onChipClick(key) {
-  if (key === 'all') { f.role = null; f.inactive = false; }
+  if (key === 'all') { f.role = null; f.inactive = false; f.noname = false; }
   else if (key === 'inactive') f.inactive = !f.inactive;
+  else if (key === 'noname') f.noname = !f.noname;
   else { const slug = key.slice(5); f.role = f.role === slug ? null : slug; }
   renderChips(); renderAccounts();
 }
@@ -159,16 +173,16 @@ function setSort(key) {
 }
 
 function resetFilters() {
-  f.role = null; f.inactive = false; $('search').value = '';
+  f.role = null; f.inactive = false; f.noname = false; $('search').value = '';
   renderChips(); renderAccounts();
 }
 
 function compareUsers(a, b) {
   const k = f.sort.key;
   let r;
-  if (k === 'role')      r = roleRank(a.role) - roleRank(b.role) || roleLabel(a.role).localeCompare(roleLabel(b.role)) || a.email.localeCompare(b.email);
-  else if (k === 'last') r = (a.lastSignIn ? Date.parse(a.lastSignIn) : 0) - (b.lastSignIn ? Date.parse(b.lastSignIn) : 0) || a.email.localeCompare(b.email);
-  else                   r = a.email.localeCompare(b.email);
+  if (k === 'role')      r = roleRank(a.role) - roleRank(b.role) || roleLabel(a.role).localeCompare(roleLabel(b.role)) || sortName(a).localeCompare(sortName(b));
+  else if (k === 'last') r = (a.lastSignIn ? Date.parse(a.lastSignIn) : 0) - (b.lastSignIn ? Date.parse(b.lastSignIn) : 0) || sortName(a).localeCompare(sortName(b));
+  else                   r = sortName(a).localeCompare(sortName(b));
   return r * f.sort.dir;
 }
 
@@ -176,13 +190,15 @@ function compareUsers(a, b) {
 function rowHtml(u) {
   const c = roleColor(u.role), last = lastInfo(u);
   return '<div class="cp-row" data-id="' + esc(u.id) + '">'
-    + '<div class="cp-who"><div class="cp-avatar" style="background:' + c + '22;color:' + c + '">' + esc(initials(u.email)) + '</div>'
-    + '<div class="cp-email" title="' + esc(u.email) + '">' + esc(u.email) + '</div></div>'
+    + '<div class="cp-who"><div class="cp-avatar" style="background:' + c + '22;color:' + c + '">' + esc(initials(u)) + '</div>'
+    + '<div class="cp-ident" title="' + esc(u.email) + '">'
+    + (fullName(u) ? '<div class="cp-email">' + esc(fullName(u)) + '</div><div class="cp-sub">' + esc(u.email) + '</div>' : '<div class="cp-email">' + esc(u.email) + '</div>')
+    + '</div></div>'
     + '<div class="cp-rolecol"><span class="cp-role" style="background:' + c + '1f;color:' + c + '"><i class="fchip-dot" style="background:' + c + '"></i>' + esc(roleLabel(u.role)) + '</span></div>'
     + '<div class="cp-last ' + last.cls + '" title="' + esc(last.title) + '">' + esc(last.text) + '</div>'
     + '<div class="cp-acts">'
-    + '<button class="btn-icon" data-act="edit" title="Modifier" aria-label="Modifier ' + esc(u.email) + '">' + ICON_EDIT + '</button>'
-    + '<button class="btn-icon danger" data-act="delete" title="Supprimer" aria-label="Supprimer ' + esc(u.email) + '">' + ICON_DEL + '</button>'
+    + '<button class="btn-icon" data-act="edit" title="Modifier" aria-label="Modifier ' + esc(fullName(u) || u.email) + '">' + ICON_EDIT + '</button>'
+    + '<button class="btn-icon danger" data-act="delete" title="Supprimer" aria-label="Supprimer ' + esc(fullName(u) || u.email) + '">' + ICON_DEL + '</button>'
     + '</div></div>';
 }
 
@@ -201,7 +217,8 @@ function renderAccounts() {
   const list = _users.filter(u =>
     (!f.role || u.role === f.role)
     && (!f.inactive || isInactive(u))
-    && (!f.q || u.email.toLowerCase().indexOf(f.q) >= 0 || roleLabel(u.role).toLowerCase().indexOf(f.q) >= 0)
+    && (!f.noname || isNoName(u))
+    && (!f.q || (u.email + ' ' + fullName(u) + ' ' + roleLabel(u.role)).toLowerCase().indexOf(f.q) >= 0)
   ).sort(compareUsers);
 
   const plural = n => n + ' compte' + (n > 1 ? 's' : '');
@@ -238,8 +255,8 @@ document.addEventListener('click', function (e) {
   const row = btn.closest('[data-id]');
   const u = row && _users.find(u => String(u.id) === row.dataset.id);
   if (!u) return;
-  if (btn.dataset.act === 'edit') editAccount(u.id, u.email, u.role);
-  else if (btn.dataset.act === 'delete') deleteAccount(u.id, u.email);
+  if (btn.dataset.act === 'edit') editAccount(u);
+  else if (btn.dataset.act === 'delete') deleteAccount(u.id, fullName(u) || u.email);
 });
 
 // ── Rôles & accès : matrice ──────────────────────────
@@ -439,43 +456,62 @@ function populateRoleSelect(current) {
   if (keep) sel.value = keep;
 }
 
+function formErr(msg) { $('form-err').textContent = msg || ''; }
+
 function openForm() {
-  _editId = null;
+  _editId = null; _emailTouched = false;
   $('form-sec').textContent = 'Nouveau compte';
+  $('inp-first').value = ''; $('inp-last').value = '';
   $('inp-email').value = ''; $('inp-password').value = '';
   $('inp-email').disabled = false;
+  $('email-hint').style.display = '';
   $('pwd-hint').style.display = 'none';
   $('btn-save').textContent = 'Créer le compte →';
+  formErr('');
   populateRoleSelect(f.role || 'floor');           // le filtre de rôle en cours sert de valeur par défaut
   $('modal-form').classList.add('open');
-  setTimeout(() => $('inp-email').focus(), 50);
+  setTimeout(() => $('inp-first').focus(), 50);
 }
 
-function editAccount(id, email, role) {
-  _editId = id;
+function editAccount(u) {
+  _editId = u.id; _emailTouched = true;
   $('form-sec').textContent = 'Modifier le compte';
-  $('inp-email').value = email; $('inp-password').value = '';
+  $('inp-first').value = u.firstName || ''; $('inp-last').value = u.lastName || '';
+  $('inp-email').value = u.email; $('inp-password').value = '';
   $('inp-email').disabled = true;
+  $('email-hint').style.display = 'none';
   $('pwd-hint').style.display = '';
   $('btn-save').textContent = 'Enregistrer →';
-  populateRoleSelect(role);
+  formErr('');
+  populateRoleSelect(u.role);
   $('modal-form').classList.add('open');
-  setTimeout(() => $('inp-role').focus(), 50);
+  setTimeout(() => (u.firstName ? $('inp-role') : $('inp-first')).focus(), 50);
 }
 
 function closeForm() { $('modal-form').classList.remove('open'); _editId = null; }
 
+// Adresse proposée : initiale du prénom + nom, sans accents ni espaces (« Brayan Cuvelier » → bcuvelier@groupebarriere.com)
+function suggestEmail() {
+  const first = slug($('inp-first').value), last = slug($('inp-last').value);
+  return first && last ? first[0] + last + EMAIL_DOMAIN : '';
+}
+function onNameInput() { if (!_editId && !_emailTouched) $('inp-email').value = suggestEmail(); }
+function onEmailInput() { _emailTouched = $('inp-email').value.trim() !== ''; }
+
 async function saveForm() {
+  const first = $('inp-first').value.trim(), last = $('inp-last').value.trim();
   const email = $('inp-email').value.trim(), password = $('inp-password').value, role = $('inp-role').value, btn = $('btn-save');
-  if (!_editId && !email)              { showErr("L'e-mail est requis."); return; }
-  if (!_editId && password.length < 8) { showErr('Mot de passe trop court (8 car. min).'); return; }
-  if (_editId && password && password.length < 8) { showErr('Mot de passe trop court (8 car. min).'); return; }
+  formErr('');
+  if (!_editId && (!first || !last))   { formErr('Le prénom et le nom sont requis.'); return; }
+  if (!_editId && !email)              { formErr("L'e-mail est requis."); return; }
+  if (!_editId && password.length < 8) { formErr('Mot de passe trop court (8 car. min).'); return; }
+  if (_editId && password && password.length < 8) { formErr('Mot de passe trop court (8 car. min).'); return; }
   btn.disabled = true;
   try {
-    if (!_editId) { await SB.createUser(email, password, role); closeForm(); showOk('Compte créé.'); }
-    else { await SB.updateUser(_editId, Object.assign({ role }, password ? { password } : {})); closeForm(); showOk('Compte mis à jour.'); }
+    if (!_editId) { await SB.createUser(email, password, role, { firstName: first, lastName: last }); closeForm(); showOk('Compte créé.'); }
+    else { await SB.updateUser(_editId, Object.assign({ role, firstName: first, lastName: last }, password ? { password } : {})); closeForm(); showOk('Compte mis à jour.'); }
     await loadAndRender();
-  } catch (e) { showErr('Erreur : ' + e.message); }
+  } catch (e) { formErr('Erreur : ' + e.message); }
   finally { btn.disabled = false; }
 }
 

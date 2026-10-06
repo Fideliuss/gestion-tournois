@@ -19,6 +19,7 @@ body.has-nav .app { padding-top: 36px; min-height: calc(100vh - 56px); }
 .nav-brand { display: flex; align-items: center; flex: none; gap: 10px; text-decoration: none; }
 .nav-brand img { height: 14px; width: auto; }
 /* « BORDEAUX » dans le prolongement du logo, puis le service sur deux lignes derrière un filet */
+.nav-star { width: 9px; height: 9px; color: var(--gold); margin: 0 -1px; }   /* éclat de la charte : sépare le logo de la ville */
 .nav-city { font-size: 14px; font-weight: 400; letter-spacing: .18em; text-transform: uppercase; line-height: 1; color: var(--cream); }
 .nav-service {
   display: flex; flex-direction: column; justify-content: center; gap: 1px; padding-left: 12px; border-left: 1px solid var(--gold-bd);
@@ -98,6 +99,8 @@ body.light .nav-row:hover { background: #E7DFD0; }
 .nav-row[aria-current] small { color: #1A1208; }
 .nav-id { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px 16px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--gold-bd); }
 body.light .nav-id { border-bottom-color: #D9CFBC; }
+.nav-id small { margin-top: -4px; font-size: 11px; color: var(--text-dim); max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+body.light .nav-id small { color: #5A4830; }
 .nav-id b { font-size: 13px; font-weight: 500; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .nav-chip { border-radius: 999px; padding: 2px 9px; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 

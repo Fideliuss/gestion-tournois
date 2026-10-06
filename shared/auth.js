@@ -96,7 +96,7 @@ const AUTH = {
       try {
         const cached = _rolePanelsCache[userRole] || {};
         navOk = (await _loadNav()) && NAV.mount({
-          root, loginUrl, email: session.user.email, role: userRole, isAdmin,
+          root, loginUrl, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
           panels: cached.panels || [], color: cached.color || null,
         });
       } catch (e) { navOk = false; }
@@ -116,6 +116,12 @@ const AUTH = {
     const raw   = (meta.first_name || meta.prenom || (local.indexOf('.') > 0 ? local.split('.')[0] : '') || '').trim();
     if (raw.replace(/[^a-zà-ÿ]/gi, '').length < 2) return '';
     return raw.split(/([-' ])/).map(function (p) { return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(); }).join('');
+  },
+
+  /** « Prénom Nom » si les deux sont renseignés (métadonnées), sinon vide */
+  fullName(user) {
+    const meta = (user && user.user_metadata) || {};
+    return [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim();
   },
 
   /** « Bonjour » le jour, « Bonsoir » de 18 h à 4 h */
