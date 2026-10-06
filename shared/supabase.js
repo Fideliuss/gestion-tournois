@@ -211,6 +211,13 @@ const SB = {
     return session;
   },
 
+  // Utilisateur à jour, lu côté serveur : la session stockée dans le navigateur garde les métadonnées (prénom, nom, rôle)
+  // de la dernière connexion ou du dernier renouvellement du jeton. null si la lecture échoue.
+  async getUser() {
+    const { data, error } = await _sb.auth.getUser();
+    return error ? null : data.user;
+  },
+
   onAuthStateChange(cb) {
     return _sb.auth.onAuthStateChange(cb);
   },

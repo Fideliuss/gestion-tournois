@@ -59,7 +59,11 @@ const AUTH = {
       return null;
     }
 
-    const userRole = session.user.user_metadata?.role || 'floor';
+    // Prénom, nom et rôle à jour : on relit l'utilisateur côté serveur (repli sur la session si la lecture échoue)
+    let user = session.user;
+    try { const fresh = await SB.getUser(); if (fresh) user = fresh; } catch (e) {}
+
+    const userRole = user.user_metadata?.role || 'floor';
     const isAdmin  = userRole === 'admin';
 
     const depth = (loginUrl.match(/\.\.\//g) || []).length;
@@ -96,14 +100,14 @@ const AUTH = {
       try {
         const cached = _rolePanelsCache[userRole] || {};
         navOk = (await _loadNav()) && NAV.mount({
-          root, loginUrl, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
+          root, loginUrl, email: user.email, name: AUTH.fullName(user), role: userRole, isAdmin,
           panels: cached.panels || [], color: cached.color || null,
         });
       } catch (e) { navOk = false; }
     }
     overlay.remove();
-    if (!navOk) AUTH._addBadge(loginUrl, session.user.email, userRole);   // repli : ancienne interface
-    return session.user;
+    if (!navOk) AUTH._addBadge(loginUrl, user.email, userRole);   // repli : ancienne interface
+    return user;
   },
 
   /**
