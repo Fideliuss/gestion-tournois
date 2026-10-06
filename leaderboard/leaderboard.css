@@ -6,7 +6,9 @@
     /* ── Barre : saison (gauche) · onglets (centre) · Saisir (droite, à part) ── */
     .lb-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; margin-bottom: 24px; }
     .lb-bar .seg { margin: 0; }
-    .lb-bar-l { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; justify-self: start; min-width: 0; }
+    .lb-bar:has(.season-admin) { margin-bottom: 44px; }
+    /* Le bouton de clôture est posé sous le sélecteur sans compter dans la hauteur : sélecteur, onglets et Saisir restent alignés */
+    .lb-bar-l { position: relative; justify-self: start; min-width: 0; }
     .season-line { display: flex; align-items: center; gap: 10px; max-width: 100%; }
     .lb-bar-r { justify-self: end; }
     .lb-saisir {
@@ -28,8 +30,14 @@
     .season-state { font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-dim); white-space: nowrap; }
     .season-state.closed { color: #e07a68; }
     .season-state.closed::before { content: '🔒 '; }
-    .season-admin { background: none; border: 0; padding: 0 4px; cursor: pointer; font-family: var(--f-ui); font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); text-decoration: underline; text-underline-offset: 3px; }
-    .season-admin:hover { color: var(--gold); }
+    .season-admin {
+      position: absolute; top: calc(100% + 6px); left: 6px; white-space: nowrap;
+      padding: 3px 11px; border-radius: 999px; background: none; border: 1px solid var(--text-muted); cursor: pointer;
+      font-family: var(--f-ui); font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim);
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .season-admin:hover { color: #e07a68; border-color: rgba(192,57,43,.6); background: rgba(192,57,43,.12); }
+    body.light .season-admin:hover { color: #a93226; border-color: rgba(169,50,38,.6); background: rgba(169,50,38,.08); }
     .season-admin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     @media (max-width: 760px) {
       .lb-bar { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "l r" "s s"; }
@@ -37,7 +45,9 @@
       .season-state:not(.closed) { display: none; }
       .season-state.closed { font-size: 0; }
       .season-state.closed::before { font-size: 15px; }
-      .lb-bar-l { grid-area: l; } .lb-bar-r { grid-area: r; } .lb-bar .seg { grid-area: s; justify-self: center; }
+      .lb-bar-l { grid-area: l; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+      .lb-bar:has(.season-admin) { margin-bottom: 24px; }
+      .season-admin { position: static; } .lb-bar-r { grid-area: r; } .lb-bar .seg { grid-area: s; justify-self: center; }
     }
 
     /* ── Formulaire saisie ── */
