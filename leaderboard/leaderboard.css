@@ -18,15 +18,7 @@
     .season-state { font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-dim); white-space: nowrap; }
     .season-state.closed { color: #e07a68; }
     .season-state.closed::before { content: '🔒 '; }
-    .season-admin {
-      position: absolute; top: calc(100% + 6px); left: 6px; white-space: nowrap;
-      padding: 3px 11px; border-radius: 999px; background: none; border: 1px solid var(--text-muted); cursor: pointer;
-      font-family: var(--f-ui); font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim);
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .season-admin:hover { color: #e07a68; border-color: rgba(192,57,43,.6); background: rgba(192,57,43,.12); }
-    body.light .season-admin:hover { color: #a93226; border-color: rgba(169,50,38,.6); background: rgba(169,50,38,.08); }
-    .season-admin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .season-admin { position: absolute; top: calc(100% + 6px); left: 6px; }
     @media (max-width: 760px) {
       .season-select { padding: 8px 30px 8px 12px; font-size: 11px; max-width: 100%; }
       .season-state:not(.closed) { display: none; }
@@ -103,33 +95,10 @@
     .pts-input-extra::placeholder { color: var(--text-muted); font-size: 12px; }
 
     /* Bouton ajouter place */
-    .btn-add-place {
-      width: 100%; padding: 10px; margin-bottom: 16px;
-      font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
-      background: none; color: var(--gold-dim);
-      border: 1px dashed rgba(195,120,20,.25); border-radius: 3px;
-      cursor: pointer; transition: all .18s; display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-add-place:hover { color: var(--gold); border-color: rgba(195,120,20,.5); background: rgba(195,120,20,.04); }
+    .btn-add-place { margin-bottom: 16px; }
+    .hist-nav-btn { width: 34px; height: 34px; font-size: 20px; }
 
     /* ── Boutons ── */
-    .btn-connect {
-      background: rgba(195,120,20,.15); color: var(--gold);
-      border: 1px solid rgba(195,120,20,.35); border-radius: 3px;
-      padding: 10px 20px; font-size: 12px; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      cursor: pointer; transition: all .18s; white-space: nowrap; flex-shrink: 0;
-    }
-    .btn-connect:hover { background: rgba(195,120,20,.25); }
-    .btn-validate {
-      width: 100%; padding: 14px; font-size: 13px; font-weight: 600;
-      background: rgba(195,120,20,.18); color: var(--gold);
-      border: 1px solid rgba(195,120,20,.4); border-radius: 3px;
-      cursor: pointer; transition: all .18s; letter-spacing: .12em; text-transform: uppercase;
-    }
-    .btn-validate:hover { background: rgba(195,120,20,.28); }
-    body.light .btn-validate { background: rgba(135,50,0,.12); border-color: rgba(135,50,0,.35); }
-    body.light .btn-validate:hover { background: rgba(135,50,0,.22); }
 
     /* ── Alertes ── */
     .alert-dup {
@@ -155,13 +124,6 @@
     .search-row input[type="text"] { flex: 1; min-width: 160px; }
     .search-row select             { flex: 0 0 200px; }
     .search-row input[type="date"] { flex: 0 0 150px; }
-    .btn-ghost-hist {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: none; border: 1px solid rgba(195,120,20,.2); border-radius: 3px;
-      color: var(--text-muted); font-size: 12px; padding: 0 10px;
-      cursor: pointer; transition: all .15s; flex-shrink: 0;
-    }
-    .btn-ghost-hist:hover { background: rgba(192,57,43,.1); color: #e07a68; border-color: rgba(192,57,43,.3); }
     @media(max-width:600px){ .search-row select, .search-row input[type="date"] { flex: 1 1 140px; } }
 
     /* ── Table classement ── */
@@ -271,17 +233,6 @@
       display: flex; align-items: center; justify-content: center;
       gap: 16px; margin-bottom: 18px;
     }
-    .hist-nav-btn {
-      width: 34px; height: 34px; border-radius: 3px; flex-shrink: 0;
-      background: var(--bg-input); border: 1px solid rgba(195,120,20,.2);
-      color: var(--gold); font-size: 20px; line-height: 1; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s, border-color .15s;
-    }
-    .hist-nav-btn:hover:not(:disabled) {
-      background: rgba(195,120,20,.1); border-color: rgba(195,120,20,.4);
-    }
-    .hist-nav-btn:disabled { opacity: .22; cursor: not-allowed; }
     .hist-nav-label {
       font-family: var(--f-display); font-size: 20px; font-style: italic;
       color: var(--cream); min-width: 200px; text-align: center;
@@ -315,12 +266,6 @@
     .sess-date { font-family: var(--f-num); font-size: 11px; color: var(--text-dim); flex-shrink:0; }
     .sess-meta { font-size: 11px; color: var(--text-muted); }
 
-    .btn-sess-edit {
-      background: none; border: 1px solid rgba(195,120,20,.18); border-radius: 2px;
-      color: var(--text-muted); font-size: 11px; padding: 2px 7px;
-      cursor: pointer; transition: all .13s;
-    }
-    .btn-sess-edit:hover { background: rgba(195,120,20,.1); color: var(--gold); border-color: rgba(195,120,20,.38); }
 
     .sess-results { padding: 2px 13px 6px; }
     .sess-no-results { padding: 12px 0; font-size: 11px; color: var(--text-muted); font-style: italic; }
@@ -340,22 +285,6 @@
     .res-acts { display: flex; gap: 4px; flex-shrink:0; }
 
     /* Boutons micro */
-    .btn-edit-sm {
-      background: none; border: 1px solid rgba(195,120,20,.15); border-radius: 2px;
-      color: var(--text-muted); font-size: 11px; padding: 2px 7px;
-      cursor: pointer; transition: all .12s;
-    }
-    .btn-edit-sm:hover { background: rgba(195,120,20,.1); color: var(--gold); border-color: rgba(195,120,20,.3); }
-    .btn-save-sm {
-      background: rgba(39,174,96,.1); border: 1px solid rgba(39,174,96,.32); border-radius: 2px;
-      color: #6dcc8e; font-size: 11px; padding: 2px 8px; cursor: pointer; transition: all .12s;
-    }
-    .btn-save-sm:hover { background: rgba(39,174,96,.2); }
-    .btn-cancel-sm {
-      background: none; border: 1px solid rgba(192,57,43,.22); border-radius: 2px;
-      color: #e07a68; font-size: 11px; padding: 2px 7px; cursor: pointer; transition: all .12s;
-    }
-    .btn-cancel-sm:hover { background: rgba(192,57,43,.1); }
 
     /* Inputs édition inline */
     .edit-place, .edit-name, .edit-pts {
@@ -393,14 +322,6 @@
 
     /* ── CONFIG TOURNOIS ── */
     .config-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .btn-new-tournament {
-      display: flex; align-items: center; gap: 6px;
-      padding: 9px 18px; border-radius: 3px;
-      font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-      background: rgba(195,120,20,.18); color: var(--gold);
-      border: 1px solid rgba(195,120,20,.4); cursor: pointer; transition: all .18s;
-    }
-    .btn-new-tournament:hover { background: rgba(195,120,20,.28); }
 
     /* Liste tournois */
     .tournament-list { display: flex; flex-direction: column; gap: 8px; }
@@ -459,16 +380,8 @@
     body.light .pts-cell input { background: rgba(200,185,150,.2); border-color: rgba(135,50,0,.2); }
 
     .points-actions { display: flex; gap: 8px; margin-bottom: 16px; }
-    .btn-pts-add { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(195,120,20,.1); color: var(--gold-dim); border: 1px solid rgba(195,120,20,.22); border-radius: 3px; cursor: pointer; transition: all .15s; }
-    .btn-pts-add:hover { background: rgba(195,120,20,.2); color: var(--gold); }
-    .btn-pts-rem { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(192,57,43,.07); color: #e07a68; border: 1px solid rgba(192,57,43,.2); border-radius: 3px; cursor: pointer; transition: all .15s; }
-    .btn-pts-rem:hover { background: rgba(192,57,43,.16); }
 
     .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-save { padding: 10px 22px; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; background: rgba(195,120,20,.18); color: var(--gold); border: 1px solid rgba(195,120,20,.4); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-save:hover { background: rgba(195,120,20,.28); }
-    .btn-cancel { padding: 10px 18px; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; background: none; color: var(--text-dim); border: 1px solid rgba(195,120,20,.12); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-cancel:hover { color: var(--text); border-color: rgba(195,120,20,.25); }
 
     .config-empty { text-align: center; padding: 32px; color: var(--text-muted); font-size: 13px; border: 1px dashed rgba(195,120,20,.15); border-radius: 3px; }
     .alert-config-success { background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.25); border-radius: 3px; padding: 10px 14px; font-size: 12px; color: #6dcc8e; margin-bottom: 14px; display: none; }
@@ -487,10 +400,7 @@
     /* ── Document ranking — écran ── */
     .ranking-doc-wrapper { background: rgba(255,255,255,.04); border: 1px solid rgba(195,120,20,.15); border-radius: 4px; padding: 24px; margin-bottom: 20px; }
     .ranking-doc { background: #fff; border-radius: 4px; padding: 40px 36px; max-width: 560px; margin: 0 auto; text-align: center; font-family: 'Bebas Neue', sans-serif; color: #111; }
-    .btn-print-ranking { display: block; width: 100%; padding: 14px; font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; background: rgba(195,120,20,.18); color: var(--gold); border: 1px solid rgba(195,120,20,.4); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-print-ranking:hover { background: rgba(195,120,20,.28); }
     body.light .ranking-doc-wrapper { background: rgba(135,50,0,.04); border-color: rgba(135,50,0,.15); }
-    body.light .btn-print-ranking   { background: rgba(135,50,0,.1); border-color: rgba(135,50,0,.3); }
 
     /* ── Styles rp-doc (aperçu écran) ── */
     .ranking-doc .rp-doc    { font-family: 'Bebas Neue', sans-serif; display: flex; flex-direction: column; }

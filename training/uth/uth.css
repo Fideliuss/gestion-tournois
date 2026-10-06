@@ -174,7 +174,7 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 }
 .uc-amount-row input.bad { border-color: #e07a68; }
 .uc-amount-row input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
-.uc-amount-row .btn { padding: 8px 14px; font-size: 12px; margin-left: auto; }
+.uc-amount-row .btn { margin-left: auto; }
 .uc-pop-info, .uc-pop-res { font-size: 12px; line-height: 1.5; }
 .uc-pop-res.ok { color: #6dcc8e; }
 .uc-pop-res.ko { color: #e07a68; }

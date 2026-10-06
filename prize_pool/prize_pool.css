@@ -27,13 +27,6 @@ body.light .pp-preset.active { background: rgba(135,50,0,.1);   border-color: rg
 
 /* ── Bouton config tournois ── */
 .acc-hdr-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.btn-tm-cfg {
-  font-size: 13px; line-height: 1; padding: 3px 6px;
-  background: transparent; border: 1px solid transparent;
-  border-radius: 3px; color: var(--text-muted); cursor: pointer;
-  opacity: .45; transition: all .15s;
-}
-.btn-tm-cfg:hover { opacity: 1; color: var(--gold-dim); border-color: rgba(195,120,20,.2); }
 
 /* ── Modal gestion tournois ── */
 .tm-modal {
@@ -71,14 +64,6 @@ body.light .pp-preset.active { background: rgba(135,50,0,.1);   border-color: rg
 .tm-row-name  { display: block; font-size: 13px; font-weight: 400; color: var(--text-dim); }
 .tm-row-meta  { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: var(--f-num); }
 .tm-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.tm-btn-edit, .tm-btn-del {
-  font-size: 12px; padding: 3px 8px; border-radius: 3px; cursor: pointer;
-  background: transparent; border: 1px solid transparent; transition: all .13s;
-}
-.tm-btn-edit { color: var(--gold-dim); }
-.tm-btn-edit:hover { background: rgba(195,120,20,.1); border-color: rgba(195,120,20,.25); color: var(--gold); }
-.tm-btn-del  { color: var(--text-muted); }
-.tm-btn-del:hover  { background: rgba(192,57,43,.1); border-color: rgba(192,57,43,.3); color: var(--red); }
 
 .tm-form {
   padding: 16px 20px; border-top: 1px solid rgba(195,120,20,.1); flex-shrink: 0;
@@ -212,19 +197,7 @@ body.light .suggest-row { background: rgba(200,180,140,.08); border-color: rgba(
 
 .sug-actions { display: flex; gap: 8px; align-items: center; }
 
-.btn-suggest {
-  padding: 8px 18px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
-  background: rgba(195,120,20,.12); border: 1px solid rgba(195,120,20,.4);
-  border-radius: 3px; color: var(--gold); cursor: pointer; transition: all .18s;
-}
-.btn-suggest:hover { background: rgba(195,120,20,.2); border-color: rgba(195,120,20,.6); }
 
-.btn-secondary {
-  padding: 8px 14px; font-size: 11px; font-weight: 400;
-  background: transparent; border: 1px solid rgba(195,120,20,.18);
-  border-radius: 3px; color: var(--text-muted); cursor: pointer; transition: all .15s;
-}
-.btn-secondary:hover { color: var(--text-dim); border-color: rgba(195,120,20,.3); }
 
 /* ── Summary bar ── */
 .sum-bar {
@@ -286,27 +259,12 @@ body.light .r-ok-ico, body.light .r-ok-txt { color: #1e8449; }
 .restant-err  .r-amount { color: var(--red); }
 .r-sub { font-size: 12px; font-weight: 300; color: var(--text-muted); }
 
-.btn-affecter {
-  padding: 7px 16px; font-size: 11px; font-weight: 500; letter-spacing: .05em;
-  background: rgba(195,120,20,.1); border: 1px solid rgba(195,120,20,.35);
-  border-radius: 3px; color: var(--gold); cursor: pointer; transition: all .15s;
-  flex-shrink: 0; white-space: nowrap;
-}
-.btn-affecter:hover { background: rgba(195,120,20,.2); border-color: rgba(195,120,20,.55); }
 
 /* ── En-tête table + bouton impression ── */
+.btn-affecter { flex-shrink: 0; }
 .table-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .tdiv-line  { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(195,120,20,.14), transparent); }
-.btn-print {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--gold-dim); background: rgba(195,120,20,.06);
-  border: 1px solid rgba(195,120,20,.22); border-radius: 3px;
-  padding: 7px 14px; cursor: pointer; transition: all .18s;
-  flex-shrink: 0; margin-left: 16px;
-}
-.btn-print:not(:disabled):hover { background: rgba(195,120,20,.12); color: var(--gold); border-color: rgba(195,120,20,.4); }
-.btn-print svg { width: 13px; height: 13px; fill: none; }
+.btn-print { flex-shrink: 0; margin-left: 16px; }
 
 /* ── Table principale ── */
 table { width: 100%; border-collapse: collapse; }
@@ -382,15 +340,8 @@ body.light .amt-inp:focus { border-color: rgba(135,50,0,.5); box-shadow: 0 0 0 3
 body.light .hint-accel { color: rgba(135,50,0,.7); }
 body.light .hint-flat  { color: rgba(135,50,0,.4); }
 
-/* Bouton "← restant" inline sur la ligne 1er */
-.btn-fill-first {
-  font-size: 10px; font-weight: 500; letter-spacing: .04em;
-  color: var(--gold-dim); background: rgba(195,120,20,.07);
-  border: 1px solid rgba(195,120,20,.25); border-radius: 3px;
-  padding: 4px 9px; cursor: pointer; transition: all .14s;
-  white-space: nowrap;
-}
-.btn-fill-first:hover { color: var(--gold); background: rgba(195,120,20,.14); border-color: rgba(195,120,20,.45); }
+/* Bouton "← restant" inline sur la ligne 1er (apparence : .btn .btn-ghost .btn-sm, en plus compact) */
+.btn-fill-first { --btn-py: 3px; --btn-px: 10px; --btn-fs: 10px; }
 
 /* ── Cellule indicateur ── */
 .ind-cell { min-width: 60px; }

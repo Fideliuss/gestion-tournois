@@ -153,8 +153,8 @@
           </div>
         </div>
         <div class="sug-actions">
-          <button class="btn-suggest" onclick="suggest()">Suggérer</button>
-          <button class="btn-secondary" onclick="clearAmounts()">Effacer</button>
+          <button class="btn btn-gold btn-sm" onclick="suggest()">Suggérer</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearAmounts()">Effacer</button>
         </div>
       </div>
 
@@ -187,7 +187,7 @@
             <span class="restant-idle-txt">Configurez le buy-in et les joueurs</span>
           </span>
         </div>
-        <button class="btn-affecter" id="btn-affecter" onclick="affecterPremier()"
+        <button class="btn btn-ghost btn-sm btn-affecter" id="btn-affecter" onclick="affecterPremier()"
           title="Affecter ce restant au 1er" style="display:none">
           → 1er
         </button>
@@ -196,12 +196,8 @@
       <!-- En-tête table + bouton impression -->
       <div class="table-hdr">
         <div class="tdiv-line"></div>
-        <button class="btn-print" id="btn-print" onclick="doPrint()" disabled style="opacity:.4">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"
-              stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Imprimer
+        <button class="btn btn-ghost btn-sm btn-print" id="btn-print" onclick="doPrint()" disabled style="opacity:.4">
+          <i class="ico ico-print"></i> Imprimer
         </button>
       </div>
 

@@ -64,22 +64,9 @@
       display: flex; gap: 4px; margin-top: 4px; border-top: 1px solid rgba(195,120,20,.07);
       padding-top: 6px;
     }
-    .tm-btn-edit {
-      flex: 1; padding: 4px 6px; font-size: 10px; font-family: var(--f-ui);
-      background: rgba(195,120,20,.07); border: 1px solid rgba(195,120,20,.18);
-      border-radius: 2px; color: var(--gold-dim); cursor: pointer; transition: all .13s;
-      text-align: center;
-    }
-    .tm-btn-edit:hover { background: rgba(195,120,20,.18); color: var(--gold); border-color: rgba(195,120,20,.4); }
 
-    /* ── Bouton + Ajouter ── */
-    .tm-day-add {
-      padding: 7px 6px; font-size: 11px; text-align: center; width: 100%; box-sizing: border-box;
-      background: transparent; border: 1px dashed rgba(195,120,20,.12);
-      border-radius: 3px; color: var(--text-muted); cursor: pointer;
-      transition: all .15s; font-family: var(--f-ui); line-height: 1;
-    }
-    .tm-day-add:hover { border-color: rgba(195,120,20,.38); color: var(--gold-dim); background: rgba(195,120,20,.04); }
+    /* ── Bouton + Ajouter (apparence : .btn-ghost .btn-dashed) ── */
+    .tm-day-add { width: 100%; }
 
     /* ── Section Événements ── */
     .tm-events-section {
@@ -93,15 +80,6 @@
     .tm-events-cards { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; align-items: flex-start; }
     .tm-events-cards .tm-card { min-width: 140px; max-width: 200px; }
 
-    /* ── Bouton nouveau tournoi ── */
-    .btn-new-tm {
-      display: inline-flex; align-items: center; gap: 6px; margin-top: 18px;
-      padding: 10px 20px; border-radius: 3px;
-      font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-      background: rgba(195,120,20,.14); color: var(--gold);
-      border: 1px solid rgba(195,120,20,.35); cursor: pointer; transition: all .18s;
-    }
-    .btn-new-tm:hover { background: rgba(195,120,20,.24); }
 
     /* ── Empty state ── */
     .tm-empty {
@@ -162,16 +140,8 @@
     body.light .pts-cell input { background: rgba(200,185,150,.2); border-color: rgba(135,50,0,.2); }
 
     .pts-actions { display: flex; gap: 8px; margin-bottom: 18px; }
-    .btn-pts-add { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(195,120,20,.1); color: var(--gold-dim); border: 1px solid rgba(195,120,20,.22); border-radius: 3px; cursor: pointer; transition: all .15s; }
-    .btn-pts-add:hover { background: rgba(195,120,20,.2); color: var(--gold); }
-    .btn-pts-rem { padding: 6px 14px; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; background: rgba(192,57,43,.07); color: #e07a68; border: 1px solid rgba(192,57,43,.2); border-radius: 3px; cursor: pointer; transition: all .15s; }
-    .btn-pts-rem:hover { background: rgba(192,57,43,.16); }
 
     .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
-    .btn-save   { padding: 10px 24px; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; background: rgba(195,120,20,.18); color: var(--gold); border: 1px solid rgba(195,120,20,.4); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-save:hover { background: rgba(195,120,20,.3); }
-    .btn-cancel { padding: 10px 18px; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; background: none; color: var(--text-dim); border: 1px solid rgba(195,120,20,.12); border-radius: 3px; cursor: pointer; transition: all .18s; }
-    .btn-cancel:hover { color: var(--text); border-color: rgba(195,120,20,.28); }
 
     /* ── Alert succès ── */
     .alert-ok {
@@ -241,13 +211,13 @@
     </div>
     <div class="pts-grid" id="pts-grid"></div>
     <div class="pts-actions">
-      <button class="btn-pts-add" onclick="addPtsSlot()">＋ Ajouter une place</button>
-      <button class="btn-pts-rem" onclick="remPtsSlot()">− Retirer la dernière</button>
+      <button class="btn btn-ghost btn-sm" onclick="addPtsSlot()"><i class="ico ico-plus"></i> Ajouter une place</button>
+      <button class="btn btn-red btn-sm" onclick="remPtsSlot()"><i class="ico ico-minus"></i> Retirer la dernière</button>
     </div>
 
     <div class="form-actions">
-      <button class="btn-cancel" onclick="closeForm()">Annuler</button>
-      <button class="btn-save"   onclick="saveForm()">✓ Enregistrer</button>
+      <button class="btn btn-ghost" onclick="closeForm()">Annuler</button>
+      <button class="btn btn-gold" onclick="saveForm()"><i class="ico ico-check"></i> Enregistrer</button>
     </div>
   </div>
 
@@ -255,7 +225,7 @@
   <div class="card" style="max-width:100%">
     <div class="sec" style="margin-bottom:16px">Calendrier des tournois</div>
     <div id="tm-content"></div>
-    <button class="btn-new-tm" onclick="openForm(null)">＋ Nouveau tournoi</button>
+    <button class="btn btn-gold" style="margin-top:18px" onclick="openForm(null)"><i class="ico ico-plus"></i> Nouveau tournoi</button>
   </div>
 </div>
 
@@ -310,7 +280,7 @@ function renderSemainier(tournaments) {
     return `<div class="tm-day${ts.length === 0 ? ' tm-day-empty' : ''}">
       <div class="tm-day-label">${DAYS_SHORT[i]}</div>
       ${cards}
-      <button class="tm-day-add" onclick="openForm('${day}')" title="Ajouter un tournoi ce jour">＋</button>
+      <button class="btn btn-ghost btn-dashed btn-sm tm-day-add" onclick="openForm('${day}')" title="Ajouter un tournoi ce jour" aria-label="Ajouter un tournoi ce jour"><i class="ico ico-plus"></i></button>
     </div>`;
   }).join('');
 
@@ -322,15 +292,15 @@ function renderSemainier(tournaments) {
       <span class="tm-events-label">Événements</span>
       <div class="tm-events-cards">
         ${evtCards}
-        <button class="tm-day-add" style="min-width:70px;align-self:flex-start"
-          onclick="openForm('Événement')" title="Ajouter un événement">＋</button>
+        <button class="btn btn-ghost btn-dashed btn-sm tm-day-add" style="align-self:flex-start"
+          onclick="openForm('Événement')" title="Ajouter un événement" aria-label="Ajouter un événement"><i class="ico ico-plus"></i></button>
       </div>
     </div>`;
   } else {
     eventsHtml = `<div class="tm-events-section">
       <span class="tm-events-label">Événements</span>
-      <button class="tm-day-add" style="min-width:90px"
-        onclick="openForm('Événement')">＋ Ajouter</button>
+      <button class="btn btn-ghost btn-dashed btn-sm tm-day-add"
+        onclick="openForm('Événement')"><i class="ico ico-plus"></i> Ajouter</button>
     </div>`;
   }
 
@@ -361,9 +331,9 @@ function tmCardHtml(t) {
     </div>
     <div class="tm-card-pts">${ptsTxt}</div>
     <div class="tm-card-actions">
-      <button class="tm-btn-edit" onclick="editTournament('${t.id}')">✎ Modifier</button>
-      <button class="btn-red" style="padding:4px 8px;font-size:11px"
-        onclick="deleteTournament('${t.id}')">✕</button>
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editTournament('${t.id}')"><i class="ico ico-edit"></i> Modifier</button>
+      <button class="btn-icon danger" title="Supprimer" aria-label="Supprimer ce tournoi"
+        onclick="deleteTournament('${t.id}')"><i class="ico ico-del"></i></button>
     </div>
   </div>`;
 }

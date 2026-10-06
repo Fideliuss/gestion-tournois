@@ -150,10 +150,10 @@ const AUTH = {
           onkeydown="if(event.key==='Enter') AUTH._saveNewPwd()" />
 
         <div class="auth-pwd-actions">
-          <button class="auth-pwd-save" id="auth-pwd-save-btn" onclick="AUTH._saveNewPwd()">
+          <button class="btn btn-gold" id="auth-pwd-save-btn" onclick="AUTH._saveNewPwd()">
             Enregistrer →
           </button>
-          <button class="auth-pwd-cancel" onclick="AUTH._closeChangePwd()">Annuler</button>
+          <button class="btn btn-ghost" onclick="AUTH._closeChangePwd()">Annuler</button>
         </div>
         <div class="auth-pwd-msg" id="auth-pwd-msg"></div>
       </div>`;

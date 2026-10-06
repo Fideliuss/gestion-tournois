@@ -208,7 +208,7 @@ function ucPopHtml(bet) {
     ? '<div class="uc-amount"><label for="uc-amount-input">Gain à payer (hors mise rendue)</label>'
       + '<div class="uc-amount-row"><input id="uc-amount-input" type="text" inputmode="decimal" autocomplete="off" placeholder="0" value="'
       + (Number.isFinite(a.amount) ? String(a.amount).replace('.', ',') : '') + '" oninput="ucAmount(\'' + bet + '\', this.value)" onkeydown="ucAmountKey(event,\'' + bet + '\')" /><span>€</span>'
-      + '<button class="btn btn-gold" onclick="ucConfirm(\'' + bet + '\')">OK</button></div></div>'
+      + '<button class="btn btn-gold btn-sm" onclick="ucConfirm(\'' + bet + '\')">OK</button></div></div>'
     : '';
   return title + '<div class="uc-pop-btns">' + buttons + '</div>' + amountBox;
 }
