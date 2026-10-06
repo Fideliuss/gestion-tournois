@@ -106,6 +106,24 @@ const AUTH = {
     return session.user;
   },
 
+  /**
+   * Prénom à afficher. Métadonnée `first_name` / `prenom` si elle existe, sinon le début de l'e-mail (prenom.nom@…).
+   * Vide si on ne peut pas le déduire (identifiant sans point, ou simple initiale comme « b.nom »).
+   */
+  firstName(user) {
+    const meta  = (user && user.user_metadata) || {};
+    const local = ((user && user.email) || '').split('@')[0];
+    const raw   = (meta.first_name || meta.prenom || (local.indexOf('.') > 0 ? local.split('.')[0] : '') || '').trim();
+    if (raw.replace(/[^a-zà-ÿ]/gi, '').length < 2) return '';
+    return raw.split(/([-' ])/).map(function (p) { return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(); }).join('');
+  },
+
+  /** « Bonjour » le jour, « Bonsoir » de 18 h à 4 h */
+  salutation() {
+    const h = new Date().getHours();
+    return h >= 18 || h < 4 ? 'Bonsoir' : 'Bonjour';
+  },
+
   async signOut(loginUrl = 'login.html') {
     await SB.signOut();
     window.location.replace(loginUrl);

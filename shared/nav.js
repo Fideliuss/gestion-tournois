@@ -195,8 +195,11 @@ const NAV = (function () {
 
     // ── Marque ──
     const logo = function (file, cls) { return el('img', { src: href('shared/logos/' + file), alt: '', class: cls }); };
-    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino — Accueil' },
-      [logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark')]);
+    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels — Accueil' }, [
+      logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark'),
+      el('span', { class: 'nav-city', text: 'Bordeaux' }),
+      el('span', { class: 'nav-service' }, [el('span', { text: 'Service' }), el('span', { text: 'Jeux traditionnels' })]),
+    ]);
 
     // ── Espace courant : lanceur (plusieurs espaces) ou simple titre (un seul) ──
     let spaceEl = null;
