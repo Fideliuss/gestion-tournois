@@ -32,7 +32,7 @@
     /* ── Carte tournoi ── */
     .tm-card {
       background: rgba(195,120,20,.03); border: 1px solid rgba(195,120,20,.14);
-      border-radius: 3px; padding: 10px 10px 8px;
+      border-radius: var(--r-box); padding: 10px 10px 8px;
       display: flex; flex-direction: column; gap: 5px;
       transition: border-color .16s, background .16s;
       position: relative;
@@ -84,7 +84,7 @@
     /* ── Empty state ── */
     .tm-empty {
       text-align: center; padding: 48px 20px; color: var(--text-muted);
-      font-size: 13px; border: 1px dashed rgba(195,120,20,.13); border-radius: 3px;
+      font-size: 13px; border: 1px dashed rgba(195,120,20,.13); border-radius: var(--r-box);
     }
     .tm-empty-icon { font-size: 28px; margin-bottom: 12px; }
 
@@ -93,7 +93,7 @@
     ══════════════════════════════════════════════════════ */
     .form-panel {
       background: rgba(195,120,20,.03); border: 1px solid rgba(195,120,20,.2);
-      border-radius: 3px; padding: 24px 28px; margin-bottom: 20px;
+      border-radius: var(--r-card); padding: 24px 28px; margin-bottom: 20px;
     }
     body.light .form-panel { background: rgba(135,50,0,.03); border-color: rgba(135,50,0,.22); }
 
@@ -108,7 +108,7 @@
     .tm-inp {
       width: 100%; padding: 10px 12px; box-sizing: border-box;
       background: rgba(10,9,7,.9); border: 1px solid rgba(195,120,20,.2);
-      border-radius: 3px; color: var(--cream); font-size: 13px; font-family: var(--f-ui);
+      border-radius: var(--r-field); color: var(--cream); font-size: 13px; font-family: var(--f-ui);
       outline: none; transition: border-color .15s;
     }
     .tm-inp:focus { border-color: rgba(195,120,20,.48); box-shadow: 0 0 0 3px rgba(195,120,20,.07); }
@@ -131,7 +131,7 @@
       width: 52px; padding: 7px 6px; text-align: center;
       font-family: var(--f-num); font-size: 13px; font-weight: 600; color: var(--gold);
       background: rgba(10,9,7,.6); border: 1px solid rgba(195,120,20,.18);
-      border-radius: 3px; outline: none; transition: border-color .15s;
+      border-radius: var(--r-field); outline: none; transition: border-color .15s;
       -moz-appearance: textfield; appearance: textfield;
     }
     .pts-cell input::-webkit-outer-spin-button,
@@ -146,7 +146,7 @@
     /* ── Alert succès ── */
     .alert-ok {
       background: rgba(39,174,96,.08); border: 1px solid rgba(39,174,96,.25);
-      border-radius: 3px; padding: 10px 16px; font-size: 12px; color: #6dcc8e;
+      border-radius: var(--r-box); padding: 10px 16px; font-size: 12px; color: #6dcc8e;
       margin-bottom: 16px; display: none;
     }
   </style>

@@ -80,7 +80,7 @@
   font-family: var(--f-num); font-size: 28px; font-weight: 600;
   color: var(--cream);
   background: var(--bg-card); border: 1px solid var(--gold-bd);
-  border-radius: 4px; padding: 10px 14px;
+  border-radius: var(--r-field); padding: 10px 14px;
   outline: none; transition: border-color .15s;
   -moz-appearance: textfield; appearance: textfield;
 }
@@ -95,7 +95,7 @@
 /* ── Feedback ── */
 .feedback-bar {
   width: 100%; max-width: 560px; margin: 16px auto 0;
-  padding: 14px 20px; border-radius: 4px;
+  padding: 14px 20px; border-radius: var(--r-box);
   text-align: center; font-size: 13px; font-family: var(--f-ui);
   min-height: 48px; display: flex; align-items: center; justify-content: center;
   gap: 10px; transition: opacity .15s;
@@ -217,7 +217,7 @@
 }
 .level-card {
   background: var(--bg-card); border: 1px solid var(--gold-bd);
-  border-radius: 4px; padding: 24px 16px; text-align: center;
+  border-radius: var(--r-box); padding: 24px 16px; text-align: center;
   cursor: pointer; transition: border-color .15s, background .15s;
   position: relative;
 }

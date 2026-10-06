@@ -92,7 +92,7 @@
   display: flex; gap: 14px; justify-content: center; margin-top: 32px; flex-wrap: wrap;
 }
 .couleur-btn {
-  padding: 14px 32px; border-radius: 4px; font-size: 13px; font-weight: 700;
+  padding: 14px 32px; border-radius: var(--r-field); font-size: 13px; font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase; font-family: var(--f-ui);
   cursor: pointer; transition: filter .12s, transform .1s;
   border: 2px solid transparent;
@@ -249,7 +249,7 @@
   width: 120px; padding: 10px 12px; text-align: center;
   font-family: var(--f-num); font-size: 22px; font-weight: 700;
   background: rgba(10,9,7,.6); border: 1px solid var(--gold-bd);
-  border-radius: 4px; color: var(--cream); outline: none;
+  border-radius: var(--r-field); color: var(--cream); outline: none;
 }
 .tb-answer-row input:focus { border-color: rgba(195,120,20,.5); }
 
