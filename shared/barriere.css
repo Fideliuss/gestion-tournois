@@ -297,6 +297,8 @@ body.has-nav .hdr-sub { margin-top: 8px; font-size: 13px; letter-spacing: .01em;
 .fchip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .fchip-n { font-family: var(--f-num); font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .fchip.on .fchip-n { color: var(--gold); }
+.fchip.dim { opacity: .4; cursor: default; }   /* indisponible */
+.fchip.dim:hover { color: var(--text-dim); border-color: var(--gold-bd); }
 .fchip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 @media print { .fchips { display: none !important; } }
 

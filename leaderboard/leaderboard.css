@@ -440,6 +440,7 @@
     .podium-sub { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .podium-card { padding: 14px 16px; background: rgba(195,120,20,.05); border: 1px solid rgba(195,120,20,.15); border-radius: var(--r-box); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background .15s; }
     .podium-card:hover { background: rgba(195,120,20,.1); }
+    @media (max-width: 520px) { .podium-sub { grid-template-columns: 1fr; } }
     .podium-card .p-rank-num { font-family: var(--f-num); font-size: 22px; font-weight: 600; color: var(--gold-dim); width: 32px; flex-shrink: 0; }
     .podium-card .p-info { flex: 1; min-width: 0; }
     .podium-card .p-name { font-size: 14px; font-weight: 500; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

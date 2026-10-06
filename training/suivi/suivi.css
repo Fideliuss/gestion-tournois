@@ -33,17 +33,6 @@
 }
 .sv-title em { color: var(--gold); }
 
-.sv-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.sv-chip {
-  background: none; border: 1px solid var(--gold-bd); border-radius: 999px;
-  padding: 5px 14px; font-family: var(--f-ui); font-size: 11px; font-weight: 500;
-  letter-spacing: .06em; color: var(--text-dim); cursor: pointer;
-  transition: border-color .15s, color .15s, background .15s;
-}
-.sv-chip:hover { color: var(--text); border-color: var(--gold); }
-/* filtre actif : même famille que l'onglet actif (.seg-btn), en plus discret */
-.sv-chip.on { color: var(--cream); border-color: var(--gold); background: var(--gold-bg); font-weight: 600; }
-
 .sv-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .sv-stat-label {
   font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
@@ -104,17 +93,7 @@ body.light .sv-down { color: #b5483a; }
   .sv-times { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* Pastille de comptage : celle des onglets est définie par le composant `.seg` (barriere.css) */
-.sv-chip-n {
-  font-family: var(--f-num); font-size: 10px; font-weight: 600; line-height: 1;
-  padding: 3px 6px; border-radius: 8px; background: var(--gold-bg); color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
-}
-.sv-chip.on .sv-chip-n { color: var(--gold); }
-
 .sv-pills { margin: -4px 0 4px; }
-.sv-chip.dim { opacity: .4; cursor: default; }
-.sv-chip.dim:hover { color: var(--text-dim); border-color: var(--gold-bd); }
 
 /* ── Vue d'ensemble : tableau cliquable des modules ── */
 .sv-mrow {
@@ -125,7 +104,7 @@ body.light .sv-down { color: #b5483a; }
 }
 button.sv-mrow { cursor: pointer; transition: background .15s; }
 button.sv-mrow:hover { background: var(--gold-bg); }
-button.sv-mrow:focus-visible, .sv-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+button.sv-mrow:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .sv-mhead {
   border-top: none; padding-top: 0; padding-bottom: 8px;
   font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim);
