@@ -14,7 +14,7 @@ let _draft        = {};        // accès en cours d'édition dans la matrice : {
 
 const INACTIVE_DAYS = 60;       // « inactif » : jamais connecté, ou aucune connexion depuis plus de 60 jours
 const f = { q: '', role: null, inactive: false, noname: false, group: false, sort: { key: 'email', dir: 1 } };
-const EMAIL_DOMAIN = '@groupebarriere.com';      // adresses : initiale du prénom + nom (bcuvelier@groupebarriere.com)
+const EMAIL_DOMAIN = '@groupebarriere.com';      // adresses : initiale du prénom + nom (ex. jdupont@groupebarriere.com pour Jean Dupont)
 let _emailTouched = false;                          // l'adresse proposée n'est plus recalculée dès qu'on la modifie à la main
 
 // `short` : intitulé de la colonne dans la matrice
@@ -490,7 +490,7 @@ function editAccount(u) {
 
 function closeForm() { $('modal-form').classList.remove('open'); _editId = null; }
 
-// Adresse proposée : initiale du prénom + nom, sans accents ni espaces (« Brayan Cuvelier » → bcuvelier@groupebarriere.com)
+// Adresse proposée : initiale du prénom + nom, sans accents ni espaces (« Jean Dupont » → jdupont@groupebarriere.com)
 function suggestEmail() {
   const first = slug($('inp-first').value), last = slug($('inp-last').value);
   return first && last ? first[0] + last + EMAIL_DOMAIN : '';
