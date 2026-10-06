@@ -22,8 +22,10 @@
 
 function applyTheme(light) {
   document.body.classList.toggle('light', light);
-  document.getElementById('theme-icon').textContent  = light ? '🌙' : '☀️';
-  document.getElementById('theme-label').textContent = light ? 'Mode nuit' : 'Mode jour';
+  // Ancien bouton flottant : absent des pages qui n'ont que la barre de navigation
+  const icon = document.getElementById('theme-icon'), label = document.getElementById('theme-label');
+  if (icon)  icon.textContent  = light ? '🌙' : '☀️';
+  if (label) label.textContent = light ? 'Mode nuit' : 'Mode jour';
 }
 
 function toggleTheme() {

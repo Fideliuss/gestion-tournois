@@ -146,6 +146,24 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Saisons clôturées (challenge saisonnier) ───────
+  // Saison = année de début (2025 → 2025 / 2026). Une saison clôturée est verrouillée côté base (triggers).
+  async getSeasonClosures() {
+    const { data, error } = await _sb.from('saisons_cloturees').select('*');
+    if (error) throw error;
+    return (data || []).map(r => ({ season: r.saison, closedAt: r.cloturee_le }));
+  },
+
+  async closeSeason(season) {
+    const { error } = await _sb.from('saisons_cloturees').insert({ saison: season });
+    if (error) throw error;
+  },
+
+  async reopenSeason(season) {
+    const { error } = await _sb.from('saisons_cloturees').delete().eq('saison', season);
+    if (error) throw error;
+  },
+
   // ── Tournois ───────────────────────────────────────
   async getTournaments() {
     const { data, error } = await _sb.from('tournaments').select('*');
