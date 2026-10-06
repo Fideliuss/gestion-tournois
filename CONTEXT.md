@@ -65,7 +65,7 @@ prize_pool/
 admin/
   config_tournois.html  CRUD tournois — semainier par jour, barème de points, guard panel:'admin-tournois'
   config_training.html/.js/.css  Configuration des modules (admin) — réglages de tous les modules de training, un onglet par jeu
-  comptes.html           Gestion Comptes — CRUD comptes + rôles personnalisables + permissions par panneau, guard role:'admin' (intentionnellement admin-only, pas de panel)
+  comptes.html/.css/.js  Gestion des comptes — onglets Comptes (liste filtrable) et Rôles & accès (matrice des accès), guard role:'admin' (intentionnellement admin-only, pas de panel)
   declaration/
     declaration.html  Déclaration mensuelle PN, guard panel:'admin-tournois'
     declaration.css / declaration.js
@@ -118,7 +118,7 @@ supabase/
 **Règle de séparation :** chaque fichier HTML ne contient que la structure + les balises `<link>` et `<script>`. Tout le CSS et le JS sont externalisés dans leurs fichiers dédiés (sauf styles/scripts très courts spécifiques à une page, tolérés inline dans un `<style>`/`<script>` de tête).
 
 **Composants CSS partagés (ripolinage juillet 2026)** — training/ avait dérivé stylistiquement de l'app générale (réimplémentation parallèle des cartes de nav, modals dupliquées 3×, styles inline trop longs). Centralisés :
-- `.modal-overlay`/`.modal-box`/`.modal-wide` (avec coins dorés) → `shared/barriere.css`, utilisé par `admin/comptes.html`. Les modals plus larges utilisent un override scoped (`#modal-cfg .modal-box { max-width: ... }`) plutôt que de dupliquer le composant.
+- `.modal-overlay`/`.modal-box`/`.modal-wide` (avec coins dorés) → `shared/barriere.css`, utilisé par `admin/comptes.html`, avec la correction du `transform` permanent sur `body` (voir historique des bugs n°14). Les modals plus larges utilisent un override scoped (`#modal-cfg .modal-box { max-width: ... }`) plutôt que de dupliquer le composant.
 - `.seg` / `.seg-btn` (+ `.seg.sm`, `.seg-n`) → **pastille segmentée, composant unique des onglets de page** (`barriere.css`) : compacte et centrée, coins très arrondis, actif en ambre plein (`.active`, `.on` ou `aria-selected="true"`), défile horizontalement si trop large, masquée à l'impression, **sans emoji**. Utilisée par Classement (leaderboard), Gestion des Extras, Déclaration DTPJ, Générateur de courrier (type de document, lettre, sous-onglets des destinataires), Suivi des résultats (onglets par jeu et par vue) et Config Training. Pour un nouvel onglet : ajouter `seg` au conteneur et `seg-btn` aux boutons ; les classes propres à la page (`.tab`, `.xt-tab`…) ne servent qu'aux scripts. Les filtres (`.sv-chip` du suivi) gardent leur propre style, plus discret.
 - `.tool-card`/`.tool-badge`/`.tool-name` (cartes de navigation, avec `--accent` par carte : rectangles très arrondis 300×92 px, toutes de même taille, picto à gauche et nom centré, liseret de couleur sur le bord gauche, encoche sur le bord droit, sombres en mode nuit et crème en mode jour, sans bouton) → seul composant de nav card dans toute l'app, y compris les hubs training (`training.html`, `blackjack_hub.html`, `roulette_hub.html`). Étendu avec `.tool-card.disabled` + `.tool-soon` pour les cartes "bientôt disponible". **Ne plus créer de variante `.game-card` ou équivalent** — toujours réutiliser `.tool-card`.
 - `.cfg-module-title`/`.cfg-timers`/`.cfg-timer-cell`/`.cfg-timer-label`/`.cfg-timer-input`/`.cfg-hint`/`.cfg-msg` (grille de config timers par niveau, modals admin des hubs training) → `training/training.css`
@@ -142,7 +142,7 @@ supabase/
   - Rôles : entièrement personnalisables via **Gestion Comptes** (table `app_roles`) — `admin`, `mcd`, `floor` sont les seeds par défaut, mais tout rôle custom (slug, label, couleur, panels) peut être créé/édité/supprimé
   - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable) — `raw_user_meta_data.role` conservé en fallback pendant la période de migration
   - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent) → `training-suivi` (enfant : voir les résultats de toute l'équipe, utilisé par la RLS via `can_view_training_stats()`). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé — **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
-  - Gestion des comptes : `admin/comptes.html` — CRUD comptes (email+password+role) + CRUD rôles (label, couleur, panels) + table croisée permissions
+  - Gestion des comptes : `admin/comptes.html` — CRUD comptes (email+password+role) + CRUD rôles (label, couleur) + matrice des accès rôles × pages
   - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin côté serveur avant d'utiliser `auth.admin.*`
   - Changement de mot de passe : modal 🔑 dans le badge utilisateur (`AUTH._openChangePwd()`)
   - Persistance session : JWT 7 jours (604800s) via localStorage (géré par supabase-js)
@@ -260,12 +260,12 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - **Clôture / verrouillage** : un admin voit, en petit sous le sélecteur de saison, « Clôturer la saison » (résumé : joueurs, tournois, ranking, podium, impression du classement final) puis « Rouvrir la saison ». Table `saisons_cloturees` (migration `saisons_cloturees.sql`, lecture pour tous, écriture admin) + triggers `trg_results_saison_cloturee` / `trg_sessions_saison_cloturee` : **toute insertion, modification ou suppression** de résultat ou de session dont la date est dans une saison clôturée est refusée en base (y compris via l'API ; fonction `saison_de(date)`). L'interface suit : historique en lecture seule, saisie bloquée avec message. Si la table est absente, aucune saison n'est verrouillée (le challenge reste utilisable). Une saison clôturée affiche « Classement final au <date de clôture> ».
 - **Barre de la page** (plus de sous-titre sous « Challenge Saisonnier » : la saison est dans le sélecteur) : saison à gauche · onglets Classement / Historique / Ranking au centre · bouton **« ＋ Saisir »** à part, à droite (même page, simple onglet : `showTab('saisir')`, onglets repérés par `data-tab`).
 
-### Gestion Comptes
-- CRUD comptes (email + mot de passe + rôle) via Edge Function sécurisée
-- CRUD rôles personnalisés : label, couleur (nuancier), liste de panneaux autorisés
-- Panneaux hiérarchiques dans le formulaire d'édition de rôle : cocher un parent affiche ses enfants (ex : "Outils Tournois" → Prize Pool / Leaderboard / Administration tournois)
-- Table croisée permissions (rôles × panneaux) avec renommage inline
-- Stats par rôle (nombre de comptes)
+### Gestion des comptes (`admin/comptes.html` / `.css` / `.js`)
+Deux onglets (pastille `.seg`, hash `#comptes` / `#roles`) ; l'action principale à droite (`.btn-pill`) suit l'onglet : « Nouveau compte » ou « Nouveau rôle ». Barre `.page-bar` partagée avec le Classement.
+- **Comptes** (octobre 2026 : ~30 comptes) : liste unique, recherche (e-mail ou rôle), filtres en pastilles `.fchip` — Tous, un par rôle ayant des comptes (avec leur nombre), **Inactifs** (jamais connecté ou aucune connexion depuis plus de 60 jours, `INACTIVE_DAYS`) —, tri par colonne (Compte, Rôle, Dernière connexion ; la dernière connexion est affichée en relatif avec la date exacte en infobulle), bouton **« Grouper par rôle »** (mémorisé dans `localStorage` `cp_group`, colonne Rôle masquée dans ce mode). Modifier / supprimer par ligne (clics délégués, pas de `onclick` avec e-mail). Le filtre de rôle en cours est la valeur par défaut d'un nouveau compte. Sur mobile : une carte par compte.
+- **Rôles & accès** : matrice rôles × pages en deux niveaux (espace Outils Tournois : Espace, Prize Pool, Leaderboard, Admin. tournois ; espace Training Croupier : Espace, Suivi équipe). Les cases se modifient en brouillon (`_draft`), rien n'est envoyé avant **« Enregistrer les accès »** (seuls les rôles modifiés sont envoyés) ; « Annuler les modifications » le vide. Une page n'est cochable que si son espace l'est (décocher un espace décoche ses pages). La ligne Admin affiche « Accès total ». L'engrenage d'une ligne ouvre la modale du rôle (**nom, couleur, suppression** ; les accès ne s'y règlent plus). **Suppression d'un rôle refusée tant que des comptes l'ont.** Créer un rôle amène directement sur cet onglet pour lui donner ses accès.
+- L'ancienne modale « Gestion des rôles » (tableau jamais ouvert depuis l'interface et dont les colonnes ne correspondaient plus aux panneaux) est supprimée.
+- Composants partagés ajoutés à `barriere.css` : `.page-bar` (+ `-l`, `-r`), `.btn-pill`, `.fchips` / `.fchip` / `.fchip-n` / `.fchip-dot`. Le suivi (`.sv-chip`) pourra les adopter lors du balayage visuel.
 
 ### Training Croupier
 
