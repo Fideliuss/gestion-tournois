@@ -51,12 +51,14 @@ const NAV = (function () {
     ] },
   ];
 
-  // Menu « Gestion », à droite de la barre : trois parties, chaque entrée selon les droits
+  // Menu « Gestion », à droite de la barre : une partie par domaine (Comptes, Training), chaque entrée selon les droits
   // (`role: 'admin'` = admins seulement ; `panel` = droit de l'espace, comme dans les gardes de page)
   const GESTION = { label: 'Gestion', groups: [
-    { title: 'Comptes',  items: [ { label: 'Gestion des comptes',       href: 'admin/comptes.html',                 role: 'admin' } ] },
-    { title: 'Training', items: [ { label: 'Configuration des modules', href: 'admin/config_training.html',         role: 'admin' } ] },
-    { title: 'Suivi',    items: [ { label: 'Suivi équipe',              href: T + 'suivi/suivi_manager.html',       panel: 'training-suivi' } ] },
+    { title: 'Comptes',  items: [ { label: 'Gestion des comptes',       href: 'admin/comptes.html',            role: 'admin' } ] },
+    { title: 'Training', items: [
+      { label: 'Suivi équipe',              href: T + 'suivi/suivi_manager.html', panel: 'training-suivi' },
+      { label: 'Configuration des modules', href: 'admin/config_training.html',   role: 'admin' },
+    ] },
   ] };
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
