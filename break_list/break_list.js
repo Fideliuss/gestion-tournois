@@ -9,7 +9,6 @@ let plan = null;                  // planning du mois affiché (null = aucun)
 let D = { y: 0, m: 0, d: 0 };     // soirée affichée
 let octime = null;                // { at, rows: [{nom, matricule, minutes}] }
 let match = null;                 // résultat de blRapprocher pour les présents
-let _tab = 'departs';
 const SS_KEY = 'bl_octime';
 
 // ── Démarrage ────────────────────────────────────────
@@ -64,14 +63,12 @@ async function loadPlan() {
   renderAll();
 }
 
-function showTab(name) {
-  _tab = name;
-  document.querySelectorAll('#bl-tabs .seg-btn').forEach(function (b) {
-    const on = b.dataset.tab === name;
-    b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on));
-  });
-  document.getElementById('view-departs').hidden = name !== 'departs';
-  document.getElementById('bl-print').hidden = name !== 'breaklist';
+/** Aperçu de la feuille (recto et verso) sous la page ; l'impression, elle, ne dépend pas de cet affichage */
+function togglePreview() {
+  const box = document.getElementById('bl-print'), btn = document.getElementById('btn-preview');
+  box.hidden = !box.hidden;
+  btn.querySelector('span').textContent = box.hidden ? 'Voir la feuille' : 'Masquer la feuille';
+  if (!box.hidden) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── Rendu général ────────────────────────────────────
@@ -89,7 +86,6 @@ function renderAll() {
   renderOctime();
   renderRepartition();
   renderPrint();
-  showTab(_tab);
 }
 
 // ── Effectif du soir : une pastille par horaire du planning, puis le total ──
@@ -98,11 +94,14 @@ function renderCount() {
   const box = document.getElementById('count-out');
   box.hidden = !plan || D.d > plan.days;
   if (box.hidden) return;
-  const sub = function (k) { return k.floor ? 'floor' : k.groupe === 'depart' ? 'part en premier' : 'arrivée ' + k.groupe; };
-  box.innerHTML = cfg.codes.map(function (k) {
-    const n = _presents.filter(function (p) { return p.code === k.code; }).length;
-    return '<div class="bl-tile' + (n ? '' : ' zero') + '"><b>' + n + '</b><span>' + esc(k.code) + '</span><small>' + esc(sub(k)) + '</small></div>';
-  }).join('') + '<div class="bl-tile total"><b>' + _presents.length + '</b><span>Total</span><small>présents ce soir</small></div>';
+  const n = function (k) { return _presents.filter(function (p) { return p.code === k.code; }).length; };
+  // Gros chiffres : les horaires des équipes (hors floor) ; le floor, discret, avec son horaire
+  const main = cfg.codes.filter(function (k) { return !k.floor && k.groupe !== 'depart'; });
+  const floors = cfg.codes.filter(function (k) { return k.floor && n(k); });
+  box.innerHTML = main.map(function (k) {
+    return '<div class="bl-tile' + (n(k) ? '' : ' zero') + '"><b>' + n(k) + '</b><span>' + esc(k.code) + '</span></div>';
+  }).join('') + '<div class="bl-tile total"><b>' + _presents.length + '</b><span>Total</span></div>'
+    + (floors.length ? '<div class="bl-floor">' + floors.map(function (k) { return 'Floor ' + esc(k.code) + (n(k) > 1 ? ' (' + n(k) + ')' : ''); }).join(' · ') + '</div>' : '');
 }
 
 // ── Présents ─────────────────────────────────────────

@@ -36,6 +36,7 @@
       </div>
       <div class="period-actions">
         <button class="btn btn-ghost" id="btn-today" onclick="goToday()">Aujourd'hui</button>
+        <button class="btn btn-ghost" id="btn-preview" onclick="togglePreview()"><i class="ico ico-star"></i> <span>Voir la feuille</span></button>
         <button class="btn btn-ghost" id="btn-print" onclick="printBreakList()"><i class="ico ico-print"></i> Imprimer la break list</button>
       </div>
     </div>
@@ -45,12 +46,7 @@
   <!-- ── Effectif du soir : par horaire et au total ── -->
   <div class="bl-count bl-no-print" id="count-out" hidden></div>
 
-  <div class="seg bl-no-print" id="bl-tabs" role="tablist" aria-label="Vue">
-    <button class="seg-btn active" role="tab" data-tab="departs"   aria-selected="true"  onclick="showTab('departs')">Départs</button>
-    <button class="seg-btn"        role="tab" data-tab="breaklist" aria-selected="false" onclick="showTab('breaklist')">Break list</button>
-  </div>
-
-  <!-- ══ Départs : présents, extraction Octime, répartition ══ -->
+  <!-- ══ Présents, extraction Octime, répartition ══ -->
   <section class="bl-view bl-no-print" id="view-departs" style="width:100%;display:flex;flex-direction:column;align-items:center">
 
     <div class="card bl-card">
@@ -89,7 +85,7 @@
     </div>
   </section>
 
-  <!-- ══ Break list : recto et verso, aperçu à l'écran et feuille imprimée ══ -->
+  <!-- ══ Break list : recto et verso (aperçu à l'écran sur demande, toujours présents pour l'impression) ══ -->
   <div id="bl-print" hidden></div>
 </div>
 

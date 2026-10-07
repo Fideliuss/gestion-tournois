@@ -36,10 +36,10 @@
 }
 .bl-tile b { font-family: var(--f-num); font-size: 38px; line-height: 1; font-weight: 600; color: var(--cream); }
 .bl-tile span { margin-top: 6px; font-family: var(--f-num); font-size: 13px; color: var(--gold-dim); letter-spacing: .06em; }
-.bl-tile small { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); }
+.bl-floor { flex: 1 0 100%; text-align: right; font-size: 11px; letter-spacing: .08em; color: var(--text-dim); }
 .bl-tile.zero { opacity: .45; }
 .bl-tile.total { background: var(--gold-solid); border-color: var(--gold-solid); }
-.bl-tile.total b, .bl-tile.total span, .bl-tile.total small { color: #1A1208; }
+.bl-tile.total b, .bl-tile.total span { color: #1A1208; }
 
 /* ── Présents ── */
 .bl-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
