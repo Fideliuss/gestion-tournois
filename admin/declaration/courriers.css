@@ -309,8 +309,8 @@
   }
 }
 
-/* Pied d'un encadré : action alignée en bas à droite */
-.card-foot { display: flex; justify-content: flex-end; margin-top: 18px; }
+/* Réglages : même hauteur que les champs de la ligne Date, aligné à droite sur cette ligne */
+.period-row .period-actions .btn { min-height: 42px; }
 
 /* Largeur fixe des blocs : les encadrés gardent la même largeur quelle que soit la vue (courrier ou réglages) */
 #section-mensuel, #section-annulation { width: 100%; max-width: 860px; }

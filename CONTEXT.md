@@ -242,7 +242,7 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - **Titres d'impression** (`printWithTitle(titre)` dans `barriere.js`) : le titre de la page devient le nom du PDF proposé. Format avec tiret simple, jamais de tiret cadratique : « Déclaration Tournois - Novembre 2026 », « Courrier SIPJ 33 - Déclaration Tournois Novembre 2026 », « Annulation de tournoi - <destinataire> - <date> », « Déclaration extras - Novembre 2026 », « Émargement extras - Semaine 41 (5 au 11 octobre 2026) ».
 
 **Générateur de courrier** (courriers mensuels)
-- **Réglages** : bouton dans l'encadré « Mois déclaré » (même place et même style que sur la page Déclarations) ; il remplace le courrier par l'éditeur des destinataires et signatures et devient « Retour au courrier » (`toggleTplPanel()`). Remplace l'ancien lien discret « Modifier les destinataires & signatures ».
+- **Réglages** : bouton dans l'encadré « Mois déclaré », sur la même ligne que la date du courrier, à droite ; il remplace le courrier par l'éditeur des destinataires et signatures et devient « Retour au courrier » (`toggleTplPanel()`). Remplace l'ancien lien discret « Modifier les destinataires & signatures ».
 - Génération des 3 courriers officiels : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde
 - Lit la même config localStorage que les Déclarations - aucune saisie supplémentaire
 - Mise en page A4 portrait stricte (1 page), style administratif français

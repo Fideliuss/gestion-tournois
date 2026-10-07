@@ -60,13 +60,12 @@
             <select id="inp-date-m" onchange="renderAll()" style="flex:1"></select>
             <input type="number" id="inp-date-y" min="2020" max="2099" style="width:88px;flex-shrink:0" onchange="renderAll()"/>
           </div>
-          <div class="deadline-hint" id="deadline-hint"></div>
+        </div>
+        <div class="period-actions">
+          <button class="btn btn-ghost" id="btn-tpl" onclick="toggleTplPanel()"><i class="ico ico-cog"></i> <span>Réglages</span></button>
         </div>
       </div>
-
-      <div class="card-foot">
-        <button class="btn btn-ghost" id="btn-tpl" onclick="toggleTplPanel()"><i class="ico ico-cog"></i> <span>Réglages</span></button>
-      </div>
+      <div class="deadline-hint" id="deadline-hint"></div>
     </div>
 
     <!-- Sélecteur de courrier -->
