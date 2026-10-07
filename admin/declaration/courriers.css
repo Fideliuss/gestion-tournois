@@ -309,8 +309,11 @@
   }
 }
 
-/* Réglages : même hauteur que les champs de la ligne Date, aligné à droite sur cette ligne */
-.period-row .period-actions .btn { min-height: 42px; }
+/* Réglages : posé dans le coin bas droit de l'encadré, sans ajouter de ligne */
+.card-corner { position: absolute; right: 32px; bottom: 30px; min-height: 42px; }
+@media (max-width: 520px) {
+  .card-corner { position: static; margin-top: 14px; width: 100%; }
+}
 
 /* Largeur fixe des blocs : les encadrés gardent la même largeur quelle que soit la vue (courrier ou réglages) */
 #section-mensuel, #section-annulation { width: 100%; max-width: 860px; }
