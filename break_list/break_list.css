@@ -163,25 +163,19 @@
 .bl-tables tr:last-child td { border-bottom: 3px solid #000; }
 .bl-tables tr:first-child td { border-top: 3px solid #000; }
 
-/* Feuille des départs : seulement à l'impression (bouton « Imprimer les départs »), A4 portrait pliable en 2 ou en 4 */
+/* Feuille des départs : seulement à l'impression (bouton « Imprimer les départs »), A4 portrait, une colonne par poste sur une ligne (pliable en 2 ou en 4) */
 #dep-print { display: none; }
 .dep-page .bl-title { font-size: 17px; padding: 2.5mm 0; }
-.dep-top { height: 136mm; display: flex; flex-direction: column; }
-.dep-eff { text-align: center; font-size: 12px; margin: 2mm 0 3mm; color: #333; }
-.dep-postes { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; }
-.dep-side { display: flex; flex-direction: column; gap: 3mm; }
-.dep-bottom { margin-top: 4mm; }
-.dep-box { border: 2px solid #000; border-radius: 2mm; overflow: hidden; }
-.dep-box h3 { margin: 0; padding: 2mm 3mm; background: #e6e6e6; border-bottom: 2px solid #000; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; }
-.dep-box h3 span { font-weight: 400; color: #555; }
-.dep-box.dp h3 { background: #c9c9c9; }
-.dep-box ul { list-style: none; margin: 0; padding: 0; }
-.dep-box.dp ul { columns: 2; column-gap: 0; }
-.dep-box li { display: flex; justify-content: space-between; align-items: center; height: 9.5mm; padding: 0 3mm; border-bottom: 1px solid #888; font-size: 15px; break-inside: avoid; }
-.dep-box li:last-child { border-bottom: 0; }
-.dep-box li.chef span { font-weight: 700; }
-.dep-box li em { font-style: normal; font-weight: 700; }
-.dep-box li small { font-size: 11px; color: #555; font-family: 'IBM Plex Mono', monospace; }
+.dep-eff { text-align: center; font-size: 12px; margin: 2mm 0 4mm; color: #333; }
+.dep-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; border: 3px solid #000; }
+.dep-tbl th { background: #e6e6e6; border: 1px solid #000; padding: 3mm 1mm; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; text-align: center; }
+.dep-tbl th span { display: block; margin-top: 1px; font-weight: 400; font-size: 11px; color: #555; }
+.dep-tbl th.dp { background: #c9c9c9; }
+.dep-tbl td { border: 1px solid #000; height: var(--rh, 12mm); padding: 0 2.5mm; vertical-align: middle; font-size: 15px; }
+.dep-tbl td span { display: block; line-height: 1.15; }
+.dep-tbl td.chef span { font-weight: 700; }
+.dep-tbl td em { font-style: normal; font-weight: 700; }
+.dep-tbl td small { display: block; font-size: 11px; color: #555; font-family: 'IBM Plex Mono', monospace; }
 .dep-leg { margin-top: 4mm; font-size: 10px; color: #444; }
 
 @media print {

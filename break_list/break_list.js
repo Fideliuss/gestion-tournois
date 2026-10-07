@@ -378,21 +378,24 @@ function effectifTexte() {
     .concat(['Total ' + _presents.length]).join(' · ');
 }
 
-function depBox(title, list, cls) {
-  const lines = list.map(function (p) {
-    return '<li class="' + (p.chef ? 'chef' : '') + '"><span>' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
-      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + '</span><small>' + (p.known ? blDeltaH(p.delta) : '?') + '</small></li>';
-  }).join('');
-  return '<div class="dep-box ' + (cls || '') + '"><h3>' + title + ' <span>' + list.length + '</span></h3><ul>' + lines + '</ul></div>';
-}
-
-/** Moitié haute : stackers à gauche, compteurs / cartes / salle à droite ; moitié basse : les départs. Un pli en deux, un autre en quatre */
+/** Une colonne par poste, toutes sur une seule ligne ; un poste vide (la salle fermée, par exemple) n'est pas imprimé.
+ *  Les colonnes ont la même largeur : à 4 colonnes, un pli en deux puis en quatre tombe entre elles. */
 function renderDepPrint(cols) {
-  document.getElementById('dep-print').innerHTML = '<section class="bl-page dep-page">'
-    + '<div class="dep-top"><div class="bl-title">Départs du ' + esc(blDateLabel(D.y, D.m, D.d)) + '</div><div class="dep-eff">' + esc(effectifTexte()) + '</div>'
-    + '<div class="dep-postes">' + depBox('Stackers Haut', cols.stackers, 'st')
-    + '<div class="dep-side">' + depBox('Compteurs', cols.compteurs) + depBox('Cartes', cols.cartes) + depBox('Salle', cols.salle) + '</div></div></div>'
-    + '<div class="dep-bottom">' + depBox('Départs', cols.departs, 'dp') + '</div>'
+  const sections = REP_COLS.filter(function (c) { return cols[c[0]].length; });
+  const max = Math.max.apply(null, sections.map(function (c) { return cols[c[0]].length; }).concat([1]));
+  const cell = function (p) {
+    if (!p) return '<td></td>';
+    return '<td class="' + (p.chef ? 'chef' : '') + '"><span>' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
+      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + '</span><small>' + (p.known ? blDeltaH(p.delta) : '?') + '</small></td>';
+  };
+  let body = '';
+  for (let i = 0; i < max; i++) body += '<tr>' + sections.map(function (c) { return cell(cols[c[0]][i]); }).join('') + '</tr>';
+  const rh = Math.round(Math.min(15, Math.max(10, 230 / max)) * 10) / 10;
+  document.getElementById('dep-print').innerHTML = '<section class="bl-page dep-page"><div class="bl-title">Départs du ' + esc(blDateLabel(D.y, D.m, D.d)) + '</div>'
+    + '<div class="dep-eff">' + esc(effectifTexte()) + '</div>'
+    + '<table class="dep-tbl" style="--rh:' + rh + 'mm"><thead><tr>' + sections.map(function (c) {
+      return '<th class="' + (c[0] === 'departs' ? 'dp' : '') + '">' + c[1] + '<span>' + cols[c[0]].length + '</span></th>';
+    }).join('') + '</tr></thead><tbody>' + body + '</tbody></table>'
     + '<div class="dep-leg">◉ arrivée 20h</div></section>';
 }
 
