@@ -241,6 +241,7 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 .dist-total.err { color: #e07a68; }
 
 /* ── Tableau de la déclaration Extras (écran) ── */
+#view-extras .decl-wrap { max-width: 860px; margin: 0 auto; }   /* largeur lisible, comme avant la fusion des pages */
 .decl-extras-tbl {
   width: 100%; border-collapse: collapse; font-size: 12px;
 }
@@ -394,6 +395,7 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 
 /* ── Impression de la déclaration Extras (reprise de l'ancienne page Extras) ── */
 @media print {
+  #view-extras .decl-wrap { max-width: none; margin: 0; }   /* pleine largeur à l'impression */
   #extras-output         { margin: 0; overflow: visible !important; }
   .decl-extras-tbl     { width: 100%; font-size: 9pt; border-collapse: collapse; table-layout: auto; }
   .det-title           { background: #000 !important; color: #fff !important; font-size: 11pt; padding: 8px 12px; letter-spacing: .07em; }
