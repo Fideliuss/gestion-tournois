@@ -86,6 +86,7 @@
 
 .print-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
   margin-top: 12px;
@@ -310,3 +311,7 @@
 
 /* Pied d'un encadré : action alignée en bas à droite */
 .card-foot { display: flex; justify-content: flex-end; margin-top: 18px; }
+
+/* Largeur fixe des blocs : les encadrés gardent la même largeur quelle que soit la vue (courrier ou réglages) */
+#section-mensuel, #section-annulation { width: 100%; max-width: 860px; }
+#section-mensuel > *, #section-annulation > * { max-width: 100% !important; }
