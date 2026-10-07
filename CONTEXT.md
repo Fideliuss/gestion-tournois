@@ -69,12 +69,12 @@ admin/
   config_training.html/.js/.css  Configuration des modules (admin) - réglages de tous les modules de training, un onglet par jeu
   comptes.html/.css/.js  Gestion des comptes - onglets Comptes (liste filtrable) et Rôles & accès (matrice des accès), guard role:'admin' (intentionnellement admin-only, pas de panel)
   declaration/
-    declaration.html  Déclaration mensuelle PN, guard panel:'admin-tournois'
+    declaration.html  Déclarations mensuelles (Tournois + Extras) et réglages des tournois, guard panel:'admin-tournois'
     declaration.css / declaration.js
-    courriers.html    Générateur de courrier - accessible uniquement par le menu « Administration tournois » de la barre (plus de bouton dans Déclaration DTPJ), guard panel:'admin-tournois'
+    courriers.html    Générateur de courrier - accessible uniquement par le menu « Administration tournois » de la barre (plus de bouton dans Déclarations), guard panel:'admin-tournois'
     courriers.css / courriers.js
   extras/
-    extras.html   Déclaration extras & émargement, guard panel:'admin-tournois'
+    extras.html   Gestion des Extras (liste et émargement), guard panel:'admin-tournois'
     extras.css / extras.js
 
 training/
@@ -222,11 +222,13 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 - Impression du tableau
 
 ### Administration tournois
-Pages regroupées dans le menu **Administration tournois** de la barre (panel `admin-tournois`) : **Déclaration DTPJ**, **Générateur de courrier**, **Gestion des Extras**, **Calendrier & barèmes** (fichiers `declaration.html`, `courriers.html`, `extras.html`, `config_tournois.html` : les noms de fichiers n'ont pas changé, seuls les libellés).
+Pages regroupées dans le menu **Administration tournois** de la barre (panel `admin-tournois`) : **Déclarations**, **Générateur de courrier**, **Gestion des Extras**, **Calendrier & barèmes** (fichiers `declaration.html`, `courriers.html`, `extras.html`, `config_tournois.html` : les noms de fichiers n'ont pas changé, seuls les libellés).
 
 **Calendrier & barèmes** (`config_tournois.html`) - semainier CRUD (cartes édition/suppression par jour + section événements), formulaire nom/jour/PP/frais/buy-in auto + barème de points éditable slot par slot.
 
-**Déclaration DTPJ**
+**Déclarations (Tournois + Extras)** - une seule page, une seule période (mois + année) pour les deux déclarations, `declaration.html`
+- Deux onglets : **Tournois** (tableau DTPJ + annexes) et **Extras** (déclaration des croupiers extras, lue dans la liste de Gestion des Extras). Le bouton **Imprimer / PDF** imprime la déclaration affichée.
+- Le bouton **Réglages** est dans l'encadré de période (il n'existe que pour les Tournois) : il remplace la déclaration par les réglages (Tournois, Encadrement, Annexes, Ad-hoc & exceptions) ; le même bouton devient « Retour à la déclaration ». Plus de bouton « Tournoi ad-hoc » séparé : l'ad-hoc est dans les réglages.
 - Tableau mensuel généré automatiquement depuis une config par jour de semaine (lun–dim)
 - Impression A4 paysage : seuls tableau + annexes visibles, tient sur 1 page
 - Annexes Prize Pool indépendantes et éditables (joueurs, cave, répartition % à 10 places)
@@ -235,12 +237,12 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - Persistance localStorage (`decl_cfg`, `decl_staff`, `decl_annexes`, `decl_adhoc_Y_M`, `decl_exc_Y_M`)
 - **Deux vues** (octobre 2026, retours d'un utilisateur) : barre `.page-bar` avec **Déclaration** (période, tableau, annexes) et **Réglages** (sous-onglets Tournois, Encadrement, Annexes, **Ad-hoc & exceptions**) ; à droite le bouton **« + Tournoi ad-hoc »** ouvre directement le formulaire (`goAdhoc()`). Plus de bouton « Générer » : le tableau se recalcule dès qu'on change le mois ou l'année. Les enregistrements des réglages affichent une confirmation (`flash()`).
 - **Annexe : on saisit le numéro seul** (champ numérique), stocké et affiché « ANNEXE n » (`annexeNum` / `annexeLabel`) ; les anciennes valeurs « ANNEXE 4 » restent lues. Vaut pour la config par jour, l'éditeur d'annexes, les exceptions et les tournois ad-hoc.
-- **Mois par défaut = mois suivant** (`defaultDeclMonth()` dans `barriere.js`, décembre → janvier) pour la Déclaration DTPJ, les courriers mensuels (la date limite d'envoi suit : 21 jours avant le 1er du mois déclaré) et la déclaration des extras - les déclarations se font en amont. **Sélecteur de période identique partout** (mois en liste + année en champ numérique, mêmes dimensions) : `initPeriodPicker(selectMois, champAnnée, noms)` dans `barriere.js` et classes `.pf-month` / `.pf-year` ; plus de bouton « Générer » ni de `<input type="month">`.
+- **Mois par défaut = mois suivant** (`defaultDeclMonth()` dans `barriere.js`, décembre → janvier) pour les Déclarations, les courriers mensuels (la date limite d'envoi suit : 21 jours avant le 1er du mois déclaré) et la déclaration des extras - les déclarations se font en amont. **Sélecteur de période identique partout** (mois en liste + année en champ numérique, mêmes dimensions) : `initPeriodPicker(selectMois, champAnnée, noms)` dans `barriere.js` et classes `.pf-month` / `.pf-year` ; plus de bouton « Générer » ni de `<input type="month">`.
 - **Titres d'impression** (`printWithTitle(titre)` dans `barriere.js`) : le titre de la page devient le nom du PDF proposé. Format avec tiret simple, jamais de tiret cadratique : « Déclaration Tournois - Novembre 2026 », « Courrier SIPJ 33 - Déclaration Tournois Novembre 2026 », « Annulation de tournoi - <destinataire> - <date> », « Déclaration extras - Novembre 2026 », « Émargement extras - Semaine 41 (5 au 11 octobre 2026) ».
 
 **Générateur de courrier** (courriers mensuels)
 - Génération des 3 courriers officiels : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde
-- Lit la même config localStorage que la Déclaration DTPJ - aucune saisie supplémentaire
+- Lit la même config localStorage que les Déclarations - aucune saisie supplémentaire
 - Mise en page A4 portrait stricte (1 page), style administratif français
 - Date courrier auto-calculée à J-21 du début du mois déclaré
 - Triangle des destinataires : chaque courrier liste les 2 autres destinataires
@@ -248,7 +250,7 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 
 **Gestion des Extras**
 - Liste des croupiers extras avec infos personnelles CRUD (nom, prénom, date/lieu naissance, adresse)
-- **Déclaration mensuelle** : tableau officiel imprimable A4 paysage
+- La déclaration mensuelle des extras n'est plus ici : elle est dans la page **Déclarations** (onglet Extras)
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, sélecteur `<input type="week">`
   - Cochage des jours travaillés → heure auto (20:55 semaine, 16:55 dimanche, configurables)
   - Overrides d'horaires ad-hoc : par colonne (jour) et par cellule (extra × jour)

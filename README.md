@@ -39,7 +39,7 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 
 ### Administration tournois *(menu de la barre)*
 
-**Déclaration DTPJ** - formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
+**Déclarations** - déclarations mensuelles au Service Course et Jeux de la Police Nationale, sur une seule page avec une période commune : onglet **Tournois** (formulaire DTPJ et annexes) et onglet **Extras** (croupiers extras). Le bouton Réglages, dans l'encadré de période, ouvre les réglages des tournois.
 - Tableau généré automatiquement depuis une configuration par jour de semaine
 - Gestion des exceptions ponctuelles (annulation, modification d'un tournoi) et tournois ad-hoc
 - Annexes Prize Pool éditables avec répartition configurable
@@ -52,7 +52,6 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 
 **Gestion des Extras** - gestion des croupiers extras.
 - CRUD complet de la liste des extras (nom, prénom, date/lieu de naissance, adresse)
-- **Déclaration mensuelle** imprimable A4 paysage, sélecteur calendrier natif
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, horaires par défaut configurables + overrides ad-hoc
 - Liste des extras persistée dans **Supabase**
 
@@ -161,7 +160,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── comptes.html / .css / .js  - Gestion des comptes : liste filtrable + matrice des accès par rôle
 │   ├── config_training.html / .js / .css - Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
-│   │   ├── declaration.html       - Déclaration Tournois DTPJ
+│   │   ├── declaration.html       - Déclarations mensuelles (Tournois + Extras)
 │   │   ├── declaration.css / .js
 │   │   ├── courriers.html         - Générateur de courrier (menu Administration tournois)
 │   │   └── courriers.css / .js
