@@ -84,11 +84,25 @@ function renderAll() {
   const info = document.getElementById('plan-info');
   if (!plan) info.innerHTML = 'Aucun planning pour ' + esc(blMonthLabel(D.y, D.m)) + '. <a href="planning.html" style="color:var(--gold-dim);text-decoration:underline">Importer le planning</a>';
   else info.textContent = 'Planning de ' + blMonthLabel(D.y, D.m) + ' · ' + plan.rows.length + ' salariés · ' + blDateLabel(D.y, D.m, D.d);
+  renderCount();
   renderPresents();
   renderOctime();
   renderRepartition();
   renderPrint();
   showTab(_tab);
+}
+
+// ── Effectif du soir : une pastille par horaire du planning, puis le total ──
+
+function renderCount() {
+  const box = document.getElementById('count-out');
+  box.hidden = !plan || D.d > plan.days;
+  if (box.hidden) return;
+  const sub = function (k) { return k.floor ? 'floor' : k.groupe === 'depart' ? 'part en premier' : 'arrivée ' + k.groupe; };
+  box.innerHTML = cfg.codes.map(function (k) {
+    const n = _presents.filter(function (p) { return p.code === k.code; }).length;
+    return '<div class="bl-tile' + (n ? '' : ' zero') + '"><b>' + n + '</b><span>' + esc(k.code) + '</span><small>' + esc(sub(k)) + '</small></div>';
+  }).join('') + '<div class="bl-tile total"><b>' + _presents.length + '</b><span>Total</span><small>présents ce soir</small></div>';
 }
 
 // ── Présents ─────────────────────────────────────────
