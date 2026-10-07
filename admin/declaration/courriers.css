@@ -307,3 +307,6 @@
     margin: 0;
   }
 }
+
+/* Pied d'un encadré : action alignée en bas à droite */
+.card-foot { display: flex; justify-content: flex-end; margin-top: 18px; }
