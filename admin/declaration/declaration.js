@@ -57,15 +57,15 @@ function saveExc(m, y, data) { localStorage.setItem(excKey(m, y), JSON.stringify
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
-  const now = new Date();
+  const def = defaultDeclMonth();            // mois suivant : on déclare en amont
   const selMonth = document.getElementById('sel-month');
   MOIS.forEach((m, i) => {
     const o = document.createElement('option');
     o.value = i + 1; o.textContent = m;
-    if (i === now.getMonth()) o.selected = true;
+    if (i + 1 === def.month) o.selected = true;
     selMonth.appendChild(o);
   });
-  document.getElementById('inp-year').value = now.getFullYear();
+  document.getElementById('inp-year').value = def.year;
 
   renderCfgTable();
   renderStaffEditor();
@@ -73,6 +73,48 @@ document.addEventListener('DOMContentLoaded', () => {
   updateMonthInputs();
   renderAll();
 });
+
+/* ── Vues : Déclaration / Réglages ── */
+function showView(name) {
+  document.querySelectorAll('#decl-bar .seg-btn').forEach(b => {
+    const on = b.dataset.view === name;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', String(on));
+  });
+  document.getElementById('view-decl').hidden = name !== 'decl';
+  document.getElementById('view-cfg').hidden  = name !== 'cfg';
+  window.scrollTo(0, 0);
+}
+
+/* « + Tournoi ad-hoc » : ouvre directement le formulaire, sur la date du mois sélectionné */
+function goAdhoc() {
+  showView('cfg');
+  showDeclTab('ponctuel');
+  const card = document.getElementById('adhoc-card');
+  card.scrollIntoView({ block: 'start' });
+  setTimeout(() => document.getElementById('adhoc-date').focus(), 150);
+}
+
+/* Période modifiée : tout se recalcule, plus de bouton « Générer » */
+function onPeriodChange() { if (getMonth() && getYear()) renderAll(); }
+
+/* Petit message de confirmation (les réglages sont dans une autre vue que le résultat) */
+function flash(msg) {
+  let t = document.getElementById('decl-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'decl-toast'; t.className = 'decl-toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(flash._t); flash._t = setTimeout(() => t.classList.remove('on'), 2200);
+}
+
+/* Impression : le titre devient le nom du PDF proposé */
+function printDeclaration() {
+  const m = MOIS[getMonth() - 1].toLowerCase();
+  printWithTitle(`Déclaration DTPJ — ${m.charAt(0).toUpperCase() + m.slice(1)} ${getYear()}`);
+}
+
+/* ── Annexe : on saisit le numéro seul, on stocke et on affiche « ANNEXE n » ── */
+function annexeNum(v)   { const m = String(v == null ? '' : v).match(/\d+/); return m ? m[0] : ''; }
+function annexeLabel(v) { const n = annexeNum(v); return n ? 'ANNEXE ' + n : ''; }
 
 /* ── Onglets config ── */
 function showDeclTab(name) {
@@ -105,7 +147,7 @@ function renderCfgTable() {
   const ORDER = [1, 2, 3, 4, 5, 6, 0];
   document.getElementById('cfg-table').innerHTML = `
     <thead>
-      <tr><th>Jour</th><th>Actif</th><th>Heure</th><th>Cave (€)</th><th>Joueurs max</th><th>Rachats</th><th>Bounty (€)</th><th>Annexe</th></tr>
+      <tr><th>Jour</th><th>Actif</th><th>Heure</th><th>Cave (€)</th><th>Joueurs max</th><th>Rachats</th><th>Bounty (€)</th><th>N° annexe</th></tr>
     </thead>
     <tbody>
       ${ORDER.map(d => { const c = cfg[d]; return `<tr data-day="${d}" class="${c.actif ? '' : 'inactive'}">
@@ -116,14 +158,14 @@ function renderCfgTable() {
           <td><input type="number" value="${c.joueurs}" onchange="updateCfg(${d},'joueurs',+this.value)" style="width:68px"/></td>
           <td><input type="checkbox" ${c.rachats ? 'checked' : ''} onchange="updateCfg(${d},'rachats',this.checked)"/></td>
           <td><input type="number" value="${c.bounty}"  onchange="updateCfg(${d},'bounty',+this.value)"  style="width:60px" placeholder="0"/></td>
-          <td><input type="text"   value="${c.annexe}"  onchange="updateCfg(${d},'annexe',this.value)"   style="width:86px" placeholder="ANNEXE X"/></td>
+          <td><input type="number" value="${annexeNum(c.annexe)}" onchange="updateCfg(${d},'annexe',annexeLabel(this.value))" style="width:60px" min="1" placeholder="N°"/></td>
         </tr>`; }).join('')}
     </tbody>`;
 }
 function toggleDay(d, val) { cfg[d].actif = val; const r = document.querySelector(`#cfg-table tr[data-day="${d}"]`); if (r) r.className = val ? '' : 'inactive'; }
 function updateCfg(d, k, v) { cfg[d][k] = v; }
 function resetConfig() { if (!confirm('Réinitialiser la configuration ?')) return; cfg = deepClone(CFG_DEFAULT); saveCfg(); renderCfgTable(); renderAll(); }
-function saveAndRender() { saveCfg(); renderAll(); }
+function saveAndRender() { saveCfg(); renderAll(); flash('Réglages des tournois enregistrés'); }
 
 /* ── Staff ── */
 function renderStaffEditor() {
@@ -143,7 +185,7 @@ function staffRow(type, i, n) { return `<div class="staff-item"><input type="tex
 function updateStaff(type, i, v) { staff[type][i] = v; }
 function addStaff(type)          { staff[type].push(''); saveStaff(); renderStaffEditor(); }
 function removeStaff(type, i)    { staff[type].splice(i,1); saveStaff(); renderStaffEditor(); }
-function saveStaffAndRender()    { saveStaff(); renderAll(); }
+function saveStaffAndRender()    { saveStaff(); renderAll(); flash('Encadrement enregistré'); }
 
 /* ── Éditeur annexes ── */
 function renderAnnexesEditor() {
@@ -160,7 +202,7 @@ function annexeEditorCard(a) {
     </div>`).join('');
   return `<div class="annexe-editor-item" id="ae-${a.id}">
     <div class="annexe-editor-header">
-      <div class="fg"><label class="fl">Nom</label><input type="text" value="${a.nom}" onchange="updateAnnexeField('${a.id}','nom',this.value)" style="width:110px"/></div>
+      <div class="fg"><label class="fl">N° d'annexe</label><input type="number" value="${annexeNum(a.nom)}" min="1" onchange="updateAnnexeField('${a.id}','nom',annexeLabel(this.value))" style="width:80px"/></div>
       <div class="fg"><label class="fl">Joueurs</label><input type="number" value="${a.joueurs}" onchange="updateAnnexeField('${a.id}','joueurs',+this.value)" style="width:70px"/></div>
       <div class="fg"><label class="fl">Cave (€)</label><input type="number" value="${a.cave}" onchange="updateAnnexeField('${a.id}','cave',+this.value)" style="width:70px"/></div>
       <div style="margin-left:auto"><button class="btn-red" onclick="removeAnnexe('${a.id}')">Supprimer</button></div>
@@ -184,7 +226,7 @@ function updateAnnexeDist(id, idx, v) {
 }
 function addAnnexe() { annexes.push({id:uid(), nom:'ANNEXE '+(annexes.length+1), joueurs:150, cave:0, dist:[...DIST_STD]}); saveAnnexes(); renderAnnexesEditor(); renderAll(); }
 function removeAnnexe(id) { if (!confirm('Supprimer cette annexe ?')) return; annexes = annexes.filter(a => a.id!==id); saveAnnexes(); renderAnnexesEditor(); renderAll(); }
-function saveAnnexesAndRender() { saveAnnexes(); renderAll(); }
+function saveAnnexesAndRender() { saveAnnexes(); renderAll(); flash('Annexes enregistrées'); }
 
 /* ── Ad-hoc ── */
 function addAdhoc() {
@@ -198,7 +240,7 @@ function addAdhoc() {
   const joueurs = +document.getElementById('adhoc-joueurs').value || 150;
   const rachats = document.getElementById('adhoc-rachats').checked;
   const bounty  = +document.getElementById('adhoc-bounty').value  || 0;
-  const annexe  = document.getElementById('adhoc-annexe').value.trim();
+  const annexe  = annexeLabel(document.getElementById('adhoc-annexe').value);
   const titre   = `${JOURS[dow]} ${d} ${MOIS[m-1]} ${y} à ${heure}${rachats ? ' RE ENTRY' : ''}`;
 
   const list = loadAdhoc(month, year);
@@ -251,7 +293,7 @@ function onExcDateChange() {
   document.getElementById('exc-joueurs').value   = vals.joueurs ?? c.joueurs;
   document.getElementById('exc-rachats').checked = vals.rachats ?? c.rachats;
   document.getElementById('exc-bounty').value    = vals.bounty  ?? 0;
-  document.getElementById('exc-annexe').value    = vals.annexe  ?? c.annexe;
+  document.getElementById('exc-annexe').value    = annexeNum(vals.annexe ?? c.annexe);
 
   if (existing) {
     const radio = document.querySelector(`input[name="exc-type"][value="${existing.type}"]`);
@@ -280,7 +322,7 @@ function applyException() {
     joueurs: +document.getElementById('exc-joueurs').value,
     rachats: document.getElementById('exc-rachats').checked,
     bounty:  +document.getElementById('exc-bounty').value,
-    annexe:  document.getElementById('exc-annexe').value.trim(),
+    annexe:  annexeLabel(document.getElementById('exc-annexe').value),
   };
 
   saveExc(month, year, exc);

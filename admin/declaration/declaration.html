@@ -21,40 +21,56 @@
 
   </div>
 
-  <!-- ── 1. Période + impression ── -->
+  <!-- Barre : Déclaration | Réglages ; à droite l'action la plus cherchée (tournoi ad-hoc) -->
+  <div class="page-bar" id="decl-bar">
+    <div class="page-bar-l"></div>
+    <div class="seg" role="tablist" aria-label="Vue">
+      <button class="seg-btn active" role="tab" data-view="decl" aria-selected="true"  onclick="showView('decl')">Déclaration</button>
+      <button class="seg-btn"        role="tab" data-view="cfg"  aria-selected="false" onclick="showView('cfg')">Réglages</button>
+    </div>
+    <div class="page-bar-r">
+      <button class="btn btn-gold btn-lg" onclick="goAdhoc()"><i class="ico ico-plus"></i> Tournoi ad-hoc</button>
+    </div>
+  </div>
+
+  <!-- ══ Vue Déclaration : période, tableau, annexes ══ -->
+  <section class="decl-view" id="view-decl">
+
   <div class="card" id="period-card" style="max-width:1100px">
     <div class="sec">Période</div>
     <div class="period-row">
       <div class="fg">
         <label class="fl">Mois</label>
-        <select id="sel-month"></select>
+        <select id="sel-month" onchange="onPeriodChange()"></select>
       </div>
       <div class="fg">
         <label class="fl">Année</label>
-        <input type="number" id="inp-year" min="2020" max="2099" style="width:100px"/>
+        <input type="number" id="inp-year" min="2020" max="2099" style="width:100px" onchange="onPeriodChange()"/>
       </div>
-      <button class="btn btn-gold" onclick="renderAll()">Générer</button>
-      <button class="btn btn-ghost" onclick="window.print()" style="margin-left:auto"><i class="ico ico-print"></i> Imprimer / PDF</button>
+      <span class="period-hint">Mois suivant par défaut : une déclaration se fait en amont.</span>
+      <button class="btn btn-ghost" onclick="printDeclaration()" style="margin-left:auto"><i class="ico ico-print"></i> Imprimer / PDF</button>
     </div>
   </div>
 
-  <!-- ── 2. Formulaire de déclaration ── -->
   <div class="decl-wrap">
     <div id="decl-output"></div>
   </div>
 
-  <!-- ── 3. Annexes prize pool ── -->
   <div class="sec" id="annexes-label" style="width:100%;margin-bottom:16px">
     Annexes — Prize Pool
   </div>
   <div class="annexes-grid" id="annexes-output"></div>
 
-  <!-- ── 4. Onglets de configuration ── -->
-  <div class="decl-tabs seg" id="decl-tabs">
+  </section>
+
+  <!-- ══ Vue Réglages : tournois, encadrement, annexes, ad-hoc & exceptions ══ -->
+  <section class="decl-view" id="view-cfg" hidden>
+
+  <div class="decl-tabs seg sm" id="decl-tabs">
     <button class="decl-tab seg-btn active" onclick="showDeclTab('tournois')">Tournois</button>
     <button class="decl-tab seg-btn" onclick="showDeclTab('encadrement')">Encadrement</button>
     <button class="decl-tab seg-btn" onclick="showDeclTab('annexes')">Annexes</button>
-    <button class="decl-tab seg-btn" onclick="showDeclTab('ponctuel')">Ponctuel</button>
+    <button class="decl-tab seg-btn" onclick="showDeclTab('ponctuel')">Ad-hoc &amp; exceptions</button>
   </div>
 
   <!-- ── Onglet : Tournois ── -->
@@ -149,8 +165,8 @@
           <input type="number" id="exc-bounty" placeholder="0" min="0" style="width:80px"/>
         </div>
         <div class="fg">
-          <label class="fl">Annexe</label>
-          <input type="text" id="exc-annexe" placeholder="ANNEXE X" style="width:100px"/>
+          <label class="fl">N° d'annexe</label>
+          <input type="number" id="exc-annexe" placeholder="ex : 4" min="1" style="width:90px"/>
         </div>
       </div>
       <div class="sec" style="margin-top:4px;margin-bottom:12px">Exceptions ce mois</div>
@@ -192,8 +208,8 @@
           <input type="number" id="adhoc-bounty" placeholder="0" min="0" style="width:80px"/>
         </div>
         <div class="fg">
-          <label class="fl">Annexe</label>
-          <input type="text" id="adhoc-annexe" placeholder="ANNEXE X" style="width:100px"/>
+          <label class="fl">N° d'annexe</label>
+          <input type="number" id="adhoc-annexe" placeholder="ex : 4" min="1" style="width:90px"/>
         </div>
         <div class="fg" style="justify-content:flex-end">
           <label class="fl">&nbsp;</label>
@@ -207,6 +223,8 @@
     </div>
 
   </div>
+
+  </section>
 
   <div class="footer" style="width:100%;max-width:1100px">
     Barrière Casino Bordeaux · Déclaration mensuelle — Service Course et Jeux de la Police Judiciaire

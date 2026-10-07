@@ -233,6 +233,10 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - Tournois ad-hoc : ajout d'un tournoi exceptionnel pour le mois en cours, trié chronologiquement
 - Gestion ponctuelle : annuler ou modifier un tournoi sur un jour précis (restaurable)
 - Persistance localStorage (`decl_cfg`, `decl_staff`, `decl_annexes`, `decl_adhoc_Y_M`, `decl_exc_Y_M`)
+- **Deux vues** (octobre 2026, retours d'un utilisateur) : barre `.page-bar` avec **Déclaration** (période, tableau, annexes) et **Réglages** (sous-onglets Tournois, Encadrement, Annexes, **Ad-hoc & exceptions**) ; à droite le bouton **« + Tournoi ad-hoc »** ouvre directement le formulaire (`goAdhoc()`). Plus de bouton « Générer » : le tableau se recalcule dès qu'on change le mois ou l'année. Les enregistrements des réglages affichent une confirmation (`flash()`).
+- **Annexe : on saisit le numéro seul** (champ numérique), stocké et affiché « ANNEXE n » (`annexeNum` / `annexeLabel`) ; les anciennes valeurs « ANNEXE 4 » restent lues. Vaut pour la config par jour, l'éditeur d'annexes, les exceptions et les tournois ad-hoc.
+- **Mois par défaut = mois suivant** (`defaultDeclMonth()` dans `barriere.js`, décembre → janvier) pour la Déclaration DTPJ, les courriers mensuels (la date limite d'envoi suit : 21 jours avant le 1er du mois déclaré) et la déclaration des extras — les déclarations se font en amont.
+- **Titres d'impression** (`printWithTitle(titre)` dans `barriere.js`) : le titre de la page devient le nom du PDF proposé — « Déclaration DTPJ — Novembre 2026 », « Courrier SIPJ 33 — Déclaration DTPJ Novembre 2026 », « Annulation de tournoi — <destinataire> — <date> », « Déclaration extras — Novembre 2026 », « Émargement extras — Semaine 41 (5 au 11 octobre 2026) ».
 
 **Générateur de courrier** (courriers mensuels)
 - Génération des 3 courriers officiels : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde

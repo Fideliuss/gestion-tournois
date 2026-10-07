@@ -62,7 +62,8 @@ function getWeekDays(week, year) {
 document.addEventListener('DOMContentLoaded', async () => {
   const now = new Date();
 
-  document.getElementById('decl-month-input').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`;
+  const def = defaultDeclMonth();            // mois suivant : on déclare en amont
+  document.getElementById('decl-month-input').value = `${def.year}-${String(def.month).padStart(2,'0')}`;
   document.getElementById('emarg-week-input').value = `${now.getFullYear()}-W${String(getISOWeek(now)).padStart(2,'0')}`;
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;
   document.getElementById('cfg-sunday-time').value  = cfg.sundayTime;
@@ -456,14 +457,20 @@ function buildBlankCard(week, days) {
 function printDeclaration() {
   injectPageStyle('@page{size:A4 landscape;margin:10mm}');
   document.body.setAttribute('data-print', 'declaration');
-  window.print();
+  const MLONG = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  printWithTitle(`Déclaration extras — ${MLONG[getDeclMonth() - 1]} ${getDeclYear()}`);
   cleanupPrint();
 }
 
 function printEmargement() {
   injectPageStyle('@page{size:A4 landscape;margin:0}');
   document.body.setAttribute('data-print', 'emargement');
-  window.print();
+  const week = getEmargWeek(), days = getWeekDays(week, getEmargYear()), mon = days[0], sun = days[6];
+  const ML = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const plage = mon.getMonth() === sun.getMonth()
+    ? `${mon.getDate()} au ${sun.getDate()} ${ML[sun.getMonth()]} ${sun.getFullYear()}`
+    : `${mon.getDate()} ${ML[mon.getMonth()]} au ${sun.getDate()} ${ML[sun.getMonth()]} ${sun.getFullYear()}`;
+  printWithTitle(`Émargement extras — Semaine ${String(week).padStart(2, '0')} (${plage})`);
   cleanupPrint();
 }
 

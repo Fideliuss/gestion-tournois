@@ -50,4 +50,21 @@ document.addEventListener('click', e => {
   setTimeout(() => { window.location.href = href; }, 200);
 });
 
+/* ── Déclarations : mois par défaut = le mois SUIVANT ──
+   Les déclarations (DTPJ, courriers, extras) se font en amont : une fois le mois commencé, il est trop tard. */
+function defaultDeclMonth() {
+  const n = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);   // gère décembre → janvier
+  return { month: n.getMonth() + 1, year: n.getFullYear() };
+}
 
+/* ── Impression avec un titre explicite ──
+   Le navigateur propose le titre de la page comme nom du fichier PDF (et l'imprime en en-tête) : on le remplace le
+   temps de l'impression par un titre qui dit ce qu'on imprime (« Déclaration DTPJ — Novembre 2026 »). */
+function printWithTitle(title) {
+  const previous = document.title;
+  document.title = title;
+  const restore = () => { document.title = previous; window.removeEventListener('afterprint', restore); };
+  window.addEventListener('afterprint', restore);
+  window.print();
+  setTimeout(restore, 1500);   // repli si `afterprint` n'est pas émis
+}
