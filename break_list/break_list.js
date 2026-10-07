@@ -63,14 +63,6 @@ async function loadPlan() {
   renderAll();
 }
 
-/** Aperçu de la feuille (recto et verso) sous la page ; l'impression, elle, ne dépend pas de cet affichage */
-function togglePreview() {
-  const box = document.getElementById('bl-print'), btn = document.getElementById('btn-preview');
-  box.hidden = !box.hidden;
-  btn.querySelector('span').textContent = box.hidden ? 'Voir la feuille' : 'Masquer la feuille';
-  if (!box.hidden) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 // ── Rendu général ────────────────────────────────────
 
 let _presents = [];
@@ -95,13 +87,12 @@ function renderCount() {
   box.hidden = !plan || D.d > plan.days;
   if (box.hidden) return;
   const n = function (k) { return _presents.filter(function (p) { return p.code === k.code; }).length; };
-  // Gros chiffres : les horaires des équipes (hors floor) ; le floor, discret, avec son horaire
-  const main = cfg.codes.filter(function (k) { return !k.floor && k.groupe !== 'depart'; });
-  const floors = cfg.codes.filter(function (k) { return k.floor && n(k); });
-  box.innerHTML = main.map(function (k) {
-    return '<div class="bl-tile' + (n(k) ? '' : ' zero') + '"><b>' + n(k) + '</b><span>' + esc(k.code) + '</span></div>';
-  }).join('') + '<div class="bl-tile total"><b>' + _presents.length + '</b><span>Total</span></div>'
-    + (floors.length ? '<div class="bl-floor">' + floors.map(function (k) { return 'Floor ' + esc(k.code) + (n(k) > 1 ? ' (' + n(k) + ')' : ''); }).join(' · ') + '</div>' : '');
+  // « 5 à 19:55 · 6 à 20:55 · 1 floor à 20:30 », puis le total ; les horaires d'équipe d'abord, le floor ensuite (seulement s'il y en a)
+  const parts = cfg.codes.filter(function (k) { return !k.floor && k.groupe !== 'depart'; })
+    .map(function (k) { return '<span><b>' + n(k) + '</b> à ' + esc(k.code) + '</span>'; })
+    .concat(cfg.codes.filter(function (k) { return k.floor && n(k); })
+      .map(function (k) { return '<span class="flr"><b>' + n(k) + '</b> floor à ' + esc(k.code) + '</span>'; }));
+  box.innerHTML = parts.join('<i>·</i>') + '<span class="tot">Total <b>' + _presents.length + '</b></span>';
 }
 
 // ── Présents ─────────────────────────────────────────
