@@ -263,7 +263,9 @@ async function setAlias(key, value) {
 function numOpt(id) { return Math.max(0, parseInt(document.getElementById(id).value, 10) || 0); }
 
 function renderRepartition() {
-  const out = document.getElementById('rep-out');
+  const out = document.getElementById('rep-out'), btn = document.getElementById('btn-print-dep');
+  document.getElementById('dep-print').innerHTML = '';
+  btn.disabled = true;
   if (!_presents.length) { out.innerHTML = '<div class="bl-empty">Aucun présent à répartir.</div>'; return; }
   if (!octime) { out.innerHTML = '<div class="bl-empty">Collez l\'extraction Octime pour calculer la répartition.</div>'; return; }
   const people = _presents.map(function (p) {
@@ -282,6 +284,45 @@ function renderRepartition() {
   out.innerHTML = '<div class="bl-rep">' + col('Stackers Haut', res.stackers) + col('Compteurs', res.compteurs) + col('Cartes', res.cartes) + col('Salle', res.salle) + col('Départs', res.departs) + '</div>'
     + (warns.length ? '<div class="bl-warn">' + warns.map(esc).join('<br>') + '</div>' : '')
     + '<div class="bl-legend">◉ arrivée 20h · en gras : chef · ' + esc(cfg.breaklist.floorMarque) + ' : floor · entre parenthèses : delta de quota</div>';
+  renderDepPrint(res);
+  btn.disabled = false;
+}
+
+// ── Feuille des départs imprimable (pour le chef qui gère la break list) ──
+
+function effectifTexte() {
+  const n = function (k) { return _presents.filter(function (p) { return p.code === k.code; }).length; };
+  return cfg.codes.filter(function (k) { return !k.floor && k.groupe !== 'depart'; }).map(function (k) { return n(k) + ' à ' + k.code; })
+    .concat(cfg.codes.filter(function (k) { return k.floor && n(k); }).map(function (k) { return n(k) + ' floor à ' + k.code; }))
+    .concat(['Total ' + _presents.length]).join(' · ');
+}
+
+function renderDepPrint(res) {
+  const cols = [['Stackers Haut', res.stackers], ['Compteurs', res.compteurs], ['Cartes', res.cartes], ['Salle', res.salle], ['Départs', res.departs]];
+  const max = Math.max.apply(null, cols.map(function (c) { return c[1].length; }).concat([1]));
+  const known = {};
+  _presents.forEach(function (p) { const m = match && match.match[p.id]; known[p.id] = m && m.octime.minutes != null ? m.octime.minutes : null; });
+  const cell = function (p) {
+    if (!p) return '<td></td>';
+    return '<td class="' + (p.chef ? 'chef' : '') + '"><span>' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
+      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + '</span><small>' + (known[p.id] == null ? '?' : blDeltaH(known[p.id])) + '</small></td>';
+  };
+  let body = '';
+  for (let i = 0; i < max; i++) body += '<tr>' + cols.map(function (c) { return cell(c[1][i]); }).join('') + '</tr>';
+  const rh = Math.round(Math.min(15, Math.max(6.5, 150 / max)) * 10) / 10;
+  document.getElementById('dep-print').innerHTML = '<section class="bl-page dep-page"><div class="bl-title">Départs du ' + esc(blDateLabel(D.y, D.m, D.d)) + '</div>'
+    + '<div class="dep-eff">' + esc(effectifTexte()) + '</div>'
+    + '<table class="dep-tbl" style="--rh:' + rh + 'mm"><thead><tr>' + cols.map(function (c) { return '<th>' + c[0] + ' <span>' + c[1].length + '</span></th>'; }).join('')
+    + '</tr></thead><tbody>' + body + '</tbody></table>'
+    + '<div class="dep-leg">◉ arrivée 20h · en gras : chef · ' + esc(cfg.breaklist.floorMarque) + ' : floor · à droite du nom : delta de quota</div></section>';
+}
+
+function printDeparts() {
+  document.body.classList.add('print-dep');
+  const done = function () { document.body.classList.remove('print-dep'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  printWithTitle('Départs - ' + blDateLabel(D.y, D.m, D.d));
+  setTimeout(done, 1500);
 }
 
 // ── Break list imprimable ────────────────────────────

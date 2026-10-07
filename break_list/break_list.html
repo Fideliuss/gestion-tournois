@@ -78,6 +78,7 @@
         <div class="fg"><label class="fl">Compteurs</label><input type="number" id="opt-compteurs" min="0" max="10" onchange="renderRepartition()"/></div>
         <div class="fg"><label class="fl">Cartes</label><input type="number" id="opt-cartes" min="0" max="10" onchange="renderRepartition()"/></div>
         <label class="chk"><input type="checkbox" id="opt-salle" onchange="renderRepartition()"/> Salle (1 chef)</label>
+        <button class="btn btn-ghost bl-opts-print" id="btn-print-dep" onclick="printDeparts()" disabled><i class="ico ico-print"></i> Imprimer les départs</button>
       </div>
       <div id="rep-out"></div>
     </div>
@@ -85,6 +86,7 @@
 
   <!-- ══ Break list : recto et verso, uniquement pour l'impression ══ -->
   <div id="bl-print" hidden></div>
+  <div id="dep-print"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
