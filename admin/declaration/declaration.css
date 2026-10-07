@@ -240,6 +240,33 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 .dist-total.ok  { color: #6dcc8e; }
 .dist-total.err { color: #e07a68; }
 
+/* ── Tableau de la déclaration Extras (écran) ── */
+.decl-extras-tbl {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.det-title {
+  background: #1F4E79; color: #fff;
+  font-weight: 700; font-size: 14px;
+  letter-spacing: .1em; text-transform: uppercase;
+  padding: 12px 16px; text-align: center;
+}
+.det-hrow th {
+  background: rgba(195,120,20,.1); color: var(--gold);
+  font-size: 9px; letter-spacing: .22em; text-transform: uppercase; font-weight: 700;
+  padding: 8px 10px; text-align: center;
+  border: 1px solid rgba(195,120,20,.2);
+}
+.decl-extras-tbl tbody tr:nth-child(even) { background: rgba(195,120,20,.03); }
+.decl-extras-tbl td {
+  border: 1px solid rgba(195,120,20,.15); padding: 7px 12px;
+  color: var(--text); vertical-align: middle; white-space: nowrap;
+}
+.det-nom    { font-weight: 700; color: var(--cream); text-align: center; letter-spacing: .04em; }
+.det-prenom { font-weight: 700; font-style: italic; color: var(--cream); text-align: center; }
+.det-italic { font-style: italic; text-align: center; }
+.det-lieu   { font-style: italic; text-transform: uppercase; text-align: center; }
+.det-ville  { text-transform: uppercase; font-weight: 500; text-align: center; }
+
 /* ══════════════════════════════════════════════════════
    IMPRESSION - A4 Paysage
 ══════════════════════════════════════════════════════ */
@@ -249,9 +276,10 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 }
 
 /* ── Vues Déclaration / Réglages ── */
-#decl-bar { max-width: 1100px; }
 #view-cfg { align-items: center; }
-.footer { text-align: center; }
+.period-actions { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+#decl-main-tabs { margin-top: 4px; }
+#decl-main-tabs[hidden], #btn-print[hidden], #btn-reglages[hidden] { display: none; }
 .decl-view { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .decl-view[hidden] { display: none; }
 .decl-toast {
@@ -270,7 +298,7 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
   .theme-toggle,
   .back,
   #period-card,
-  #decl-bar,
+  #decl-main-tabs,
   .decl-toast,
   .decl-tabs,
   .decl-tab-panel,
@@ -362,4 +390,19 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
   .dist-tbl td         { color: #000; border-bottom-color: #eee; font-size: 7.5pt; }
   .place-cell          { color: #777; }
   .annexe-legal        { color: #888; font-size: 6pt; }
+}
+
+/* ── Impression de la déclaration Extras (reprise de l'ancienne page Extras) ── */
+@media print {
+  #extras-output         { margin: 0; overflow: visible !important; }
+  .decl-extras-tbl     { width: 100%; font-size: 9pt; border-collapse: collapse; table-layout: auto; }
+  .det-title           { background: #000 !important; color: #fff !important; font-size: 11pt; padding: 8px 12px; letter-spacing: .07em; }
+  .det-hrow th         { background: #f0f0f0 !important; color: #000 !important; border-color: #888 !important; font-size: 7.5pt; padding: 5px 8px; white-space: nowrap; }
+  .decl-extras-tbl td  { border-color: #aaa !important; color: #000 !important; padding: 4px 8px; font-size: 8.5pt; white-space: nowrap; }
+  .decl-extras-tbl tbody tr:nth-child(even) { background: #f7f7f7 !important; }
+  .det-nom             { color: #000 !important; font-weight: 700; }
+  .det-prenom          { color: #000 !important; font-weight: 700; font-style: italic; }
+  .det-italic          { font-style: italic; color: #000 !important; }
+  .det-lieu            { font-style: italic; color: #000 !important; }
+  .det-ville           { color: #000 !important; }
 }

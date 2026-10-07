@@ -59,6 +59,8 @@ function saveExc(m, y, data) { localStorage.setItem(excKey(m, y), JSON.stringify
 document.addEventListener('DOMContentLoaded', () => {
   initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS);   // mois suivant par défaut
 
+  SB.getExtras().then(list => { extras = list; renderExtrasDeclaration(); }).catch(() => {});
+  syncViews();
   renderCfgTable();
   renderStaffEditor();
   renderAnnexesEditor();
@@ -66,25 +68,38 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
 });
 
-/* ── Vues : Déclaration / Réglages ── */
-function showView(name) {
-  document.querySelectorAll('#decl-bar .seg-btn').forEach(b => {
-    const on = b.dataset.view === name;
+/* ── Déclaration affichée (Tournois ou Extras) et Réglages des tournois ── */
+let _decl = 'tournois';
+let _reglages = false;
+
+function showDeclaration(name) {
+  _decl = name;
+  document.querySelectorAll('#decl-main-tabs .seg-btn').forEach(b => {
+    const on = b.dataset.decl === name;
     b.classList.toggle('active', on);
     b.setAttribute('aria-selected', String(on));
   });
-  document.getElementById('view-decl').hidden = name !== 'decl';
-  document.getElementById('view-cfg').hidden  = name !== 'cfg';
+  syncViews();
+}
+
+/* Le bouton Réglages (dans l'encadré de période) ouvre les réglages des tournois à la place de la déclaration */
+function toggleReglages() {
+  _reglages = !_reglages;
+  syncViews();
   window.scrollTo(0, 0);
 }
 
-/* « + Tournoi ad-hoc » : ouvre directement le formulaire, sur la date du mois sélectionné */
-function goAdhoc() {
-  showView('cfg');
-  showDeclTab('ponctuel');
-  const card = document.getElementById('adhoc-card');
-  card.scrollIntoView({ block: 'start' });
-  setTimeout(() => document.getElementById('adhoc-date').focus(), 150);
+function syncViews() {
+  const t = !_reglages && _decl === 'tournois', x = !_reglages && _decl === 'extras';
+  document.getElementById('view-tournois').hidden = !t;
+  document.getElementById('view-extras').hidden   = !x;
+  document.getElementById('view-cfg').hidden      = !_reglages;
+  document.getElementById('decl-main-tabs').hidden = _reglages;
+  document.getElementById('btn-print').hidden      = _reglages;
+  const rb = document.getElementById('btn-reglages');
+  rb.hidden = _decl !== 'tournois' && !_reglages;            // les réglages concernent la déclaration des tournois
+  rb.querySelector('span').textContent = _reglages ? 'Retour à la déclaration' : 'Réglages';
+  rb.querySelector('i').className = 'ico ' + (_reglages ? 'ico-chev-l' : 'ico-cog');
 }
 
 /* Période modifiée : tout se recalcule, plus de bouton « Générer » */
@@ -101,7 +116,8 @@ function flash(msg) {
 /* Impression : le titre devient le nom du PDF proposé */
 function printDeclaration() {
   const m = MOIS[getMonth() - 1].toLowerCase();
-  printWithTitle(`Déclaration Tournois - ${m.charAt(0).toUpperCase() + m.slice(1)} ${getYear()}`);
+  const mois = m.charAt(0).toUpperCase() + m.slice(1);
+  printWithTitle(_decl === 'extras' ? `Déclaration extras - ${mois} ${getYear()}` : `Déclaration Tournois - ${mois} ${getYear()}`);
 }
 
 /* ── Annexe : on saisit le numéro seul, on stocke et on affiche « ANNEXE n » ── */
@@ -384,6 +400,37 @@ function renderAll() {
   renderExcList();
   renderDeclaration();
   renderAnnexes();
+  renderExtrasDeclaration();
+}
+
+/* ── Déclaration Extras (liste des croupiers extras enregistrés dans Gestion des Extras) ── */
+let extras = [];
+function renderExtrasDeclaration() {
+  const el = document.getElementById('extras-output');
+  if (!el) return;
+  if (!extras.length) { el.innerHTML = '<p class="adhoc-empty" style="padding:20px 0">Aucun extra enregistré. Ils se gèrent dans « Gestion des Extras ».</p>'; return; }
+  const list = [...extras].sort((a, b) => a.nom.localeCompare(b.nom, 'fr') || a.prenom.localeCompare(b.prenom, 'fr'));
+  el.innerHTML = `
+    <table class="decl-extras-tbl">
+      <thead>
+        <tr><th colspan="7" class="det-title">DECLARATION CROUPIER EXTRA ${MOIS[getMonth() - 1]} ${getYear()} - CASINO BORDEAUX</th></tr>
+        <tr class="det-hrow">
+          <th>Noms</th><th>Prenoms</th><th>Date de naissance</th>
+          <th>Lieu de naissance</th><th>Adresse</th><th>Code postal</th><th>Ville</th>
+        </tr>
+      </thead>
+      <tbody>${list.map(e => `
+        <tr>
+          <td class="det-nom">${e.nom}</td>
+          <td class="det-prenom">${e.prenom.toUpperCase()}</td>
+          <td class="det-italic">${e.dateNaissance || ''}</td>
+          <td class="det-lieu">${e.lieuNaissance || ''}</td>
+          <td>${e.adresse || ''}</td>
+          <td>${e.codePostal || ''}</td>
+          <td class="det-ville">${e.ville || ''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
 /* ── Déclaration ── */

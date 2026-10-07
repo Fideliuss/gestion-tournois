@@ -24,7 +24,7 @@ const NAV = (function () {
       { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
       { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
       { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
-        { label: 'Déclaration DTPJ',      href: 'admin/declaration/declaration.html' },
+        { label: 'Déclarations',          href: 'admin/declaration/declaration.html' },
         { label: 'Générateur de courrier', href: 'admin/declaration/courriers.html' },
         { label: 'Gestion des Extras',    href: 'admin/extras/extras.html' },
         { label: 'Calendrier & barèmes',  href: 'admin/config_tournois.html' },

@@ -1,10 +1,8 @@
 /* ═══════════════════════════════════════════════════════
-   extras.js - Déclaration Extras & Émargement Hebdomadaire
+   extras.js - Gestion des Extras : liste et émargement hebdomadaire
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
-const MOIS_FULL  = ['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN',
-                    'JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
 const DAY_KEYS   = ['lun','mar','mer','jeu','ven','sam','dim'];
 const DAY_LABELS = ['lun.','mar.','mer.','jeu.','ven.','sam.','dim.'];
 const DAY_HDR    = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
@@ -62,8 +60,6 @@ function getWeekDays(week, year) {
 document.addEventListener('DOMContentLoaded', async () => {
   const now = new Date();
 
-  initPeriodPicker(document.getElementById('decl-month'), document.getElementById('decl-year'),
-    ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre']);   // mois suivant par défaut
   document.getElementById('emarg-week-input').value = `${now.getFullYear()}-W${String(getISOWeek(now)).padStart(2,'0')}`;
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;
   document.getElementById('cfg-sunday-time').value  = cfg.sundayTime;
@@ -74,14 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function renderAll() {
   renderExtrasList();
-  renderDeclaration();
   renderAssignTable();
   renderEmargement();
 }
 
 /* ── Onglets ── */
 function showTab(name) {
-  ['liste', 'declaration', 'emargement'].forEach(t => {
+  ['liste', 'emargement'].forEach(t => {
     document.getElementById(`tab-${t}`).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('.xt-tab').forEach(b =>
@@ -208,43 +203,6 @@ async function removeExtra(id) {
   await SB.deleteExtra(id);
   extras = extras.filter(e => e.id !== id);
   renderAll();
-}
-
-/* ── Déclaration mensuelle ── */
-function getDeclMonth()    { return +document.getElementById('decl-month').value || new Date().getMonth() + 1; }
-function getDeclYear()     { return +document.getElementById('decl-year').value  || new Date().getFullYear(); }
-
-function renderDeclaration() {
-  const month = getDeclMonth(), year = getDeclYear();
-  const el = document.getElementById('decl-output');
-  if (!el) return;
-
-  if (!extras.length) {
-    el.innerHTML = '<p class="xt-empty" style="padding:20px 0">Aucun extra enregistré.</p>';
-    return;
-  }
-
-  el.innerHTML = `
-    <table class="decl-extras-tbl">
-      <thead>
-        <tr><th colspan="7" class="det-title">DECLARATION CROUPIER EXTRA ${MOIS_FULL[month - 1]} ${year} - CASINO BORDEAUX</th></tr>
-        <tr class="det-hrow">
-          <th>Noms</th><th>Prenoms</th><th>Date de naissance</th>
-          <th>Lieu de naissance</th><th>Adresse</th><th>Code postal</th><th>Ville</th>
-        </tr>
-      </thead>
-      <tbody>${sortedExtras().map(e => `
-        <tr>
-          <td class="det-nom">${e.nom}</td>
-          <td class="det-prenom">${e.prenom.toUpperCase()}</td>
-          <td class="det-italic">${e.dateNaissance || ''}</td>
-          <td class="det-lieu">${e.lieuNaissance || ''}</td>
-          <td>${e.adresse || ''}</td>
-          <td>${e.codePostal || ''}</td>
-          <td class="det-ville">${e.ville || ''}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
 }
 
 /* ── Émargement - tableau de saisie ── */
@@ -453,14 +411,6 @@ function buildBlankCard(week, days) {
 }
 
 /* ── Impression ── */
-function printDeclaration() {
-  injectPageStyle('@page{size:A4 landscape;margin:10mm}');
-  document.body.setAttribute('data-print', 'declaration');
-  const MLONG = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  printWithTitle(`Déclaration extras - ${MLONG[getDeclMonth() - 1]} ${getDeclYear()}`);
-  cleanupPrint();
-}
-
 function printEmargement() {
   injectPageStyle('@page{size:A4 landscape;margin:0}');
   document.body.setAttribute('data-print', 'emargement');
