@@ -14,12 +14,11 @@
     ══════════════════════════════════════════════════════ */
     .tm-week {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      /* 7 jours sur une ligne si la place le permet, sinon ils passent à la ligne : jamais de barre de défilement */
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 8px;
       margin-bottom: 14px;
     }
-    @media(max-width: 760px) { .tm-week { grid-template-columns: repeat(4, 1fr); } }
-    @media(max-width: 440px) { .tm-week { grid-template-columns: repeat(3, 1fr); } }
 
     .tm-day { display: flex; flex-direction: column; gap: 6px; }
     .tm-day-label {

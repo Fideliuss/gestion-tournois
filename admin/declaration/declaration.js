@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
 });
 
-/* ── Déclaration affichée (Tournois ou Extras) et Réglages des tournois ── */
+/* ── Déclaration affichée (Tournois ou Extras), Réglages et Ajout/Modifications (tournois) ── */
 let _decl = 'tournois';
-let _reglages = false;
+let _view = 'decl';          // decl | cfg (réglages) | adhoc (ajout / modifications ponctuelles)
 
 function showDeclaration(name) {
   _decl = name;
@@ -82,24 +82,28 @@ function showDeclaration(name) {
   syncViews();
 }
 
-/* Le bouton Réglages (dans l'encadré de période) ouvre les réglages des tournois à la place de la déclaration */
-function toggleReglages() {
-  _reglages = !_reglages;
+/* Les boutons de l'encadré de période ouvrent Réglages ou Ajout/Modifications à la place de la déclaration ;
+   le bouton ouvert devient « Retour à la déclaration » */
+function openView(name) {
+  _view = _view === name ? 'decl' : name;
   syncViews();
   window.scrollTo(0, 0);
 }
 
 function syncViews() {
-  const t = !_reglages && _decl === 'tournois', x = !_reglages && _decl === 'extras';
-  document.getElementById('view-tournois').hidden = !t;
-  document.getElementById('view-extras').hidden   = !x;
-  document.getElementById('view-cfg').hidden      = !_reglages;
-  document.getElementById('decl-main-tabs').hidden = _reglages;
-  document.getElementById('btn-print').hidden      = _reglages;
-  const rb = document.getElementById('btn-reglages');
-  rb.hidden = _decl !== 'tournois' && !_reglages;            // les réglages concernent la déclaration des tournois
-  rb.querySelector('span').textContent = _reglages ? 'Retour à la déclaration' : 'Réglages';
-  rb.querySelector('i').className = 'ico ' + (_reglages ? 'ico-chev-l' : 'ico-cog');
+  const decl = _view === 'decl';
+  document.getElementById('view-tournois').hidden = !(decl && _decl === 'tournois');
+  document.getElementById('view-extras').hidden   = !(decl && _decl === 'extras');
+  document.getElementById('view-cfg').hidden      = _view !== 'cfg';
+  document.getElementById('view-adhoc').hidden    = _view !== 'adhoc';
+  document.getElementById('decl-main-tabs').hidden = !decl;
+  document.getElementById('btn-print').hidden      = !decl;
+  [['btn-reglages', 'cfg', 'ico-cog', 'Réglages'], ['btn-adhoc', 'adhoc', 'ico-plus', 'Ajout/Modifications']].forEach(([id, view, icon, label]) => {
+    const b = document.getElementById(id);
+    b.hidden = decl ? _decl !== 'tournois' : _view !== view;   // réservés à la déclaration des tournois ; ouverts, seul le bouton actif reste
+    b.querySelector('span').textContent = _view === view ? 'Retour à la déclaration' : label;
+    b.querySelector('i').className = 'ico ' + (_view === view ? 'ico-chev-l' : icon);
+  });
 }
 
 /* Période modifiée : tout se recalcule, plus de bouton « Générer » */

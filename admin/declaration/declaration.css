@@ -86,12 +86,12 @@
 .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%; max-width: 1100px; margin-bottom: 20px; }
 
 /* ── Zone déclaration ── */
-.decl-wrap { width: 100%; max-width: none; overflow-x: auto; margin-bottom: 28px; }
+.decl-wrap { width: 100%; max-width: none; margin-bottom: 28px; }   /* pas de barre de défilement : le tableau s'adapte */
 
 .decl-form {
   border-collapse: collapse;
   width: max-content;
-  min-width: 1000px;
+  max-width: 100%;     /* jamais plus large que la page : les colonnes passent à la ligne au besoin */
   font-size: 11px;
   font-family: var(--f-ui);
   margin: 0 auto;
@@ -123,11 +123,10 @@
   font-weight: 600;
   text-align: center;
   padding: 7px 6px;
-  white-space: nowrap;
 }
 
 .drow td          { text-align: center; font-size: 10px; }
-.drow .titre-cell { text-align: left; font-weight: 500; color: var(--cream); font-size: 11px; white-space: nowrap; }
+.drow .titre-cell { text-align: left; font-weight: 500; color: var(--cream); font-size: 11px; }
 
 
 .staff-col { font-size: 9px; text-align: left; color: var(--text-dim); line-height: 1.65; vertical-align: top; padding: 8px 10px; }
@@ -277,10 +276,10 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 }
 
 /* ── Vues Déclaration / Réglages ── */
-#view-cfg { align-items: center; }
+#view-cfg, #view-adhoc { align-items: center; }
 .period-actions { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
 #decl-main-tabs { margin-top: 4px; }
-#decl-main-tabs[hidden], #btn-print[hidden], #btn-reglages[hidden] { display: none; }
+#decl-main-tabs[hidden], #btn-print[hidden], #btn-reglages[hidden], #btn-adhoc[hidden] { display: none; }
 .decl-view { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .decl-view[hidden] { display: none; }
 .decl-toast {

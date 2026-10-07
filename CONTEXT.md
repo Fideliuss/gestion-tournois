@@ -228,7 +228,8 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 
 **Déclarations (Tournois + Extras)** - une seule page, une seule période (mois + année) pour les deux déclarations, `declaration.html`
 - Deux onglets : **Tournois** (tableau DTPJ + annexes) et **Extras** (déclaration des croupiers extras, lue dans la liste de Gestion des Extras). Le bouton **Imprimer / PDF** imprime la déclaration affichée.
-- Le bouton **Réglages** est dans l'encadré de période (il n'existe que pour les Tournois) : il remplace la déclaration par les réglages (Tournois, Encadrement, Annexes, Ad-hoc & exceptions) ; le même bouton devient « Retour à la déclaration ». Plus de bouton « Tournoi ad-hoc » séparé : l'ad-hoc est dans les réglages.
+- Deux boutons dans l'encadré de période (uniquement sur l'onglet Tournois) : **Réglages** (sous-onglets Tournois, Encadrement, Annexes) et **Ajout/Modifications** (tournoi ad-hoc, puis modification ou annulation ponctuelle d'un tournoi du mois). Chacun remplace la déclaration ; ouvert, il devient « Retour à la déclaration » et l'autre disparaît (`openView('cfg' | 'adhoc')`).
+- **Aucune barre de défilement horizontale** : le tableau DTPJ se réduit à la largeur de la page (ses colonnes passent à la ligne) et la grille des jours de « Calendrier & barèmes » passe à 5, 4... colonnes quand la place manque (`repeat(auto-fit, minmax(150px, 1fr))`). Vérifié à 1366, 1180, 1024 et 800 px.
 - Tableau mensuel généré automatiquement depuis une config par jour de semaine (lun–dim)
 - Impression A4 paysage : seuls tableau + annexes visibles, tient sur 1 page
 - Annexes Prize Pool indépendantes et éditables (joueurs, cave, répartition % à 10 places)
