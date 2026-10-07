@@ -27,6 +27,10 @@ async function init() {
   document.getElementById('opt-compteurs').value = cfg.postes.compteurs;
   document.getElementById('opt-cartes').value = cfg.postes.cartes;
   document.getElementById('opt-salle').checked = !!cfg.postes.salle;
+  const rep = document.getElementById('rep-out');
+  rep.addEventListener('click', repClick);
+  ['dragstart', 'dragover', 'drop'].forEach(function (t) { rep.addEventListener(t, repDrag); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && repSel) { repSel = null; drawRep(); } });
   await goToday();
 }
 
@@ -262,33 +266,110 @@ async function setAlias(key, value) {
 
 function numOpt(id) { return Math.max(0, parseInt(document.getElementById(id).value, 10) || 0); }
 
+let repState = null;   // répartition affichée : { key, cols, manual, warns, people } ; modifiable à la main
+let repSel = null;     // identifiant du nom sélectionné pour un échange ou un déplacement
+const REP_COLS = [['stackers', 'Stackers Haut'], ['compteurs', 'Compteurs'], ['cartes', 'Cartes'], ['salle', 'Salle'], ['departs', 'Départs']];
+
 function renderRepartition() {
   const out = document.getElementById('rep-out'), btn = document.getElementById('btn-print-dep');
   document.getElementById('dep-print').innerHTML = '';
   btn.disabled = true;
-  if (!_presents.length) { out.innerHTML = '<div class="bl-empty">Aucun présent à répartir.</div>'; return; }
-  if (!octime) { out.innerHTML = '<div class="bl-empty">Collez l\'extraction Octime pour calculer la répartition.</div>'; return; }
+  if (!_presents.length) { repState = null; out.innerHTML = '<div class="bl-empty">Aucun présent à répartir.</div>'; return; }
+  if (!octime) { repState = null; out.innerHTML = '<div class="bl-empty">Collez l\'extraction Octime pour calculer la répartition.</div>'; return; }
   const people = _presents.map(function (p) {
     const m = match && match.match[p.id], dm = m && m.octime.minutes != null ? m.octime.minutes : null;
     return Object.assign({}, p, { delta: dm == null ? 0 : dm, known: dm != null });
   });
-  const res = blRepartir(people, { stackers: numOpt('opt-stackers'), compteurs: numOpt('opt-compteurs'), cartes: numOpt('opt-cartes'), salle: document.getElementById('opt-salle').checked });
-  const li = function (p) {
-    return '<li class="' + (p.chef ? 'chef' : '') + '">' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
-      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + ' <i>(' + (p.known ? blDeltaH(p.delta) : '?') + ')</i></li>';
-  };
-  const col = function (title, list) { return '<div class="bl-rep-col"><h4>' + title + ' <span>' + list.length + '</span></h4><ul>' + list.map(li).join('') + '</ul></div>'; };
-  const warns = res.warnings.slice();
-  const unk = people.filter(function (p) { return !p.known; }).length;
-  if (unk) warns.push(unk + ' présent(s) sans delta (compté 0) : ' + people.filter(function (p) { return !p.known; }).map(function (p) { return blNomCourt(p, cfg.affichage); }).join(', ') + '.');
-  out.innerHTML = '<div class="bl-rep">' + col('Stackers Haut', res.stackers) + col('Compteurs', res.compteurs) + col('Cartes', res.cartes) + col('Salle', res.salle) + col('Départs', res.departs) + '</div>'
-    + (warns.length ? '<div class="bl-warn">' + warns.map(esc).join('<br>') + '</div>' : '')
-    + '<div class="bl-legend">◉ arrivée 20h · en gras : chef · ' + esc(cfg.breaklist.floorMarque) + ' : floor · entre parenthèses : delta de quota</div>';
-  renderDepPrint(res);
+  const opts = { stackers: numOpt('opt-stackers'), compteurs: numOpt('opt-compteurs'), cartes: numOpt('opt-cartes'), salle: document.getElementById('opt-salle').checked };
+  // Une répartition modifiée à la main est conservée tant que les présents, les deltas et les postes ne changent pas
+  const key = JSON.stringify([people.map(function (p) { return [p.id, p.delta, p.groupe, p.chef]; }), opts]);
+  if (!repState || repState.key !== key) {
+    const res = blRepartir(people, opts);
+    repState = { key: key, manual: false, warns: res.warnings, people: people,
+      cols: { stackers: res.stackers, compteurs: res.compteurs, cartes: res.cartes, salle: res.salle, departs: res.departs } };
+    repSel = null;
+  }
+  drawRep();
   btn.disabled = false;
 }
 
-// ── Feuille des départs imprimable (pour le chef qui gère la break list) ──
+function drawRep() {
+  const out = document.getElementById('rep-out'), st = repState;
+  const li = function (p) {
+    return '<li draggable="true" data-id="' + esc(p.id) + '" class="' + (p.chef ? 'chef ' : '') + (repSel === p.id ? 'sel' : '') + '">' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
+      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + ' <i>(' + (p.known ? blDeltaH(p.delta) : '?') + ')</i></li>';
+  };
+  const col = function (c) {
+    const list = st.cols[c[0]];
+    return '<div class="bl-rep-col" data-col="' + c[0] + '"><h4>' + c[1] + ' <span>' + list.length + '</span></h4><ul>' + list.map(li).join('') + '</ul></div>';
+  };
+  const warns = st.warns.slice();
+  if (st.manual) {
+    const chefs = st.cols.stackers.filter(function (p) { return p.chef; }).length;
+    if (st.cols.stackers.length && chefs !== 1) warns.push('Stackers Haut : ' + chefs + ' chef(s) (1 attendu).');
+  }
+  const unk = st.people.filter(function (p) { return !p.known; });
+  if (unk.length) warns.push(unk.length + ' présent(s) sans delta (compté 0) : ' + unk.map(function (p) { return blNomCourt(p, cfg.affichage); }).join(', ') + '.');
+  out.innerHTML = '<div class="bl-rep">' + REP_COLS.map(col).join('') + '</div>'
+    + (warns.length ? '<div class="bl-warn">' + warns.map(esc).join('<br>') + '</div>' : '')
+    + '<div class="bl-legend">◉ arrivée 20h · en gras : chef · ' + esc(cfg.breaklist.floorMarque) + ' : floor · entre parenthèses : delta de quota'
+    + (st.manual ? ' · <b style="color:var(--gold-dim)">modifiée à la main</b> <button class="btn btn-ghost btn-sm" onclick="resetRep()">Régénérer</button>' : '') + '</div>';
+  renderDepPrint(st.cols);
+}
+
+// Modification à la main : cliquer un nom puis un autre pour les échanger, ou puis une colonne pour l'y déplacer (le glisser-déposer fait de même)
+
+function repFind(id) {
+  for (let i = 0; i < REP_COLS.length; i++) {
+    const k = REP_COLS[i][0], idx = repState.cols[k].findIndex(function (p) { return p.id === id; });
+    if (idx >= 0) return { k: k, idx: idx };
+  }
+  return null;
+}
+
+function repSwap(a, b) {
+  const A = repFind(a), B = repFind(b);
+  if (!A || !B) return;
+  const cols = repState.cols, t = cols[A.k][A.idx];
+  cols[A.k][A.idx] = cols[B.k][B.idx]; cols[B.k][B.idx] = t;
+}
+
+function repMove(id, k) {
+  const A = repFind(id);
+  if (!A || A.k === k) return;
+  repState.cols[k].push(repState.cols[A.k].splice(A.idx, 1)[0]);
+}
+
+function repEdited() { repState.manual = true; repSel = null; drawRep(); }
+
+function resetRep() { repState = null; repSel = null; renderRepartition(); }
+
+function repClick(e) {
+  if (!repState) return;
+  const li = e.target.closest('li[data-id]'), colEl = e.target.closest('.bl-rep-col');
+  if (li) {
+    const id = li.dataset.id;
+    if (!repSel) repSel = id;
+    else if (repSel === id) repSel = null;
+    else { repSwap(repSel, id); repEdited(); return; }
+    drawRep();
+  } else if (colEl && repSel) { repMove(repSel, colEl.dataset.col); repEdited(); }
+}
+
+function repDrag(e) {
+  const li = e.target.closest && e.target.closest('li[data-id]');
+  if (e.type === 'dragstart' && li) { e.dataTransfer.setData('text/plain', li.dataset.id); e.dataTransfer.effectAllowed = 'move'; return; }
+  if (e.type === 'dragover' && e.target.closest('.bl-rep-col')) { e.preventDefault(); return; }
+  if (e.type === 'drop') {
+    const id = e.dataTransfer.getData('text/plain'), colEl = e.target.closest('.bl-rep-col');
+    if (!id || !colEl || !repState) return;
+    e.preventDefault();
+    if (li && li.dataset.id !== id) repSwap(id, li.dataset.id); else if (!li) repMove(id, colEl.dataset.col); else return;
+    repEdited();
+  }
+}
+
+// ── Feuille des départs imprimable (pour le chef qui gère la break list) : A4 portrait, pliable en 2 ou en 4 ──
 
 function effectifTexte() {
   const n = function (k) { return _presents.filter(function (p) { return p.code === k.code; }).length; };
@@ -297,29 +378,30 @@ function effectifTexte() {
     .concat(['Total ' + _presents.length]).join(' · ');
 }
 
-function renderDepPrint(res) {
-  const cols = [['Stackers Haut', res.stackers], ['Compteurs', res.compteurs], ['Cartes', res.cartes], ['Salle', res.salle], ['Départs', res.departs]];
-  const max = Math.max.apply(null, cols.map(function (c) { return c[1].length; }).concat([1]));
-  const known = {};
-  _presents.forEach(function (p) { const m = match && match.match[p.id]; known[p.id] = m && m.octime.minutes != null ? m.octime.minutes : null; });
-  const cell = function (p) {
-    if (!p) return '<td></td>';
-    return '<td class="' + (p.chef ? 'chef' : '') + '"><span>' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
-      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + '</span><small>' + (known[p.id] == null ? '?' : blDeltaH(known[p.id])) + '</small></td>';
-  };
-  let body = '';
-  for (let i = 0; i < max; i++) body += '<tr>' + cols.map(function (c) { return cell(c[1][i]); }).join('') + '</tr>';
-  const rh = Math.round(Math.min(15, Math.max(6.5, 150 / max)) * 10) / 10;
-  document.getElementById('dep-print').innerHTML = '<section class="bl-page dep-page"><div class="bl-title">Départs du ' + esc(blDateLabel(D.y, D.m, D.d)) + '</div>'
-    + '<div class="dep-eff">' + esc(effectifTexte()) + '</div>'
-    + '<table class="dep-tbl" style="--rh:' + rh + 'mm"><thead><tr>' + cols.map(function (c) { return '<th>' + c[0] + ' <span>' + c[1].length + '</span></th>'; }).join('')
-    + '</tr></thead><tbody>' + body + '</tbody></table>'
+function depBox(title, list, cls) {
+  const lines = list.map(function (p) {
+    return '<li class="' + (p.chef ? 'chef' : '') + '"><span>' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
+      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + '</span><small>' + (p.known ? blDeltaH(p.delta) : '?') + '</small></li>';
+  }).join('');
+  return '<div class="dep-box ' + (cls || '') + '"><h3>' + title + ' <span>' + list.length + '</span></h3><ul>' + lines + '</ul></div>';
+}
+
+/** Moitié haute : stackers à gauche, compteurs / cartes / salle à droite ; moitié basse : les départs. Un pli en deux, un autre en quatre */
+function renderDepPrint(cols) {
+  document.getElementById('dep-print').innerHTML = '<section class="bl-page dep-page">'
+    + '<div class="dep-top"><div class="bl-title">Départs du ' + esc(blDateLabel(D.y, D.m, D.d)) + '</div><div class="dep-eff">' + esc(effectifTexte()) + '</div>'
+    + '<div class="dep-postes">' + depBox('Stackers Haut', cols.stackers, 'st')
+    + '<div class="dep-side">' + depBox('Compteurs', cols.compteurs) + depBox('Cartes', cols.cartes) + depBox('Salle', cols.salle) + '</div></div></div>'
+    + '<div class="dep-bottom">' + depBox('Départs', cols.departs, 'dp') + '</div>'
     + '<div class="dep-leg">◉ arrivée 20h · en gras : chef · ' + esc(cfg.breaklist.floorMarque) + ' : floor · à droite du nom : delta de quota</div></section>';
 }
 
 function printDeparts() {
   document.body.classList.add('print-dep');
-  const done = function () { document.body.classList.remove('print-dep'); window.removeEventListener('afterprint', done); };
+  const page = document.createElement('style');                      // cette feuille est en portrait, la break list en paysage
+  page.textContent = '@page { size: A4 portrait; margin: 8mm; }';
+  document.head.appendChild(page);
+  const done = function () { document.body.classList.remove('print-dep'); page.remove(); window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
   printWithTitle('Départs - ' + blDateLabel(D.y, D.m, D.d));
   setTimeout(done, 1500);

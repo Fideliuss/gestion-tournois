@@ -81,7 +81,11 @@
 .bl-rep-col { background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: var(--r-box); padding: 12px 14px; min-height: 90px; }
 .bl-rep-col h4 { margin: 0 0 8px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
 .bl-rep-col h4 span { color: var(--text-dim); font-family: var(--f-num); letter-spacing: .04em; }
-.bl-rep-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.bl-rep-col li { cursor: pointer; border-radius: 8px; padding: 2px 6px; margin: 0 -6px; }
+.bl-rep-col li:hover { background: var(--gold-bg); }
+.bl-rep-col li.sel { background: var(--gold-solid); }
+.bl-rep-col li.sel, .bl-rep-col li.sel i, .bl-rep-col li.sel em { color: #1A1208; }
+.bl-rep-col ul { min-height: 24px; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .bl-rep-col li { font-size: 13px; color: var(--cream); }
 .bl-rep-col li.chef { font-weight: 700; }
 .bl-rep-col li i { font-style: normal; color: var(--text-dim); font-family: var(--f-num); font-size: 11px; }
@@ -159,20 +163,26 @@
 .bl-tables tr:last-child td { border-bottom: 3px solid #000; }
 .bl-tables tr:first-child td { border-top: 3px solid #000; }
 
-/* Feuille des départs : seulement à l'impression (bouton « Imprimer les départs ») */
+/* Feuille des départs : seulement à l'impression (bouton « Imprimer les départs »), A4 portrait pliable en 2 ou en 4 */
 #dep-print { display: none; }
-.dep-page .bl-title { margin-bottom: 4mm; font-size: 18px; padding: 8px 0; }
-.dep-eff { text-align: center; font-size: 13px; margin-bottom: 5mm; color: #333; }
-.dep-tbl { width: 100%; border-collapse: collapse; table-layout: fixed; border: 3px solid #000; }
-.dep-tbl th { background: #e6e6e6; border: 1px solid #000; padding: 3.5mm 2mm; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
-.dep-tbl th span { font-weight: 400; color: #555; margin-left: 4px; }
-.dep-tbl th:last-child { background: #c9c9c9; }
-.dep-tbl td { border: 1px solid #000; height: var(--rh, 9mm); padding: 0 3mm; font-size: 17px; vertical-align: middle; }
-.dep-tbl td span { display: inline-block; max-width: 70%; }
-.dep-tbl td small { float: right; margin-top: 1.5mm; font-size: 12px; color: #555; font-family: 'IBM Plex Mono', monospace; }
-.dep-tbl td.chef span { font-weight: 700; }
-.dep-tbl td em { font-style: normal; font-weight: 700; }
-.dep-leg { margin-top: 4mm; font-size: 11px; color: #444; }
+.dep-page .bl-title { font-size: 17px; padding: 2.5mm 0; }
+.dep-top { height: 136mm; display: flex; flex-direction: column; }
+.dep-eff { text-align: center; font-size: 12px; margin: 2mm 0 3mm; color: #333; }
+.dep-postes { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; }
+.dep-side { display: flex; flex-direction: column; gap: 3mm; }
+.dep-bottom { margin-top: 4mm; }
+.dep-box { border: 2px solid #000; border-radius: 2mm; overflow: hidden; }
+.dep-box h3 { margin: 0; padding: 2mm 3mm; background: #e6e6e6; border-bottom: 2px solid #000; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; }
+.dep-box h3 span { font-weight: 400; color: #555; }
+.dep-box.dp h3 { background: #c9c9c9; }
+.dep-box ul { list-style: none; margin: 0; padding: 0; }
+.dep-box.dp ul { columns: 2; column-gap: 0; }
+.dep-box li { display: flex; justify-content: space-between; align-items: center; height: 9.5mm; padding: 0 3mm; border-bottom: 1px solid #888; font-size: 15px; break-inside: avoid; }
+.dep-box li:last-child { border-bottom: 0; }
+.dep-box li.chef span { font-weight: 700; }
+.dep-box li em { font-style: normal; font-weight: 700; }
+.dep-box li small { font-size: 11px; color: #555; font-family: 'IBM Plex Mono', monospace; }
+.dep-leg { margin-top: 4mm; font-size: 10px; color: #444; }
 
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -185,6 +195,7 @@
   #dep-print { display: none !important; }
   body.print-dep #bl-print { display: none !important; }
   body.print-dep #dep-print { display: block !important; }
+  body.print-dep .bl-page.dep-page { height: auto; min-height: 281mm; overflow: visible; }
   .bl-page { box-shadow: none; border-radius: 0; padding: 0; margin: 0; height: 194mm; overflow: hidden; break-after: page; page-break-after: always; }
   .bl-page:last-child { break-after: auto; page-break-after: auto; }
 }
