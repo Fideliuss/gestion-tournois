@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════
-   barriere.js — Scripts communs
+   barriere.js - Scripts communs
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════ */
 
-/* Injection favicon — chemin déduit depuis l'URL du script lui-même */
+/* Injection favicon - chemin déduit depuis l'URL du script lui-même */
 (function () {
   const base = document.currentScript.src.replace('barriere.js', 'favicon/');
   [
@@ -50,4 +50,35 @@ document.addEventListener('click', e => {
   setTimeout(() => { window.location.href = href; }, 200);
 });
 
+/* ── Déclarations : mois par défaut = le mois SUIVANT ──
+   Les déclarations (DTPJ, courriers, extras) se font en amont : une fois le mois commencé, il est trop tard. */
+function defaultDeclMonth() {
+  const n = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);   // gère décembre → janvier
+  return { month: n.getMonth() + 1, year: n.getFullYear() };
+}
 
+/* ── Sélecteur de période (mois + année), le même partout ──
+   Remplit la liste des mois (noms avec majuscule initiale) et place le mois suivant par défaut. */
+function initPeriodPicker(monthEl, yearEl, names) {
+  const def = defaultDeclMonth();
+  names.forEach((n, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1;
+    o.textContent = n.charAt(0).toUpperCase() + n.slice(1).toLowerCase();
+    if (i + 1 === def.month) o.selected = true;
+    monthEl.appendChild(o);
+  });
+  yearEl.value = def.year;
+}
+
+/* ── Impression avec un titre explicite ──
+   Le navigateur propose le titre de la page comme nom du fichier PDF (et l'imprime en en-tête) : on le remplace le
+   temps de l'impression par un titre qui dit ce qu'on imprime (« Déclaration DTPJ - Novembre 2026 »). */
+function printWithTitle(title) {
+  const previous = document.title;
+  document.title = title;
+  const restore = () => { document.title = previous; window.removeEventListener('afterprint', restore); };
+  window.addEventListener('afterprint', restore);
+  window.print();
+  setTimeout(restore, 1500);   // repli si `afterprint` n'est pas émis
+}

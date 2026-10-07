@@ -1,4 +1,4 @@
-// Tests du moteur Ultimate Texas Hold'em — `node training/uth/uth_engine.test.js`
+// Tests du moteur Ultimate Texas Hold'em - `node training/uth/uth_engine.test.js`
 // Pas de dépendance : assert natif de Node. À relancer après toute modification de uth_engine.js ou des tables de paiement.
 
 const assert = require('assert');
@@ -142,7 +142,7 @@ test('évaluateur = implémentation de référence sur 200 000 mains (catégorie
 test('fréquences observées ≈ probabilités théoriques du poker à 7 cartes (300 000 mains)', function () {
   const N = 300000, freq = new Array(10).fill(0);
   for (let i = 0; i < N; i++) freq[UTH.bestHand(UTH.shuffle(UTH.newDeck()).slice(0, 7)).category]++;
-  // Probabilités exactes (meilleure main de 5 parmi 7) — tolérance large pour le tirage aléatoire
+  // Probabilités exactes (meilleure main de 5 parmi 7) - tolérance large pour le tirage aléatoire
   const expected = [0.17412, 0.43823, 0.23496, 0.04830, 0.04619, 0.03025, 0.02597, 0.00168, 0.000279, 0.0000323];
   [0, 1, 2, 3, 4, 5, 6].forEach(function (c) {
     const p = freq[c] / N, tol = Math.max(0.002, expected[c] * 0.08);
@@ -217,12 +217,12 @@ test('explainCompare : combinaisons différentes', function () {
 });
 
 test('explainCompare : même combinaison, ce qui décide (paire, kicker, double paire, full, couleur, quinte)', function () {
-  assert.strictEqual(UTH.explainCompare(P('AH AS KD 5C 2H'), P('AD AC QD 5H 2S')), 'Le joueur gagne : même combinaison (Paire), le kicker décide — Roi contre Dame.');
-  assert.strictEqual(UTH.explainCompare(P('KH KS 4D 4C 2H'), P('QH QS JD JC 2S')), 'Le joueur gagne : même combinaison (Double paire), la plus haute paire décide — Roi contre Dame.');
-  assert.strictEqual(UTH.explainCompare(P('QH QS 4D 4C 2H'), P('QD QC 4H 4S 9S')), 'La banque gagne : même combinaison (Double paire), le kicker décide — 9 contre 2.');
-  assert.strictEqual(UTH.explainCompare(P('KH KS KD 2C 2H'), P('KC KS KD 3C 3H')), 'La banque gagne : même combinaison (Full), la paire décide — 3 contre 2.');
-  assert.strictEqual(UTH.explainCompare(P('AH JH 8H 4H 2H'), P('AD JD 8D 5D 2D')), 'La banque gagne : même combinaison (Couleur), la 4e carte décide — 5 contre 4.');
-  assert.strictEqual(UTH.explainCompare(P('9H 8S 7D 6C 5H'), P('AH 2S 3D 4C 5H')), 'Le joueur gagne : même combinaison (Quinte), la hauteur de la quinte décide — 9 contre 5.');
+  assert.strictEqual(UTH.explainCompare(P('AH AS KD 5C 2H'), P('AD AC QD 5H 2S')), 'Le joueur gagne : même combinaison (Paire), le kicker décide - Roi contre Dame.');
+  assert.strictEqual(UTH.explainCompare(P('KH KS 4D 4C 2H'), P('QH QS JD JC 2S')), 'Le joueur gagne : même combinaison (Double paire), la plus haute paire décide - Roi contre Dame.');
+  assert.strictEqual(UTH.explainCompare(P('QH QS 4D 4C 2H'), P('QD QC 4H 4S 9S')), 'La banque gagne : même combinaison (Double paire), le kicker décide - 9 contre 2.');
+  assert.strictEqual(UTH.explainCompare(P('KH KS KD 2C 2H'), P('KC KS KD 3C 3H')), 'La banque gagne : même combinaison (Full), la paire décide - 3 contre 2.');
+  assert.strictEqual(UTH.explainCompare(P('AH JH 8H 4H 2H'), P('AD JD 8D 5D 2D')), 'La banque gagne : même combinaison (Couleur), la 4e carte décide - 5 contre 4.');
+  assert.strictEqual(UTH.explainCompare(P('9H 8S 7D 6C 5H'), P('AH 2S 3D 4C 5H')), 'Le joueur gagne : même combinaison (Quinte), la hauteur de la quinte décide - 9 contre 5.');
 });
 
 test('explainCompare : égalité', function () {
@@ -450,7 +450,7 @@ test('gainsRound : chaque situation demandée est bien celle qui est produite', 
   });
 });
 
-test('gainsRound : tirage libre — toutes les situations, Trips/JP1 présents ET absents, gains Trips/JP1', function () {
+test('gainsRound : tirage libre - toutes les situations, Trips/JP1 présents ET absents, gains Trips/JP1', function () {
   const seen = { kinds: new Set(), trips0: 0, trips1: 0, jp0: 0, jp1: 0, tripsWin: 0, jpWin: 0, fold: 0, blindPays: 0, jackpot: 0 };
   for (let i = 0; i < 2000; i++) {
     const g = UTH.gainsRound();
@@ -541,7 +541,7 @@ test('gradeGains : banque non qualifiée (Ante laissé), égalité (tout laissé
   assert.strictEqual(gf.userNet, -20);
 });
 
-test('gradeGains : 1 500 donnes — répondre exactement comme le règlement est toujours correct', function () {
+test('gradeGains : 1 500 donnes - répondre exactement comme le règlement est toujours correct', function () {
   for (let i = 0; i < 1500; i++) {
     const g = UTH.gainsRound({ maxBet: 50 });
     const answers = {};

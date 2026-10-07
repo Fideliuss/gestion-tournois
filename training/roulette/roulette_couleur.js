@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  ROULETTE COULEUR — module 5
+//  ROULETTE COULEUR - module 5
 //  Affiche un numéro → le croupier identifie la couleur
 // ══════════════════════════════════════════════════════
 
@@ -113,7 +113,7 @@ function couleurTimeout() {
   const correct = R_COLORS[_colNumber];
   const fb = document.getElementById('col-feedback');
   fb.className   = 'feedback-bar wrong';
-  fb.textContent = '⏱ Temps écoulé — ' + colorLabel(correct);
+  fb.textContent = '⏱ Temps écoulé - ' + colorLabel(correct);
   _colQIndex++;
   updateCouleurProgress();
   setTimeout(function() {
@@ -135,7 +135,7 @@ async function answerCouleur(answer) {
   const fb = document.getElementById('col-feedback');
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ ' + colorLabel(correct) + ' — Correct !';
+    fb.textContent = '✓ ' + colorLabel(correct) + ' - Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
     fb.textContent = '✕ ' + colorLabel(correct);

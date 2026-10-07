@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  ROULETTE TAPIS — composant partagé
+//  ROULETTE TAPIS - composant partagé
 //  Utilisé par : roulette_couleur, roulette_pointage,
 //                roulette_paiement
 // ══════════════════════════════════════════════════════
@@ -27,7 +27,7 @@ function rRow(n) {
 // col : 1 à 12 (groupe de 3 numéros)
 function rCol(n) { return Math.ceil(n / 3); }
 
-// ── Types de mise (module 1 — calcul paiement) ───────
+// ── Types de mise (module 1 - calcul paiement) ───────
 const BET_TYPES = [
   { id: 'plein',        label: 'Plein',        ratio: 35, covered: 1 },
   { id: 'cheval',       label: 'Cheval',        ratio: 17, covered: 2 },
@@ -37,7 +37,7 @@ const BET_TYPES = [
 ];
 
 const STACK_SIZE = 20; // fixe, non modifiable
-const ZERO_W = 1.3; // largeur de la colonne 0 — doit correspondre au 1.3fr dans renderTapis
+const ZERO_W = 1.3; // largeur de la colonne 0 - doit correspondre au 1.3fr dans renderTapis
 
 // Pondération des types de mise par niveau (probabilité relative)
 const BET_TYPE_WEIGHTS = {
@@ -67,7 +67,7 @@ function renderTapis(container, opts) {
 
   let html = '<div class="rt-grid" style="grid-template-columns: ' + gridCols + '">';
 
-  // Cellule 0 — placement explicite (col 1 normal, col numCols+1 en miroir)
+  // Cellule 0 - placement explicite (col 1 normal, col numCols+1 en miroir)
   const zeroCol = mirror ? (numCols + 1) : 1;
   const isZeroHighlight = highlight.indexOf(0) >= 0;
   html += '<div class="rt-cell rt-zero' + (isZeroHighlight ? ' rt-highlight' : '') + (clickable ? ' rt-clickable' : '') + '"'
@@ -81,7 +81,7 @@ function renderTapis(container, opts) {
     for (var col = 1; col <= numCols; col++) {
       var n = (col - 1) * 3 + (row === 1 ? 3 : row === 2 ? 2 : 1);
       // Symétrie centrale à 180° (confirmé par photos de la vraie table) : colonnes ET
-      // rangées inversées — la rangée proche du bord/labels devient la rangée proche du 0.
+      // rangées inversées - la rangée proche du bord/labels devient la rangée proche du 0.
       var gridCol = mirror ? (numCols - col + 1) : (col + 1);
       var gridRow = mirror ? (4 - row) : row;
       var cellStyle = 'grid-column:' + gridCol + ';grid-row:' + gridRow;
@@ -91,7 +91,7 @@ function renderTapis(container, opts) {
       }
       var color = R_COLORS[n];
       var isHighlight = highlight.indexOf(n) >= 0;
-      // Séparateur de douzaine (tapis complet uniquement) — suit le sens du miroir
+      // Séparateur de douzaine (tapis complet uniquement) - suit le sens du miroir
       var dozenBorder = '';
       if (numCols === 12 && (col === 4 || col === 8)) {
         dozenBorder = mirror ? ' rt-dozen-l' : ' rt-dozen-r';
@@ -188,7 +188,7 @@ function pickNumbers(typeId) {
       return [base, base + 1, base + 2];
     }
     case 'carre': {
-      // Carré : 4 numéros en 2x2 — ex: 1-2-4-5, 2-3-5-6...
+      // Carré : 4 numéros en 2x2 - ex: 1-2-4-5, 2-3-5-6...
       // Ou carré avec 0 : 0-1-2-3
       if (Math.random() < 0.15) return [0, 1, 2, 3];
       const col = randInt(1, 3);
@@ -197,7 +197,7 @@ function pickNumbers(typeId) {
       return [n1, n1 + 1, n1 + 3, n1 + 4];
     }
     case 'sixain': {
-      // Sixain : 2 colonnes adjacentes de 3 — ex: 1-2-3-4-5-6
+      // Sixain : 2 colonnes adjacentes de 3 - ex: 1-2-3-4-5-6
       const col = randInt(1, 3);
       const base = (col - 1) * 3 + 1;
       return [base, base+1, base+2, base+3, base+4, base+5];

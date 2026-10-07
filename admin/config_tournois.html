@@ -3,23 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calendrier &amp; barèmes — Barrière Casino Bordeaux</title>
+  <title>Calendrier &amp; barèmes - Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
 
 
     /* ══════════════════════════════════════════════════════
-       SEMAINIER ADMIN — grille par jour
+       SEMAINIER ADMIN - grille par jour
     ══════════════════════════════════════════════════════ */
     .tm-week {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      /* 7 jours sur une ligne si la place le permet, sinon ils passent à la ligne : jamais de barre de défilement */
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 8px;
       margin-bottom: 14px;
     }
-    @media(max-width: 760px) { .tm-week { grid-template-columns: repeat(4, 1fr); } }
-    @media(max-width: 440px) { .tm-week { grid-template-columns: repeat(3, 1fr); } }
 
     .tm-day { display: flex; flex-direction: column; gap: 6px; }
     .tm-day-label {
@@ -321,7 +320,7 @@ function renderSemainier(tournaments) {
 function tmCardHtml(t) {
   const ptsTxt = t.points && t.points.length
     ? `${t.points.length} place${t.points.length > 1 ? 's' : ''} · ${t.points.slice(0,4).join(', ')}${t.points.length > 4 ? '…' : ''}`
-    : '— aucun barème';
+    : '- aucun barème';
   return `<div class="tm-card">
     <div class="tm-card-name">${t.name}</div>
     <div class="tm-card-buyin">${t.buyin} €</div>

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   barriere.css — Charte graphique partagée
+   barriere.css - Charte graphique partagée
    Barrière Casino Bordeaux · Outils internes Tournois
    Utilisé par : index.html · leaderboard.html · prize-pool.html
 ═══════════════════════════════════════════════════════ */
@@ -26,7 +26,7 @@
 /* ── Arrondis de la charte (un seul endroit) : carte / panneau, boîte intérieure, champ de saisie ── */
 :root { --r-card: 24px; --r-box: 16px; --r-field: 14px; }
 
-/* ── Variables — Mode nuit (défaut) ── */
+/* ── Variables - Mode nuit (défaut) ── */
 :root {
   --gold:       #C37814;
   --gold-dim:   #FAA500;
@@ -46,7 +46,7 @@
   --f-ui:       'Jost', system-ui, sans-serif;
   --f-num:      'IBM Plex Mono', 'Courier New', monospace;
 
-  /* Accents d'accompagnement — charte Barrière Casino */
+  /* Accents d'accompagnement - charte Barrière Casino */
   --cognac:   #E65A00;
   --sauterne: #FAA500;
   --jean:     #0075A9;
@@ -54,7 +54,7 @@
   --cobalt:   #3264C8;
 }
 
-/* ── Variables — Mode jour ── */
+/* ── Variables - Mode jour ── */
 body.light {
   --gold:       #873200;
   --gold-dim:   #5E2300;
@@ -82,7 +82,7 @@ body.light {
 @keyframes pg-in  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pg-out { to   { opacity: 0; transform: translateY(-8px); } }
 /* `backwards` et non `both` : un transform (même translateY(0)) laissé sur body après l'animation devient le repère des
-   éléments position:fixed — les modaux se collaient alors en haut du document au lieu de l'écran */
+   éléments position:fixed - les modaux se collaient alors en haut du document au lieu de l'écran */
 body             { animation: pg-in .22s ease-out backwards; }
 body.is-leaving  { animation: pg-out .18s ease-in both; }
 
@@ -373,6 +373,13 @@ body.light input:focus, body.light select:focus, body.light textarea:focus {
   box-shadow: 0 0 0 3px rgba(135,50,0,.07);
 }
 
+/* ── Champs de période (mois + année) : mêmes dimensions sur toutes les pages ── */
+.period-row .fg.pf-month { flex: 0 0 180px; max-width: 180px; min-width: 0; }
+.period-row .fg.pf-year  { flex: 0 0 110px; max-width: 110px; min-width: 0; }
+
+/* Boutons d'action à droite d'un encadré de période (Réglages, Imprimer…) */
+.period-actions { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+
 /* ── Helpers formulaire ── */
 .fg  { display: flex; flex-direction: column; gap: 6px; }
 .fl  { font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-dim); }
@@ -381,9 +388,9 @@ body.light input:focus, body.light select:focus, body.light textarea:focus {
 /* ══ Boutons ══════════════════════════════════════════════════════════════════════════════════════════
    Une seule famille, en pastilles, pour toute l'application. On compose : `class="btn btn-gold"`.
    Variantes (une par rôle) :
-     .btn-gold  principal, doré plein — l'action de la vue (Enregistrer, Valider, Créer…) ; un seul par vue ou modale
-     .btn-ghost secondaire, contour doré discret — Annuler, Imprimer, Fermer, Effacer…
-     .btn-red   destructif, gris puis rouge au survol — Supprimer, Clôturer…
+     .btn-gold  principal, doré plein - l'action de la vue (Enregistrer, Valider, Créer…) ; un seul par vue ou modale
+     .btn-ghost secondaire, contour doré discret - Annuler, Imprimer, Fermer, Effacer…
+     .btn-red   destructif, gris puis rouge au survol - Supprimer, Clôturer…
    Tailles : normale, .btn-sm (dans une ligne ou un tableau), .btn-lg (action de page) ; .btn-block = pleine largeur ;
    .btn-dashed = contour en tirets (« + Ajouter »).
    Rond, icône seule : .btn-icon (+ .danger pour supprimer). Icônes : <i class="ico ico-edit"></i> (liste plus bas).
@@ -481,7 +488,7 @@ body.light .btn-red:hover:not(:disabled) { color: #a93226; border-color: rgba(16
 }
 
 /* ══════════════════════════════════════════════════════
-   SEMAINIER — sélecteur de tournoi par jour
+   SEMAINIER - sélecteur de tournoi par jour
    Utilisé par leaderboard (Saisir) et prize-pool
 ══════════════════════════════════════════════════════ */
 .semainier { width: 100%; }
@@ -517,7 +524,7 @@ body.light .btn-red:hover:not(:disabled) { color: #a93226; border-color: rgba(16
   background: rgba(195,120,20,.18); border-color: var(--gold);
   color: var(--gold); font-weight: 600;
 }
-/* Tournoi(s) du jour sélectionné — mis en évidence sans être actif */
+/* Tournoi(s) du jour sélectionné - mis en évidence sans être actif */
 .sem-btn.sem-suggested {
   border-color: rgba(195,120,20,.38);
   background: rgba(195,120,20,.07);
@@ -593,7 +600,7 @@ body.light .tool-card:hover { background: #fff; box-shadow: 0 4px 20px rgba(0,0,
 }
 body.light .tool-badge { background: linear-gradient(140deg, rgba(var(--accent),.1), rgba(var(--accent),.03)); }
 
-/* Icône vectorielle (charte) à la place de l'emoji — class="picto" + data-icon="nom" */
+/* Icône vectorielle (charte) à la place de l'emoji - class="picto" + data-icon="nom" */
 .tool-badge.picto { font-size: 0; }
 .tool-badge.picto::before {
   content: ''; display: block; width: 28px; height: 28px;
@@ -626,7 +633,7 @@ body.light .tool-badge { background: linear-gradient(140deg, rgba(var(--accent),
 }
 .tool-name em { font-style: italic; color: rgb(var(--accent)); }
 
-/* ── Accents d'accompagnement — classes centralisées (remplace les blocs dupliqués par page) ── */
+/* ── Accents d'accompagnement - classes centralisées (remplace les blocs dupliqués par page) ── */
 .tool-card           { --accent: 195,120,20; }
 .tool-card.c-cognac   { --accent: 230,90,0; }
 .tool-card.c-sauterne { --accent: 250,165,0; }
@@ -639,7 +646,7 @@ body.light .tool-card.c-jean     { --accent: 0,48,91; }
 body.light .tool-card.c-teal     { --accent: 10,90,110; }
 body.light .tool-card.c-cobalt   { --accent: 31,63,138; }
 
-/* Carte désactivée ("bientôt disponible") — utiliser un <div>, pas un <a> */
+/* Carte désactivée ("bientôt disponible") - utiliser un <div>, pas un <a> */
 .tool-card.disabled { opacity: .35; pointer-events: none; cursor: default; }
 .tool-soon {
   display: inline-block; margin-top: 8px;

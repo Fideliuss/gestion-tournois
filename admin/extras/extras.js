@@ -1,17 +1,15 @@
 /* ═══════════════════════════════════════════════════════
-   extras.js — Déclaration Extras & Émargement Hebdomadaire
+   extras.js - Gestion des Extras : liste et émargement hebdomadaire
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
-const MOIS_FULL  = ['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN',
-                    'JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
 const DAY_KEYS   = ['lun','mar','mer','jeu','ven','sam','dim'];
 const DAY_LABELS = ['lun.','mar.','mer.','jeu.','ven.','sam.','dim.'];
 const DAY_HDR    = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 
 
 /* ══════════════════════════════════════════════════════
-   DONNÉES — via Supabase (shared/supabase.js)
+   DONNÉES - via Supabase (shared/supabase.js)
 ══════════════════════════════════════════════════════ */
 
 /* ── Persistance config + émargement (localStorage) ── */
@@ -62,7 +60,6 @@ function getWeekDays(week, year) {
 document.addEventListener('DOMContentLoaded', async () => {
   const now = new Date();
 
-  document.getElementById('decl-month-input').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`;
   document.getElementById('emarg-week-input').value = `${now.getFullYear()}-W${String(getISOWeek(now)).padStart(2,'0')}`;
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;
   document.getElementById('cfg-sunday-time').value  = cfg.sundayTime;
@@ -73,14 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function renderAll() {
   renderExtrasList();
-  renderDeclaration();
   renderAssignTable();
   renderEmargement();
 }
 
 /* ── Onglets ── */
 function showTab(name) {
-  ['liste', 'declaration', 'emargement'].forEach(t => {
+  ['liste', 'emargement'].forEach(t => {
     document.getElementById(`tab-${t}`).style.display = t === name ? '' : 'none';
   });
   document.querySelectorAll('.xt-tab').forEach(b =>
@@ -118,11 +114,11 @@ function renderExtrasList() {
     <tr>
       <td class="xt-nom">${e.nom}</td>
       <td class="xt-prenom">${e.prenom}</td>
-      <td>${e.dateNaissance || '—'}</td>
-      <td>${e.lieuNaissance || '—'}</td>
-      <td>${e.adresse || '—'}</td>
-      <td>${e.codePostal || '—'}</td>
-      <td>${e.ville || '—'}</td>
+      <td>${e.dateNaissance || '-'}</td>
+      <td>${e.lieuNaissance || '-'}</td>
+      <td>${e.adresse || '-'}</td>
+      <td>${e.codePostal || '-'}</td>
+      <td>${e.ville || '-'}</td>
       <td><button class="btn-ghost" onclick="openEditModal('${esc(e.id)}')">✎</button></td>
       <td><button class="btn-red" onclick="removeExtra('${esc(e.id)}')">×</button></td>
     </tr>`).join('');
@@ -209,45 +205,7 @@ async function removeExtra(id) {
   renderAll();
 }
 
-/* ── Déclaration mensuelle ── */
-function getDeclMonthVal() { return document.getElementById('decl-month-input').value || ''; }
-function getDeclMonth()    { const v = getDeclMonthVal(); return v ? +v.split('-')[1] : new Date().getMonth() + 1; }
-function getDeclYear()     { const v = getDeclMonthVal(); return v ? +v.split('-')[0] : new Date().getFullYear(); }
-
-function renderDeclaration() {
-  const month = getDeclMonth(), year = getDeclYear();
-  const el = document.getElementById('decl-output');
-  if (!el) return;
-
-  if (!extras.length) {
-    el.innerHTML = '<p class="xt-empty" style="padding:20px 0">Aucun extra enregistré.</p>';
-    return;
-  }
-
-  el.innerHTML = `
-    <table class="decl-extras-tbl">
-      <thead>
-        <tr><th colspan="7" class="det-title">DECLARATION CROUPIER EXTRA ${MOIS_FULL[month - 1]} ${year} - CASINO BORDEAUX</th></tr>
-        <tr class="det-hrow">
-          <th>Noms</th><th>Prenoms</th><th>Date de naissance</th>
-          <th>Lieu de naissance</th><th>Adresse</th><th>Code postal</th><th>Ville</th>
-        </tr>
-      </thead>
-      <tbody>${sortedExtras().map(e => `
-        <tr>
-          <td class="det-nom">${e.nom}</td>
-          <td class="det-prenom">${e.prenom.toUpperCase()}</td>
-          <td class="det-italic">${e.dateNaissance || ''}</td>
-          <td class="det-lieu">${e.lieuNaissance || ''}</td>
-          <td>${e.adresse || ''}</td>
-          <td>${e.codePostal || ''}</td>
-          <td class="det-ville">${e.ville || ''}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
-}
-
-/* ── Émargement — tableau de saisie ── */
+/* ── Émargement - tableau de saisie ── */
 function getEmargWeekVal() { return document.getElementById('emarg-week-input').value || ''; }
 function getEmargYear() { const v = getEmargWeekVal(); return v ? +v.split('-W')[0] : new Date().getFullYear(); }
 function getEmargWeek() { const v = getEmargWeekVal(); return v ? +v.split('-W')[1] : getISOWeek(new Date()); }
@@ -355,7 +313,7 @@ function setCellHour(extraId, dayKey, val) {
   renderEmargement();
 }
 
-/* ── Émargement — grille imprimable ── */
+/* ── Émargement - grille imprimable ── */
 const EMARG_PER_PAGE = 16;   // 4 colonnes × 4 lignes de fiches par page imprimée
 function renderEmargement() {
   const year  = getEmargYear(), week = getEmargWeek();
@@ -386,7 +344,7 @@ function renderEmargement() {
     const pageNo = pages.length > 1 ? ` &nbsp;·&nbsp; Page ${p + 1}/${pages.length}` : '';
     return `<section class="emarg-page">
       <div class="emarg-header">
-        <div class="emarg-header-title">FEUILLE D'ÉMARGEMENT — CROUPIERS EXTRAS POKER</div>
+        <div class="emarg-header-title">FEUILLE D'ÉMARGEMENT - CROUPIERS EXTRAS POKER</div>
         <div class="emarg-header-meta">Barrière Casino Bordeaux &nbsp;·&nbsp; Semaine ${String(week).padStart(2,'0')} &nbsp;·&nbsp; du ${rangeStr}${pageNo}</div>
       </div>
       <div class="emarg-grid">
@@ -453,17 +411,15 @@ function buildBlankCard(week, days) {
 }
 
 /* ── Impression ── */
-function printDeclaration() {
-  injectPageStyle('@page{size:A4 landscape;margin:10mm}');
-  document.body.setAttribute('data-print', 'declaration');
-  window.print();
-  cleanupPrint();
-}
-
 function printEmargement() {
   injectPageStyle('@page{size:A4 landscape;margin:0}');
   document.body.setAttribute('data-print', 'emargement');
-  window.print();
+  const week = getEmargWeek(), days = getWeekDays(week, getEmargYear()), mon = days[0], sun = days[6];
+  const ML = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const plage = mon.getMonth() === sun.getMonth()
+    ? `${mon.getDate()} au ${sun.getDate()} ${ML[sun.getMonth()]} ${sun.getFullYear()}`
+    : `${mon.getDate()} ${ML[mon.getMonth()]} au ${sun.getDate()} ${ML[sun.getMonth()]} ${sun.getFullYear()}`;
+  printWithTitle(`Émargement extras - Semaine ${String(week).padStart(2, '0')} (${plage})`);
   cleanupPrint();
 }
 

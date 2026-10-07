@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   courriers.js — Générateur de courriers PN
+   courriers.js - Générateur de courriers PN
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -233,11 +233,17 @@ function saveTplAndRender() {
   renderAll();
 }
 
-function toggleTplAccordion() {
-  const btn  = document.getElementById('tpl-accordion-btn');
-  const body = document.getElementById('tpl-accordion-body');
-  const open = body.classList.toggle('open');
-  btn.classList.toggle('open', open);
+/* Réglages (destinataires et signatures) : le panneau remplace le courrier tant qu'il est ouvert */
+function toggleTplPanel() {
+  const panel = document.getElementById('tpl-panel');
+  const open = panel.hidden;                                  // état à venir
+  panel.hidden = !open;
+  document.getElementById('letter-controls').style.display = open ? 'none' : '';
+  document.querySelector('.letter-preview-wrap').style.display = open ? 'none' : '';
+  const btn = document.getElementById('btn-tpl');
+  btn.querySelector('span').textContent = open ? 'Retour au courrier' : 'Réglages';
+  btn.querySelector('i').className = 'ico ' + (open ? 'ico-chev-l' : 'ico-cog');
+  window.scrollTo(0, 0);
 }
 
 function resetTemplates() {
@@ -289,17 +295,7 @@ function esc(str) {
 /* ── Initialisation ── */
 document.addEventListener('DOMContentLoaded', () => {
   const now      = new Date();
-  const selMonth = document.getElementById('sel-month');
-
-  MOIS_LETTRE.forEach((m, i) => {
-    const o = document.createElement('option');
-    o.value = i + 1;
-    o.textContent = m;
-    if (i === now.getMonth()) o.selected = true;
-    selMonth.appendChild(o);
-  });
-
-  document.getElementById('inp-year').value = now.getFullYear();
+  initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS_LETTRE);   // mois suivant par défaut
 
   // Peuple le select mois de la date courrier
   const selDateM = document.getElementById('inp-date-m');
@@ -422,12 +418,24 @@ function generateLetterHtml(tpl, rows, month, year) {
 }
 
 /* ── Impression ── */
+const DEST_COURT = { ministre: 'Ministre de l\'Intérieur', sipj: 'SIPJ 33', prefecture: 'Préfecture de la Gironde' };
 function printCurrent() {
-  window.print();
+  const dest = DEST_COURT[currentTab] || '';
+  if (docType === 'annulation') {
+    // titre = destinataire + date du courrier d'annulation
+    printWithTitle(`Annulation de tournoi - ${dest} - ${formatAnnulLetterDate()}`);
+  } else {
+    printWithTitle(`Courrier ${dest} - Déclaration Tournois ${MOIS_LETTRE[getMonth() - 1]} ${getYear()}`);
+  }
+}
+function formatAnnulLetterDate() {
+  const d = +document.getElementById('annul-date-d').value, m = +document.getElementById('annul-date-m').value, y = +document.getElementById('annul-date-y').value;
+  return m ? `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}` : '';
 }
 
 /* ── Sélecteur de type de document ── */
 function selectDocType(type) {
+  if (!document.getElementById('tpl-panel').hidden) toggleTplPanel();   // les réglages ne concernent que les courriers mensuels
   docType = type;
   document.getElementById('section-mensuel').style.display    = type === 'mensuel'    ? '' : 'none';
   document.getElementById('section-annulation').style.display = type === 'annulation' ? '' : 'none';
@@ -460,7 +468,7 @@ function renderAnnulDateList() {
   const objetEl   = document.getElementById('annul-objet-preview');
   if (!annulDates.length) {
     container.innerHTML = '<div class="annul-empty-hint">Aucune date ajoutée.</div>';
-    if (objetEl) objetEl.textContent = '—';
+    if (objetEl) objetEl.textContent = '-';
     return;
   }
   container.innerHTML = annulDates.map((d, i) => {
@@ -530,7 +538,7 @@ function formatAnnulDatesBody(dates) {
 
 function formatAnnulObjet(dates) {
   const dateStr = formatAnnulDatesObjet(dates);
-  if (!dateStr) return '—';
+  if (!dateStr) return '-';
   const plural = dates.length > 1;
   return `Annulation ${plural ? 'des tournois' : 'du tournoi'} de Texas Hold'em Poker ${dateStr}.`;
 }
@@ -540,7 +548,7 @@ function formatAnnulLetterDate() {
   const d = +document.getElementById('annul-date-d').value || 0;
   const m = +document.getElementById('annul-date-m').value || 0;
   const y = +document.getElementById('annul-date-y').value || 0;
-  if (!d || !m || !y) return '—';
+  if (!d || !m || !y) return '-';
   return `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
 }
 
@@ -555,7 +563,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
   const recipientHtml = tpl.recipient.map(esc).join('<br>');
   const plural        = dates.length > 1;
   const objetStr      = formatAnnulObjet(dates);
-  const bodyDatesStr  = formatAnnulDatesBody(dates) || '—';
+  const bodyDatesStr  = formatAnnulDatesBody(dates) || '-';
 
   const motifPara = motif.trim()
     ? `<p>Cette annulation est rendue nécessaire en raison ${esc(motif.trim())}.</p>`

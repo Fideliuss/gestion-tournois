@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  AUTH — garde d'accès + badge utilisateur
+//  AUTH - garde d'accès + badge utilisateur
 //  Doit être chargé APRÈS supabase.js
 // ══════════════════════════════════════════════════════
 
@@ -41,10 +41,10 @@ const AUTH = {
   /**
    * À appeler sur chaque page protégée.
    * @param {object} opts
-   *   loginUrl    {string}              — chemin relatif vers login.html depuis cette page
-   *   role        {string|string[]|null} — 'admin', ['admin','mcd'], ou null = tout connecté
-   *   panel       {string|string[]|null} — panel(s) requis ; les admins passent toujours
-   *   nav         {boolean}             — barre de navigation commune (true par défaut) ; false = ancienne interface flottante
+   *   loginUrl    {string}              - chemin relatif vers login.html depuis cette page
+   *   role        {string|string[]|null} - 'admin', ['admin','mcd'], ou null = tout connecté
+   *   panel       {string|string[]|null} - panel(s) requis ; les admins passent toujours
+   *   nav         {boolean}             - barre de navigation commune (true par défaut) ; false = ancienne interface flottante
    */
   async guard({ loginUrl = 'login.html', role = null, panel = null, nav = true } = {}) {
     // Overlay immédiat pour éviter le flash de contenu
@@ -74,10 +74,10 @@ const AUTH = {
       }
     }
 
-    // Chargement des rôles (panels + couleurs) — pour tous, badge inclus
+    // Chargement des rôles (panels + couleurs) - pour tous, badge inclus
     await _loadRolePanels();
 
-    // Vérification du panel via la table app_roles — les admins passent toujours
+    // Vérification du panel via la table app_roles - les admins passent toujours
     if (panel !== null && !isAdmin) {
       const entry   = (_rolePanelsCache[userRole] || {});
       const allowed = entry.panels || [];

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  UTH — MEILLEURE MAIN
+//  UTH - MEILLEURE MAIN
 //  Pas de niveaux : l'UTH est un jeu simple, il doit être maîtrisé en entier. Comme à la table, le croupier
 //  voit toujours 7 cartes (les 2 du joueur + le board de 5, affichés comme dans « Qui gagne ? ») et identifie la meilleure combinaison de 5 cartes.
 //  Les donnes sont tirées au hasard, de la carte haute à la quinte flush royale ; une donne sur trois environ
@@ -74,7 +74,7 @@ function umNext() {
   q.best = UTH.bestHand(q.cards);
   _umQuestion = q;
 
-  // Les 2 premières cartes sont celles du joueur, les 5 suivantes le board — même table que « Qui gagne ? »
+  // Les 2 premières cartes sont celles du joueur, les 5 suivantes le board - même table que « Qui gagne ? »
   document.getElementById('um-table').innerHTML = uthPlayerZone(q.cards.slice(0, 2)) + uthBoardZone(q.cards.slice(2));
 
   document.querySelectorAll('#um-answers .uth-ans').forEach(function (b) { b.disabled = false; b.className = 'uth-ans'; });
@@ -113,7 +113,7 @@ async function umAnswer(chosen) {
   const fb = document.getElementById('um-feedback');
   const name = UTH.describe(q.best);
   fb.className = 'feedback-bar ' + (isCorrect ? 'correct' : 'wrong');
-  fb.innerHTML = '<div>' + (isCorrect ? '✓ <b>' + name + '</b> — Correct !' : '✕ Incorrect — c\'est <b>' + name + '</b>') + '</div>'
+  fb.innerHTML = '<div>' + (isCorrect ? '✓ <b>' + name + '</b> - Correct !' : '✕ Incorrect - c\'est <b>' + name + '</b>') + '</div>'
     + (q.trap ? '<div class="uth-trap">' + q.trap + '</div>' : '');
   if (q.trap || !isCorrect) fb.style.flexDirection = 'column';
 

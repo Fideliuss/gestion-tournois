@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  ROULETTE CONVERSION — module 2
+//  ROULETTE CONVERSION - module 2
 //  N pièces payées de valeur X€ (fixée pour la session) → conversion en euros
 // ══════════════════════════════════════════════════════
 
@@ -85,7 +85,7 @@ function nextConversion() {
 
   _cvAnswered = false;
   // Nombre de pièces = un vrai paiement roulette (type de mise pondéré par niveau,
-  // pièces plafonnées par niveau) plutôt qu'un tirage arbitraire — ratios réels (35/17/11/8/5)
+  // pièces plafonnées par niveau) plutôt qu'un tirage arbitraire - ratios réels (35/17/11/8/5)
   _cvBet   = generateBet(_cvLevel);
   _cvChips = _cvBet.payout;
 
@@ -141,7 +141,7 @@ function cvTimeout() {
   const correct = roundVal(_cvChips * _cvChipValue);
   const fb = document.getElementById('cv-feedback');
   fb.className   = 'feedback-bar wrong';
-  fb.textContent = '⏱ Temps écoulé — ' + formatVal(correct) + ' €';
+  fb.textContent = '⏱ Temps écoulé - ' + formatVal(correct) + ' €';
   _cvQIndex++;
   updateConversionProgress();
   if (_cvQIndex >= CV_QUESTIONS) {
@@ -171,10 +171,10 @@ async function submitConversion() {
   const fb = document.getElementById('cv-feedback');
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ ' + formatVal(correct) + ' € — Correct !';
+    fb.textContent = '✓ ' + formatVal(correct) + ' € - Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
-    fb.textContent = '✕ Incorrect — ' + formatVal(correct) + ' €';
+    fb.textContent = '✕ Incorrect - ' + formatVal(correct) + ' €';
   }
 
   try {

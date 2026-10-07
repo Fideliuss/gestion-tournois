@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  SUIVI — constantes et calculs partagés
+//  SUIVI - constantes et calculs partagés
 //  Utilisé par suivi_croupier (Mes résultats) et, à l'étape 3, suivi_manager
 // ══════════════════════════════════════════════════════
 
@@ -87,7 +87,7 @@ function svBestTimes(sessions) {
   return out;
 }
 
-// m:ss.t — identique au chrono du module Tables
+// m:ss.t - identique au chrono du module Tables
 function svFormatTime(ms) {
   const t = Math.floor(ms / 100) / 10;
   const m = Math.floor(t / 60);
@@ -151,7 +151,7 @@ function renderBestTimes(all) {
   return '<div class="sv-times">' + SV_RATIOS.map(function(r) {
     const ms = best[r];
     return '<div class="sv-time"><div class="sv-time-ratio">× ' + r + '</div>'
-      + '<div class="sv-time-val' + (ms ? '' : ' none') + '">' + (ms ? svFormatTime(ms) : '—') + '</div></div>';
+      + '<div class="sv-time-val' + (ms ? '' : ' none') + '">' + (ms ? svFormatTime(ms) : '-') + '</div></div>';
   }).join('') + '</div>'
-    + '<div class="sv-caption" style="margin-top:6px">Meilleur temps par table — sessions sans erreur uniquement</div>';
+    + '<div class="sv-caption" style="margin-top:6px">Meilleur temps par table - sessions sans erreur uniquement</div>';
 }

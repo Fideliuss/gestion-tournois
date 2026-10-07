@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gestion des Extras — Barrière Casino Bordeaux</title>
+  <title>Gestion des Extras - Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../../shared/barriere.css"/>
   <link rel="stylesheet" href="extras.css"/>
 </head>
@@ -24,7 +24,6 @@
   <!-- ── Onglets ── -->
   <div class="xt-tabs seg" id="xt-tabs">
     <button class="xt-tab seg-btn active" data-tab="liste"       onclick="showTab('liste')">Liste</button>
-    <button class="xt-tab seg-btn"        data-tab="declaration" onclick="showTab('declaration')">Déclaration</button>
     <button class="xt-tab seg-btn"        data-tab="emargement"  onclick="showTab('emargement')">Émargement</button>
   </div>
 
@@ -89,26 +88,6 @@
   </div><!-- /tab-liste -->
 
   <!-- ════════════════════════════════════════
-       TAB : DÉCLARATION MENSUELLE
-  ════════════════════════════════════════ -->
-  <div id="tab-declaration" class="xt-panel" style="display:none">
-
-    <div class="card" id="decl-controls">
-      <div class="sec">Période</div>
-      <div class="period-row">
-        <div class="fg">
-          <label class="fl">Mois</label>
-          <input type="month" id="decl-month-input" onchange="renderDeclaration()"/>
-        </div>
-        <button class="btn btn-gold" onclick="printDeclaration()" style="margin-left:auto"><i class="ico ico-print"></i> Imprimer / PDF</button>
-      </div>
-    </div>
-
-    <div id="decl-output" style="margin-top:16px;overflow-x:auto"></div>
-
-  </div><!-- /tab-declaration -->
-
-  <!-- ════════════════════════════════════════
        TAB : ÉMARGEMENT HEBDOMADAIRE
   ════════════════════════════════════════ -->
   <div id="tab-emargement" class="xt-panel" style="display:none">
@@ -151,7 +130,6 @@
 
   </div><!-- /tab-emargement -->
 
-  <div class="footer">Barrière Casino Bordeaux · Croupiers extras — Déclaration mensuelle DTPJ</div>
 </div>
 
 <!-- ── Modal édition extra ── -->

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  ROULETTE POINTAGE — module 4
+//  ROULETTE POINTAGE - module 4
 //  Le cylindre annonce un numéro → cliquer sur le tapis
 // ══════════════════════════════════════════════════════
 
@@ -67,12 +67,12 @@ function nextPointage() {
   _ptNumber   = Math.floor(Math.random() * 37); // 0-36
   _ptMirror   = Math.random() < 0.5; // sens de table aléatoire (le 0 détermine le sens)
 
-  // Affiche le numéro dans le cylindre — couleur masquée jusqu'à la réponse
+  // Affiche le numéro dans le cylindre - couleur masquée jusqu'à la réponse
   const numEl = document.getElementById('pt-announced');
   numEl.textContent = _ptNumber;
   numEl.className   = 'pt-ball neutral';
 
-  // Tapis cliquable — numéros masqués (test de mémoire), sens aléatoire
+  // Tapis cliquable - numéros masqués (test de mémoire), sens aléatoire
   renderTapis(document.getElementById('pt-tapis'), {
     maxNum:      36,
     clickable:   true,
@@ -127,7 +127,7 @@ function ptTimeout() {
   highlightCorrect();
   const fb = document.getElementById('pt-feedback');
   fb.className   = 'feedback-bar wrong';
-  fb.textContent = '⏱ Temps écoulé — le ' + _ptNumber + ' est ' + positionLabel(_ptNumber);
+  fb.textContent = '⏱ Temps écoulé - le ' + _ptNumber + ' est ' + positionLabel(_ptNumber);
   _ptQIndex++;
   updatePointageProgress();
   if (_ptQIndex >= PT_QUESTIONS) {
@@ -152,10 +152,10 @@ async function clickPointage(n) {
 
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ Correct — le ' + _ptNumber;
+    fb.textContent = '✓ Correct - le ' + _ptNumber;
   } else {
     fb.className   = 'feedback-bar wrong';
-    fb.textContent = '✕ Incorrect — le ' + _ptNumber + ' est ' + positionLabel(_ptNumber);
+    fb.textContent = '✕ Incorrect - le ' + _ptNumber + ' est ' + positionLabel(_ptNumber);
   }
 
   try {

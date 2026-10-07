@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  ULTIMATE TEXAS HOLD'EM — affichage des cartes (partagé par les modules)
+//  ULTIMATE TEXAS HOLD'EM - affichage des cartes (partagé par les modules)
 //  Réutilise le composant .playing-card du Blackjack (training.css).
 //  Dépend de uth_engine.js (chargé avant).
 // ══════════════════════════════════════════════════════
@@ -31,7 +31,7 @@ function uthFrame(label, inner) {
 }
 
 // Joueur : deux cartes en quinconce (décalées en hauteur, légèrement superposées)
-// `best` (optionnel) : les 5 cartes de la meilleure main — les autres cartes sont alors atténuées
+// `best` (optionnel) : les 5 cartes de la meilleure main - les autres cartes sont alors atténuées
 function uthMark(card, best) {
   if (!best) return '';
   return best.some(function (b) { return uthSameCard(b, card); }) ? 'uth-best' : 'uth-dim';

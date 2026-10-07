@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════
-   SUIVI — styles des pages de résultats (croupier + manager)
+   SUIVI - styles des pages de résultats (croupier + manager)
    ══════════════════════════════════════════════════════ */
 
 .sv-wrap { width: 100%; max-width: 860px; display: flex; flex-direction: column; gap: 16px; }
