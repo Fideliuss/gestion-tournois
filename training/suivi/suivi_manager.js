@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  SUIVI MANAGER — résultats de toute l'équipe (panel 'training-suivi')
+//  SUIVI MANAGER - résultats de toute l'équipe (panel 'training-suivi')
 //  4 vues : Classement · Progression · Points faibles · Activité
 //  Vue courante portée par le hash : #classement · #progression/<user_id> · #faibles · #activite
 //  Les agrégats viennent de fonctions SQL (supabase/migrations/phase3_suivi_fonctions_manager.sql).
@@ -134,7 +134,7 @@ function svmUserSelect(current, fn, withTeam) {
     + (withTeam ? '<option value="">Toute l\'équipe</option>' : '')
     + users.map(function(u) {
         return '<option value="' + svEsc(u.user_id) + '"' + (u.user_id === current ? ' selected' : '') + '>'
-          + svEsc(u.user_label || '—') + ' (' + u.sessions_total + ')</option>';
+          + svEsc(u.user_label || '-') + ' (' + u.sessions_total + ')</option>';
       }).join('') + '</select>';
 }
 
@@ -173,7 +173,7 @@ function svmRankTable(rows, m) {
     const pct = r.avg_recent || 0;
     return '<button class="svm-row svm-t-rank' + (rank ? '' : ' svm-dim') + '" onclick="svmOpenProg(\'' + svEsc(r.user_id) + '\',\'' + m.game + '\',' + (m.levels && _svm.rankLevel ? '\'' + _svm.rankLevel + '\'' : 'null') + ')">'
       + '<span class="svm-rank' + (rank && rank <= 3 ? ' top' : '') + '">' + (rank || '·') + '</span>'
-      + '<span class="svm-name">' + svEsc(r.user_label || '—') + '</span>'
+      + '<span class="svm-name">' + svEsc(r.user_label || '-') + '</span>'
       + '<span class="svm-val svm-hide-m">' + r.sessions + '</span>'
       + '<span class="svm-val">' + pct + '<small>%</small></span>'
       + '<span class="sv-meter svm-hide-m"><i style="width:' + pct + '%"></i></span>'
@@ -183,7 +183,7 @@ function svmRankTable(rows, m) {
   let html = '<div class="svm-row svm-t-rank svm-head"><span>#</span><span>Croupier</span><span class="svm-hide-m">Sessions</span><span>Moy. 5 dern.</span><span class="svm-hide-m"></span><span class="svm-hide-m">Record</span><span>Dernière</span></div>';
   html += ranked.map(function(r, i) { return line(r, i + 1); }).join('');
   if (others.length) {
-    html += '<div class="svm-sep">Moins de ' + SVM_MIN_RANKED + ' sessions — pas encore classés</div>';
+    html += '<div class="svm-sep">Moins de ' + SVM_MIN_RANKED + ' sessions - pas encore classés</div>';
     html += others.map(function(r) { return line(r, 0); }).join('');
   }
   return html;
@@ -196,8 +196,8 @@ function svmTimesTable(rows, m) {
   const line = function(r, rank) {
     return '<button class="svm-row svm-t-time' + (rank ? '' : ' svm-dim') + '" onclick="svmOpenProg(\'' + svEsc(r.user_id) + '\',\'' + m.game + '\',null)">'
       + '<span class="svm-rank' + (rank && rank <= 3 ? ' top' : '') + '">' + (rank || '·') + '</span>'
-      + '<span class="svm-name">' + svEsc(r.user_label || '—') + '</span>'
-      + '<span class="svm-val">' + (r.best_ms !== null ? svFormatTime(Number(r.best_ms)) : '—') + '</span>'
+      + '<span class="svm-name">' + svEsc(r.user_label || '-') + '</span>'
+      + '<span class="svm-val">' + (r.best_ms !== null ? svFormatTime(Number(r.best_ms)) : '-') + '</span>'
       + '<span class="svm-val svm-hide-m">' + r.perfect_runs + '</span>'
       + '<span class="svm-val svm-hide-m">' + r.sessions + '</span>'
       + '<span class="svm-date">' + svAgo(r.last_at) + '</span></button>';
@@ -205,7 +205,7 @@ function svmTimesTable(rows, m) {
   let html = '<div class="svm-row svm-t-time svm-head"><span>#</span><span>Croupier</span><span>Meilleur temps</span><span class="svm-hide-m">Sans erreur</span><span class="svm-hide-m">Sessions</span><span>Dernière</span></div>';
   html += timed.map(function(r, i) { return line(r, i + 1); }).join('');
   if (untimed.length) {
-    html += '<div class="svm-sep">Pas encore de temps — il faut une session sans erreur chronométrée</div>';
+    html += '<div class="svm-sep">Pas encore de temps - il faut une session sans erreur chronométrée</div>';
     html += untimed.map(function(r) { return line(r, 0); }).join('');
   }
   return html;
@@ -417,7 +417,7 @@ async function svmActivite() {
     + users.map(function(u) {
         const idle = (Date.now() - new Date(u.last_at).getTime()) / 86400000 > SVM_INACTIVE_DAYS;
         return '<button class="svm-row svm-t-act" onclick="svmOpenProg(\'' + svEsc(u.user_id) + '\',null,null)">'
-          + '<span class="svm-name">' + svEsc(u.user_label || '—') + (idle ? ' <span class="svm-badge">Inactif</span>' : '') + '</span>'
+          + '<span class="svm-name">' + svEsc(u.user_label || '-') + (idle ? ' <span class="svm-badge">Inactif</span>' : '') + '</span>'
           + '<span class="svm-val">' + u.sessions_period + '</span>'
           + '<span class="svm-val svm-hide-m">' + u.active_days + '</span>'
           + '<span class="svm-val svm-hide-m">' + u.sessions_total + '</span>'

@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════
-//  ULTIMATE TEXAS HOLD'EM — moteur de cartes et de paiements
+//  ULTIMATE TEXAS HOLD'EM - moteur de cartes et de paiements
 //  Fonctions pures : aucun accès au DOM ni à Supabase. Testable avec `node uth_engine.test.js`.
 //  Règles : réglementation des jeux (Ultimate Texas Hold'em, option Trips, jackpot progressif JP1)
-//  — barème « X pour 1 » lu comme X fois la mise en gain (mise rendue en plus), comme à la roulette.
+//  - barème « X pour 1 » lu comme X fois la mise en gain (mise rendue en plus), comme à la roulette.
 // ══════════════════════════════════════════════════════
 
 const UTH = (function () {
@@ -127,7 +127,7 @@ const UTH = (function () {
     }
   }
 
-  // ── Tables de paiement (réglementation) — modifiables par un admin via training_config 'uth' ──
+  // ── Tables de paiement (réglementation) - modifiables par un admin via training_config 'uth' ──
   const DEFAULT_CONFIG = {
     blind: { royal_flush: 500, straight_flush: 50, quads: 10, full_house: 3, flush: 1.5, straight: 1 },
     trips: { royal_flush: 50, straight_flush: 40, quads: 30, full_house: 8, flush: 7, straight: 4, trips: 3 },
@@ -453,7 +453,7 @@ const UTH = (function () {
       case CAT.STRAIGHT_FLUSH: what = 'la hauteur de la quinte'; break;
       default:             what = 'la ' + ordinal[i] + ' carte';    // couleur, carte haute : carte par carte
     }
-    return who + ' gagne : même combinaison (' + CAT_NAMES[p.category] + '), ' + what + ' décide — '
+    return who + ' gagne : même combinaison (' + CAT_NAMES[p.category] + '), ' + what + ' décide - '
       + rankName(w.tiebreak[i]) + ' contre ' + rankName(l.tiebreak[i]) + '.';
   }
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Déclaration DTPJ — Barrière Casino Bordeaux</title>
+  <title>Déclarations - Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../../shared/barriere.css"/>
   <link rel="stylesheet" href="declaration.css"/>
 </head>
@@ -17,44 +17,63 @@
 
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
-    <div class="hdr-title">Déclaration <em>DTPJ</em></div>
+    <div class="hdr-title">Déclarations <em>mensuelles</em></div>
 
   </div>
 
-  <!-- ── 1. Période + impression ── -->
+  <!-- Période commune aux deux déclarations ; Réglages (tournois) et impression dans le même encadré -->
   <div class="card" id="period-card" style="max-width:1100px">
     <div class="sec">Période</div>
     <div class="period-row">
-      <div class="fg">
+      <div class="fg pf-month">
         <label class="fl">Mois</label>
-        <select id="sel-month"></select>
+        <select id="sel-month" onchange="onPeriodChange()"></select>
       </div>
-      <div class="fg">
+      <div class="fg pf-year">
         <label class="fl">Année</label>
-        <input type="number" id="inp-year" min="2020" max="2099" style="width:100px"/>
+        <input type="number" id="inp-year" min="2020" max="2099" onchange="onPeriodChange()"/>
       </div>
-      <button class="btn btn-gold" onclick="renderAll()">Générer</button>
-      <button class="btn btn-ghost" onclick="window.print()" style="margin-left:auto"><i class="ico ico-print"></i> Imprimer / PDF</button>
+      <div class="period-actions">
+        <button class="btn btn-ghost" id="btn-adhoc" onclick="openView('adhoc')"><i class="ico ico-plus"></i> <span>Ajout/Modifications</span></button>
+        <button class="btn btn-ghost" id="btn-reglages" onclick="openView('cfg')"><i class="ico ico-cog"></i> <span>Réglages</span></button>
+        <button class="btn btn-ghost" id="btn-print" onclick="printDeclaration()"><i class="ico ico-print"></i> Imprimer / PDF</button>
+      </div>
     </div>
   </div>
 
-  <!-- ── 2. Formulaire de déclaration ── -->
+  <div class="seg" id="decl-main-tabs" role="tablist" aria-label="Déclaration">
+    <button class="seg-btn active" role="tab" data-decl="tournois" aria-selected="true"  onclick="showDeclaration('tournois')">Tournois</button>
+    <button class="seg-btn"        role="tab" data-decl="extras"   aria-selected="false" onclick="showDeclaration('extras')">Extras</button>
+  </div>
+
+  <!-- ══ Déclaration Tournois : tableau et annexes ══ -->
+  <section class="decl-view" id="view-tournois">
+
   <div class="decl-wrap">
     <div id="decl-output"></div>
   </div>
 
-  <!-- ── 3. Annexes prize pool ── -->
   <div class="sec" id="annexes-label" style="width:100%;margin-bottom:16px">
-    Annexes — Prize Pool
+    Annexes - Prize Pool
   </div>
   <div class="annexes-grid" id="annexes-output"></div>
 
-  <!-- ── 4. Onglets de configuration ── -->
-  <div class="decl-tabs seg" id="decl-tabs">
+  </section>
+
+  <!-- ══ Déclaration Extras ══ -->
+  <section class="decl-view" id="view-extras" hidden>
+    <div class="decl-wrap">
+      <div id="extras-output"></div>
+    </div>
+  </section>
+
+  <!-- ══ Vue Réglages : tournois, encadrement, annexes ══ -->
+  <section class="decl-view" id="view-cfg" hidden>
+
+  <div class="decl-tabs seg sm" id="decl-tabs">
     <button class="decl-tab seg-btn active" onclick="showDeclTab('tournois')">Tournois</button>
     <button class="decl-tab seg-btn" onclick="showDeclTab('encadrement')">Encadrement</button>
     <button class="decl-tab seg-btn" onclick="showDeclTab('annexes')">Annexes</button>
-    <button class="decl-tab seg-btn" onclick="showDeclTab('ponctuel')">Ponctuel</button>
   </div>
 
   <!-- ── Onglet : Tournois ── -->
@@ -98,11 +117,63 @@
     </div>
   </div>
 
-  <!-- ── Onglet : Ponctuel (exceptions + ad-hoc) ── -->
-  <div class="decl-tab-panel" id="dtab-ponctuel" style="max-width:1100px;width:100%;display:none">
+  </section>
 
-    <div class="card" id="exc-card">
-      <div class="sec">Gestion ponctuelle</div>
+  <!-- ══ Ajout / Modifications : tournoi ad-hoc, modification ou annulation ponctuelle ══ -->
+  <section class="decl-view" id="view-adhoc" hidden>
+  <div class="decl-tab-panel" id="dtab-ponctuel" style="max-width:1100px;width:100%">
+
+    <div class="card" id="adhoc-card">
+      <div class="sec">Tournoi Ad-hoc</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:18px">
+        Ajoutez un tournoi exceptionnel (événement, festival…) pour le mois sélectionné.
+        Il apparaîtra dans le tableau de déclaration, trié chronologiquement.
+      </p>
+      <div class="adhoc-form">
+        <div class="fg">
+          <label class="fl">Date</label>
+          <input type="date" id="adhoc-date"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Heure</label>
+          <input type="text" id="adhoc-heure" value="21:00" placeholder="21:00" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Cave (€)</label>
+          <input type="number" id="adhoc-cave" placeholder="ex: 200" min="0" style="width:90px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Joueurs max</label>
+          <input type="number" id="adhoc-joueurs" value="150" min="1" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Rachats</label>
+          <div style="display:flex;align-items:center;gap:8px;height:38px">
+            <input type="checkbox" id="adhoc-rachats" checked style="width:16px;height:16px;accent-color:var(--gold)"/>
+            <label for="adhoc-rachats" style="font-size:12px;color:var(--text)">OUI</label>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Bounty (€)</label>
+          <input type="number" id="adhoc-bounty" placeholder="0" min="0" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">N° d'annexe</label>
+          <input type="number" id="adhoc-annexe" placeholder="ex : 4" min="1" style="width:90px"/>
+        </div>
+        <div class="fg" style="justify-content:flex-end">
+          <label class="fl">&nbsp;</label>
+          <button class="btn btn-gold" onclick="addAdhoc()">+ Ajouter</button>
+        </div>
+      </div>
+      <div class="sec" style="margin-top:4px;margin-bottom:12px">Ce mois</div>
+      <div class="adhoc-list" id="adhoc-list">
+        <div class="adhoc-empty">Aucun tournoi ad-hoc ce mois.</div>
+      </div>
+    </div>
+
+    <div class="card" id="exc-card" style="margin-top:16px">
+      <div class="sec">Modifier ou annuler un tournoi</div>
       <p style="font-size:11px;color:var(--text-dim);margin-bottom:18px">
         Annulez ou modifiez ponctuellement un tournoi pour ce mois uniquement. Restaurable à tout moment.
       </p>
@@ -149,68 +220,17 @@
           <input type="number" id="exc-bounty" placeholder="0" min="0" style="width:80px"/>
         </div>
         <div class="fg">
-          <label class="fl">Annexe</label>
-          <input type="text" id="exc-annexe" placeholder="ANNEXE X" style="width:100px"/>
+          <label class="fl">N° d'annexe</label>
+          <input type="number" id="exc-annexe" placeholder="ex : 4" min="1" style="width:90px"/>
         </div>
       </div>
       <div class="sec" style="margin-top:4px;margin-bottom:12px">Exceptions ce mois</div>
       <div id="exc-list"><div class="adhoc-empty">Aucune exception ce mois.</div></div>
     </div>
 
-    <div class="card" id="adhoc-card" style="margin-top:16px">
-      <div class="sec">Tournoi Ad-hoc</div>
-      <p style="font-size:11px;color:var(--text-dim);margin-bottom:18px">
-        Ajoutez un tournoi exceptionnel (événement, festival…) pour le mois sélectionné.
-        Il apparaîtra dans le tableau de déclaration, trié chronologiquement.
-      </p>
-      <div class="adhoc-form">
-        <div class="fg">
-          <label class="fl">Date</label>
-          <input type="date" id="adhoc-date"/>
-        </div>
-        <div class="fg">
-          <label class="fl">Heure</label>
-          <input type="text" id="adhoc-heure" value="21:00" placeholder="21:00" style="width:80px"/>
-        </div>
-        <div class="fg">
-          <label class="fl">Cave (€)</label>
-          <input type="number" id="adhoc-cave" placeholder="ex: 200" min="0" style="width:90px"/>
-        </div>
-        <div class="fg">
-          <label class="fl">Joueurs max</label>
-          <input type="number" id="adhoc-joueurs" value="150" min="1" style="width:80px"/>
-        </div>
-        <div class="fg">
-          <label class="fl">Rachats</label>
-          <div style="display:flex;align-items:center;gap:8px;height:38px">
-            <input type="checkbox" id="adhoc-rachats" checked style="width:16px;height:16px;accent-color:var(--gold)"/>
-            <label for="adhoc-rachats" style="font-size:12px;color:var(--text)">OUI</label>
-          </div>
-        </div>
-        <div class="fg">
-          <label class="fl">Bounty (€)</label>
-          <input type="number" id="adhoc-bounty" placeholder="0" min="0" style="width:80px"/>
-        </div>
-        <div class="fg">
-          <label class="fl">Annexe</label>
-          <input type="text" id="adhoc-annexe" placeholder="ANNEXE X" style="width:100px"/>
-        </div>
-        <div class="fg" style="justify-content:flex-end">
-          <label class="fl">&nbsp;</label>
-          <button class="btn btn-gold" onclick="addAdhoc()">+ Ajouter</button>
-        </div>
-      </div>
-      <div class="sec" style="margin-top:4px;margin-bottom:12px">Ce mois</div>
-      <div class="adhoc-list" id="adhoc-list">
-        <div class="adhoc-empty">Aucun tournoi ad-hoc ce mois.</div>
-      </div>
-    </div>
-
   </div>
+  </section>
 
-  <div class="footer" style="width:100%;max-width:1100px">
-    Barrière Casino Bordeaux · Déclaration mensuelle — Service Course et Jeux de la Police Judiciaire
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  NAV — barre de navigation commune
+//  NAV - barre de navigation commune
 //  Injectée par AUTH.guard une fois l'accès validé (auth.js charge ce fichier et nav.css).
 //
 //  Structure : des ESPACES (Outils Tournois, Training Croupier…) qui ont chacun leurs pages ; un lanceur d'espaces ;
@@ -18,13 +18,13 @@
 const NAV = (function () {
 
   // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
-  const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/';
+  const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'break_list/';
   const SPACES = [
     { id: 'tournois', label: 'Outils Tournois', note: 'Prize pool, classement, administration', href: 'outils_tournois.html', panel: 'tournois', items: [
       { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
       { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
       { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
-        { label: 'Déclaration DTPJ',      href: 'admin/declaration/declaration.html' },
+        { label: 'Déclarations',          href: 'admin/declaration/declaration.html' },
         { label: 'Générateur de courrier', href: 'admin/declaration/courriers.html' },
         { label: 'Gestion des Extras',    href: 'admin/extras/extras.html' },
         { label: 'Calendrier & barèmes',  href: 'admin/config_tournois.html' },
@@ -48,6 +48,11 @@ const NAV = (function () {
         { label: 'Calcul des gains', href: UTH + 'uth_gains.html' },
       ] },
       { label: 'Mes résultats', href: T + 'suivi/suivi_croupier.html' },
+    ] },
+    { id: 'break-list', label: 'Break list', note: 'Break list du soir, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
+      { label: 'Aujourd\'hui', href: BL + 'break_list.html' },
+      { label: 'Planning',     href: BL + 'planning.html' },
+      { label: 'Réglages',     href: BL + 'reglages.html' },
     ] },
   ];
 
@@ -195,7 +200,7 @@ const NAV = (function () {
 
     // ── Marque ──
     const logo = function (file, cls) { return el('img', { src: href('shared/logos/' + file), alt: '', class: cls }); };
-    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels — Accueil' }, [
+    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels - Accueil' }, [
       logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark'),
       el('i', { class: 'ico ico-star nav-star', 'aria-hidden': 'true' }),
       el('span', { class: 'nav-city', text: 'Bordeaux' }),

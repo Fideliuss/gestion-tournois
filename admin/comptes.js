@@ -27,6 +27,7 @@ const PANELS = [
   { id: 'training', label: 'Training Croupier', children: [
     { id: 'training-suivi', label: 'Suivi équipe', short: 'Suivi équipe' },
   ]},
+  { id: 'break-list', label: 'Break list', children: [] },
 ];
 
 const ROLE_COLORS = [

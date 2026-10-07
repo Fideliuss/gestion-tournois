@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   declaration.js — Déclaration mensuelle PN
+   declaration.js - Déclaration mensuelle PN
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -57,22 +57,76 @@ function saveExc(m, y, data) { localStorage.setItem(excKey(m, y), JSON.stringify
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
-  const now = new Date();
-  const selMonth = document.getElementById('sel-month');
-  MOIS.forEach((m, i) => {
-    const o = document.createElement('option');
-    o.value = i + 1; o.textContent = m;
-    if (i === now.getMonth()) o.selected = true;
-    selMonth.appendChild(o);
-  });
-  document.getElementById('inp-year').value = now.getFullYear();
+  initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS);   // mois suivant par défaut
 
+  SB.getExtras().then(list => { extras = list; renderExtrasDeclaration(); }).catch(() => {});
+  syncViews();
   renderCfgTable();
   renderStaffEditor();
   renderAnnexesEditor();
   updateMonthInputs();
   renderAll();
 });
+
+/* ── Déclaration affichée (Tournois ou Extras), Réglages et Ajout/Modifications (tournois) ── */
+let _decl = 'tournois';
+let _view = 'decl';          // decl | cfg (réglages) | adhoc (ajout / modifications ponctuelles)
+
+function showDeclaration(name) {
+  _decl = name;
+  document.querySelectorAll('#decl-main-tabs .seg-btn').forEach(b => {
+    const on = b.dataset.decl === name;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', String(on));
+  });
+  syncViews();
+}
+
+/* Les boutons de l'encadré de période ouvrent Réglages ou Ajout/Modifications à la place de la déclaration ;
+   le bouton ouvert devient « Retour à la déclaration » */
+function openView(name) {
+  _view = _view === name ? 'decl' : name;
+  syncViews();
+  window.scrollTo(0, 0);
+}
+
+function syncViews() {
+  const decl = _view === 'decl';
+  document.getElementById('view-tournois').hidden = !(decl && _decl === 'tournois');
+  document.getElementById('view-extras').hidden   = !(decl && _decl === 'extras');
+  document.getElementById('view-cfg').hidden      = _view !== 'cfg';
+  document.getElementById('view-adhoc').hidden    = _view !== 'adhoc';
+  document.getElementById('decl-main-tabs').hidden = !decl;
+  document.getElementById('btn-print').hidden      = !decl;
+  [['btn-reglages', 'cfg', 'ico-cog', 'Réglages'], ['btn-adhoc', 'adhoc', 'ico-plus', 'Ajout/Modifications']].forEach(([id, view, icon, label]) => {
+    const b = document.getElementById(id);
+    b.hidden = decl ? _decl !== 'tournois' : _view !== view;   // réservés à la déclaration des tournois ; ouverts, seul le bouton actif reste
+    b.querySelector('span').textContent = _view === view ? 'Retour à la déclaration' : label;
+    b.querySelector('i').className = 'ico ' + (_view === view ? 'ico-chev-l' : icon);
+  });
+}
+
+/* Période modifiée : tout se recalcule, plus de bouton « Générer » */
+function onPeriodChange() { if (getMonth() && getYear()) renderAll(); }
+
+/* Petit message de confirmation (les réglages sont dans une autre vue que le résultat) */
+function flash(msg) {
+  let t = document.getElementById('decl-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'decl-toast'; t.className = 'decl-toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(flash._t); flash._t = setTimeout(() => t.classList.remove('on'), 2200);
+}
+
+/* Impression : le titre devient le nom du PDF proposé */
+function printDeclaration() {
+  const m = MOIS[getMonth() - 1].toLowerCase();
+  const mois = m.charAt(0).toUpperCase() + m.slice(1);
+  printWithTitle(_decl === 'extras' ? `Déclaration extras - ${mois} ${getYear()}` : `Déclaration Tournois - ${mois} ${getYear()}`);
+}
+
+/* ── Annexe : on saisit le numéro seul, on stocke et on affiche « ANNEXE n » ── */
+function annexeNum(v)   { const m = String(v == null ? '' : v).match(/\d+/); return m ? m[0] : ''; }
+function annexeLabel(v) { const n = annexeNum(v); return n ? 'ANNEXE ' + n : ''; }
 
 /* ── Onglets config ── */
 function showDeclTab(name) {
@@ -105,7 +159,7 @@ function renderCfgTable() {
   const ORDER = [1, 2, 3, 4, 5, 6, 0];
   document.getElementById('cfg-table').innerHTML = `
     <thead>
-      <tr><th>Jour</th><th>Actif</th><th>Heure</th><th>Cave (€)</th><th>Joueurs max</th><th>Rachats</th><th>Bounty (€)</th><th>Annexe</th></tr>
+      <tr><th>Jour</th><th>Actif</th><th>Heure</th><th>Cave (€)</th><th>Joueurs max</th><th>Rachats</th><th>Bounty (€)</th><th>N° annexe</th></tr>
     </thead>
     <tbody>
       ${ORDER.map(d => { const c = cfg[d]; return `<tr data-day="${d}" class="${c.actif ? '' : 'inactive'}">
@@ -116,14 +170,14 @@ function renderCfgTable() {
           <td><input type="number" value="${c.joueurs}" onchange="updateCfg(${d},'joueurs',+this.value)" style="width:68px"/></td>
           <td><input type="checkbox" ${c.rachats ? 'checked' : ''} onchange="updateCfg(${d},'rachats',this.checked)"/></td>
           <td><input type="number" value="${c.bounty}"  onchange="updateCfg(${d},'bounty',+this.value)"  style="width:60px" placeholder="0"/></td>
-          <td><input type="text"   value="${c.annexe}"  onchange="updateCfg(${d},'annexe',this.value)"   style="width:86px" placeholder="ANNEXE X"/></td>
+          <td><input type="number" value="${annexeNum(c.annexe)}" onchange="updateCfg(${d},'annexe',annexeLabel(this.value))" style="width:60px" min="1" placeholder="N°"/></td>
         </tr>`; }).join('')}
     </tbody>`;
 }
 function toggleDay(d, val) { cfg[d].actif = val; const r = document.querySelector(`#cfg-table tr[data-day="${d}"]`); if (r) r.className = val ? '' : 'inactive'; }
 function updateCfg(d, k, v) { cfg[d][k] = v; }
 function resetConfig() { if (!confirm('Réinitialiser la configuration ?')) return; cfg = deepClone(CFG_DEFAULT); saveCfg(); renderCfgTable(); renderAll(); }
-function saveAndRender() { saveCfg(); renderAll(); }
+function saveAndRender() { saveCfg(); renderAll(); flash('Réglages des tournois enregistrés'); }
 
 /* ── Staff ── */
 function renderStaffEditor() {
@@ -143,7 +197,7 @@ function staffRow(type, i, n) { return `<div class="staff-item"><input type="tex
 function updateStaff(type, i, v) { staff[type][i] = v; }
 function addStaff(type)          { staff[type].push(''); saveStaff(); renderStaffEditor(); }
 function removeStaff(type, i)    { staff[type].splice(i,1); saveStaff(); renderStaffEditor(); }
-function saveStaffAndRender()    { saveStaff(); renderAll(); }
+function saveStaffAndRender()    { saveStaff(); renderAll(); flash('Encadrement enregistré'); }
 
 /* ── Éditeur annexes ── */
 function renderAnnexesEditor() {
@@ -160,7 +214,7 @@ function annexeEditorCard(a) {
     </div>`).join('');
   return `<div class="annexe-editor-item" id="ae-${a.id}">
     <div class="annexe-editor-header">
-      <div class="fg"><label class="fl">Nom</label><input type="text" value="${a.nom}" onchange="updateAnnexeField('${a.id}','nom',this.value)" style="width:110px"/></div>
+      <div class="fg"><label class="fl">N° d'annexe</label><input type="number" value="${annexeNum(a.nom)}" min="1" onchange="updateAnnexeField('${a.id}','nom',annexeLabel(this.value))" style="width:80px"/></div>
       <div class="fg"><label class="fl">Joueurs</label><input type="number" value="${a.joueurs}" onchange="updateAnnexeField('${a.id}','joueurs',+this.value)" style="width:70px"/></div>
       <div class="fg"><label class="fl">Cave (€)</label><input type="number" value="${a.cave}" onchange="updateAnnexeField('${a.id}','cave',+this.value)" style="width:70px"/></div>
       <div style="margin-left:auto"><button class="btn-red" onclick="removeAnnexe('${a.id}')">Supprimer</button></div>
@@ -184,7 +238,7 @@ function updateAnnexeDist(id, idx, v) {
 }
 function addAnnexe() { annexes.push({id:uid(), nom:'ANNEXE '+(annexes.length+1), joueurs:150, cave:0, dist:[...DIST_STD]}); saveAnnexes(); renderAnnexesEditor(); renderAll(); }
 function removeAnnexe(id) { if (!confirm('Supprimer cette annexe ?')) return; annexes = annexes.filter(a => a.id!==id); saveAnnexes(); renderAnnexesEditor(); renderAll(); }
-function saveAnnexesAndRender() { saveAnnexes(); renderAll(); }
+function saveAnnexesAndRender() { saveAnnexes(); renderAll(); flash('Annexes enregistrées'); }
 
 /* ── Ad-hoc ── */
 function addAdhoc() {
@@ -198,7 +252,7 @@ function addAdhoc() {
   const joueurs = +document.getElementById('adhoc-joueurs').value || 150;
   const rachats = document.getElementById('adhoc-rachats').checked;
   const bounty  = +document.getElementById('adhoc-bounty').value  || 0;
-  const annexe  = document.getElementById('adhoc-annexe').value.trim();
+  const annexe  = annexeLabel(document.getElementById('adhoc-annexe').value);
   const titre   = `${JOURS[dow]} ${d} ${MOIS[m-1]} ${y} à ${heure}${rachats ? ' RE ENTRY' : ''}`;
 
   const list = loadAdhoc(month, year);
@@ -251,7 +305,7 @@ function onExcDateChange() {
   document.getElementById('exc-joueurs').value   = vals.joueurs ?? c.joueurs;
   document.getElementById('exc-rachats').checked = vals.rachats ?? c.rachats;
   document.getElementById('exc-bounty').value    = vals.bounty  ?? 0;
-  document.getElementById('exc-annexe').value    = vals.annexe  ?? c.annexe;
+  document.getElementById('exc-annexe').value    = annexeNum(vals.annexe ?? c.annexe);
 
   if (existing) {
     const radio = document.querySelector(`input[name="exc-type"][value="${existing.type}"]`);
@@ -280,7 +334,7 @@ function applyException() {
     joueurs: +document.getElementById('exc-joueurs').value,
     rachats: document.getElementById('exc-rachats').checked,
     bounty:  +document.getElementById('exc-bounty').value,
-    annexe:  document.getElementById('exc-annexe').value.trim(),
+    annexe:  annexeLabel(document.getElementById('exc-annexe').value),
   };
 
   saveExc(month, year, exc);
@@ -305,7 +359,7 @@ function renderExcList() {
     const dateStr = `${JOURS[dow]} ${d} ${MOIS[month-1]} ${year}`;
     const detail  = e.type === 'cancelled'
       ? '<span style="color:#e07a68;font-weight:500">Annulé</span>'
-      : `<span style="color:var(--gold);font-weight:500">Modifié</span> — ${e.cave}€ · ${e.heure}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+e.annexe : ''}`;
+      : `<span style="color:var(--gold);font-weight:500">Modifié</span> - ${e.cave}€ · ${e.heure}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+e.annexe : ''}`;
     return `<div class="adhoc-item">
       <div class="adhoc-info">
         <span class="adhoc-titre">${dateStr}</span>
@@ -350,6 +404,37 @@ function renderAll() {
   renderExcList();
   renderDeclaration();
   renderAnnexes();
+  renderExtrasDeclaration();
+}
+
+/* ── Déclaration Extras (liste des croupiers extras enregistrés dans Gestion des Extras) ── */
+let extras = [];
+function renderExtrasDeclaration() {
+  const el = document.getElementById('extras-output');
+  if (!el) return;
+  if (!extras.length) { el.innerHTML = '<p class="adhoc-empty" style="padding:20px 0">Aucun extra enregistré. Ils se gèrent dans « Gestion des Extras ».</p>'; return; }
+  const list = [...extras].sort((a, b) => a.nom.localeCompare(b.nom, 'fr') || a.prenom.localeCompare(b.prenom, 'fr'));
+  el.innerHTML = `
+    <table class="decl-extras-tbl">
+      <thead>
+        <tr><th colspan="7" class="det-title">DECLARATION CROUPIER EXTRA ${MOIS[getMonth() - 1]} ${getYear()} - CASINO BORDEAUX</th></tr>
+        <tr class="det-hrow">
+          <th>Noms</th><th>Prenoms</th><th>Date de naissance</th>
+          <th>Lieu de naissance</th><th>Adresse</th><th>Code postal</th><th>Ville</th>
+        </tr>
+      </thead>
+      <tbody>${list.map(e => `
+        <tr>
+          <td class="det-nom">${e.nom}</td>
+          <td class="det-prenom">${e.prenom.toUpperCase()}</td>
+          <td class="det-italic">${e.dateNaissance || ''}</td>
+          <td class="det-lieu">${e.lieuNaissance || ''}</td>
+          <td>${e.adresse || ''}</td>
+          <td>${e.codePostal || ''}</td>
+          <td class="det-ville">${e.ville || ''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
 /* ── Déclaration ── */
@@ -370,7 +455,7 @@ function renderDeclaration() {
           <td class="titre-cell">${r.titre}</td>
           <td>${r.cave} €</td><td>${r.joueurs}</td><td>ESPÈCES</td><td>MULTI-TABLES</td><td>1</td>
           <td>${r.rachats ? 'OUI' : 'NON'}</td><td>Level 8</td>
-          <td>${r.bounty > 0 ? r.bounty+' €' : '—'}</td><td>${r.annexe || '—'}</td>
+          <td>${r.bounty > 0 ? r.bounty+' €' : '-'}</td><td>${r.annexe || '-'}</td>
           ${i===0 ? `<td class="staff-col" rowspan="${rows.length}">${staffHtml}</td>` : ''}
         </tr>`).join('')
     : `<tr><td colspan="11" class="empty">Aucun tournoi actif ce mois.</td></tr>`;
@@ -424,7 +509,7 @@ function renderAnnexes() {
 
     return `<div class="annexe-card">
       <div class="annexe-title">${a.nom}</div>
-      <div class="annexe-subtitle">Tournoi Cash — Répartition des lots</div>
+      <div class="annexe-subtitle">Tournoi Cash - Répartition des lots</div>
       <div class="annexe-calc">
         <div class="ac-row"><span>Joueurs</span><span class="ac-val">${a.joueurs}</span></div>
         <div class="ac-row"><span>Achat de cave</span><span class="ac-val">${a.cave} €</span></div>

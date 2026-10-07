@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  BLACKJACK TRAINING — logique
+//  BLACKJACK TRAINING - logique
 // ══════════════════════════════════════════════════════
 
 const SITUATIONS = [
@@ -33,7 +33,7 @@ async function initBlackjack() {
     const cfg = await SB.getTrainingConfig('blackjack');
     if (cfg) _config = cfg;
   } catch(e) {
-    // Graceful degradation — use defaults
+    // Graceful degradation - use defaults
   }
 
   try {
@@ -144,10 +144,10 @@ async function submitAnswer() {
   const fb = document.getElementById('feedback-bar');
   if (isCorrect) {
     fb.className    = 'feedback-bar correct';
-    fb.textContent  = '✓ ' + formatAmount(correct) + ' € — Correct !';
+    fb.textContent  = '✓ ' + formatAmount(correct) + ' € - Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
-    fb.textContent = '✕ Incorrect — La bonne réponse était ' + formatAmount(correct) + ' €';
+    fb.textContent = '✕ Incorrect - La bonne réponse était ' + formatAmount(correct) + ' €';
   }
 
   try {

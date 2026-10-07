@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   tournaments.js — Référentiel tournois partagé
+   tournaments.js - Référentiel tournois partagé
    Barrière Casino Bordeaux · Outils Tournois
    Charger après barriere.js dans chaque module.
 ═══════════════════════════════════════════════════════ */
@@ -17,7 +17,7 @@ const TOURNAMENT_DEFAULTS = [
 ];
 
 /* ══════════════════════════════════════════════════════
-   TournamentsStore — accès centralisé aux tournois
+   TournamentsStore - accès centralisé aux tournois
    Source de vérité : Supabase (SB.getTournaments)
    Fallback : TOURNAMENT_DEFAULTS si Supabase inaccessible
    La clé "points" est préservée lors des mises à jour

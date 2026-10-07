@@ -1,12 +1,12 @@
 // ══════════════════════════════════════════════════════
-//  ACCÈS AUX DONNÉES — cache + pagination transparente
+//  ACCÈS AUX DONNÉES - cache + pagination transparente
 //  Les données sont chargées une seule fois par session
 //  navigateur, puis relues depuis le cache.
 //  invalidateCache() vide le cache après toute mutation.
 // ══════════════════════════════════════════════════════
 let _cacheResults      = null;   // tous les résultats, toutes saisons confondues
 let _cacheSessions     = null;   // toutes les sessions, toutes saisons confondues
-let _cacheByMonth      = {};     // { 'YYYY-MM': [...results] } — pour l'historique
+let _cacheByMonth      = {};     // { 'YYYY-MM': [...results] } - pour l'historique
 let _histCurrentMonth  = null;   // mois affiché dans l'historique
 
 // ── Saison : du 1er novembre au 31 octobre, déduite de la date (clé = année de début : 2025 → 2025 / 2026) ──
@@ -14,7 +14,7 @@ const _seasonOf    = d => { const [y, m] = d.split('-').map(Number); return m >=
 const _seasonLabel = s => `${s} / ${s + 1}`;
 const _todayStr    = () => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; };
 let _season   = _seasonOf(_todayStr());   // saison affichée
-let _closures = {};                       // { saison: date ISO de clôture } — saisons verrouillées
+let _closures = {};                       // { saison: date ISO de clôture } - saisons verrouillées
 let _isAdmin  = false;
 let _tab      = 'classement';
 
@@ -75,7 +75,7 @@ function setLbUser(user) {
 }
 
 // ══════════════════════════════════════════════════════
-//  SAISONS — sélecteur, clôture, verrouillage
+//  SAISONS - sélecteur, clôture, verrouillage
 //  Table saisons_cloturees absente / illisible : aucune saison n'est verrouillée (le challenge reste utilisable)
 // ══════════════════════════════════════════════════════
 async function loadClosures() {
@@ -184,9 +184,9 @@ function _asOfDate() { return isClosed(_season) ? new Date(_closures[_season] + 
 async function populateTournoiSelects() {
   const tournaments = await getTournaments();
 
-  // Select caché — utilisé par checkDuplicate / validateTournament
+  // Select caché - utilisé par checkDuplicate / validateTournament
   const sel = document.getElementById('inp-tournoi');
-  sel.innerHTML = '<option value="">— Choisir —</option>';
+  sel.innerHTML = '<option value="">- Choisir -</option>';
   tournaments.forEach(t => sel.appendChild(new Option(t.name, t.id)));
 
   // Semainier
@@ -198,7 +198,7 @@ async function populateTournoiSelects() {
   tournaments.forEach(t => selH.appendChild(new Option(t.name, t.id)));
 }
 
-/* Sélection depuis le semainier — met à jour le select caché et re-rend le semainier */
+/* Sélection depuis le semainier - met à jour le select caché et re-rend le semainier */
 function selectTournoiSaisir(id) {
   document.getElementById('inp-tournoi').value = id;
   _renderSaisirSemainier(id);
@@ -240,19 +240,19 @@ async function checkDuplicate() {
   const el  =document.getElementById('alert-dup');
   const lock=document.getElementById('alert-lock');
   if (date && isClosed(_seasonOf(date))) {
-    lock.innerHTML=`⛔ <strong>Saison ${_seasonLabel(_seasonOf(date))} clôturée</strong> — aucune saisie possible à cette date. Un administrateur peut rouvrir la saison.`;
+    lock.innerHTML=`⛔ <strong>Saison ${_seasonLabel(_seasonOf(date))} clôturée</strong> - aucune saisie possible à cette date. Un administrateur peut rouvrir la saison.`;
     lock.style.display='flex';
   } else { lock.style.display='none'; }
   if (!date||!tid) { el.style.display='none'; return; }
   const sessions=await getAllSessions();
   const dup=sessions.find(s=>s.date===date&&s.tournamentId===tid);
   if (dup) {
-    el.innerHTML=`⚠️ <strong>Doublon détecté</strong> — ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats, ${dup.entries} entrées).`;
+    el.innerHTML=`⚠️ <strong>Doublon détecté</strong> - ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats, ${dup.entries} entrées).`;
     el.style.display='block';
   } else { el.style.display='none'; }
 }
 
-/* Déclencheur date — vérifie doublon + met à jour la suggestion */
+/* Déclencheur date - vérifie doublon + met à jour la suggestion */
 async function onDateChange() {
   await checkDuplicate();
   await autoSuggestByDate();
@@ -358,7 +358,7 @@ async function validateTournament() {
 
   // Saison clôturée : verrouillée aussi côté base
   if (isClosed(_seasonOf(date))) {
-    warnEl.innerHTML=`⛔ <strong>Saison ${_seasonLabel(_seasonOf(date))} clôturée</strong> — impossible d'ajouter un tournoi à cette date.`;
+    warnEl.innerHTML=`⛔ <strong>Saison ${_seasonLabel(_seasonOf(date))} clôturée</strong> - impossible d'ajouter un tournoi à cette date.`;
     warnEl.style.display='flex';
     return;
   }
@@ -367,7 +367,7 @@ async function validateTournament() {
   const allSessions=await getAllSessions();
   const dup=allSessions.find(s=>s.date===date&&s.tournamentId===tid);
   if (dup) {
-    warnEl.innerHTML=`⛔ <strong>Doublon bloqué</strong> — ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats). Supprime la session existante dans l'Historique avant de re-saisir.`;
+    warnEl.innerHTML=`⛔ <strong>Doublon bloqué</strong> - ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats). Supprime la session existante dans l'Historique avant de re-saisir.`;
     warnEl.style.display='flex';
     return;
   }
@@ -460,7 +460,7 @@ async function renderClassement() {
   if (!isFiltered) {
     html+=`<div class="class-header">
       <div class="class-title">Classement Challenge ${_seasonLabel(_season)}</div>
-      <div class="class-date">${isClosed(_season)?'Classement final au':'Au'} ${today} — ${sorted.length} joueur${sorted.length>1?'s':''}</div>
+      <div class="class-date">${isClosed(_season)?'Classement final au':'Au'} ${today} - ${sorted.length} joueur${sorted.length>1?'s':''}</div>
       <div class="class-cagnotte"><span class="class-cagnotte-label">Ranking</span><span class="class-cagnotte-val">${cagnotte.toLocaleString('fr-FR')} €</span></div>
     </div>`;
     if (sorted.length>=1) {
@@ -495,7 +495,7 @@ async function renderClassement() {
 }
 
 // ══════════════════════════════════════════════════════
-//  HISTORIQUE — navigation mois par mois
+//  HISTORIQUE - navigation mois par mois
 // ══════════════════════════════════════════════════════
 async function renderHistorique() {
   await refreshTournamentsCache();
@@ -896,11 +896,11 @@ async function printClassement() {
     <div class="cp-podium">${podiumHtml}</div>
 
     ${mid.length ? `
-    <div class="cp-section-title">4<sup>ème</sup> — ${endMid}<sup>ème</sup></div>
+    <div class="cp-section-title">4<sup>ème</sup> - ${endMid}<sup>ème</sup></div>
     <div class="cp-grid cp-grid-3">${gridHtml(mid, 4)}</div>` : ''}
 
     ${low.length ? `
-    <div class="cp-section-title">31<sup>ème</sup> — ${endLow}<sup>ème</sup></div>
+    <div class="cp-section-title">31<sup>ème</sup> - ${endLow}<sup>ème</sup></div>
     <div class="cp-grid cp-grid-4">${gridHtml(low, 31)}</div>` : ''}
   `;
 
@@ -932,7 +932,7 @@ async function openPlayerModal(playerName) {
     <div class="modal-pts">${total} <small>pts</small></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
       <div class="stat-item"><div class="stat-v">${results.length}</div><div class="stat-k">Tournois</div></div>
-      <div class="stat-item"><div class="stat-v">${best<99?best+(best===1?'er':'ème'):'—'}</div><div class="stat-k">Meilleur résultat</div></div>
+      <div class="stat-item"><div class="stat-v">${best<99?best+(best===1?'er':'ème'):'-'}</div><div class="stat-k">Meilleur résultat</div></div>
     </div>
     <div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Historique · ${_seasonLabel(_season)}</div>
     <table style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>

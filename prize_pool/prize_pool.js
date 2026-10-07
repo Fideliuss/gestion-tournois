@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   prize-pool.js — Prize Pool Builder
+   prize-pool.js - Prize Pool Builder
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -101,7 +101,7 @@ function savePersist() {
   }));
 }
 
-/* Sauvegarde la répartition PP/Frais dans le tournoi actif — debounce 800ms */
+/* Sauvegarde la répartition PP/Frais dans le tournoi actif - debounce 800ms */
 let _splitSaveTimer = null;
 function saveSplitIfActive() {
   if (!state.activeTournamentId) return;
@@ -160,7 +160,7 @@ function computeHint(i, amounts) {
 /* ══════════════════════════════════════════════════════
    CONSTRUCTION DE LA TABLE (rebuild complet des lignes)
    Appelé uniquement quand le nombre de places change,
-   ou après suggest/clear — préserve le focus sinon.
+   ou après suggest/clear - préserve le focus sinon.
 ══════════════════════════════════════════════════════ */
 function buildTableBody(effSpots) {
   const tbody = document.getElementById('pp-tbody');
@@ -176,7 +176,7 @@ function buildTableBody(effSpots) {
           <div class="iw">
             <span class="ip">€</span>
             <input type="number" id="amt-${i}" class="amt-inp"
-              min="0" step="5" value="${v}" placeholder="—"
+              min="0" step="5" value="${v}" placeholder="-"
               oninput="onAmountChange(${i}, this.value)"
               onkeydown="onAmountKey(event, ${i})"/>
           </div>
@@ -256,7 +256,7 @@ function updateIndicators(d) {
       }
       pctEl.innerHTML = pct
         ? `<span class="${pctCls}">${pct}%</span>`
-        : `<span class="pct ind-muted">—</span>`;
+        : `<span class="pct ind-muted">-</span>`;
     }
 
     /* Barre */
@@ -313,7 +313,7 @@ function renderDelta(delta) {
 }
 
 function renderRatio(ratioD) {
-  if (ratioD === null) return '<span class="ratio-d ind-muted">—</span>';
+  if (ratioD === null) return '<span class="ratio-d ind-muted">-</span>';
   const warn = ratioD < 0.999;
   return `<span class="ratio-d ${warn ? 'ind-warn' : 'ind-ok'}">×${ratioD.toFixed(2)}</span>`;
 }
@@ -338,7 +338,7 @@ function updateRestant(restant, poolNet) {
 
   if (abs < 0.01) {
     bar.className = 'restant-bar restant-ok';
-    val.innerHTML = '<span class="r-ok-ico">✓</span><span class="r-ok-txt">Pool entièrement distribué — prêt à imprimer</span>';
+    val.innerHTML = '<span class="r-ok-ico">✓</span><span class="r-ok-txt">Pool entièrement distribué - prêt à imprimer</span>';
     if (btn) btn.style.display = 'none';
   } else if (restant > 0) {
     const pct = (restant / poolNet * 100).toFixed(1);
@@ -347,7 +347,7 @@ function updateRestant(restant, poolNet) {
     if (btn) btn.style.display = '';
   } else {
     bar.className = 'restant-bar restant-err';
-    val.innerHTML = `<span class="r-amount">${fmt(-restant)}</span><span class="r-sub">de trop — dépasse le pool net</span>`;
+    val.innerHTML = `<span class="r-amount">${fmt(-restant)}</span><span class="r-sub">de trop - dépasse le pool net</span>`;
     if (btn) btn.style.display = 'none';
   }
 }
@@ -408,10 +408,10 @@ function render() {
   );
 
   /* Récap */
-  document.getElementById('sum-brut').textContent = d.ok ? fmt(d.poolBrut)  : '—';
-  document.getElementById('sum-rake').textContent = d.ok ? fmt(d.rakeTotal) : '—';
-  document.getElementById('sum-pool').textContent = d.ok ? fmt(d.poolNet)   : '—';
-  document.getElementById('sum-cag' ).textContent = d.ok ? fmt(d.cagTotal)  : '—';
+  document.getElementById('sum-brut').textContent = d.ok ? fmt(d.poolBrut)  : '-';
+  document.getElementById('sum-rake').textContent = d.ok ? fmt(d.rakeTotal) : '-';
+  document.getElementById('sum-pool').textContent = d.ok ? fmt(d.poolNet)   : '-';
+  document.getElementById('sum-cag' ).textContent = d.ok ? fmt(d.cagTotal)  : '-';
 
   /* Places */
   const spotsInp = document.getElementById('inp-spots');
@@ -423,7 +423,7 @@ function render() {
   const exactSpots = (state.players * 0.12).toFixed(2).replace('.', ',');
   if (togLbl) togLbl.textContent = state.spotsManual
     ? `Places : override manuel (12% de ${state.players} joueurs = ${exactSpots})`
-    : `Places : auto — ${d.autoSpots} (12% de ${state.players} joueurs = ${exactSpots})`;
+    : `Places : auto - ${d.autoSpots} (12% de ${state.players} joueurs = ${exactSpots})`;
 
   /* Table */
   renderTable(d);
@@ -478,7 +478,7 @@ function diagSuggest(d) {
     return `Le 1er cible (${state.firstPct}% = ${fmt(firstTarget)}) est inférieur ou égal au dernier payé (${fmt(last)}). Augmente le % 1er.`;
   if (d.effSpots > 2 && last * (d.effSpots - 1) >= d.poolNet - firstTarget)
     return `Pas assez de pool pour construire ${d.effSpots - 1} paliers entre la 2ème place et le dernier. Réduis le multiplicateur ou augmente le % 1er.`;
-  return 'Paramètres incompatibles — ajuste le % 1er ou le multiplicateur dernier.';
+  return 'Paramètres incompatibles - ajuste le % 1er ou le multiplicateur dernier.';
 }
 
 function suggest() {
@@ -487,7 +487,7 @@ function suggest() {
   const payouts = genPayouts(d.poolNet, d.effSpots, state.total, state.lastMult, state.firstPct / 100);
   if (!payouts) {
     const errEl = document.getElementById('pp-error');
-    if (errEl) { errEl.style.display = 'block'; errEl.textContent = `Suggestion impossible — ${diagSuggest(d)}`; }
+    if (errEl) { errEl.style.display = 'block'; errEl.textContent = `Suggestion impossible - ${diagSuggest(d)}`; }
     return;
   }
   document.getElementById('pp-error').style.display = 'none';
@@ -598,7 +598,7 @@ function toggleManualSpots() {
 }
 
 /* ══════════════════════════════════════════════════════
-   PRESETS — semainier
+   PRESETS - semainier
 ══════════════════════════════════════════════════════ */
 function renderPresets() {
   const wrap = document.getElementById('presets-row');

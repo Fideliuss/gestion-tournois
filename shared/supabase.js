@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  SUPABASE — client et couche de données
+//  SUPABASE - client et couche de données
 //  Doit être chargé APRÈS le CDN supabase-js
 // ══════════════════════════════════════════════════════
 
@@ -304,7 +304,7 @@ const SB = {
     if (error) throw error;
   },
 
-  // meta : contexte de la session (level, ratio, chipValue...) — exploité par le suivi (Phase 3)
+  // meta : contexte de la session (level, ratio, chipValue...) - exploité par le suivi (Phase 3)
   async startTrainingSession(game, meta) {
     const session = await this.getSession();
     if (!session) throw new Error('Non authentifié');
@@ -333,7 +333,7 @@ const SB = {
     return data;
   },
 
-  // meta (optionnel) remplace le meta de départ — le module passe l'objet complet (ex. { ratio, elapsedMs })
+  // meta (optionnel) remplace le meta de départ - le module passe l'objet complet (ex. { ratio, elapsedMs })
   async endTrainingSession(sessionId, total, correct, meta) {
     const patch = { ended_at: new Date().toISOString(), total, correct };
     if (meta) patch.meta = meta;
@@ -391,7 +391,7 @@ const SB = {
     return this._rpc('training_activity_weekly', { p_weeks: weeks || 12 });
   },
 
-  // Sessions terminées d'un croupier précis (vue Progression) — lecture réservée aux managers par la RLS
+  // Sessions terminées d'un croupier précis (vue Progression) - lecture réservée aux managers par la RLS
   async getTrainingSessionsOf(userId, game) {
     const q = _sb.from('training_sessions')
       .select('*').eq('user_id', userId).not('ended_at', 'is', null)
@@ -400,6 +400,43 @@ const SB = {
     const { data, error } = await q;
     if (error) throw error;
     return data || [];
+  },
+
+  // ── Break list (planning mensuel et réglages) ───────
+  // mois : 'AAAA-MM'. Un planning par mois : l'enregistrer remplace l'ancien en entier
+  async getBreakListPlanning(mois) {
+    const { data, error } = await _sb.from('breaklist_plannings').select('data').eq('mois', mois).maybeSingle();
+    if (error) throw error;
+    return data ? data.data : null;
+  },
+
+  async listBreakListPlannings() {
+    const { data, error } = await _sb.from('breaklist_plannings').select('mois, updated_at').order('mois', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async saveBreakListPlanning(mois, planning) {
+    const { error } = await _sb.from('breaklist_plannings')
+      .upsert({ mois, data: planning, updated_at: new Date().toISOString() }, { onConflict: 'mois' });
+    if (error) throw error;
+  },
+
+  async deleteBreakListPlanning(mois) {
+    const { error } = await _sb.from('breaklist_plannings').delete().eq('mois', mois);
+    if (error) throw error;
+  },
+
+  async getBreakListConfig() {
+    const { data, error } = await _sb.from('breaklist_config').select('value').eq('key', 'config').maybeSingle();
+    if (error) throw error;
+    return data ? data.value : null;
+  },
+
+  async saveBreakListConfig(value) {
+    const { error } = await _sb.from('breaklist_config')
+      .upsert({ key: 'config', value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
   },
 
   // ── Import (outil de migration) ────────────────────
