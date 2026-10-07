@@ -18,7 +18,7 @@
 const NAV = (function () {
 
   // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
-  const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/';
+  const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'break_list/';
   const SPACES = [
     { id: 'tournois', label: 'Outils Tournois', note: 'Prize pool, classement, administration', href: 'outils_tournois.html', panel: 'tournois', items: [
       { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
@@ -48,6 +48,11 @@ const NAV = (function () {
         { label: 'Calcul des gains', href: UTH + 'uth_gains.html' },
       ] },
       { label: 'Mes résultats', href: T + 'suivi/suivi_croupier.html' },
+    ] },
+    { id: 'break-list', label: 'Break list', note: 'Break list du soir, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
+      { label: 'Aujourd\'hui', href: BL + 'break_list.html' },
+      { label: 'Planning',     href: BL + 'planning.html' },
+      { label: 'Réglages',     href: BL + 'reglages.html' },
     ] },
   ];
 
