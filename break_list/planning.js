@@ -60,12 +60,7 @@ function goMonth(y, m) { Y = y; M = m; pending = null; refresh(); }
 
 // ── Import ───────────────────────────────────────────
 
-async function readText(file) {
-  const buf = await file.arrayBuffer();
-  let text = new TextDecoder('utf-8').decode(buf);
-  if (text.indexOf('�') >= 0) text = new TextDecoder('windows-1252').decode(buf);   // CSV Excel français
-  return text;
-}
+async function readText(file) { return blDecodeText(await file.arrayBuffer()); }          // UTF-8, ou Windows-1252 (CSV Excel français)
 
 async function onPlanFile(input) {
   const f = input.files && input.files[0];

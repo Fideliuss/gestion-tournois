@@ -216,7 +216,7 @@ async function onOctimeFile(input) {
         catch (e) { last = e; }
       }
       if (!rows) throw last || new Error('Aucune feuille exploitable.');
-    } else rows = blParseOctime(await f.text());
+    } else rows = blParseOctime(blDecodeText(await f.arrayBuffer()));
     setOctime(rows); flash('Extraction lue');
   } catch (e) {
     document.getElementById('octime-status').innerHTML = '<span style="color:#D9864A">' + esc(e.message) + '</span>';
@@ -230,7 +230,11 @@ function renderOctime() {
   if (!octime) { st.textContent = 'Aucune extraction chargée.'; return; }
   const t = new Date(octime.at), hh = blPad(t.getHours()) + ':' + blPad(t.getMinutes());
   const total = _presents.length, ok = match ? Object.keys(match.match).length : 0;
-  st.innerHTML = 'Extraction de <b>' + hh + '</b> : ' + octime.rows.length + ' salariés lus' + (total ? ' · <b>' + ok + '/' + total + '</b> présents rapprochés' : '');
+  const arr = blOctimeArrete(octime.rows), soiree = Date.UTC(D.y, D.m - 1, D.d);
+  const vieux = arr != null && arr < soiree - 3 * 86400000;                      // extraction arrêtée bien avant la soirée : deltas périmés
+  const arrTxt = arr == null ? '' : ' · arrêtée au <b' + (vieux ? ' style="color:#D9864A"' : '') + '>' + new Date(arr).toLocaleDateString('fr-FR', { timeZone: 'UTC' }) + '</b>';
+  st.innerHTML = 'Extraction chargée à <b>' + hh + '</b>' + arrTxt + ' : ' + octime.rows.length + ' salariés lus' + (total ? ' · <b>' + ok + '/' + total + '</b> présents rapprochés' : '')
+    + (vieux ? '<br><span style="color:#D9864A">Cette extraction date de plus de 3 jours avant la soirée : les deltas sont peut-être périmés.</span>' : '');
   if (!match || (!match.manquants.length && !match.ambigus.length)) return;
   const names = octime.rows.map(function (r) { return r.nom; }).sort(function (a, b) { return a.localeCompare(b, 'fr'); });
   const rowsHtml = match.ambigus.map(function (a) { return [a.p, a.candidats.map(function (c) { return c.nom; })]; })

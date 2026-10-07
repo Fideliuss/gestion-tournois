@@ -76,6 +76,13 @@ function blParseDelimited(text, delim) {
   return rows;
 }
 
+/** Octets d'un fichier en texte : UTF-8, ou Windows-1252 si des caractères ne passent pas (CSV d'Octime et d'Excel français) */
+function blDecodeText(buf) {
+  let t = new TextDecoder('utf-8').decode(buf);
+  if (t.indexOf('�') >= 0) t = new TextDecoder('windows-1252').decode(buf);
+  return t;
+}
+
 function blDetectDelim(text) {
   const first = String(text).split(/\r?\n/).find(function (l) { return l.trim(); }) || '';
   const n = function (c) { return first.split(c).length - 1; };
@@ -205,7 +212,7 @@ function blDureeMinutes(v) {
  * @returns {{nom:string, matricule:string, minutes:number|null}[]}
  */
 function blOctimeRows(rows) {
-  let h = -1, cN = -1, cD = -1, cM = -1;
+  let h = -1, cN = -1, cD = -1, cM = -1, cA = -1;
   for (let i = 0; i < Math.min(rows.length, 10) && h < 0; i++) {
     const cells = rows[i].map(function (c) { return blNorm(c); });
     const n = cells.findIndex(function (c) { return c === 'NOM PRENOM'; });
@@ -214,17 +221,42 @@ function blOctimeRows(rows) {
       const prec = cells.findIndex(function (c) { return /DELTA QUOTA PRECEDENT$/.test(c); });
       if (prec >= 0) d = prec + 1;
     }
-    if (n >= 0 && d >= 0) { h = i; cN = n; cD = d; cM = cells.findIndex(function (c) { return c === 'MATRICULE'; }); }
+    if (n >= 0 && d >= 0) {
+      h = i; cN = n; cD = d;
+      cM = cells.findIndex(function (c) { return c === 'MATRICULE'; });
+      cA = cells.findIndex(function (c) { return c === 'AU'; });         // fin de période : date d'arrêté de l'extraction
+    }
   }
   if (h < 0) throw new Error('En-têtes introuvables : l\'extraction doit contenir les colonnes « Nom Prénom » et « = Delta Quota ».');
-  const out = [];
+  const byName = {}, out = [];
   for (let i = h + 1; i < rows.length; i++) {
     const nom = String(rows[i][cN] == null ? '' : rows[i][cN]).trim();
     if (!nom) continue;
-    out.push({ nom: nom, matricule: cM >= 0 ? String(rows[i][cM] == null ? '' : rows[i][cM]).trim().replace(/\.0$/, '') : '', minutes: blDureeMinutes(rows[i][cD]) });
+    const row = {
+      nom: nom, minutes: blDureeMinutes(rows[i][cD]),
+      matricule: cM >= 0 ? String(rows[i][cM] == null ? '' : rows[i][cM]).trim().replace(/\.0$/, '') : '',
+      au: cA >= 0 ? blDateFr(rows[i][cA]) : null,
+    };
+    // Un salarié peut figurer sur plusieurs lignes (changement de période) : on garde la période qui finit le plus tard
+    const k = blNorm(nom), prev = byName[k];
+    if (prev == null) { byName[k] = out.length; out.push(row); }
+    else if ((row.au || 0) >= (out[prev].au || 0)) out[prev] = row;
   }
   if (!out.length) throw new Error('Aucune ligne de salarié dans l\'extraction.');
   return out;
+}
+
+/** « 07/01/2026 » (ou un nombre de jours de classeur) vers un horodatage ; null si illisible */
+function blDateFr(v) {
+  if (typeof v === 'number') return isFinite(v) && v > 20000 ? Date.UTC(1899, 11, 30) + Math.round(v) * 86400000 : null;
+  const m = /^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/.exec(String(v == null ? '' : v));
+  return m ? Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1])) : null;
+}
+
+/** Date d'arrêté de l'extraction : la fin de période la plus tardive (horodatage ou null) */
+function blOctimeArrete(rows) {
+  const ds = rows.map(function (r) { return r.au; }).filter(function (x) { return x != null; });
+  return ds.length ? Math.max.apply(null, ds) : null;
 }
 
 /** Texte collé (depuis un tableur) ou fichier CSV */
@@ -397,6 +429,6 @@ if (typeof module !== 'undefined') {
     blDiffPlanning: blDiffPlanning, blStatut: blStatut, blCodesInconnus: blCodesInconnus, blPresents: blPresents,
     blDureeMinutes: blDureeMinutes, blOctimeRows: blOctimeRows, blParseOctime: blParseOctime, blRapprocher: blRapprocher,
     blNomCourt: blNomCourt, blDeltaH: blDeltaH, blRepartir: blRepartir, blOrdreBreakList: blOrdreBreakList,
-    blLignesVerso: blLignesVerso, blAujourdhui: blAujourdhui,
+    blLignesVerso: blLignesVerso, blAujourdhui: blAujourdhui, blDecodeText: blDecodeText, blDateFr: blDateFr, blOctimeArrete: blOctimeArrete,
   };
 }
