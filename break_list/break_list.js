@@ -297,7 +297,7 @@ function drawRep() {
   const out = document.getElementById('rep-out'), st = repState;
   const li = function (p) {
     return '<li draggable="true" data-id="' + esc(p.id) + '" class="' + (p.chef ? 'chef ' : '') + (repSel === p.id ? 'sel' : '') + '">' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
-      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + ' <i>(' + (p.known ? blDeltaH(p.delta) : '?') + ')</i></li>';
+      + ' <i>(' + (p.known ? blDeltaH(p.delta) : '?') + ')</i></li>';
   };
   const shown = REP_COLS.filter(function (c) { return st.cols[c[0]].length || repSel; });
   if (!shown.length) shown.push(REP_COLS[4]);
@@ -388,7 +388,7 @@ function renderDepPrint(cols) {
   const cell = function (p) {
     if (!p) return '<td></td>';
     return '<td class="' + (p.chef ? 'chef' : '') + '"><span>' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
-      + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + '</span><small>' + (p.known ? blDeltaH(p.delta) : '?') + '</small></td>';
+      + '</span><small>' + (p.known ? blDeltaH(p.delta) : '?') + '</small></td>';
   };
   let body = '';
   for (let i = 0; i < max; i++) body += '<tr>' + sections.map(function (c) { return cell(cols[c[0]][i]); }).join('') + '</tr>';
