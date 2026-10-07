@@ -299,9 +299,11 @@ function drawRep() {
     return '<li draggable="true" data-id="' + esc(p.id) + '" class="' + (p.chef ? 'chef ' : '') + (repSel === p.id ? 'sel' : '') + '">' + (p.groupe === '20h' ? '◉ ' : '') + esc(blNomCourt(p, cfg.affichage))
       + (p.floor ? ' <em>' + esc(cfg.breaklist.floorMarque) + '</em>' : '') + ' <i>(' + (p.known ? blDeltaH(p.delta) : '?') + ')</i></li>';
   };
+  const shown = REP_COLS.filter(function (c) { return st.cols[c[0]].length || repSel; });
+  if (!shown.length) shown.push(REP_COLS[4]);
   const col = function (c) {
     const list = st.cols[c[0]];
-    return '<div class="bl-rep-col" data-col="' + c[0] + '"><h4>' + c[1] + ' <span>' + list.length + '</span></h4><ul>' + list.map(li).join('') + '</ul></div>';
+    return '<div class="bl-rep-col' + (list.length ? '' : ' ghost') + '" data-col="' + c[0] + '"><h4>' + c[1] + ' <span>' + list.length + '</span></h4><ul>' + list.map(li).join('') + '</ul></div>';
   };
   const warns = st.warns.slice();
   if (st.manual) {
@@ -310,7 +312,7 @@ function drawRep() {
   }
   const unk = st.people.filter(function (p) { return !p.known; });
   if (unk.length) warns.push(unk.length + ' présent(s) sans delta (compté 0) : ' + unk.map(function (p) { return blNomCourt(p, cfg.affichage); }).join(', ') + '.');
-  out.innerHTML = '<div class="bl-rep">' + REP_COLS.map(col).join('') + '</div>'
+  out.innerHTML = '<div class="bl-rep" style="--n:' + shown.length + '">' + shown.map(col).join('') + '</div>'
     + (warns.length ? '<div class="bl-warn">' + warns.map(esc).join('<br>') + '</div>' : '')
     + '<div class="bl-legend">◉ arrivée 20h'
     + (st.manual ? ' · <b style="color:var(--gold-dim)">modifiée à la main</b> <button class="btn btn-ghost btn-sm" onclick="resetRep()">Régénérer</button>' : '') + '</div>';
@@ -390,11 +392,11 @@ function renderDepPrint(cols) {
   };
   let body = '';
   for (let i = 0; i < max; i++) body += '<tr>' + sections.map(function (c) { return cell(cols[c[0]][i]); }).join('') + '</tr>';
-  const rh = Math.round(Math.min(15, Math.max(10, 230 / max)) * 10) / 10;
+  const rh = Math.round(Math.min(10, Math.max(7, 230 / max)) * 10) / 10;
   document.getElementById('dep-print').innerHTML = '<section class="bl-page dep-page"><div class="bl-title">Départs du ' + esc(blDateLabel(D.y, D.m, D.d)) + '</div>'
     + '<div class="dep-eff">' + esc(effectifTexte()) + '</div>'
     + '<table class="dep-tbl" style="--rh:' + rh + 'mm"><thead><tr>' + sections.map(function (c) {
-      return '<th class="' + (c[0] === 'departs' ? 'dp' : '') + '">' + c[1] + '<span>' + cols[c[0]].length + '</span></th>';
+      return '<th>' + c[1] + '<span>' + cols[c[0]].length + '</span></th>';
     }).join('') + '</tr></thead><tbody>' + body + '</tbody></table>'
     + '<div class="dep-leg">◉ arrivée 20h</div></section>';
 }
