@@ -377,6 +377,9 @@ body.light input:focus, body.light select:focus, body.light textarea:focus {
 .period-row .fg.pf-month { flex: 0 0 180px; max-width: 180px; min-width: 0; }
 .period-row .fg.pf-year  { flex: 0 0 110px; max-width: 110px; min-width: 0; }
 
+/* Boutons d'action à droite d'un encadré de période (Réglages, Imprimer…) */
+.period-actions { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+
 /* ── Helpers formulaire ── */
 .fg  { display: flex; flex-direction: column; gap: 6px; }
 .fl  { font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-dim); }

@@ -277,7 +277,6 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 
 /* ── Vues Déclaration / Réglages ── */
 #view-cfg, #view-adhoc { align-items: center; }
-.period-actions { margin-left: auto; display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
 #decl-main-tabs { margin-top: 4px; }
 #decl-main-tabs[hidden], #btn-print[hidden], #btn-reglages[hidden], #btn-adhoc[hidden] { display: none; }
 .decl-view { width: 100%; display: flex; flex-direction: column; align-items: center; }

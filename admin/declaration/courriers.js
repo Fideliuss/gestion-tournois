@@ -233,11 +233,17 @@ function saveTplAndRender() {
   renderAll();
 }
 
-function toggleTplAccordion() {
-  const btn  = document.getElementById('tpl-accordion-btn');
-  const body = document.getElementById('tpl-accordion-body');
-  const open = body.classList.toggle('open');
-  btn.classList.toggle('open', open);
+/* Réglages (destinataires et signatures) : le panneau remplace le courrier tant qu'il est ouvert */
+function toggleTplPanel() {
+  const panel = document.getElementById('tpl-panel');
+  const open = panel.hidden;                                  // état à venir
+  panel.hidden = !open;
+  document.getElementById('letter-controls').style.display = open ? 'none' : '';
+  document.querySelector('.letter-preview-wrap').style.display = open ? 'none' : '';
+  const btn = document.getElementById('btn-tpl');
+  btn.querySelector('span').textContent = open ? 'Retour au courrier' : 'Réglages';
+  btn.querySelector('i').className = 'ico ' + (open ? 'ico-chev-l' : 'ico-cog');
+  window.scrollTo(0, 0);
 }
 
 function resetTemplates() {
@@ -429,6 +435,7 @@ function formatAnnulLetterDate() {
 
 /* ── Sélecteur de type de document ── */
 function selectDocType(type) {
+  if (!document.getElementById('tpl-panel').hidden) toggleTplPanel();   // les réglages ne concernent que les courriers mensuels
   docType = type;
   document.getElementById('section-mensuel').style.display    = type === 'mensuel'    ? '' : 'none';
   document.getElementById('section-annulation').style.display = type === 'annulation' ? '' : 'none';
