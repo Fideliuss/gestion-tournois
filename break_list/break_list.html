@@ -17,34 +17,37 @@
 
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
-    <div class="hdr-title">Break list <em>du soir</em></div>
+    <div class="hdr-title bl-switch" id="bl-switch" role="tablist" aria-label="Partie">
+      <button type="button" role="tab" data-part="breaklist" class="on" aria-selected="true" onclick="showPart('breaklist')">Break list</button>
+      <i>|</i>
+      <button type="button" role="tab" data-part="departs" aria-selected="false" onclick="showPart('departs')">Départs</button>
+    </div>
   </div>
 
-  <!-- ── Soirée ── -->
-  <div class="card bl-card bl-no-print">
-    <div class="sec">Soirée</div>
-    <div class="period-row">
-      <div class="fg fg-date">
-        <label class="fl">Date</label>
-        <div class="bl-date">
-          <button class="btn btn-ghost btn-icon" type="button" title="Jour précédent" aria-label="Jour précédent" onclick="shiftDay(-1)"><i class="ico ico-chev-l"></i></button>
-          <input type="number" id="inp-day" min="1" max="31" onchange="onDateChange()"/>
-          <select id="sel-mon" onchange="onDateChange()"></select>
-          <input type="number" id="inp-year" min="2020" max="2099" onchange="onDateChange()"/>
-          <button class="btn btn-ghost btn-icon" type="button" title="Jour suivant" aria-label="Jour suivant" onclick="shiftDay(1)"><i class="ico ico-chev-r"></i></button>
+  <!-- ══ Break list : la soirée, les présents, l'impression de la feuille ══ -->
+  <section class="bl-part bl-view bl-no-print" id="part-breaklist">
+
+    <div class="card bl-card">
+      <div class="sec">Soirée</div>
+      <div class="period-row">
+        <div class="fg fg-date">
+          <label class="fl">Date</label>
+          <div class="bl-date">
+            <button class="btn btn-ghost btn-icon" type="button" title="Jour précédent" aria-label="Jour précédent" onclick="shiftDay(-1)"><i class="ico ico-chev-l"></i></button>
+            <input type="number" id="inp-day" min="1" max="31" onchange="onDateChange()"/>
+            <select id="sel-mon" onchange="onDateChange()"></select>
+            <input type="number" id="inp-year" min="2020" max="2099" onchange="onDateChange()"/>
+            <button class="btn btn-ghost btn-icon" type="button" title="Jour suivant" aria-label="Jour suivant" onclick="shiftDay(1)"><i class="ico ico-chev-r"></i></button>
+          </div>
+        </div>
+        <div class="period-actions">
+          <button class="btn btn-ghost" id="btn-today" onclick="goToday()">Aujourd'hui</button>
+          <button class="btn btn-ghost" id="btn-print" onclick="printBreakList()"><i class="ico ico-print"></i> Imprimer la break list</button>
         </div>
       </div>
-      <div class="period-actions">
-        <button class="btn btn-ghost" id="btn-today" onclick="goToday()">Aujourd'hui</button>
-        <button class="btn btn-ghost" id="btn-print" onclick="printBreakList()"><i class="ico ico-print"></i> Imprimer la break list</button>
-      </div>
+      <div class="bl-muted" id="plan-info" style="margin-top:12px"></div>
+      <div class="bl-muted" id="plan-maj" style="margin-top:4px"></div>
     </div>
-    <div class="bl-muted" id="plan-info" style="margin-top:12px"></div>
-    <div class="bl-muted" id="plan-maj" style="margin-top:4px"></div>
-  </div>
-
-  <!-- ══ Présents, extraction Octime, répartition ══ -->
-  <section class="bl-view bl-no-print" id="view-departs" style="width:100%;display:flex;flex-direction:column;align-items:center">
 
     <div class="card bl-card">
       <div class="sec">Présents ce soir</div>
@@ -56,6 +59,12 @@
         <button class="btn btn-ghost" onclick="addPresent()"><i class="ico ico-plus"></i> Ajouter</button>
       </div>
     </div>
+  </section>
+
+  <!-- ══ Départs : extraction Octime et répartition ══ -->
+  <section class="bl-part bl-view bl-no-print" id="part-departs" hidden>
+
+    <div class="bl-muted bl-card" id="dep-date" style="margin:-8px 0 16px"></div>
 
     <div class="card bl-card">
       <div class="sec">Extraction Octime</div>
@@ -84,7 +93,7 @@
     </div>
   </section>
 
-  <!-- ══ Break list : recto et verso, uniquement pour l'impression ══ -->
+  <!-- ══ Feuilles imprimées : break list (recto et verso) et départs ══ -->
   <div id="bl-print" hidden></div>
   <div id="dep-print"></div>
 </div>

@@ -27,6 +27,9 @@ async function init() {
   document.getElementById('opt-compteurs').value = cfg.postes.compteurs;
   document.getElementById('opt-cartes').value = cfg.postes.cartes;
   document.getElementById('opt-salle').checked = !!cfg.postes.salle;
+  let part = 'breaklist';
+  try { part = sessionStorage.getItem('bl_part') === 'departs' ? 'departs' : 'breaklist'; } catch (e) { part = 'breaklist'; }
+  showPart(part);
   const rep = document.getElementById('rep-out');
   rep.addEventListener('click', repClick);
   ['dragstart', 'dragover', 'drop'].forEach(function (t) { rep.addEventListener(t, repDrag); });
@@ -72,6 +75,18 @@ async function loadPlan() {
   renderAll();
 }
 
+// ── Partie affichée : Break list (en premier, c'est la première chose à faire le soir) ou Départs ──
+
+function showPart(name) {
+  try { sessionStorage.setItem('bl_part', name); } catch (e) { /* stockage indisponible : le choix n'est pas retenu */ }
+  document.querySelectorAll('#bl-switch button').forEach(function (b) {
+    const on = b.dataset.part === name;
+    b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on));
+  });
+  document.getElementById('part-breaklist').hidden = name !== 'breaklist';
+  document.getElementById('part-departs').hidden = name !== 'departs';
+}
+
 // ── Rendu général ────────────────────────────────────
 
 let _presents = [];
@@ -88,6 +103,7 @@ function renderAll() {
   renderOctime();
   renderRepartition();
   renderPrint();
+  document.getElementById('dep-date').textContent = 'Soirée du ' + blDateLabel(D.y, D.m, D.d) + ' · ' + _presents.length + ' présents';
 }
 
 // ── Effectif du soir : une pastille par horaire du planning, puis le total ──
