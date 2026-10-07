@@ -27,14 +27,13 @@
 .period-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
 .period-row .fg-date { flex: 0 0 auto; max-width: none; }
 
-/* ── Effectif du soir : une ligne, sous le titre de l'encadré ── */
-.bl-eff { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: -6px 0 18px; font-size: 14px; color: var(--text-dim); }
+/* ── Effectif du soir : de petits encadrés discrets sous le titre de l'encadré ── */
+.bl-eff { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -4px 0 18px; font-size: 13px; color: var(--text-dim); }
 .bl-eff[hidden] { display: none; }
-.bl-eff b { font-family: var(--f-num); font-size: 16px; font-weight: 600; color: var(--cream); }
-.bl-eff i { font-style: normal; color: var(--text-muted); }
-.bl-eff .flr { font-size: 12px; }
-.bl-eff .tot { margin-left: auto; padding-left: 16px; border-left: 1px solid var(--gold-bd); color: var(--gold-dim); }
-.bl-eff .tot b { font-size: 20px; color: var(--gold-dim); }
+.bl-eff span { padding: 4px 12px; border-radius: 999px; background: var(--gold-bg); border: 1px solid var(--gold-bd); white-space: nowrap; }
+.bl-eff b { font-family: var(--f-num); font-size: 15px; font-weight: 600; color: var(--cream); margin-right: 2px; }
+.bl-eff .tot { margin-left: auto; color: var(--gold-dim); }
+.bl-eff .tot b { color: var(--gold-dim); }
 
 /* ── Présents ── */
 .bl-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
