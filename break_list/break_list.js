@@ -92,7 +92,7 @@ function renderCount() {
     .map(function (k) { return '<span><b>' + n(k) + '</b> à ' + esc(k.code) + '</span>'; })
     .concat(cfg.codes.filter(function (k) { return k.floor && n(k); })
       .map(function (k) { return '<span class="flr"><b>' + n(k) + '</b> floor à ' + esc(k.code) + '</span>'; }));
-  box.innerHTML = parts.join('') + '<span class="tot">Total <b>' + _presents.length + '</b></span>';
+  box.innerHTML = parts.join('') + '<i class="sep"></i><span class="tot">Total <b>' + _presents.length + '</b></span>';
 }
 
 // ── Présents ─────────────────────────────────────────
