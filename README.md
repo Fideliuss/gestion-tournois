@@ -1,6 +1,6 @@
-# Service Jeux Traditionnels — Barrière Casino Bordeaux
+# Service Jeux Traditionnels - Barrière Casino Bordeaux
 
-Outils internes du casino, regroupés dans une seule application web déployée sur **GitHub Pages**, sécurisée par authentification e-mail + mot de passe (Supabase Auth), sans serveur, sans installation — s'ouvre directement dans le navigateur.
+Outils internes du casino, regroupés dans une seule application web déployée sur **GitHub Pages**, sécurisée par authentification e-mail + mot de passe (Supabase Auth), sans serveur, sans installation - s'ouvre directement dans le navigateur.
 
 **URL de production :** https://fideliuss.github.io/gestion-tournois/
 
@@ -8,7 +8,7 @@ L'application est organisée en 3 grands panneaux d'accès, chacun filtrable par
 
 | Panneau | Description |
 |---------|-------------|
-| 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes — dans le menu de la barre) |
+| 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes - dans le menu de la barre) |
 | 🎓 **Training Croupier** | Modules d'entraînement Blackjack et Roulette Anglaise |
 | 👤 **Gestion des comptes** | Comptes (liste filtrable), rôles personnalisables et accès par page *(admin uniquement)* |
 
@@ -35,28 +35,28 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 - **Impression classement one-page** (A4) : podium visuel 3 marches, places 4-30 et 31-150 en colonnes (ordre colonne par colonne), coupure stricte à 150
 - **Document ranking imprimable** : encadré doré centré A4, montant en grand, cases 1er (or) / 2ème (gris)
 - Fiche joueur détaillée (points, meilleur résultat, historique)
-- Données sauvegardées dans **Supabase** (cloud) — synchronisées en temps réel
+- Données sauvegardées dans **Supabase** (cloud) - synchronisées en temps réel
 
 ### Administration tournois *(menu de la barre)*
 
-**Déclaration DTPJ** — formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
+**Déclaration DTPJ** - formulaire mensuel de déclaration des tournois au Service Course et Jeux de la Police Nationale.
 - Tableau généré automatiquement depuis une configuration par jour de semaine
 - Gestion des exceptions ponctuelles (annulation, modification d'un tournoi) et tournois ad-hoc
 - Annexes Prize Pool éditables avec répartition configurable
 - Impression A4 paysage optimisée (tableau + annexes en 1 page)
 
-**Générateur de courrier** — génération des 3 courriers officiels d'accompagnement : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde.
+**Générateur de courrier** - génération des 3 courriers officiels d'accompagnement : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde.
 - Triangle des destinataires respecté (chaque courrier mentionne les 2 autres en copie)
 - Date auto-calculée à J-21 du début du mois déclaré, destinataires/signatures éditables
 - Export PDF natif via l'impression navigateur (A4 portrait, style administratif français)
 
-**Gestion des Extras** — gestion des croupiers extras.
+**Gestion des Extras** - gestion des croupiers extras.
 - CRUD complet de la liste des extras (nom, prénom, date/lieu de naissance, adresse)
 - **Déclaration mensuelle** imprimable A4 paysage, sélecteur calendrier natif
 - **Émargement hebdomadaire** : grille imprimable A4 paysage, horaires par défaut configurables + overrides ad-hoc
 - Liste des extras persistée dans **Supabase**
 
-**Calendrier & barèmes** — calendrier des tournois (CRUD), un semainier par jour + section événements, barème de points éditable par tournoi.
+**Calendrier & barèmes** - calendrier des tournois (CRUD), un semainier par jour + section événements, barème de points éditable par tournoi.
 
 ---
 
@@ -65,27 +65,27 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 Modules d'entraînement pour les croupiers, avec sessions chronométrées, score, niveaux de difficulté (Facile / Médium / Expert) et configuration admin par jeu.
 
 ### Blackjack
-- **BJ Paiement** — calcul du paiement d'une main gagnante selon la mise (plages de mises configurables) et le timer par niveau
-- **BJ Score** — entraînement au calcul de score de main. Le nombre de cartes de la main dépend du niveau (configurable) : Facile 2-3 cartes, Médium 3-5 cartes, Expert 4 cartes et plus (règle client, tire jusqu'à 20)
+- **BJ Paiement** - calcul du paiement d'une main gagnante selon la mise (plages de mises configurables) et le timer par niveau
+- **BJ Score** - entraînement au calcul de score de main. Le nombre de cartes de la main dépend du niveau (configurable) : Facile 2-3 cartes, Médium 3-5 cartes, Expert 4 cartes et plus (règle client, tire jusqu'à 20)
 
 ### Roulette Anglaise
-- **Calcul Paiement** — un numéro gagnant tiré, plusieurs mises simultanées à calculer (plein, cheval, transversale, carré, sixain), y compris les mises couvrant le 0. Positionnement des chips sur le tapis calculé dynamiquement depuis le DOM réel (robuste à toute mise en page). Chips en couleur neutre pendant la question, révélation des couleurs + détail groupé par type de mise en cas d'erreur.
-- **Conversion Pièces** — conversion valeur de pièces, valeur fixée par session. Le nombre de pièces à convertir provient désormais d'un vrai calcul de paiement roulette (type de mise pondéré par niveau), avec des montants réalistes pouvant dépasser plusieurs centaines de pièces
-- **Pointage Numéro** — identification d'un numéro sur le tapis, orientation aléatoire (symétrie 180°, comme une vraie table à double croupier)
-- **Couleur Numéro** — identification rouge / noir / vert
-- **Tables de multiplication** — vraies flashcards qui se retournent pour révéler la réponse. Choix d'une table (×35, ×17, ×11, ×8, ×5), puis les 20 multiplications ×1 à ×20 mélangées. Pas de niveau ni de timer par carte : un chronomètre libre tourne sur l'ensemble des 20 cartes, l'objectif étant d'aller le plus vite possible
-- **Ordre Paiement** — *bientôt disponible*
+- **Calcul Paiement** - un numéro gagnant tiré, plusieurs mises simultanées à calculer (plein, cheval, transversale, carré, sixain), y compris les mises couvrant le 0. Positionnement des chips sur le tapis calculé dynamiquement depuis le DOM réel (robuste à toute mise en page). Chips en couleur neutre pendant la question, révélation des couleurs + détail groupé par type de mise en cas d'erreur.
+- **Conversion Pièces** - conversion valeur de pièces, valeur fixée par session. Le nombre de pièces à convertir provient désormais d'un vrai calcul de paiement roulette (type de mise pondéré par niveau), avec des montants réalistes pouvant dépasser plusieurs centaines de pièces
+- **Pointage Numéro** - identification d'un numéro sur le tapis, orientation aléatoire (symétrie 180°, comme une vraie table à double croupier)
+- **Couleur Numéro** - identification rouge / noir / vert
+- **Tables de multiplication** - vraies flashcards qui se retournent pour révéler la réponse. Choix d'une table (×35, ×17, ×11, ×8, ×5), puis les 20 multiplications ×1 à ×20 mélangées. Pas de niveau ni de timer par carte : un chronomètre libre tourne sur l'ensemble des 20 cartes, l'objectif étant d'aller le plus vite possible
+- **Ordre Paiement** - *bientôt disponible*
 
 ### Ultimate Texas Hold'em
 
-- **Meilleure main** — pas de niveaux : comme à la table, le croupier voit 7 cartes (les 2 du joueur et le board, présentés comme dans « Qui gagne ? ») et identifie la meilleure combinaison. Donnes au hasard, avec environ une sur trois qui est un piège (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
-- **Qui gagne ?** — pas de niveaux : des donnes au hasard, de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). La table est affichée en trois encadrés : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier annonce d'abord si la banque est qualifiée, puis qui gagne. Après chaque donne : les deux meilleures mains et l'explication de ce qui décide
-- **Calcul des gains** — pas de niveaux : à chaque donne, un vrai tapis (de haut en bas : banque, board, Bonus en losange et voyant du Prog, ronds Blind = Ante, rond Play, cartes du joueur, avec leurs jetons) ; le croupier clique sur chaque mise (Play, Blind, Ante, Bonus, Prog) et répond dans une fenêtre à côté des jetons : « Je paie » (avec le montant du gain), « Je laisse » (mise rendue) ou « Je ramasse » (mise perdue). Situations au hasard : banque non qualifiée, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents. Mises par multiples de 5 € jusqu'à 50 € (maximum modifiable par un admin via « ⚙ Config UTH »). Le jackpot JP1 est seulement indiqué, sans calcul
+- **Meilleure main** - pas de niveaux : comme à la table, le croupier voit 7 cartes (les 2 du joueur et le board, présentés comme dans « Qui gagne ? ») et identifie la meilleure combinaison. Donnes au hasard, avec environ une sur trois qui est un piège (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
+- **Qui gagne ?** - pas de niveaux : des donnes au hasard, de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). La table est affichée en trois encadrés : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier annonce d'abord si la banque est qualifiée, puis qui gagne. Après chaque donne : les deux meilleures mains et l'explication de ce qui décide
+- **Calcul des gains** - pas de niveaux : à chaque donne, un vrai tapis (de haut en bas : banque, board, Bonus en losange et voyant du Prog, ronds Blind = Ante, rond Play, cartes du joueur, avec leurs jetons) ; le croupier clique sur chaque mise (Play, Blind, Ante, Bonus, Prog) et répond dans une fenêtre à côté des jetons : « Je paie » (avec le montant du gain), « Je laisse » (mise rendue) ou « Je ramasse » (mise perdue). Situations au hasard : banque non qualifiée, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents. Mises par multiples de 5 € jusqu'à 50 € (maximum modifiable par un admin via « ⚙ Config UTH »). Le jackpot JP1 est seulement indiqué, sans calcul
 
 ### Suivi des résultats
 
-- **Mes résultats** (tous les croupiers) — pour chaque module : sessions, record, moyenne des 5 dernières, tendance, historique, filtre par niveau, meilleur temps par table (Tables ×). Navigation par jeu (Black Jack / Roulette / Ultimate Texas Hold'em) puis par module
-- **Suivi équipe** (rôles disposant du panel « Suivi Training », et admins) — *Classement* par module et niveau (meilleur temps par table pour les Tables ×), *Progression* d'un croupier dans le temps, *Points faibles* (taux d'erreur par type de mise, table, numéro, combinaison, situation… pour l'équipe ou un croupier), *Activité* (sessions par semaine, croupiers inactifs). Le droit se donne dans Gestion Comptes, sous Training Croupier
+- **Mes résultats** (tous les croupiers) - pour chaque module : sessions, record, moyenne des 5 dernières, tendance, historique, filtre par niveau, meilleur temps par table (Tables ×). Navigation par jeu (Black Jack / Roulette / Ultimate Texas Hold'em) puis par module
+- **Suivi équipe** (rôles disposant du panel « Suivi Training », et admins) - *Classement* par module et niveau (meilleur temps par table pour les Tables ×), *Progression* d'un croupier dans le temps, *Points faibles* (taux d'erreur par type de mise, table, numéro, combinaison, situation… pour l'équipe ou un croupier), *Activité* (sessions par semaine, croupiers inactifs). Le droit se donne dans Gestion Comptes, sous Training Croupier
 
 Toutes les sessions et résultats de training sont enregistrés dans **Supabase** (historique par utilisateur). Les paramètres (timers, plages de mise, valeurs de pièces) sont configurables par un admin depuis chaque hub de module.
 
@@ -95,7 +95,7 @@ Toutes les sessions et résultats de training sont enregistrés dans **Supabase*
 
 - **Comptes** : création / édition / suppression (e-mail + mot de passe) via une Edge Function Supabase sécurisée (vérification admin côté serveur, jamais côté client). La liste se filtre par recherche, par rôle ou par « inactifs », se trie par colonne et peut se regrouper par rôle
 - **Rôles personnalisables** : au-delà des rôles par défaut (Admin, MCD, Floor), création de rôles sur mesure avec libellé et couleur
-- **Rôles & accès** : un tableau rôles × pages à cocher, enregistré d'un coup ; chaque rôle a une liste de panneaux autorisés (Outils Tournois et ses sous-panneaux, Training) — un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
+- **Rôles & accès** : un tableau rôles × pages à cocher, enregistré d'un coup ; chaque rôle a une liste de panneaux autorisés (Outils Tournois et ses sous-panneaux, Training) - un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
 - Les admins ont toujours accès à tout, quels que soient les panneaux configurés
 
 ---
@@ -107,7 +107,7 @@ L'application est sécurisée par **e-mail + mot de passe** (Supabase Auth). Les
 ### Connexion
 1. Ouvrir https://fideliuss.github.io/gestion-tournois/
 2. Saisir son adresse e-mail et son mot de passe
-3. Redirection automatique selon le rôle — session valable **7 jours**
+3. Redirection automatique selon le rôle - session valable **7 jours**
 4. Changement de mot de passe disponible depuis le badge utilisateur (icône 🔑)
 
 ### Gestion des comptes et permissions
@@ -123,86 +123,86 @@ Accessible depuis le menu **Gestion** de la barre (réservé aux admins) :
 Compatible **Google Chrome** et **Microsoft Edge** (version récente).
 
 ### Données cloud
-Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) sont stockées dans **Supabase** (cloud PostgreSQL) — aucune configuration locale requise, synchronisées automatiquement entre toutes les machines.
+Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) sont stockées dans **Supabase** (cloud PostgreSQL) - aucune configuration locale requise, synchronisées automatiquement entre toutes les machines.
 
 ---
 
 ## Structure des fichiers
 
 ```
-├── index.html                     — Hub principal (guard auth, filtrage panneaux par rôle)
-├── outils_tournois.html           — Sous-hub Outils Tournois
-├── login.html                     — Page de connexion (e-mail + mot de passe)
+├── index.html                     - Hub principal (guard auth, filtrage panneaux par rôle)
+├── outils_tournois.html           - Sous-hub Outils Tournois
+├── login.html                     - Page de connexion (e-mail + mot de passe)
 │
 ├── shared/
-│   ├── barriere.css               — Styles partagés (thème, composants, styles auth)
-│   ├── barriere.js                — Scripts partagés (thème, favicon)
-│   ├── tournaments.js             — TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
-│   ├── semainier.js               — Widget partagé : sélecteur de tournoi par jour de semaine
-│   ├── supabase.js                — Client Supabase + objet SB (CRUD complet + auth + app_roles + training + mappers)
-│   ├── nav.js / nav.css           — Barre de navigation commune (lanceur d'espaces, pages, menu Gestion, menu mobile), adaptée aux droits
-│   ├── auth.js                    — AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), badge utilisateur, cache panels
-│   ├── changelog.js                — Mis à jour manuellement avant chaque PR de release
-│   ├── logos/                     — Logos (écran + impression)
-│   └── favicon/                   — Favicon et icônes PWA
+│   ├── barriere.css               - Styles partagés (thème, composants, styles auth)
+│   ├── barriere.js                - Scripts partagés (thème, favicon)
+│   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
+│   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
+│   ├── supabase.js                - Client Supabase + objet SB (CRUD complet + auth + app_roles + training + mappers)
+│   ├── nav.js / nav.css           - Barre de navigation commune (lanceur d'espaces, pages, menu Gestion, menu mobile), adaptée aux droits
+│   ├── auth.js                    - AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), badge utilisateur, cache panels
+│   ├── changelog.js                - Mis à jour manuellement avant chaque PR de release
+│   ├── logos/                     - Logos (écran + impression)
+│   └── favicon/                   - Favicon et icônes PWA
 │
 ├── prize_pool/
-│   ├── prize_pool.html            — Prize Pool Builder
+│   ├── prize_pool.html            - Prize Pool Builder
 │   ├── prize_pool.css
-│   └── prize_pool.js              — Logique React
+│   └── prize_pool.js              - Logique React
 │
 ├── leaderboard/
-│   ├── leaderboard.html           — Challenge Saisonnier
+│   ├── leaderboard.html           - Challenge Saisonnier
 │   ├── leaderboard.css
 │   └── leaderboard.js
 │
 ├── admin/
-│   ├── config_tournois.html       — CRUD tournois + semainier + barème de points
-│   ├── comptes.html / .css / .js  — Gestion des comptes : liste filtrable + matrice des accès par rôle
-│   ├── config_training.html / .js / .css — Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
+│   ├── config_tournois.html       - CRUD tournois + semainier + barème de points
+│   ├── comptes.html / .css / .js  - Gestion des comptes : liste filtrable + matrice des accès par rôle
+│   ├── config_training.html / .js / .css - Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
-│   │   ├── declaration.html       — Déclaration Tournois DTPJ
+│   │   ├── declaration.html       - Déclaration Tournois DTPJ
 │   │   ├── declaration.css / .js
-│   │   ├── courriers.html         — Générateur de courrier (menu Administration tournois)
+│   │   ├── courriers.html         - Générateur de courrier (menu Administration tournois)
 │   │   └── courriers.css / .js
 │   └── extras/
-│       ├── extras.html            — Gestion des Extras & Émargement
+│       ├── extras.html            - Gestion des Extras & Émargement
 │       └── extras.css / .js
 │
 ├── training/
-│   ├── training.html              — Training Croupier : tous les modules, groupés par jeu
-│   ├── training.css               — Styles partagés training
+│   ├── training.html              - Training Croupier : tous les modules, groupés par jeu
+│   ├── training.css               - Styles partagés training
 │   ├── suivi/
-│   │   ├── suivi_croupier.html / .js  — Mes résultats
-│   │   ├── suivi_manager.html / .js   — Suivi équipe (panel training-suivi)
-│   │   ├── suivi_common.js            — Modules suivis, calculs et blocs d'affichage partagés
-│   │   └── suivi.css                  — Styles des pages de suivi
+│   │   ├── suivi_croupier.html / .js  - Mes résultats
+│   │   ├── suivi_manager.html / .js   - Suivi équipe (panel training-suivi)
+│   │   ├── suivi_common.js            - Modules suivis, calculs et blocs d'affichage partagés
+│   │   └── suivi.css                  - Styles des pages de suivi
 │   ├── uth/
-│   │   ├── uth_main.html / .js        — Meilleure main
-│   │   ├── uth_gagnant.html / .js     — Qui gagne ?
-│   │   ├── uth_gains.html / .js       — Calcul des gains
-│   │   ├── uth_engine.js              — Moteur (cartes, mains, règlement des mises) + tests Node
-│   │   └── uth_ui.js / uth.css        — Affichage partagé des cartes
+│   │   ├── uth_main.html / .js        - Meilleure main
+│   │   ├── uth_gagnant.html / .js     - Qui gagne ?
+│   │   ├── uth_gains.html / .js       - Calcul des gains
+│   │   ├── uth_engine.js              - Moteur (cartes, mains, règlement des mises) + tests Node
+│   │   └── uth_ui.js / uth.css        - Affichage partagé des cartes
 │   ├── blackjack/
-│   │   ├── blackjack.html / .js       — BJ Paiement
-│   │   └── blackjack_score.html / .js — BJ Score
+│   │   ├── blackjack.html / .js       - BJ Paiement
+│   │   └── blackjack_score.html / .js - BJ Score
 │   └── roulette/
-│       ├── roulette.css               — Styles partagés roulette (tapis, chips, badges)
-│       ├── roulette_tapis.js          — Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
-│       ├── roulette_paiement.html / .js    — Calcul Paiement
-│       ├── roulette_conversion.html / .js  — Conversion Pièces
-│       ├── roulette_pointage.html / .js    — Pointage Numéro
-│       ├── roulette_couleur.html / .js     — Couleur Numéro
-│       └── roulette_tables.html / .js      — Tables de multiplication
+│       ├── roulette.css               - Styles partagés roulette (tapis, chips, badges)
+│       ├── roulette_tapis.js          - Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
+│       ├── roulette_paiement.html / .js    - Calcul Paiement
+│       ├── roulette_conversion.html / .js  - Conversion Pièces
+│       ├── roulette_pointage.html / .js    - Pointage Numéro
+│       ├── roulette_couleur.html / .js     - Couleur Numéro
+│       └── roulette_tables.html / .js      - Tables de multiplication
 │
 └── supabase/
     ├── functions/
-    │   └── manage-users/index.ts  — Edge Function : CRUD comptes (admin only, vérifié côté serveur)
+    │   └── manage-users/index.ts  - Edge Function : CRUD comptes (admin only, vérifié côté serveur)
     └── migrations/
-        ├── training_tables.sql              — training_config, training_sessions, training_results
-        ├── fix_rls_app_metadata.sql         — migration des policies vers app_metadata (rôle non modifiable client-side)
-        ├── add_blackjack_cards_config.sql   — config nb cartes/niveau BJ Score
-        └── saisons_cloturees.sql            — clôture des saisons du challenge (table + verrouillage par triggers)
+        ├── training_tables.sql              - training_config, training_sessions, training_results
+        ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
+        ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
+        └── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
 ```
 
 ---
@@ -214,7 +214,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 | HTML / CSS / JS vanilla | Base de l'application |
 | React 18 (CDN) | Interface Prize Pool Builder |
 | Supabase (PostgreSQL cloud) | Persistance (tournois, leaderboard, extras, training) + **authentification** |
-| Supabase Edge Functions (Deno) | `manage-users` — CRUD comptes avec vérification admin côté serveur |
+| Supabase Edge Functions (Deno) | `manage-users` - CRUD comptes avec vérification admin côté serveur |
 | supabase-js v2 (CDN) | Client Supabase côté navigateur |
 | Supabase Auth (e-mail + mot de passe) | Connexion sécurisée, rôles configurables, session 7 jours |
 | `localStorage` | Configs déclaration / courriers / émargements hebdo |
@@ -251,4 +251,4 @@ Du 1er novembre au 31 octobre. Saison en cours : **2025 / 2026** (clôture à pr
 
 ---
 
-*Barrière Casino Bordeaux — Outil interne*
+*Barrière Casino Bordeaux - Outil interne*

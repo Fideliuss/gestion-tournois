@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  UTH — CALCUL DES GAINS
+//  UTH - CALCUL DES GAINS
 //  Pas de niveaux, pas de chronomètre. À chaque donne, le croupier voit un tapis : la banque, le board, les cases de
 //  mises du joueur avec leurs jetons (de haut en bas : Bonus en losange et voyant du Prog, Blind = Ante, Play, puis les cartes du joueur).
 //  (En France : « Bonus » = option Trips, « Prog » = jackpot progressif JP1.) Il répond MISE PAR MISE : un clic sur une mise ouvre, à côté des jetons, une fenêtre « Je paie » (avec le montant
@@ -134,7 +134,7 @@ function ucNext() {
   document.getElementById('uc-detail').innerHTML = '';
   const jp = document.getElementById('uc-jackpot');
   if (q.res.jackpot) {      // jackpot : seulement indiqué, sans question
-    jp.innerHTML = '<b>Jackpot Prog</b> — quinte flush royale du joueur : 100 % du jackpot. Pas de calcul ici : à faire valider par le superviseur (vidéo).';
+    jp.innerHTML = '<b>Jackpot Prog</b> - quinte flush royale du joueur : 100 % du jackpot. Pas de calcul ici : à faire valider par le superviseur (vidéo).';
     jp.style.display = '';
   } else { jp.style.display = 'none'; jp.innerHTML = ''; }
   document.getElementById('uc-next-btn').style.display = 'none';
@@ -178,7 +178,7 @@ function ucRefresh() {
     tag.className = 'uc-tag' + (_ucAnswers[l.bet] && !done ? ' pending' : '') + (row ? (row.ok ? ' ok' : ' ko') : '');
   });
   const n = bets.filter(function (l) { return ucIsDone(_ucAnswers[l.bet]); }).length;
-  document.getElementById('uc-hint').textContent = _ucAnswered ? '' : 'Cliquez sur chaque mise pour répondre — ' + n + ' / ' + bets.length;
+  document.getElementById('uc-hint').textContent = _ucAnswered ? '' : 'Cliquez sur chaque mise pour répondre - ' + n + ' / ' + bets.length;
   if (!_ucAnswered) document.getElementById('uc-validate-btn').disabled = !ucReady();
 }
 
@@ -193,7 +193,7 @@ function ucPopHtml(bet) {
   const q = _ucRound, amount = ucAmountOf(bet, q);
   const title = '<div class="uc-pop-title"><span>' + UC_BET_NAMES[bet] + '</span><span>' + ucEuro(amount) + '</span></div>';
   if (bet === 'jp1' && q.res.jackpot) {
-    return title + '<div class="uc-pop-info"><b>Jackpot</b> — quinte flush royale du joueur : 100 % du jackpot. Pas de question ni de calcul : à faire valider par le superviseur.</div>';
+    return title + '<div class="uc-pop-info"><b>Jackpot</b> - quinte flush royale du joueur : 100 % du jackpot. Pas de question ni de calcul : à faire valider par le superviseur.</div>';
   }
   if (_ucAnswered) {      // après validation : lecture seule, avec la correction
     const r = _ucGraded.rows.find(function (x) { return x.bet === bet; });
@@ -303,7 +303,7 @@ async function ucValidate() {
 
   // Détail de chaque mise (les textes du règlement ne viennent que de constantes : sans risque dans innerHTML)
   document.getElementById('uc-detail').innerHTML = graded.rows.map(function (r) {
-    return '<div class="uc-d ' + (r.ok ? 'ok' : 'ko') + '"><b>' + UC_BET_NAMES[r.bet] + ' ' + ucEuro(r.line.stake) + '</b> — '
+    return '<div class="uc-d ' + (r.ok ? 'ok' : 'ko') + '"><b>' + UC_BET_NAMES[r.bet] + ' ' + ucEuro(r.line.stake) + '</b> - '
       + (r.ok ? '✓ ' + r.line.why : '✕ Il fallait : <b>' + ucExpectedText(r.expected, r.line.stake) + '</b>. ' + r.line.why) + '</div>';
   }).join('');
 
@@ -314,7 +314,7 @@ async function ucValidate() {
   fb.className = 'feedback-bar ' + (graded.allOk ? 'correct' : 'wrong');
   fb.style.flexDirection = 'column';
   fb.innerHTML = '<div>' + (graded.allOk ? '✓ Toutes les mises sont justes' : '✕ ' + wrong + (wrong > 1 ? ' mises à revoir' : ' mise à revoir')) + '</div>'
-    + '<div class="uth-trap">Joueur : <b>' + UTH.describe(q.res.player) + '</b> — Banque : <b>' + UTH.describe(q.res.dealer) + '</b> ('
+    + '<div class="uth-trap">Joueur : <b>' + UTH.describe(q.res.player) + '</b> - Banque : <b>' + UTH.describe(q.res.dealer) + '</b> ('
     + (q.res.dealerQualified ? 'qualifiée' : 'non qualifiée') + '). ' + netText + (q.res.jackpot ? ' (hors jackpot)' : '') + '.</div>';
 
   try {

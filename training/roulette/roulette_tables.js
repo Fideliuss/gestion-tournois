@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════
-//  ROULETTE TABLES — module 6
+//  ROULETTE TABLES - module 6
 //  Flashcard pur : les 20 multiplications d'une table de paiement
-//  (35 / 17 / 11 / 8 / 5), mélangées, chronométrées — objectif : aller vite
+//  (35 / 17 / 11 / 8 / 5), mélangées, chronométrées - objectif : aller vite
 // ══════════════════════════════════════════════════════
 
 const TB_RATIOS   = [35, 17, 11, 8, 5];
@@ -119,7 +119,7 @@ function updateTablesProgress() {
   document.getElementById('tb-progress-fill').style.width = ((_tbIndex / TB_DECK_SIZE) * 100) + '%';
 }
 
-// ── Validation — retourne la carte pour révéler la réponse ──
+// ── Validation - retourne la carte pour révéler la réponse ──
 async function submitTables() {
   if (_tbAnswered) return;
   const inp = document.getElementById('tb-answer-input');

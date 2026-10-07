@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  UTH — QUI GAGNE ?
+//  UTH - QUI GAGNE ?
 //  Pas de niveaux : l'UTH est un jeu simple, il doit être maîtrisé en entier. Les donnes sont tirées au hasard,
 //  de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). Pas de chronomètre.
 //  Pour chaque donne, le croupier annonce d'abord si la banque est qualifiée, puis qui gagne.
@@ -79,7 +79,7 @@ function ugPickQualified(yes) {
   document.getElementById('ug-stage-winner').style.display = '';    // étape 2
 }
 
-// ── Étape 2 : qui gagne ? — valide la donne ──────────
+// ── Étape 2 : qui gagne ? - valide la donne ──────────
 async function ugPickWinner(code) {
   if (_ugAnswered || _ugQualified === null) return;
   _ugAnswered = true;
@@ -105,8 +105,8 @@ async function ugPickWinner(code) {
   // Les deux meilleures mains de 5 cartes : on voit d'où vient chaque combinaison
   document.getElementById('ug-result').innerHTML =
     '<div class="uth-duel">'
-    + uthFrame('Joueur — ' + UTH.describe(q.pEv), uthCardsRow(q.pEv.cards))
-    + uthFrame('Banque — ' + UTH.describe(q.dEv), uthCardsRow(q.dEv.cards))
+    + uthFrame('Joueur - ' + UTH.describe(q.pEv), uthCardsRow(q.pEv.cards))
+    + uthFrame('Banque - ' + UTH.describe(q.dEv), uthCardsRow(q.dEv.cards))
     + '</div>';
 
   // Explication : textes issus du moteur (constantes et rangs), sans saisie utilisateur

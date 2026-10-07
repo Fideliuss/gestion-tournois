@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════
-   barriere.js — Scripts communs
+   barriere.js - Scripts communs
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════ */
 
-/* Injection favicon — chemin déduit depuis l'URL du script lui-même */
+/* Injection favicon - chemin déduit depuis l'URL du script lui-même */
 (function () {
   const base = document.currentScript.src.replace('barriere.js', 'favicon/');
   [
@@ -73,7 +73,7 @@ function initPeriodPicker(monthEl, yearEl, names) {
 
 /* ── Impression avec un titre explicite ──
    Le navigateur propose le titre de la page comme nom du fichier PDF (et l'imprime en en-tête) : on le remplace le
-   temps de l'impression par un titre qui dit ce qu'on imprime (« Déclaration DTPJ — Novembre 2026 »). */
+   temps de l'impression par un titre qui dit ce qu'on imprime (« Déclaration DTPJ - Novembre 2026 »). */
 function printWithTitle(title) {
   const previous = document.title;
   document.title = title;

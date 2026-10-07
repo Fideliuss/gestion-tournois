@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   extras.js — Déclaration Extras & Émargement Hebdomadaire
+   extras.js - Déclaration Extras & Émargement Hebdomadaire
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -11,7 +11,7 @@ const DAY_HDR    = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 
 
 /* ══════════════════════════════════════════════════════
-   DONNÉES — via Supabase (shared/supabase.js)
+   DONNÉES - via Supabase (shared/supabase.js)
 ══════════════════════════════════════════════════════ */
 
 /* ── Persistance config + émargement (localStorage) ── */
@@ -119,11 +119,11 @@ function renderExtrasList() {
     <tr>
       <td class="xt-nom">${e.nom}</td>
       <td class="xt-prenom">${e.prenom}</td>
-      <td>${e.dateNaissance || '—'}</td>
-      <td>${e.lieuNaissance || '—'}</td>
-      <td>${e.adresse || '—'}</td>
-      <td>${e.codePostal || '—'}</td>
-      <td>${e.ville || '—'}</td>
+      <td>${e.dateNaissance || '-'}</td>
+      <td>${e.lieuNaissance || '-'}</td>
+      <td>${e.adresse || '-'}</td>
+      <td>${e.codePostal || '-'}</td>
+      <td>${e.ville || '-'}</td>
       <td><button class="btn-ghost" onclick="openEditModal('${esc(e.id)}')">✎</button></td>
       <td><button class="btn-red" onclick="removeExtra('${esc(e.id)}')">×</button></td>
     </tr>`).join('');
@@ -247,7 +247,7 @@ function renderDeclaration() {
     </table>`;
 }
 
-/* ── Émargement — tableau de saisie ── */
+/* ── Émargement - tableau de saisie ── */
 function getEmargWeekVal() { return document.getElementById('emarg-week-input').value || ''; }
 function getEmargYear() { const v = getEmargWeekVal(); return v ? +v.split('-W')[0] : new Date().getFullYear(); }
 function getEmargWeek() { const v = getEmargWeekVal(); return v ? +v.split('-W')[1] : getISOWeek(new Date()); }
@@ -355,7 +355,7 @@ function setCellHour(extraId, dayKey, val) {
   renderEmargement();
 }
 
-/* ── Émargement — grille imprimable ── */
+/* ── Émargement - grille imprimable ── */
 const EMARG_PER_PAGE = 16;   // 4 colonnes × 4 lignes de fiches par page imprimée
 function renderEmargement() {
   const year  = getEmargYear(), week = getEmargWeek();
@@ -386,7 +386,7 @@ function renderEmargement() {
     const pageNo = pages.length > 1 ? ` &nbsp;·&nbsp; Page ${p + 1}/${pages.length}` : '';
     return `<section class="emarg-page">
       <div class="emarg-header">
-        <div class="emarg-header-title">FEUILLE D'ÉMARGEMENT — CROUPIERS EXTRAS POKER</div>
+        <div class="emarg-header-title">FEUILLE D'ÉMARGEMENT - CROUPIERS EXTRAS POKER</div>
         <div class="emarg-header-meta">Barrière Casino Bordeaux &nbsp;·&nbsp; Semaine ${String(week).padStart(2,'0')} &nbsp;·&nbsp; du ${rangeStr}${pageNo}</div>
       </div>
       <div class="emarg-grid">

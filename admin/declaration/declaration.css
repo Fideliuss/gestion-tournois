@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   declaration.css — Déclaration mensuelle PN
+   declaration.css - Déclaration mensuelle PN
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -241,7 +241,7 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 .dist-total.err { color: #e07a68; }
 
 /* ══════════════════════════════════════════════════════
-   IMPRESSION — A4 Paysage
+   IMPRESSION - A4 Paysage
 ══════════════════════════════════════════════════════ */
 @page {
   size: A4 landscape;
@@ -266,7 +266,7 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
   /* Forcer les couleurs */
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-  /* Masquer toute l'interface — ne garder que tableau + annexes */
+  /* Masquer toute l'interface - ne garder que tableau + annexes */
   .theme-toggle,
   .back,
   #period-card,

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   extras.css — Déclaration Extras & Émargement
+   extras.css - Déclaration Extras & Émargement
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -339,7 +339,7 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   }
   body[data-print="emargement"] .emarg-card tbody td:last-child { border-right: none !important; }
   body[data-print="emargement"] .emarg-card tbody tr:last-child td { border-bottom: none !important; }
-  /* Largeurs imposées via colgroup — table-layout:fixed respecte col avant thead */
+  /* Largeurs imposées via colgroup - table-layout:fixed respecte col avant thead */
   body[data-print="emargement"] .col-date { width: 11%; }   /* date  : ~8mm  */
   body[data-print="emargement"] .col-dayl { width: 10%; }   /* jour  : ~7mm  */
   body[data-print="emargement"] .col-time { width: 14%; }   /* arr   : ~10mm */

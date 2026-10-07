@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   courriers.js — Générateur de courriers PN
+   courriers.js - Générateur de courriers PN
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -461,7 +461,7 @@ function renderAnnulDateList() {
   const objetEl   = document.getElementById('annul-objet-preview');
   if (!annulDates.length) {
     container.innerHTML = '<div class="annul-empty-hint">Aucune date ajoutée.</div>';
-    if (objetEl) objetEl.textContent = '—';
+    if (objetEl) objetEl.textContent = '-';
     return;
   }
   container.innerHTML = annulDates.map((d, i) => {
@@ -531,7 +531,7 @@ function formatAnnulDatesBody(dates) {
 
 function formatAnnulObjet(dates) {
   const dateStr = formatAnnulDatesObjet(dates);
-  if (!dateStr) return '—';
+  if (!dateStr) return '-';
   const plural = dates.length > 1;
   return `Annulation ${plural ? 'des tournois' : 'du tournoi'} de Texas Hold'em Poker ${dateStr}.`;
 }
@@ -541,7 +541,7 @@ function formatAnnulLetterDate() {
   const d = +document.getElementById('annul-date-d').value || 0;
   const m = +document.getElementById('annul-date-m').value || 0;
   const y = +document.getElementById('annul-date-y').value || 0;
-  if (!d || !m || !y) return '—';
+  if (!d || !m || !y) return '-';
   return `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
 }
 
@@ -556,7 +556,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
   const recipientHtml = tpl.recipient.map(esc).join('<br>');
   const plural        = dates.length > 1;
   const objetStr      = formatAnnulObjet(dates);
-  const bodyDatesStr  = formatAnnulDatesBody(dates) || '—';
+  const bodyDatesStr  = formatAnnulDatesBody(dates) || '-';
 
   const motifPara = motif.trim()
     ? `<p>Cette annulation est rendue nécessaire en raison ${esc(motif.trim())}.</p>`

@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  SUIVI CROUPIER — « Mes résultats »
+//  SUIVI CROUPIER - « Mes résultats »
 //  Historique, record et tendance de l'utilisateur connecté.
 //  Navigation : Vue d'ensemble → jeu (Black Jack / Roulette) → module.
 //  La vue courante est portée par le hash de l'URL (retour arrière et lien direct) :
@@ -158,10 +158,10 @@ function renderMetrics(all, playedCount, moduleCount) {
 
   return '<div class="sv-metrics">'
     + metric('Sessions', all.length)
-    + metric('Précision globale', all.length ? pct + '<small>%</small>' : '—')
+    + metric('Précision globale', all.length ? pct + '<small>%</small>' : '-')
     + metric('Modules essayés', playedCount + '<small>/ ' + moduleCount + '</small>')
     + '<div class="sv-metric"><div class="sv-metric-label">Dernière session</div>'
-    + '<div class="sv-metric-val sv-sm">' + (last ? svFormatDay(last) : '—') + '</div></div>'
+    + '<div class="sv-metric-val sv-sm">' + (last ? svFormatDay(last) : '-') + '</div></div>'
     + '</div>';
 }
 

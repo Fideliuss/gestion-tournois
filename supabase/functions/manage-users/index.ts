@@ -1,4 +1,4 @@
-// Edge Function — Gestion des comptes utilisateurs
+// Edge Function - Gestion des comptes utilisateurs
 // Requiert : secret SERVICE_ROLE_KEY (supabase secrets set)
 // Appelée uniquement par les admins (JWT vérifié côté serveur)
 
@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
   );
 
   try {
-    // ── GET — liste des utilisateurs ──────────────────
+    // ── GET - liste des utilisateurs ──────────────────
     if (req.method === 'GET') {
       const { data, error } = await admin.auth.admin.listUsers();
       if (error) throw error;
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       return json({ users });
     }
 
-    // ── POST — créer un utilisateur ───────────────────
+    // ── POST - créer un utilisateur ───────────────────
     if (req.method === 'POST') {
       const body = await req.json();
       const { email, password, role } = body;
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       return json({ user: { id: data.user.id, email: data.user.email, role, firstName, lastName } }, 201);
     }
 
-    // ── PATCH — modifier rôle, prénom / nom et/ou mot de passe ──
+    // ── PATCH - modifier rôle, prénom / nom et/ou mot de passe ──
     if (req.method === 'PATCH') {
       const body = await req.json();
       const { id, role, password } = body;
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
-    // ── DELETE — supprimer un utilisateur ─────────────
+    // ── DELETE - supprimer un utilisateur ─────────────
     if (req.method === 'DELETE') {
       const { id } = await req.json();
       if (!id) return json({ error: 'id est requis' }, 400);

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════
-   declaration.js — Déclaration mensuelle PN
+   declaration.js - Déclaration mensuelle PN
    Barrière Casino Bordeaux · Outils Tournois
 ═══════════════════════════════════════════════════════ */
 
@@ -339,7 +339,7 @@ function renderExcList() {
     const dateStr = `${JOURS[dow]} ${d} ${MOIS[month-1]} ${year}`;
     const detail  = e.type === 'cancelled'
       ? '<span style="color:#e07a68;font-weight:500">Annulé</span>'
-      : `<span style="color:var(--gold);font-weight:500">Modifié</span> — ${e.cave}€ · ${e.heure}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+e.annexe : ''}`;
+      : `<span style="color:var(--gold);font-weight:500">Modifié</span> - ${e.cave}€ · ${e.heure}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+e.annexe : ''}`;
     return `<div class="adhoc-item">
       <div class="adhoc-info">
         <span class="adhoc-titre">${dateStr}</span>
@@ -404,7 +404,7 @@ function renderDeclaration() {
           <td class="titre-cell">${r.titre}</td>
           <td>${r.cave} €</td><td>${r.joueurs}</td><td>ESPÈCES</td><td>MULTI-TABLES</td><td>1</td>
           <td>${r.rachats ? 'OUI' : 'NON'}</td><td>Level 8</td>
-          <td>${r.bounty > 0 ? r.bounty+' €' : '—'}</td><td>${r.annexe || '—'}</td>
+          <td>${r.bounty > 0 ? r.bounty+' €' : '-'}</td><td>${r.annexe || '-'}</td>
           ${i===0 ? `<td class="staff-col" rowspan="${rows.length}">${staffHtml}</td>` : ''}
         </tr>`).join('')
     : `<tr><td colspan="11" class="empty">Aucun tournoi actif ce mois.</td></tr>`;
@@ -458,7 +458,7 @@ function renderAnnexes() {
 
     return `<div class="annexe-card">
       <div class="annexe-title">${a.nom}</div>
-      <div class="annexe-subtitle">Tournoi Cash — Répartition des lots</div>
+      <div class="annexe-subtitle">Tournoi Cash - Répartition des lots</div>
       <div class="annexe-calc">
         <div class="ac-row"><span>Joueurs</span><span class="ac-val">${a.joueurs}</span></div>
         <div class="ac-row"><span>Achat de cave</span><span class="ac-val">${a.cave} €</span></div>

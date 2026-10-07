@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════
-   TRAINING — styles partagés
+   TRAINING - styles partagés
    ══════════════════════════════════════════════════════ */
 
 /* ── Tapis commun ── */
@@ -24,7 +24,7 @@
   pointer-events: none;
 }
 
-/* ── Blackjack — éléments tapis ── */
+/* ── Blackjack - éléments tapis ── */
 .bj-situation {
   text-align: center; margin-bottom: 24px;
 }

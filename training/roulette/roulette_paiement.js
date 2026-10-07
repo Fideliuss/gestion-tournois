@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════
-//  ROULETTE PAIEMENT — module 1
+//  ROULETTE PAIEMENT - module 1
 //  Tapis 1ère douzaine + chip visuel → paiement en pièces
-//  Pas de timer — difficulté = nombre de pièces par niveau
+//  Pas de timer - difficulté = nombre de pièces par niveau
 // ══════════════════════════════════════════════════════
 
 const RP_QUESTIONS = 10;
@@ -94,7 +94,7 @@ async function submitPaiement() {
   const fb = document.getElementById('rp-feedback');
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ ' + _rpQuestion.totalPayout + ' pièces — Correct !';
+    fb.textContent = '✓ ' + _rpQuestion.totalPayout + ' pièces - Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
     document.getElementById('rp-chip-overlay').classList.add('rp-revealed');
@@ -111,7 +111,7 @@ async function submitPaiement() {
         + g.type.label + ' ' + g.chips + '×' + g.type.ratio + '=' + g.payout
         + '</span>';
     }).join('');
-    fb.innerHTML = '✕ ' + _rpQuestion.totalPayout + ' pièces — ' + detail;
+    fb.innerHTML = '✕ ' + _rpQuestion.totalPayout + ' pièces - ' + detail;
   }
 
   try {

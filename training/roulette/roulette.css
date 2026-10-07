@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════
-   ROULETTE — styles partagés (tapis + modules)
+   ROULETTE - styles partagés (tapis + modules)
    ══════════════════════════════════════════════════════ */
 
 /* ── Grille tapis ── */
@@ -57,7 +57,7 @@
 .rt-chip-zone {
   width: 100%; max-width: 760px;
   position: relative; height: 0;
-  /* hauteur calculée = même que la grille — positionné via margin-top négatif */
+  /* hauteur calculée = même que la grille - positionné via margin-top négatif */
 }
 
 .rt-chip {
@@ -109,7 +109,7 @@
   gap: 12px; width: 100%; max-width: 440px; margin-top: 8px;
 }
 
-/* ── Pointage — balle cylindre ── */
+/* ── Pointage - balle cylindre ── */
 .pt-ball {
   width: 90px; height: 90px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -124,7 +124,7 @@
 
 .pt-tapis-wrap { width: 100%; max-width: 820px; margin: 0 auto; overflow-x: auto; }
 
-/* ── Conversion — affichage pièces ── */
+/* ── Conversion - affichage pièces ── */
 .conv-display { text-align: center; margin: 28px 0 8px; }
 .conv-chips {
   font-family: var(--f-num); font-size: 72px; font-weight: 700;

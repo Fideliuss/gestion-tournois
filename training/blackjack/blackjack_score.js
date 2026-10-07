@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  BLACKJACK SCORE — lecture de points avec timer + niveaux
+//  BLACKJACK SCORE - lecture de points avec timer + niveaux
 // ══════════════════════════════════════════════════════
 
 const RANKS   = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
@@ -140,7 +140,7 @@ function generateHand(level) {
 function handLabel(hand) {
   const total = calcTotal(hand);
   if (isBJ(hand)) return 'Blackjack';
-  if (total > 21)  return 'Bust — ' + total;
+  if (total > 21)  return 'Bust - ' + total;
   return String(total);
 }
 
@@ -186,7 +186,7 @@ function timeOut() {
   document.getElementById('submit-btn').disabled   = true;
   const fb = document.getElementById('feedback-bar');
   fb.className   = 'feedback-bar wrong';
-  fb.textContent = '⏱ Temps écoulé — ' + handLabel(_hand) + ' (' + _validTotals.join(' ou ') + ')';
+  fb.textContent = '⏱ Temps écoulé - ' + handLabel(_hand) + ' (' + _validTotals.join(' ou ') + ')';
   _qIndex++;
   updateProgress();
   scheduleNext();
@@ -236,10 +236,10 @@ async function submitAnswer() {
   const fb = document.getElementById('feedback-bar');
   if (isCorrect) {
     fb.className   = 'feedback-bar correct';
-    fb.textContent = '✓ ' + handLabel(_hand) + ' — Correct !';
+    fb.textContent = '✓ ' + handLabel(_hand) + ' - Correct !';
   } else {
     fb.className   = 'feedback-bar wrong';
-    fb.textContent = '✕ Incorrect — ' + handLabel(_hand) + ' (' + _validTotals.join(' ou ') + ')';
+    fb.textContent = '✕ Incorrect - ' + handLabel(_hand) + ' (' + _validTotals.join(' ou ') + ')';
   }
 
   try {

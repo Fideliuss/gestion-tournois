@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  NAV — barre de navigation commune
+//  NAV - barre de navigation commune
 //  Injectée par AUTH.guard une fois l'accès validé (auth.js charge ce fichier et nav.css).
 //
 //  Structure : des ESPACES (Outils Tournois, Training Croupier…) qui ont chacun leurs pages ; un lanceur d'espaces ;
@@ -195,7 +195,7 @@ const NAV = (function () {
 
     // ── Marque ──
     const logo = function (file, cls) { return el('img', { src: href('shared/logos/' + file), alt: '', class: cls }); };
-    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels — Accueil' }, [
+    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels - Accueil' }, [
       logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark'),
       el('i', { class: 'ico ico-star nav-star', 'aria-hidden': 'true' }),
       el('span', { class: 'nav-city', text: 'Bordeaux' }),

@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════
-   ULTIMATE TEXAS HOLD'EM — styles partagés des modules
+   ULTIMATE TEXAS HOLD'EM - styles partagés des modules
    S'appuie sur training.css (playing-card, level-card, feedback-bar, summary…)
    ══════════════════════════════════════════════════════ */
 
@@ -75,7 +75,7 @@ body.light .uth-ans.ko { color: #b5483a; border-color: #b5483a; }
 /* ── Calcul des gains : le tapis, les cases de mises, les jetons et la fenêtre de réponse ── */
 .uc-situation { width: 100%; max-width: 640px; margin: 0 auto 12px; text-align: center; font-size: 14px; color: var(--cream); }
 
-/* Tapis (feutre vert, identique en mode jour) : banque, board, cases de mises, joueur — de haut en bas */
+/* Tapis (feutre vert, identique en mode jour) : banque, board, cases de mises, joueur - de haut en bas */
 .uc-felt {
   --felt-line: rgba(232,196,120,.55);
   position: relative; width: 100%; max-width: 640px; box-sizing: border-box; margin: 0 auto;
