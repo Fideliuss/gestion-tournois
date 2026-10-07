@@ -52,8 +52,9 @@
       <div class="fg"><label class="fl">Salle ouverte</label><select id="cf-salle"><option value="0">Non</option><option value="1">Oui</option></select></div>
       <div class="fg"><label class="fl">Affichage des noms</label><select id="cf-affichage"><option value="PRENOM_N">Prénom N.</option><option value="N_PRENOM">N. Prénom</option></select></div>
       <div class="fg"><label class="fl">Soirée jusqu'à (heure)</label><input type="number" id="cf-bascule" min="0" max="12"/></div>
+      <div class="fg"><label class="fl">Extraction Octime arrêtée le</label><select id="cf-arrete"><option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option><option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option></select></div>
     </div>
-    <p class="bl-note" style="margin-top:12px">Les valeurs de postes sont celles proposées à l'ouverture de la page, modifiables chaque soir. Avant l'heure indiquée, « aujourd'hui » désigne encore la soirée de la veille.</p>
+    <p class="bl-note" style="margin-top:12px">Les valeurs de postes sont celles proposées à l'ouverture de la page, modifiables chaque soir. Avant l'heure indiquée, « aujourd'hui » désigne encore la soirée de la veille. Les extractions Octime sont arrêtées le dimanche qui suit la soirée, pour ne pas fausser les deltas avec des repos décalés : une autre date est signalée.</p>
   </div>
 
   <!-- Break list -->

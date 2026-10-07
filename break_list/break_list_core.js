@@ -46,6 +46,7 @@ const BL_DEFAULT_CONFIG = {
   },
   affichage: 'PRENOM_N',   // « Prénom N. (+16h50) » ou « N. Prénom (+16h50) » (N_PRENOM)
   bascule: 6,              // avant cette heure, « aujourd'hui » est encore la soirée de la veille
+  arreteJour: 0,           // jour de la semaine où s'arrêtent les extractions Octime (0 = dimanche) : le dimanche qui suit la soirée, pour ne pas fausser les deltas avec des repos décalés
   aliases: {},             // rapprochement manuel planning → Octime : { 'NOM PRENOM du planning': 'NOM PRENOM Octime' }
 };
 
@@ -253,6 +254,13 @@ function blDateFr(v) {
   return m ? Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1])) : null;
 }
 
+/** Date d'arrêté attendue pour une soirée : le prochain jour `dow` (0 = dimanche) à partir de la soirée incluse, en horodatage UTC */
+function blArreteAttendu(y, m, d, dow) {
+  const t = new Date(Date.UTC(y, m - 1, d));
+  t.setUTCDate(t.getUTCDate() + ((dow - t.getUTCDay() + 7) % 7));
+  return t.getTime();
+}
+
 /** Date d'arrêté de l'extraction : la fin de période la plus tardive (horodatage ou null) */
 function blOctimeArrete(rows) {
   const ds = rows.map(function (r) { return r.au; }).filter(function (x) { return x != null; });
@@ -429,6 +437,6 @@ if (typeof module !== 'undefined') {
     blDiffPlanning: blDiffPlanning, blStatut: blStatut, blCodesInconnus: blCodesInconnus, blPresents: blPresents,
     blDureeMinutes: blDureeMinutes, blOctimeRows: blOctimeRows, blParseOctime: blParseOctime, blRapprocher: blRapprocher,
     blNomCourt: blNomCourt, blDeltaH: blDeltaH, blRepartir: blRepartir, blOrdreBreakList: blOrdreBreakList,
-    blLignesVerso: blLignesVerso, blAujourdhui: blAujourdhui, blDecodeText: blDecodeText, blDateFr: blDateFr, blOctimeArrete: blOctimeArrete,
+    blLignesVerso: blLignesVerso, blAujourdhui: blAujourdhui, blDecodeText: blDecodeText, blDateFr: blDateFr, blOctimeArrete: blOctimeArrete, blArreteAttendu: blArreteAttendu,
   };
 }

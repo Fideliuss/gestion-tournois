@@ -33,6 +33,7 @@ function render() {
   document.getElementById('cf-salle').value = W.postes.salle ? '1' : '0';
   document.getElementById('cf-affichage').value = W.affichage;
   document.getElementById('cf-bascule').value = W.bascule;
+  document.getElementById('cf-arrete').value = String(W.arreteJour);
   document.getElementById('cf-colonnes').value = W.breaklist.colonnes;
   document.getElementById('cf-blocs').value = W.breaklist.blocs;
   document.getElementById('cf-floor').value = W.breaklist.floorMarque;
@@ -56,6 +57,7 @@ function collect() {
   W.postes = { stackers: n('cf-stackers', 0, 12), compteurs: n('cf-compteurs', 0, 10), cartes: n('cf-cartes', 0, 10), salle: document.getElementById('cf-salle').value === '1' };
   W.affichage = document.getElementById('cf-affichage').value;
   W.bascule = n('cf-bascule', 0, 12);
+  W.arreteJour = parseInt(document.getElementById('cf-arrete').value, 10);
   W.breaklist = {
     colonnes: n('cf-colonnes', 1, 40) || 24, blocs: n('cf-blocs', 1, 4) || 1, floorMarque: document.getElementById('cf-floor').value.trim() || 'T',
     colonnesVerso: n('cf-colverso', 1, 8) || 1,

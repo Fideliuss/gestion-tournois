@@ -230,11 +230,13 @@ function renderOctime() {
   if (!octime) { st.textContent = 'Aucune extraction chargée.'; return; }
   const t = new Date(octime.at), hh = blPad(t.getHours()) + ':' + blPad(t.getMinutes());
   const total = _presents.length, ok = match ? Object.keys(match.match).length : 0;
-  const arr = blOctimeArrete(octime.rows), soiree = Date.UTC(D.y, D.m - 1, D.d);
-  const vieux = arr != null && arr < soiree - 3 * 86400000;                      // extraction arrêtée bien avant la soirée : deltas périmés
-  const arrTxt = arr == null ? '' : ' · arrêtée au <b' + (vieux ? ' style="color:#D9864A"' : '') + '>' + new Date(arr).toLocaleDateString('fr-FR', { timeZone: 'UTC' }) + '</b>';
+  // Les extractions sont arrêtées au dimanche qui suit la soirée (réglable) : une autre date fausse les deltas (repos décalés)
+  const arr = blOctimeArrete(octime.rows), attendu = blArreteAttendu(D.y, D.m, D.d, cfg.arreteJour);
+  const mauvais = arr != null && arr !== attendu;
+  const fr = function (t, long) { return new Date(t).toLocaleDateString('fr-FR', long ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' } : { timeZone: 'UTC' }); };
+  const arrTxt = arr == null ? '' : ' · arrêtée au <b' + (mauvais ? ' style="color:#D9864A"' : '') + '>' + fr(arr) + '</b>';
   st.innerHTML = 'Extraction chargée à <b>' + hh + '</b>' + arrTxt + ' : ' + octime.rows.length + ' salariés lus' + (total ? ' · <b>' + ok + '/' + total + '</b> présents rapprochés' : '')
-    + (vieux ? '<br><span style="color:#D9864A">Cette extraction date de plus de 3 jours avant la soirée : les deltas sont peut-être périmés.</span>' : '');
+    + (mauvais ? '<br><span style="color:#D9864A">Pour la soirée du ' + esc(blDateLabel(D.y, D.m, D.d)) + ', il faut une extraction arrêtée au <b>' + esc(fr(attendu, true)) + '</b> : sinon les repos décalés faussent les deltas.</span>' : '');
   if (!match || (!match.manquants.length && !match.ambigus.length)) return;
   const names = octime.rows.map(function (r) { return r.nom; }).sort(function (a, b) { return a.localeCompare(b, 'fr'); });
   const rowsHtml = match.ambigus.map(function (a) { return [a.p, a.candidats.map(function (c) { return c.nom; })]; })
