@@ -6,6 +6,7 @@
 
 let cfg = null;
 let plan = null;                  // planning du mois affiché (null = aucun)
+let planMaj = null;               // date de la dernière mise à jour du planning (ISO)
 let D = { y: 0, m: 0, d: 0 };     // soirée affichée
 let octime = null;                // { at, rows: [{nom, matricule, minutes}] }
 let match = null;                 // résultat de blRapprocher pour les présents
@@ -58,8 +59,12 @@ async function shiftDay(n) {
 
 async function loadPlan() {
   writeDate();
-  try { plan = await SB.getBreakListPlanning(blMonthKey(D.y, D.m)); }
-  catch (e) { console.error(e); plan = null; flash('Lecture du planning impossible'); }
+  const key = blMonthKey(D.y, D.m);
+  try {
+    plan = await SB.getBreakListPlanning(key);
+    const row = plan ? (await SB.listBreakListPlannings()).find(function (r) { return r.mois === key; }) : null;
+    planMaj = row ? row.updated_at : null;
+  } catch (e) { console.error(e); plan = null; planMaj = null; flash('Lecture du planning impossible'); }
   renderAll();
 }
 
@@ -73,6 +78,7 @@ function renderAll() {
   const info = document.getElementById('plan-info');
   if (!plan) info.innerHTML = 'Aucun planning pour ' + esc(blMonthLabel(D.y, D.m)) + '. <a href="planning.html" style="color:var(--gold-dim);text-decoration:underline">Importer le planning</a>';
   else info.textContent = 'Planning de ' + blMonthLabel(D.y, D.m) + ' · ' + plan.rows.length + ' salariés · ' + blDateLabel(D.y, D.m, D.d);
+  document.getElementById('plan-maj').textContent = plan && planMaj ? 'Dernière mise à jour du planning : ' + blStamp(planMaj) : '';
   renderCount();
   renderPresents();
   renderOctime();
@@ -146,7 +152,7 @@ async function setCell(id, code) {
   if (!row) return;
   while (row.codes.length < plan.days) row.codes.push('');
   row.codes[D.d - 1] = code;
-  try { await SB.saveBreakListPlanning(blMonthKey(D.y, D.m), plan); flash('Planning mis à jour'); }
+  try { await SB.saveBreakListPlanning(blMonthKey(D.y, D.m), plan); planMaj = new Date().toISOString(); flash('Planning mis à jour'); }
   catch (e) { console.error(e); flash('Enregistrement impossible'); }
   renderAll();
 }
