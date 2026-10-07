@@ -57,6 +57,20 @@ function defaultDeclMonth() {
   return { month: n.getMonth() + 1, year: n.getFullYear() };
 }
 
+/* ── Sélecteur de période (mois + année), le même partout ──
+   Remplit la liste des mois (noms avec majuscule initiale) et place le mois suivant par défaut. */
+function initPeriodPicker(monthEl, yearEl, names) {
+  const def = defaultDeclMonth();
+  names.forEach((n, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1;
+    o.textContent = n.charAt(0).toUpperCase() + n.slice(1).toLowerCase();
+    if (i + 1 === def.month) o.selected = true;
+    monthEl.appendChild(o);
+  });
+  yearEl.value = def.year;
+}
+
 /* ── Impression avec un titre explicite ──
    Le navigateur propose le titre de la page comme nom du fichier PDF (et l'imprime en en-tête) : on le remplace le
    temps de l'impression par un titre qui dit ce qu'on imprime (« Déclaration DTPJ — Novembre 2026 »). */

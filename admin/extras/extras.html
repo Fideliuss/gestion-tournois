@@ -96,9 +96,13 @@
     <div class="card" id="decl-controls">
       <div class="sec">Période</div>
       <div class="period-row">
-        <div class="fg">
+        <div class="fg pf-month">
           <label class="fl">Mois</label>
-          <input type="month" id="decl-month-input" onchange="renderDeclaration()"/>
+          <select id="decl-month" onchange="renderDeclaration()"></select>
+        </div>
+        <div class="fg pf-year">
+          <label class="fl">Année</label>
+          <input type="number" id="decl-year" min="2020" max="2099" onchange="renderDeclaration()"/>
         </div>
         <button class="btn btn-gold" onclick="printDeclaration()" style="margin-left:auto"><i class="ico ico-print"></i> Imprimer / PDF</button>
       </div>

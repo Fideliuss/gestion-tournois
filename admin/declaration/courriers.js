@@ -289,18 +289,7 @@ function esc(str) {
 /* ── Initialisation ── */
 document.addEventListener('DOMContentLoaded', () => {
   const now      = new Date();
-  const def      = defaultDeclMonth();        // mois suivant : on déclare en amont
-  const selMonth = document.getElementById('sel-month');
-
-  MOIS_LETTRE.forEach((m, i) => {
-    const o = document.createElement('option');
-    o.value = i + 1;
-    o.textContent = m;
-    if (i + 1 === def.month) o.selected = true;
-    selMonth.appendChild(o);
-  });
-
-  document.getElementById('inp-year').value = def.year;
+  initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS_LETTRE);   // mois suivant par défaut
 
   // Peuple le select mois de la date courrier
   const selDateM = document.getElementById('inp-date-m');
@@ -428,9 +417,9 @@ function printCurrent() {
   const dest = DEST_COURT[currentTab] || '';
   if (docType === 'annulation') {
     // titre = destinataire + date du courrier d'annulation
-    printWithTitle(`Annulation de tournoi — ${dest} — ${formatAnnulLetterDate()}`);
+    printWithTitle(`Annulation de tournoi - ${dest} - ${formatAnnulLetterDate()}`);
   } else {
-    printWithTitle(`Courrier ${dest} — Déclaration DTPJ ${MOIS_LETTRE[getMonth() - 1]} ${getYear()}`);
+    printWithTitle(`Courrier ${dest} - Déclaration Tournois ${MOIS_LETTRE[getMonth() - 1]} ${getYear()}`);
   }
 }
 function formatAnnulLetterDate() {

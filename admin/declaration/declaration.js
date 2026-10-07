@@ -57,15 +57,7 @@ function saveExc(m, y, data) { localStorage.setItem(excKey(m, y), JSON.stringify
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
-  const def = defaultDeclMonth();            // mois suivant : on déclare en amont
-  const selMonth = document.getElementById('sel-month');
-  MOIS.forEach((m, i) => {
-    const o = document.createElement('option');
-    o.value = i + 1; o.textContent = m;
-    if (i + 1 === def.month) o.selected = true;
-    selMonth.appendChild(o);
-  });
-  document.getElementById('inp-year').value = def.year;
+  initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS);   // mois suivant par défaut
 
   renderCfgTable();
   renderStaffEditor();
@@ -109,7 +101,7 @@ function flash(msg) {
 /* Impression : le titre devient le nom du PDF proposé */
 function printDeclaration() {
   const m = MOIS[getMonth() - 1].toLowerCase();
-  printWithTitle(`Déclaration DTPJ — ${m.charAt(0).toUpperCase() + m.slice(1)} ${getYear()}`);
+  printWithTitle(`Déclaration Tournois - ${m.charAt(0).toUpperCase() + m.slice(1)} ${getYear()}`);
 }
 
 /* ── Annexe : on saisit le numéro seul, on stocke et on affiche « ANNEXE n » ── */

@@ -39,15 +39,14 @@
   <div class="card" id="period-card" style="max-width:1100px">
     <div class="sec">Période</div>
     <div class="period-row">
-      <div class="fg">
+      <div class="fg pf-month">
         <label class="fl">Mois</label>
         <select id="sel-month" onchange="onPeriodChange()"></select>
       </div>
-      <div class="fg">
+      <div class="fg pf-year">
         <label class="fl">Année</label>
-        <input type="number" id="inp-year" min="2020" max="2099" style="width:100px" onchange="onPeriodChange()"/>
+        <input type="number" id="inp-year" min="2020" max="2099" onchange="onPeriodChange()"/>
       </div>
-      <span class="period-hint">Mois suivant par défaut : une déclaration se fait en amont.</span>
       <button class="btn btn-ghost" onclick="printDeclaration()" style="margin-left:auto"><i class="ico ico-print"></i> Imprimer / PDF</button>
     </div>
   </div>

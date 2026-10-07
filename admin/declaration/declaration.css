@@ -80,7 +80,7 @@
 .adhoc-meta  { font-size: 10px; color: var(--text-dim); }
 .adhoc-empty { color: var(--text-muted); font-size: 12px; font-style: italic; }
 
-.decl-tab-panel .card { margin: 0; }
+.decl-tab-panel .card { margin: 0 auto; }   /* réglages centrés */
 
 /* ── Barre d'outils ── */
 .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%; max-width: 1100px; margin-bottom: 20px; }
@@ -250,9 +250,10 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
 
 /* ── Vues Déclaration / Réglages ── */
 #decl-bar { max-width: 1100px; }
+#view-cfg { align-items: center; }
+.footer { text-align: center; }
 .decl-view { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .decl-view[hidden] { display: none; }
-.period-hint { align-self: center; font-size: 11px; color: var(--text-muted); }
 .decl-toast {
   position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 12px); z-index: 400; opacity: 0; pointer-events: none;
   padding: 11px 22px; border-radius: 999px; background: var(--gold-solid); color: #1A1208;
