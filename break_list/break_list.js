@@ -268,7 +268,7 @@ function numOpt(id) { return Math.max(0, parseInt(document.getElementById(id).va
 
 let repState = null;   // répartition affichée : { key, cols, manual, warns, people } ; modifiable à la main
 let repSel = null;     // identifiant du nom sélectionné pour un échange ou un déplacement
-const REP_COLS = [['stackers', 'Stackers Haut'], ['compteurs', 'Compteurs'], ['cartes', 'Cartes'], ['salle', 'Salle'], ['departs', 'Départs']];
+const REP_COLS = [['stackers', 'Stackers'], ['compteurs', 'Compteurs'], ['cartes', 'Cartes'], ['salle', 'Salle'], ['departs', 'Départs']];
 
 function renderRepartition() {
   const out = document.getElementById('rep-out'), btn = document.getElementById('btn-print-dep');
@@ -308,7 +308,7 @@ function drawRep() {
   const warns = st.warns.slice();
   if (st.manual) {
     const chefs = st.cols.stackers.filter(function (p) { return p.chef; }).length;
-    if (st.cols.stackers.length && chefs !== 1) warns.push('Stackers Haut : ' + chefs + ' chef(s) (1 attendu).');
+    if (st.cols.stackers.length && chefs !== 1) warns.push('Stackers : ' + chefs + ' chef(s) (1 attendu).');
   }
   const unk = st.people.filter(function (p) { return !p.known; });
   if (unk.length) warns.push(unk.length + ' présent(s) sans delta (compté 0) : ' + unk.map(function (p) { return blNomCourt(p, cfg.affichage); }).join(', ') + '.');

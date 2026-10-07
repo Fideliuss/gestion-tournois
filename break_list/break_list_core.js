@@ -369,8 +369,8 @@ function blRepartir(personnes, opts) {
     if (picked.length && !picked.some(function (x) { return x.chef; })) {
       const dispo = pool21.filter(function (x) { return x.chef; }).find(function (x) { return !picked.some(function (p) { return p.id === x.id; }); });
       if (dispo) picked[picked.length - 1] = dispo;
-      else warnings.push('Stackers Haut : aucun chef disponible.');
-    } else if (!picked.length && o.stackers > 0) warnings.push('Stackers Haut : aucun chef disponible.');
+      else warnings.push('Stackers : aucun chef disponible.');
+    } else if (!picked.length && o.stackers > 0) warnings.push('Stackers : aucun chef disponible.');
     let chefs = picked.filter(function (x) { return x.chef; }).length;
     const names = {}; picked.forEach(function (x) { names[x.id] = true; });
     const nonChefs = pool21.filter(function (x) { return !x.chef && !names[x.id]; }).reverse();     // les 20h ne servent jamais aux stackers
@@ -382,7 +382,7 @@ function blRepartir(personnes, opts) {
       }
     }
     picked = uniq(picked);
-    if (picked.length < o.stackers) warnings.push('Stackers Haut : seulement ' + picked.length + '/' + o.stackers + ' disponible(s).');
+    if (picked.length < o.stackers) warnings.push('Stackers : seulement ' + picked.length + '/' + o.stackers + ' disponible(s).');
     return picked;
   })();
   pool21 = remove(pool21, stackers);
