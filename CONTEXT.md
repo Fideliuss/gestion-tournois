@@ -29,7 +29,7 @@ Conçue pour être **extensible au-delà des tournois** - architecture de pannea
 
 - **Refonte d'octobre 2026** - **livrée** : `v3.0.0` en prod le 2026-10-06 (PR de release #119, tag sur le commit de fusion 171d630) : navigation (barre, espaces, menu Gestion), saisons du challenge avec clôture, Gestion des comptes (liste filtrable, rôles & accès, prénom / nom), nouvelle charte (cartes arrondies, boutons et icônes uniques), émargement imprimé en pages de 4 lignes.
 
-- **Espace Break list** (octobre 2026) - **en cours** (branche `feature/breaklist`, PR vers `develop`) : remplace le Google Sheet et le script Apps Script de la break list et des départs du soir (présents automatiques depuis le planning mensuel CSV, extraction Octime collée, répartition, break list imprimable recto / verso, tout configurable). Migration `break_list.sql` à appliquer en production avant la release.
+- **Espace Break list** (octobre 2026) - **mergé dans `develop`** (PR #123), release `v3.1.0` en préparation : remplace le Google Sheet et le script Apps Script de la break list et des départs du soir (présents automatiques depuis le planning mensuel CSV, extraction Octime collée, répartition, break list imprimable recto / verso, tout configurable). Migration `break_list.sql` appliquée en production le 2026-10-07 (le panel « Break list » se donne aux rôles dans Gestion des comptes une fois la release en ligne ; les admins y ont accès d'office).
 
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
 
