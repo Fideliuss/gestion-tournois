@@ -194,6 +194,14 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │       ├── roulette_couleur.html / .js     - Couleur Numéro
 │       └── roulette_tables.html / .js      - Tables de multiplication
 │
+├── break_list/
+│   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
+│   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
+│   ├── break_list_common.js       - Réglages, messages et dates communs aux pages
+│   ├── planning.html / .js        - Import du planning mensuel (CSV), consultation, correction d'une case
+│   ├── reglages.html / .js        - Grades, horaires, postes, break list imprimable, rapprochements
+│   └── break_list.css
+│
 └── supabase/
     ├── functions/
     │   └── manage-users/index.ts  - Edge Function : CRUD comptes (admin only, vérifié côté serveur)
@@ -201,7 +209,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
         ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
-        └── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
+        ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
+        └── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
 ```
 
 ---

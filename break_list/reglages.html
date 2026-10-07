@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Réglages - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css"/>
+  <link rel="stylesheet" href="break_list.css"/>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="../index.html" class="back">← Accueil</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Break list <em>réglages</em></div>
+  </div>
+
+  <!-- Grades -->
+  <div class="card bl-card">
+    <div class="sec">Grades du planning</div>
+    <p class="bl-note">Du plus haut au plus bas : l'ordre est celui de la break list. Un grade « chef » peut être le chef des stackers ou de la salle.</p>
+    <table class="cf-tbl">
+      <thead><tr><th style="width:90px">Code</th><th>Libellé</th><th style="width:70px">Couleur</th><th style="width:60px">Chef</th><th style="width:130px"></th></tr></thead>
+      <tbody id="tb-grades"></tbody>
+    </table>
+    <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="addGrade()"><i class="ico ico-plus"></i> Ajouter un grade</button></div>
+  </div>
+
+  <!-- Codes du planning -->
+  <div class="card bl-card">
+    <div class="sec">Horaires du planning</div>
+    <p class="bl-note">Les codes qui signifient « présent ce soir ». Tout autre code (R, CP, RJF, M, ABS, Form, case vide...) compte comme absent. « Part en premier » : sans poste, en tête des départs.</p>
+    <table class="cf-tbl">
+      <thead><tr><th style="width:110px">Code</th><th>Groupe</th><th style="width:90px">Floor</th><th style="width:60px"></th></tr></thead>
+      <tbody id="tb-codes"></tbody>
+    </table>
+    <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="addCode()"><i class="ico ico-plus"></i> Ajouter un horaire</button></div>
+  </div>
+
+  <!-- Postes et affichage -->
+  <div class="card bl-card">
+    <div class="sec">Répartition</div>
+    <div class="cf-grid">
+      <div class="fg"><label class="fl">Stackers</label><input type="number" id="cf-stackers" min="0" max="12"/></div>
+      <div class="fg"><label class="fl">Compteurs</label><input type="number" id="cf-compteurs" min="0" max="10"/></div>
+      <div class="fg"><label class="fl">Cartes</label><input type="number" id="cf-cartes" min="0" max="10"/></div>
+      <div class="fg"><label class="fl">Salle ouverte</label><select id="cf-salle"><option value="0">Non</option><option value="1">Oui</option></select></div>
+      <div class="fg"><label class="fl">Affichage des noms</label><select id="cf-affichage"><option value="PRENOM_N">Prénom N.</option><option value="N_PRENOM">N. Prénom</option></select></div>
+      <div class="fg"><label class="fl">Soirée jusqu'à (heure)</label><input type="number" id="cf-bascule" min="0" max="12"/></div>
+    </div>
+    <p class="bl-note" style="margin-top:12px">Les valeurs de postes sont celles proposées à l'ouverture de la page, modifiables chaque soir. Avant l'heure indiquée, « aujourd'hui » désigne encore la soirée de la veille.</p>
+  </div>
+
+  <!-- Break list -->
+  <div class="card bl-card">
+    <div class="sec">Break list imprimable</div>
+    <div class="cf-grid">
+      <div class="fg"><label class="fl">Colonnes du recto</label><input type="number" id="cf-colonnes" min="1" max="40"/></div>
+      <div class="fg"><label class="fl">Répétitions de la liste</label><input type="number" id="cf-blocs" min="1" max="4"/></div>
+      <div class="fg"><label class="fl">Marque du floor</label><input type="text" id="cf-floor" maxlength="3"/></div>
+      <div class="fg"><label class="fl">Colonnes du verso</label><input type="number" id="cf-colverso" min="1" max="8"/></div>
+      <div class="fg wide"><label class="fl">Tables du verso (une ligne par table ou par total)</label><textarea id="cf-tables" spellcheck="false"></textarea></div>
+    </div>
+    <p class="bl-note" style="margin-top:12px">Une ligne qui commence par TOTAL devient une ligne de total grisée.</p>
+  </div>
+
+  <!-- Rapprochements -->
+  <div class="card bl-card">
+    <div class="sec">Rapprochements des noms</div>
+    <p class="bl-note">Quand un nom du planning n'est pas reconnu dans l'extraction Octime, le choix fait sur la page « Aujourd'hui » est mémorisé ici.</p>
+    <div id="alias-out"></div>
+  </div>
+
+  <div class="bl-actions end bl-card">
+    <button class="btn btn-ghost" onclick="resetDefaults()">Rétablir les valeurs d'origine</button>
+    <button class="btn btn-gold" id="btn-save" onclick="saveConfig()">Enregistrer</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="break_list_core.js"></script>
+<script src="break_list_common.js"></script>
+<script src="reglages.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'break-list' }).then(function (u) { if (u) init(); });</script>
+</body>
+</html>

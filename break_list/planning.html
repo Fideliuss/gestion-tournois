@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planning - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css"/>
+  <link rel="stylesheet" href="break_list.css"/>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="../index.html" class="back">← Accueil</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Planning <em>mensuel</em></div>
+  </div>
+
+  <div class="card bl-card">
+    <div class="sec">Période</div>
+    <div class="period-row">
+      <div class="fg pf-month">
+        <label class="fl">Mois</label>
+        <select id="sel-month" onchange="onPeriodChange()"></select>
+      </div>
+      <div class="fg pf-year">
+        <label class="fl">Année</label>
+        <input type="number" id="inp-year" min="2020" max="2099" onchange="onPeriodChange()"/>
+      </div>
+      <div class="period-actions">
+        <button class="btn btn-red" id="btn-del" onclick="deletePlanning()" hidden><i class="ico ico-del"></i> Supprimer ce planning</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('plan-file').click()"><i class="ico ico-plus"></i> Importer un planning (CSV)</button>
+        <input type="file" id="plan-file" accept=".csv,.txt" hidden onchange="onPlanFile(this)"/>
+      </div>
+    </div>
+    <div class="bl-muted" id="saved-months" style="margin-top:12px"></div>
+    <div class="bl-warn" id="plan-error" hidden></div>
+  </div>
+
+  <!-- Import en attente de confirmation -->
+  <div class="card bl-card" id="pending-card" hidden>
+    <div class="sec" id="pending-title">Import</div>
+    <div id="pending-body"></div>
+    <div class="bl-actions end" style="margin-top:14px">
+      <button class="btn btn-ghost" onclick="cancelImport()">Annuler</button>
+      <button class="btn btn-gold" id="btn-confirm" onclick="confirmImport()">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="card bl-card" id="plan-card">
+    <div class="sec" id="plan-title">Planning</div>
+    <div id="plan-out"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="break_list_core.js"></script>
+<script src="break_list_common.js"></script>
+<script src="planning.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'break-list' }).then(function (u) { if (u) init(); });</script>
+</body>
+</html>
