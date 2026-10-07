@@ -312,7 +312,7 @@ function drawRep() {
   if (unk.length) warns.push(unk.length + ' présent(s) sans delta (compté 0) : ' + unk.map(function (p) { return blNomCourt(p, cfg.affichage); }).join(', ') + '.');
   out.innerHTML = '<div class="bl-rep">' + REP_COLS.map(col).join('') + '</div>'
     + (warns.length ? '<div class="bl-warn">' + warns.map(esc).join('<br>') + '</div>' : '')
-    + '<div class="bl-legend">◉ arrivée 20h · en gras : chef · ' + esc(cfg.breaklist.floorMarque) + ' : floor · entre parenthèses : delta de quota'
+    + '<div class="bl-legend">◉ arrivée 20h'
     + (st.manual ? ' · <b style="color:var(--gold-dim)">modifiée à la main</b> <button class="btn btn-ghost btn-sm" onclick="resetRep()">Régénérer</button>' : '') + '</div>';
   renderDepPrint(st.cols);
 }
@@ -393,7 +393,7 @@ function renderDepPrint(cols) {
     + '<div class="dep-postes">' + depBox('Stackers Haut', cols.stackers, 'st')
     + '<div class="dep-side">' + depBox('Compteurs', cols.compteurs) + depBox('Cartes', cols.cartes) + depBox('Salle', cols.salle) + '</div></div></div>'
     + '<div class="dep-bottom">' + depBox('Départs', cols.departs, 'dp') + '</div>'
-    + '<div class="dep-leg">◉ arrivée 20h · en gras : chef · ' + esc(cfg.breaklist.floorMarque) + ' : floor · à droite du nom : delta de quota</div></section>';
+    + '<div class="dep-leg">◉ arrivée 20h</div></section>';
 }
 
 function printDeparts() {
