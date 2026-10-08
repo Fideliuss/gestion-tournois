@@ -107,7 +107,7 @@ function renderPending() {
           }).join('') + (diffs.length > 300 ? '<div>… et ' + (diffs.length - 300) + ' autres</div>' : '') + '</div>'
       : '<div class="bl-muted" style="margin-top:8px">Identique au planning enregistré : rien ne change.</div>';
   }
-  if (unk.length) html += '<div class="bl-warn">Horaires non déclarés dans les réglages (traités comme absent) : ' + unk.map(function (u) { return esc(u.code) + ' (' + u.nb + ' fois)'; }).join(', ') + '. À ajouter dans <a href="reglages.html" style="text-decoration:underline">Réglages</a> si besoin.</div>';
+  if (unk.length) html += '<div class="bl-warn">Codes non reconnus (traités comme absents) : ' + unk.map(function (u) { return esc(u.code) + ' (' + u.nb + ' fois)'; }).join(', ') + '. À déclarer dans <a href="reglages.html" style="text-decoration:underline">Réglages</a> (horaires ou absences) si besoin.</div>';
   document.getElementById('pending-body').innerHTML = html;
 }
 
@@ -150,30 +150,40 @@ function renderTable() {
   const body = p.rows.map(function (r, ri) {
     let tds = '';
     for (let d = 1; d <= p.days; d++) {
-      const c = r.codes[d - 1] || '', st = blStatut(c, cfg);
-      const cls = st.groupe ? (st.floor ? 'onfl' : st.groupe === '20h' ? 'on20' : 'on21') : '';
-      tds += '<td class="c ' + cls + (d === todayCol ? ' today' : '') + '"' + (pending ? '' : ' data-r="' + ri + '" data-d="' + d + '"') + ' title="' + esc(r.nom + ' ' + r.prenom + ', le ' + d) + '">' + esc(c) + '</td>';
+      const c = r.codes[d - 1] || '', st = blStatut(c, cfg), ab = st.groupe ? null : blAbsence(c, cfg);
+      let cls = st.groupe ? (st.floor ? 'onfl' : st.groupe === '20h' ? 'on20' : 'on21') : (c && !ab ? 'unk' : '');
+      const bg = ab && !ab.vide && /^#[0-9a-f]{6}$/i.test(ab.color) ? ' style="background:' + ab.color + '38"' : '';
+      const tip = r.nom + ' ' + r.prenom + ', le ' + d + (ab ? ' : ' + ab.label : st.groupe ? '' : ' : code non reconnu');
+      tds += '<td class="c ' + cls + (d === todayCol ? ' today' : '') + '"' + bg + (pending ? '' : ' data-r="' + ri + '" data-d="' + d + '"') + ' title="' + esc(tip) + '">' + esc(c) + '</td>';
     }
     return '<tr><td class="nm"><i style="background:' + esc(gradeColor[r.grade] || '#ccc') + '"></i>' + esc(r.nom + ' ' + r.prenom) + '</td>' + tds + '</tr>';
   }).join('');
   out.innerHTML = '<div class="pl-wrap"><table class="pl-tbl" id="pl-tbl"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
-    + '<datalist id="codes-list">' + cfg.codes.map(function (k) { return '<option value="' + esc(k.code) + '">'; }).join('') + ['R', 'CP', 'RJF', 'M', 'ABS', 'Form', 'DEL'].map(function (c) { return '<option value="' + c + '">'; }).join('') + '</datalist>'
-    + '<div class="bl-legend"><span style="color:var(--gold-dim)">■</span> arrivée 20h &nbsp; <span style="color:#6f95e0">■</span> arrivée 21h &nbsp; <span style="color:#6dcc8e">■</span> floor. ' + (pending ? 'Aperçu du fichier à importer.' : 'Cliquez sur une case pour la modifier.') + '</div>';
+    + '<div class="bl-legend pl-leg"><span><i style="background:var(--gold-dim)"></i>arrivée 20h</span><span><i style="background:#6f95e0"></i>arrivée 21h</span><span><i style="background:#6dcc8e"></i>floor</span>'
+    + cfg.absences.map(function (a) { return '<span><i style="background:' + esc(a.color) + '"></i>' + esc(a.code) + ' ' + esc(a.label) + '</span>'; }).join('')
+    + '<span>case vide : non planifié</span><span class="unkl">code non reconnu</span>'
+    + '<span class="pl-note">' + (pending ? 'Aperçu du fichier à importer.' : 'Cliquez sur une case pour la modifier.') + '</span></div>';
   if (!pending) out.querySelector('#pl-tbl').addEventListener('click', onCellClick);
   document.getElementById('plan-card').hidden = false;
 }
 
 function onCellClick(e) {
   const td = e.target.closest('td.c');
-  if (!td || td.querySelector('input')) return;
+  if (!td || td.querySelector('select, input')) return;
   const r = Number(td.dataset.r), d = Number(td.dataset.d), before = plan.rows[r].codes[d - 1] || '';
-  const inp = document.createElement('input');
-  inp.type = 'text'; inp.value = before; inp.setAttribute('list', 'codes-list'); inp.autocomplete = 'off';
-  td.textContent = ''; td.appendChild(inp); inp.focus(); inp.select();
-  let done = false;
-  const finish = async function (commit) {
+  const opt = function (v, l) { return '<option value="' + esc(v) + '">' + esc(l) + '</option>'; };
+  const gl = function (g) { return g === '20h' ? '20h' : g === '21h' ? '21h' : 'départ'; };
+  const sel = document.createElement('select');
+  sel.innerHTML = opt('', 'Vide (non planifié)')
+    + '<optgroup label="Présent">' + cfg.codes.map(function (k) { return opt(k.code, k.code + (k.floor ? ' floor' : '') + ' · ' + gl(k.groupe)); }).join('') + '</optgroup>'
+    + '<optgroup label="Absent">' + cfg.absences.map(function (a) { return opt(a.code, a.code + ' · ' + a.label); }).join('') + '</optgroup>'
+    + (before && !blStatut(before, cfg).groupe && !blAbsence(before, cfg) ? opt(before, before + ' (actuel)') : '') + opt('__autre', 'Autre code...');
+  sel.value = before;
+  td.textContent = ''; td.appendChild(sel); sel.focus();
+  try { sel.showPicker(); } catch (err) { /* ouverture automatique non disponible : un clic suffit */ }
+  let done = false, switching = false;
+  const finish = async function (commit, v) {
     if (done) return; done = true;
-    const v = inp.value.trim();
     if (commit && v !== before) {
       while (plan.rows[r].codes.length < plan.days) plan.rows[r].codes.push('');
       plan.rows[r].codes[d - 1] = v;
@@ -182,6 +192,14 @@ function onCellClick(e) {
     }
     renderTable();
   };
-  inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') finish(true); else if (ev.key === 'Escape') finish(false); });
-  inp.addEventListener('blur', function () { finish(true); });
+  sel.addEventListener('change', function () {
+    if (sel.value !== '__autre') { finish(true, sel.value); return; }
+    switching = true;                                           // code libre : un champ de saisie remplace la liste
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.value = before; inp.autocomplete = 'off';
+    td.textContent = ''; td.appendChild(inp); inp.focus(); inp.select();
+    inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') finish(true, inp.value.trim()); else if (ev.key === 'Escape') finish(false); });
+    inp.addEventListener('blur', function () { finish(true, inp.value.trim()); });
+  });
+  sel.addEventListener('blur', function () { if (!switching) finish(false); });
 }

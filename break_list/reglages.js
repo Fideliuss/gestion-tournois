@@ -27,6 +27,12 @@ function render() {
       + '<td><input type="checkbox" class="k-floor"' + (k.floor ? ' checked' : '') + '/></td>'
       + '<td class="act"><button class="btn btn-icon danger" title="Supprimer" onclick="delCode(' + i + ')"><i class="ico ico-del"></i></button></td></tr>';
   }).join('');
+  document.getElementById('tb-absences').innerHTML = W.absences.map(function (a, i) {
+    return '<tr><td><input type="text" class="a-code" value="' + esc(a.code) + '" maxlength="8"/></td>'
+      + '<td><input type="text" class="a-label" value="' + esc(a.label) + '"/></td>'
+      + '<td><input type="color" class="a-color" value="' + esc(a.color) + '"/></td>'
+      + '<td class="act"><button class="btn btn-icon danger" title="Supprimer" onclick="delAbsence(' + i + ')"><i class="ico ico-del"></i></button></td></tr>';
+  }).join('');
   document.getElementById('cf-stackers').value = W.postes.stackers;
   document.getElementById('cf-compteurs').value = W.postes.compteurs;
   document.getElementById('cf-cartes').value = W.postes.cartes;
@@ -53,6 +59,10 @@ function collect() {
   W.codes = Array.prototype.map.call(document.querySelectorAll('#tb-codes tr'), function (tr) {
     return { code: tr.querySelector('.k-code').value.trim(), groupe: tr.querySelector('.k-groupe').value, floor: tr.querySelector('.k-floor').checked };
   });
+  W.absences = Array.prototype.map.call(document.querySelectorAll('#tb-absences tr'), function (tr) {
+    const code = tr.querySelector('.a-code').value.trim();
+    return { code: code, label: tr.querySelector('.a-label').value.trim() || code, color: tr.querySelector('.a-color').value };
+  });
   const n = function (id, min, max) { return Math.min(max, Math.max(min, parseInt(document.getElementById(id).value, 10) || 0)); };
   W.postes = { stackers: n('cf-stackers', 0, 12), compteurs: n('cf-compteurs', 0, 10), cartes: n('cf-cartes', 0, 10), salle: document.getElementById('cf-salle').value === '1' };
   W.affichage = document.getElementById('cf-affichage').value;
@@ -70,6 +80,8 @@ function delGrade(i) { collect(); W.grades.splice(i, 1); render(); }
 function moveGrade(i, d) { collect(); const g = W.grades.splice(i, 1)[0]; W.grades.splice(i + d, 0, g); render(); }
 function addCode() { collect(); W.codes.push({ code: '', groupe: '21h', floor: false }); render(); }
 function delCode(i) { collect(); W.codes.splice(i, 1); render(); }
+function addAbsence() { collect(); W.absences.push({ code: '', label: '', color: '#8C8577' }); render(); }
+function delAbsence(i) { collect(); W.absences.splice(i, 1); render(); }
 function delAlias(k) { collect(); delete W.aliases[k]; render(); }
 
 function resetDefaults() {
@@ -95,6 +107,14 @@ async function saveConfig() {
     if (!k.code) { alert('Un horaire n\'a pas de code.'); return; }
     if (codes[k.code]) { alert('L\'horaire « ' + k.code + ' » est en double.'); return; }
     codes[k.code] = true;
+  }
+  const abs = {};
+  for (let i = 0; i < W.absences.length; i++) {
+    const a = W.absences[i], k = a.code.toLowerCase();
+    if (!a.code) { alert('Un type d\'absence n\'a pas de code.'); return; }
+    if (abs[k]) { alert('Le type d\'absence « ' + a.code + ' » est en double.'); return; }
+    if (codes[a.code]) { alert('« ' + a.code + ' » est déjà un horaire de présence.'); return; }
+    abs[k] = true;
   }
   const btn = document.getElementById('btn-save');
   btn.disabled = true;

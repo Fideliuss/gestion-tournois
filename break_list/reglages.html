@@ -42,6 +42,17 @@
     <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="addCode()"><i class="ico ico-plus"></i> Ajouter un horaire</button></div>
   </div>
 
+  <!-- Types d'absence -->
+  <div class="card bl-card">
+    <div class="sec">Types d'absence</div>
+    <p class="bl-note">Les codes du planning qui signifient « pas là ce soir », avec leur libellé et leur couleur. Une case vide est « non planifié » (pas encore arrivé, ou déjà parti de l'effectif). Un code absent de cette liste et des horaires est signalé « non reconnu ».</p>
+    <table class="cf-tbl">
+      <thead><tr><th style="width:110px">Code</th><th>Libellé</th><th style="width:70px">Couleur</th><th style="width:60px"></th></tr></thead>
+      <tbody id="tb-absences"></tbody>
+    </table>
+    <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="addAbsence()"><i class="ico ico-plus"></i> Ajouter un type d'absence</button></div>
+  </div>
+
   <!-- Postes et affichage -->
   <div class="card bl-card">
     <div class="sec">Répartition</div>
