@@ -100,6 +100,7 @@ function renderAll() {
   document.getElementById('plan-maj').textContent = plan && planMaj ? 'Dernière mise à jour du planning : ' + blStamp(planMaj) : '';
   renderCount();
   renderPresents();
+  renderAbsents();
   renderOctime();
   renderRepartition();
   renderPrint();
@@ -129,8 +130,10 @@ function codeOptions(current) {
   const opts = cfg.codes.map(function (k) {
     return '<option value="' + esc(k.code) + '"' + (k.code === current ? ' selected' : '') + '>' + esc(k.code) + (k.floor ? ' floor' : '') + ' · ' + groupeLabel(k.groupe) + '</option>';
   });
-  opts.push('<option value="ABS">Absent ce soir</option>');
-  return opts.join('');
+  const abs = cfg.absences.map(function (a) {
+    return '<option value="' + esc(a.code) + '">' + esc(a.code) + ' · ' + esc(a.label) + '</option>';
+  });
+  return '<optgroup label="Présent">' + opts.join('') + '</optgroup><optgroup label="Absent ce soir">' + abs.join('') + '</optgroup>';
 }
 
 function renderPresents() {
@@ -158,13 +161,39 @@ function renderPresents() {
   // Ajout d'un présent : les absents du jour
   const present = {}; _presents.forEach(function (p) { present[p.id] = true; });
   const absents = plan.rows.filter(function (r) { return !present[blNorm(r.nom + ' ' + r.prenom)]; });
+  const motif = {}; blAbsents(plan, D.d, cfg).forEach(function (a) { motif[a.id] = a.label; });
   document.getElementById('add-person').innerHTML = absents.map(function (r) {
-    return '<option value="' + esc(blNorm(r.nom + ' ' + r.prenom)) + '">' + esc(r.nom + ' ' + r.prenom) + ' (' + esc(r.codes[D.d - 1] || 'vide') + ')</option>';
+    const id = blNorm(r.nom + ' ' + r.prenom);
+    return '<option value="' + esc(id) + '">' + esc(r.nom + ' ' + r.prenom) + ' (' + esc(motif[id] || 'Non planifié') + ')</option>';
   }).join('');
   document.getElementById('add-code').innerHTML = cfg.codes.map(function (k) {
     return '<option value="' + esc(k.code) + '">' + esc(k.code) + (k.floor ? ' · floor' : '') + '</option>';
   }).join('');
   addBox.hidden = !absents.length;
+}
+
+/** Carte repliée « Absents ce soir » : les non présents regroupés par type d'absence (ordre des réglages), puis non planifiés, puis codes non reconnus */
+function renderAbsents() {
+  const box = document.getElementById('abs-box');
+  box.hidden = !plan || D.d > plan.days;
+  if (box.hidden) return;
+  const list = blAbsents(plan, D.d, cfg), groups = {}, keys = [];
+  list.forEach(function (a) {
+    const k = a.type === 'absence' ? 'a:' + a.code : a.type === 'vide' ? 'v' : 'i:' + a.code;
+    if (!groups[k]) { groups[k] = { label: a.label, color: a.color, items: [], rang: 0 }; keys.push(k); }
+    groups[k].items.push(a);
+  });
+  const rang = function (k) {
+    if (k.charAt(0) === 'a') return cfg.absences.findIndex(function (x) { return x.code === k.slice(2); });
+    return k === 'v' ? 900 : 950;
+  };
+  keys.sort(function (x, y) { return rang(x) - rang(y); });
+  document.getElementById('abs-count').textContent = list.length;
+  document.getElementById('abs-out').innerHTML = keys.length ? keys.map(function (k) {
+    const g = groups[k];
+    return '<div class="bl-abs-grp"><h4><i class="bl-dot" style="background:' + esc(g.color) + '"></i>' + esc(g.label) + ' <span>' + g.items.length + '</span></h4><div class="bl-abs-names">'
+      + g.items.map(function (a) { return '<span>' + esc(blNomCourt(a, cfg.affichage)) + '</span>'; }).join('') + '</div></div>';
+  }).join('') : '<div class="bl-muted">Personne.</div>';
 }
 
 async function setCell(id, code) {

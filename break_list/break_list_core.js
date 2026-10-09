@@ -29,6 +29,18 @@ const BL_DEFAULT_CONFIG = {
     { code: '20:30', groupe: '21h',    floor: true  },
     { code: '16:30', groupe: 'depart', floor: true  },
   ],
+  // Types d'absence du planning (un code qui n'est ni un horaire de présence ni dans cette liste est signalé « non reconnu »).
+  // Une case vide n'est pas une absence : « non planifié » (pas encore arrivé, ou déjà parti de l'effectif)
+  absences: [
+    { code: 'R',    label: 'Repos',                    color: '#8C8577' },
+    { code: 'CP',   label: 'Congés payés',             color: '#3F9FD0' },
+    { code: 'M',    label: 'Maladie',                  color: '#D9534F' },
+    { code: 'Form', label: 'Formation',                color: '#8E6FD0' },
+    { code: 'DEL',  label: 'Délégation',               color: '#C37814' },
+    { code: 'RJF',  label: 'Récup jour férié',         color: '#4FB3A1' },
+    { code: 'RCN',  label: 'Repos compensateur nuit',  color: '#5A7BD0' },
+    { code: 'ABS',  label: 'Absence injustifiée',      color: '#E0443E' },
+  ],
   // Répartition : nombre de personnes par poste proposé à l'ouverture
   postes: { stackers: 5, cartes: 2, compteurs: 1, salle: false },
   // Break list imprimable
@@ -160,12 +172,25 @@ function blStatut(code, config) {
   return k ? { groupe: k.groupe, floor: !!k.floor } : { groupe: null, floor: false };
 }
 
-/** Codes qui ressemblent à une heure (« 21:15 ») sans être dans les réglages : sûrement un oubli à déclarer */
+/**
+ * Type d'absence d'un code du planning : { code, label, color } ; une case vide est « non planifié » (vide: true) ;
+ * null si le code n'est ni un type d'absence ni un horaire de présence (non reconnu)
+ */
+function blAbsence(code, config) {
+  const c = String(code || '').trim();
+  if (!c) return { code: '', label: 'Non planifié', color: '#6B665E', vide: true };
+  const list = config.absences || [];
+  const a = list.find(function (x) { return x.code === c; }) || list.find(function (x) { return x.code.toLowerCase() === c.toLowerCase(); });
+  return a ? { code: a.code, label: a.label, color: a.color } : null;
+}
+
+/** Codes du planning ni horaire de présence ni type d'absence : sûrement un oubli à déclarer dans les réglages (ou une faute de frappe) */
 function blCodesInconnus(planning, config) {
-  const known = {}, out = {};
-  config.codes.forEach(function (k) { known[k.code] = true; });
+  const out = {};
   planning.rows.forEach(function (r) {
-    r.codes.forEach(function (c) { if (/^\d{1,2}[:h]\d{2}$/.test(c) && !known[c]) out[c] = (out[c] || 0) + 1; });
+    r.codes.forEach(function (c) {
+      if (c && !blStatut(c, config).groupe && !blAbsence(c, config)) out[c] = (out[c] || 0) + 1;
+    });
   });
   return Object.keys(out).sort().map(function (c) { return { code: c, nb: out[c] }; });
 }
@@ -185,6 +210,24 @@ function blPresents(planning, day, config) {
       id: blNorm(r.nom + ' ' + r.prenom), nom: r.nom, prenom: r.prenom, grade: r.grade, code: code,
       groupe: st.groupe, floor: st.floor, chef: !!(g && g.chef), color: g ? g.color : '#cccccc',
       rang: gi >= 0 ? gi : 999, ordre: i,
+    });
+  });
+  return out;
+}
+
+/**
+ * Non présents du jour, dans l'ordre du planning, avec leur type d'absence :
+ * { id, nom, prenom, grade, code, label, color, type } ; type = 'absence' (type reconnu), 'vide' (non planifié) ou 'inconnu' (code non reconnu)
+ */
+function blAbsents(planning, day, config) {
+  const out = [];
+  planning.rows.forEach(function (r, i) {
+    const code = r.codes[day - 1] || '';
+    if (blStatut(code, config).groupe) return;
+    const a = blAbsence(code, config);
+    out.push({
+      id: blNorm(r.nom + ' ' + r.prenom), nom: r.nom, prenom: r.prenom, grade: r.grade, ordre: i, code: code,
+      label: a ? a.label : 'Code non reconnu (' + code + ')', color: a ? a.color : '#D9864A', type: a ? (a.vide ? 'vide' : 'absence') : 'inconnu',
     });
   });
   return out;
@@ -434,7 +477,7 @@ if (typeof module !== 'undefined') {
   module.exports = {
     BL_MOIS: BL_MOIS, BL_JOURS: BL_JOURS, BL_DEFAULT_CONFIG: BL_DEFAULT_CONFIG,
     blNorm: blNorm, blParseDelimited: blParseDelimited, blParsePlanning: blParsePlanning, blMonthKey: blMonthKey,
-    blDiffPlanning: blDiffPlanning, blStatut: blStatut, blCodesInconnus: blCodesInconnus, blPresents: blPresents,
+    blDiffPlanning: blDiffPlanning, blStatut: blStatut, blAbsence: blAbsence, blAbsents: blAbsents, blCodesInconnus: blCodesInconnus, blPresents: blPresents,
     blDureeMinutes: blDureeMinutes, blOctimeRows: blOctimeRows, blParseOctime: blParseOctime, blRapprocher: blRapprocher,
     blNomCourt: blNomCourt, blDeltaH: blDeltaH, blRepartir: blRepartir, blOrdreBreakList: blOrdreBreakList,
     blLignesVerso: blLignesVerso, blAujourdhui: blAujourdhui, blDecodeText: blDecodeText, blDateFr: blDateFr, blOctimeArrete: blOctimeArrete, blArreteAttendu: blArreteAttendu,
