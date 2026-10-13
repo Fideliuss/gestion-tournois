@@ -74,6 +74,7 @@ const NAV = (function () {
     menu:  '<path d="M4 7h16M4 12h16M4 17h16"/>',
     x:     '<path d="M6 6l12 12M18 6L6 18"/>',
     down:  '<path d="M6 9l6 6 6-6"/>',
+    help:  '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.8M12 17h.01"/>',
   };
 
   function el(tag, attrs, kids) {
@@ -97,8 +98,11 @@ const NAV = (function () {
     return s;
   }
 
+  // Guide ouvert par le bouton « Aide » selon l'espace de la page courante (id d'un guide de aide/aide_guides.js) ; sans entrée : la page Aide
+  const HELP = { 'break-list': 'break-list-pour-commencer' };
+
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
-  const PAGES = { 'index.html': {} };
+  const PAGES = { 'index.html': {}, 'aide/aide.html': { help: true } };
   GESTION.groups.forEach(function (g) { g.items.forEach(function (it) { PAGES[it.href] = { admin: true }; }); });
   // Suivi équipe et Configuration des modules restent dans le contexte Training : la barre de l'espace est affichée, « Gestion » surligné
   PAGES[T + 'suivi/suivi_manager.html'].s = 'training';
@@ -243,6 +247,11 @@ const NAV = (function () {
       });
       tools.push(dropdown(abtn, entries, true));
     }
+    // Aide : le guide de l'espace courant (ou la page Aide)
+    const helpTarget = 'aide/aide.html' + (HELP[page.s] ? '#' + HELP[page.s] : '');
+    const helpBtn = el('a', { class: 'nav-btn', href: href(helpTarget), title: 'Aide', 'aria-label': 'Aide' }, [icon('help'), el('span', { class: 'nav-btn-label', text: 'Aide' })]);
+    if (page.help) helpBtn.setAttribute('aria-current', 'page');
+    tools.push(helpBtn);
     const themeBtn = el('button', { class: 'nav-btn nav-theme', type: 'button', 'aria-label': 'Changer de thème', on: { click: function () { toggleTheme(); } } }, [
       icon('sun', 'i-sun'), icon('moon', 'i-moon'),
       el('span', { id: 'theme-icon', hidden: true }), el('span', { id: 'theme-label', class: 'nav-btn-label', text: 'Mode jour' }),
@@ -276,6 +285,7 @@ const NAV = (function () {
     gestion.forEach(function (g) { groups.push(group(GESTION.label + ' · ' + g.title, g.items.map(function (it) { return plink(it.label, it.href, key === it.href); }))); });
     const panel = el('div', { class: 'nav-panel', id: 'nav-panel' }, groups.concat([el('div', { class: 'grp acts' }, [
       el('div', { class: 'who', text: (opts.name ? opts.name + ' · ' : '') + opts.email + ' · ' + roleLabel(opts.role) }),
+      plink('Aide', helpTarget, page.help),
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),
       el('button', { type: 'button', text: 'Changer le mot de passe', on: { click: function () { AUTH._openChangePwd(); } } }),
       el('button', { type: 'button', text: 'Déconnexion', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }),

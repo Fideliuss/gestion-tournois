@@ -195,6 +195,12 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │       ├── roulette_couleur.html / .js     - Couleur Numéro
 │       └── roulette_tables.html / .js      - Tables de multiplication
 │
+├── aide/
+│   ├── aide.html / .js / .css     - Page Aide : liste des guides (selon les droits), guide affiché, impression
+│   ├── aide_guides.js             - Contenu des guides (texte et captures)
+│   ├── captures/                  - Captures des guides (données fictives)
+│   └── outils/                    - captures.js (génération des captures avec Chrome) et donnees_fictives.js
+│
 ├── break_list/
 │   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
 │   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
