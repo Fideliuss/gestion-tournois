@@ -200,7 +200,7 @@ var AIDE_GUIDES = [
 
   {
     id: 'break-list-depannage', space: 'break-list', panel: 'break-list',
-    title: "Dépannage",
+    title: "Résolution des problèmes courants",
     intro: "Les situations les plus courantes, et ce qu'il faut regarder.",
     steps: [
       {
