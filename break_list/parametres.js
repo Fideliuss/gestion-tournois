@@ -1,9 +1,9 @@
 // ══════════════════════════════════════════════════════
-//  BREAK LIST - page « Réglages » : grades, horaires du planning, postes, break list imprimable, rapprochements
+//  BREAK LIST - page « Paramètres » : grades, horaires du planning, postes, break list imprimable, rapprochements
 //  Tout est enregistré en un bloc (table breaklist_config, clé 'config'), complété par les valeurs par défaut.
 // ══════════════════════════════════════════════════════
 
-let W = null;     // copie de travail des réglages
+let W = null;     // copie de travail des paramètres
 
 async function init() {
   W = await blLoadConfig();
@@ -85,7 +85,7 @@ function delAbsence(i) { collect(); W.absences.splice(i, 1); render(); }
 function delAlias(k) { collect(); delete W.aliases[k]; render(); }
 
 function resetDefaults() {
-  if (!confirm('Rétablir tous les réglages d\'origine ? Les rapprochements de noms sont conservés.')) return;
+  if (!confirm('Rétablir tous les paramètres d\'origine ? Les rapprochements de noms sont conservés.')) return;
   const keep = W.aliases;
   W = blMerge(BL_DEFAULT_CONFIG, {});
   W.aliases = keep;
@@ -118,7 +118,7 @@ async function saveConfig() {
   }
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
-  try { await SB.saveBreakListConfig(W); flash('Réglages enregistrés'); }
+  try { await SB.saveBreakListConfig(W); flash('Paramètres enregistrés'); }
   catch (e) { console.error(e); flash('Enregistrement impossible'); }
   btn.disabled = false;
 }

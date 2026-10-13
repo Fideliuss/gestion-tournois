@@ -107,7 +107,7 @@ function renderPending() {
           }).join('') + (diffs.length > 300 ? '<div>… et ' + (diffs.length - 300) + ' autres</div>' : '') + '</div>'
       : '<div class="bl-muted" style="margin-top:8px">Identique au planning enregistré : rien ne change.</div>';
   }
-  if (unk.length) html += '<div class="bl-warn">Codes non reconnus (traités comme absents) : ' + unk.map(function (u) { return esc(u.code) + ' (' + u.nb + ' fois)'; }).join(', ') + '. À déclarer dans <a href="reglages.html" style="text-decoration:underline">Réglages</a> (horaires ou absences) si besoin.</div>';
+  if (unk.length) html += '<div class="bl-warn">Codes non reconnus (traités comme absents) : ' + unk.map(function (u) { return esc(u.code) + ' (' + u.nb + ' fois)'; }).join(', ') + '. À déclarer dans <a href="parametres.html" style="text-decoration:underline">Paramètres</a> (horaires ou absences) si besoin.</div>';
   document.getElementById('pending-body').innerHTML = html;
 }
 

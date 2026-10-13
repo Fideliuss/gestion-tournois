@@ -172,7 +172,7 @@ function renderPresents() {
   addBox.hidden = !absents.length;
 }
 
-/** Carte repliée « Absents ce soir » : les non présents regroupés par type d'absence (ordre des réglages), puis non planifiés, puis codes non reconnus */
+/** Carte repliée « Absents ce soir » : les non présents regroupés par type d'absence (ordre des paramètres), puis non planifiés, puis codes non reconnus */
 function renderAbsents() {
   const box = document.getElementById('abs-box');
   box.hidden = !plan || D.d > plan.days;
@@ -277,14 +277,14 @@ function renderOctime() {
   clr.hidden = !octime;
   um.innerHTML = '';
   if (!octime) { st.textContent = 'Aucune extraction chargée.'; return; }
-  const t = new Date(octime.at), hh = blPad(t.getHours()) + ':' + blPad(t.getMinutes());
+  const t = new Date(octime.at), hh = blPad(t.getHours()) + ':' + blPad(t.getMinutes()), jj = blPad(t.getDate()) + '/' + blPad(t.getMonth() + 1) + '/' + t.getFullYear();
   const total = _presents.length, ok = match ? Object.keys(match.match).length : 0;
   // Les extractions sont arrêtées au dimanche qui suit la soirée (réglable) : une autre date fausse les deltas (repos décalés)
   const arr = blOctimeArrete(octime.rows), attendu = blArreteAttendu(D.y, D.m, D.d, cfg.arreteJour);
   const mauvais = arr != null && arr !== attendu;
   const fr = function (t, long) { return new Date(t).toLocaleDateString('fr-FR', long ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' } : { timeZone: 'UTC' }); };
   const arrTxt = arr == null ? '' : ' · arrêtée au <b' + (mauvais ? ' style="color:#D9864A"' : '') + '>' + fr(arr) + '</b>';
-  st.innerHTML = 'Extraction chargée à <b>' + hh + '</b>' + arrTxt + ' : ' + octime.rows.length + ' salariés lus' + (total ? ' · <b>' + ok + '/' + total + '</b> présents rapprochés' : '')
+  st.innerHTML = 'Extraction chargée le <b>' + jj + '</b> à <b>' + hh + '</b>' + arrTxt + ' : ' + octime.rows.length + ' salariés lus' + (total ? ' · <b>' + ok + '/' + total + '</b> présents rapprochés' : '')
     + (mauvais ? '<br><span style="color:#D9864A">Pour la soirée du ' + esc(blDateLabel(D.y, D.m, D.d)) + ', il faut une extraction arrêtée au <b>' + esc(fr(attendu, true)) + '</b> : sinon les repos décalés faussent les deltas.</span>' : '');
   if (!match || (!match.manquants.length && !match.ambigus.length)) return;
   const names = octime.rows.map(function (r) { return r.nom; }).sort(function (a, b) { return a.localeCompare(b, 'fr'); });

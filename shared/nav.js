@@ -52,7 +52,7 @@ const NAV = (function () {
     { id: 'break-list', label: 'Break list', note: 'Break list du soir, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
       { label: 'Aujourd\'hui', href: BL + 'break_list.html' },
       { label: 'Planning',     href: BL + 'planning.html' },
-      { label: 'Réglages',     href: BL + 'reglages.html' },
+      { label: 'Paramètres',   href: BL + 'parametres.html' },
     ] },
   ];
 

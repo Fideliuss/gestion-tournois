@@ -9,7 +9,7 @@
 const BL_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 const BL_JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 
-// Réglages par défaut : tout se modifie dans la page « Réglages » et s'enregistre dans la base (clé 'config')
+// Réglages par défaut : tout se modifie dans la page « Paramètres » et s'enregistre dans la base (clé 'config')
 const BL_DEFAULT_CONFIG = {
   // Grades du planning, du plus haut au plus bas (l'ordre sert au tri de la break list) ; `chef` : peut être le chef des stackers ou de la salle
   grades: [
@@ -184,7 +184,7 @@ function blAbsence(code, config) {
   return a ? { code: a.code, label: a.label, color: a.color } : null;
 }
 
-/** Codes du planning ni horaire de présence ni type d'absence : sûrement un oubli à déclarer dans les réglages (ou une faute de frappe) */
+/** Codes du planning ni horaire de présence ni type d'absence : sûrement un oubli à déclarer dans les paramètres (ou une faute de frappe) */
 function blCodesInconnus(planning, config) {
   const out = {};
   planning.rows.forEach(function (r) {
@@ -455,7 +455,7 @@ function blRepartir(personnes, opts) {
 
 // ── Break list imprimable ────────────────────────────
 
-/** Présents classés par grade (ordre des réglages) puis par ordre du planning */
+/** Présents classés par grade (ordre des paramètres) puis par ordre du planning */
 function blOrdreBreakList(presents) {
   return presents.slice().sort(function (a, b) { return (a.rang - b.rang) || (a.ordre - b.ordre); });
 }
