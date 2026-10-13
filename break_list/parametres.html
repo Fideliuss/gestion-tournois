@@ -22,7 +22,7 @@
 
   <div class="seg" id="pm-tabs" role="tablist" aria-label="Rubrique">
     <button class="seg-btn active" role="tab" data-tab="equipe"  aria-selected="true"  onclick="showTab('equipe')">Équipe</button>
-    <button class="seg-btn"        role="tab" data-tab="soiree"  aria-selected="false" onclick="showTab('soiree')">Soirée</button>
+    <button class="seg-btn"        role="tab" data-tab="soiree"  aria-selected="false" onclick="showTab('soiree')">Séance</button>
     <button class="seg-btn"        role="tab" data-tab="feuilles" aria-selected="false" onclick="showTab('feuilles')">Feuilles imprimées</button>
   </div>
 
@@ -41,7 +41,7 @@
 
     <div class="card bl-card">
       <div class="sec">Horaires de présence</div>
-      <p class="pm-sub">Les horaires du planning qui veulent dire « présent ce soir ».</p>
+      <p class="pm-sub">Les horaires du planning qui veulent dire « présent à la séance ».</p>
       <table class="cf-tbl">
         <thead><tr><th style="width:120px">Horaire</th><th>Groupe</th><th style="width:100px">C'est le floor</th><th style="width:60px"></th></tr></thead>
         <tbody id="tb-codes"></tbody>
@@ -60,12 +60,12 @@
     </div>
   </section>
 
-  <!-- ══ Soirée : postes, affichage, extraction Octime, rapprochements ══ -->
+  <!-- ══ Séance : postes, affichage, extraction Octime, rapprochements ══ -->
   <section class="pm-view" id="pm-soiree" hidden>
 
     <div class="card bl-card">
-      <div class="sec">Postes proposés chaque soir</div>
-      <p class="pm-sub">Valeurs de départ de la page Départs, que l'on peut changer soir par soir.</p>
+      <div class="sec">Postes proposés à chaque séance</div>
+      <p class="pm-sub">Valeurs de départ de la page Départs, que l'on peut changer séance par séance.</p>
       <div class="pm-rows">
         <div class="pm-row"><div class="pm-txt"><b>Stackers</b><small>Nombre de personnes, dont un chef</small></div><div class="pm-ctl"><input type="number" id="cf-stackers" min="0" max="12"/></div></div>
         <div class="pm-row"><div class="pm-txt"><b>Compteurs</b><small>Nombre de personnes</small></div><div class="pm-ctl"><input type="number" id="cf-compteurs" min="0" max="10"/></div></div>
@@ -78,7 +78,7 @@
       <div class="sec">Affichage</div>
       <div class="pm-rows">
         <div class="pm-row"><div class="pm-txt"><b>Écriture des noms</b><small>Dans la répartition et sur la feuille des départs</small></div><div class="pm-ctl"><select id="cf-affichage"><option value="PRENOM_N">Prénom N. (Alex M.)</option><option value="N_PRENOM">N. Prénom (M. Alex)</option></select></div></div>
-        <div class="pm-row"><div class="pm-txt"><b>Changement de soirée</b><small>Avant cette heure, la page affiche encore la soirée de la veille</small></div><div class="pm-ctl pm-unit"><input type="number" id="cf-bascule" min="0" max="12"/><span>h</span></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Changement de séance</b><small>Avant cette heure, la page affiche encore la séance de la veille</small></div><div class="pm-ctl pm-unit"><input type="number" id="cf-bascule" min="0" max="12"/><span>h</span></div></div>
       </div>
     </div>
 
@@ -101,10 +101,10 @@
 
     <div class="card bl-card">
       <div class="sec">Break list : recto</div>
-      <p class="pm-sub">La grille des pauses, avec les présents du soir à gauche.</p>
+      <p class="pm-sub">La grille des pauses, avec les présents de la séance à gauche.</p>
       <div class="pm-rows">
-        <div class="pm-row"><div class="pm-txt"><b>Colonnes libres</b><small>À remplir à la main pendant la soirée</small></div><div class="pm-ctl"><input type="number" id="cf-colonnes" min="1" max="40"/></div></div>
-        <div class="pm-row"><div class="pm-txt"><b>Liste répétée</b><small>Nombre de fois où la liste des présents est imprimée (2 : la seconde sert quand la soirée déborde)</small></div><div class="pm-ctl"><input type="number" id="cf-blocs" min="1" max="4"/></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Colonnes libres</b><small>À remplir à la main pendant la séance</small></div><div class="pm-ctl"><input type="number" id="cf-colonnes" min="1" max="40"/></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Liste répétée</b><small>Nombre de fois où la liste des présents est imprimée (2 : la seconde sert quand la séance déborde)</small></div><div class="pm-ctl"><input type="number" id="cf-blocs" min="1" max="4"/></div></div>
         <div class="pm-row"><div class="pm-txt"><b>Repère du floor</b><small>Lettre placée à côté de son nom</small></div><div class="pm-ctl"><input type="text" id="cf-floor" maxlength="3"/></div></div>
       </div>
     </div>

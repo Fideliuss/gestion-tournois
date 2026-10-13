@@ -135,6 +135,7 @@
 @media (max-width: 520px) { .bl-rep { grid-template-columns: 1fr; } }
 
 /* ── Planning ── */
+#sel-month option.has { color: #4FB87A; }
 .pl-wrap { overflow-x: auto; }
 .pl-tbl { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 11px; }
 .pl-tbl th, .pl-tbl td { border: 1px solid rgba(195,120,20,.12); text-align: center; padding: 3px 0; overflow: hidden; white-space: nowrap; }

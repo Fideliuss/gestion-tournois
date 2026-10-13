@@ -11,12 +11,6 @@ let saved = [];           // mois déjà enregistrés
 
 async function init() {
   cfg = await blLoadConfig();
-  const sel = document.getElementById('sel-month');
-  BL_MOIS.forEach(function (n, i) {
-    const o = document.createElement('option');
-    o.value = i + 1; o.textContent = n.charAt(0).toUpperCase() + n.slice(1);
-    sel.appendChild(o);
-  });
   const t = blAujourdhui(new Date(), cfg);
   Y = t.year; M = t.month;
   await refresh();
@@ -45,18 +39,21 @@ async function refresh() {
 
 function render() {
   document.getElementById('btn-del').hidden = !plan;
-  document.getElementById('saved-months').innerHTML = saved.length
-    ? 'Plannings enregistrés : ' + saved.map(function (s) {
-        const y = Number(s.mois.slice(0, 4)), m = Number(s.mois.slice(5));
-        return '<a href="#" style="color:var(--gold-dim);text-decoration:underline;margin-right:10px" onclick="goMonth(' + y + ',' + m + ');return false">' + esc(blMonthLabel(y, m)) + '</a>';
-      }).join('')
-    : 'Aucun planning enregistré pour le moment.';
+  fillMonths();
   renderPending();
   document.getElementById('plan-title').textContent = 'Planning de ' + blMonthLabel(Y, M);
   renderTable();
 }
 
-function goMonth(y, m) { Y = y; M = m; pending = null; refresh(); }
+/** Liste des mois de l'année affichée : une coche verte devant chaque mois dont le planning est enregistré */
+function fillMonths() {
+  const sel = document.getElementById('sel-month'), has = {};
+  saved.forEach(function (s) { if (s.mois.slice(0, 4) === String(Y)) has[Number(s.mois.slice(5))] = true; });
+  sel.innerHTML = BL_MOIS.map(function (n, i) {
+    return '<option value="' + (i + 1) + '"' + (has[i + 1] ? ' class="has"' : '') + '>' + (has[i + 1] ? '✓ ' : '') + n.charAt(0).toUpperCase() + n.slice(1) + '</option>';
+  }).join('');
+  sel.value = M;
+}
 
 // ── Import ───────────────────────────────────────────
 

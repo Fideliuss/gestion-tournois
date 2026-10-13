@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  BREAK LIST - page « Aujourd'hui » : présents du soir, extraction Octime, répartition, break list imprimable
+//  BREAK LIST - page « Aujourd'hui » : présents de la séance, extraction Octime, répartition, break list imprimable
 //  Les présents viennent du planning du mois ; l'extraction Octime (deltas de quota) reste dans le navigateur
 //  (sessionStorage, effacée à la fermeture de l'onglet) et n'est jamais envoyée à la base.
 // ══════════════════════════════════════════════════════
@@ -7,7 +7,7 @@
 let cfg = null;
 let plan = null;                  // planning du mois affiché (null = aucun)
 let planMaj = null;               // date de la dernière mise à jour du planning (ISO)
-let D = { y: 0, m: 0, d: 0 };     // soirée affichée
+let D = { y: 0, m: 0, d: 0 };     // séance affichée
 let octime = null;                // { at, rows: [{nom, matricule, minutes}] }
 let match = null;                 // résultat de blRapprocher pour les présents
 const SS_KEY = 'bl_octime';
@@ -104,10 +104,10 @@ function renderAll() {
   renderOctime();
   renderRepartition();
   renderPrint();
-  document.getElementById('dep-date').textContent = 'Soirée du ' + blDateLabel(D.y, D.m, D.d) + ' · ' + _presents.length + ' présents';
+  document.getElementById('dep-date').textContent = 'Séance du ' + blDateLabel(D.y, D.m, D.d) + ' · ' + _presents.length + ' présents';
 }
 
-// ── Effectif du soir : une pastille par horaire du planning, puis le total ──
+// ── Effectif de la séance : une pastille par horaire du planning, puis le total ──
 
 function renderCount() {
   const box = document.getElementById('count-out');
@@ -133,7 +133,7 @@ function codeOptions(current) {
   const abs = cfg.absences.map(function (a) {
     return '<option value="' + esc(a.code) + '">' + esc(a.code) + ' · ' + esc(a.label) + '</option>';
   });
-  return '<optgroup label="Présent">' + opts.join('') + '</optgroup><optgroup label="Absent ce soir">' + abs.join('') + '</optgroup>';
+  return '<optgroup label="Présent">' + opts.join('') + '</optgroup><optgroup label="Absent à la séance">' + abs.join('') + '</optgroup>';
 }
 
 function renderPresents() {
@@ -172,7 +172,7 @@ function renderPresents() {
   addBox.hidden = !absents.length;
 }
 
-/** Carte repliée « Absents ce soir » : les non présents regroupés par type d'absence (ordre des paramètres), puis non planifiés, puis codes non reconnus */
+/** Carte repliée « Absents de la séance » : les non présents regroupés par type d'absence (ordre des paramètres), puis non planifiés, puis codes non reconnus */
 function renderAbsents() {
   const box = document.getElementById('abs-box');
   box.hidden = !plan || D.d > plan.days;
@@ -279,13 +279,13 @@ function renderOctime() {
   if (!octime) { st.textContent = 'Aucune extraction chargée.'; return; }
   const t = new Date(octime.at), hh = blPad(t.getHours()) + ':' + blPad(t.getMinutes()), jj = blPad(t.getDate()) + '/' + blPad(t.getMonth() + 1) + '/' + t.getFullYear();
   const total = _presents.length, ok = match ? Object.keys(match.match).length : 0;
-  // Les extractions sont arrêtées au dimanche qui suit la soirée (réglable) : une autre date fausse les deltas (repos décalés)
+  // Les extractions sont arrêtées au dimanche qui suit la séance (réglable) : une autre date fausse les deltas (repos décalés)
   const arr = blOctimeArrete(octime.rows), attendu = blArreteAttendu(D.y, D.m, D.d, cfg.arreteJour);
   const mauvais = arr != null && arr !== attendu;
   const fr = function (t, long) { return new Date(t).toLocaleDateString('fr-FR', long ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' } : { timeZone: 'UTC' }); };
   const arrTxt = arr == null ? '' : ' · arrêtée au <b' + (mauvais ? ' style="color:#D9864A"' : '') + '>' + fr(arr) + '</b>';
   st.innerHTML = 'Extraction chargée le <b>' + jj + '</b> à <b>' + hh + '</b>' + arrTxt + ' : ' + octime.rows.length + ' salariés lus' + (total ? ' · <b>' + ok + '/' + total + '</b> présents rapprochés' : '')
-    + (mauvais ? '<br><span style="color:#D9864A">Pour la soirée du ' + esc(blDateLabel(D.y, D.m, D.d)) + ', il faut une extraction arrêtée au <b>' + esc(fr(attendu, true)) + '</b> : sinon les repos décalés faussent les deltas.</span>' : '');
+    + (mauvais ? '<br><span style="color:#D9864A">Pour la séance du ' + esc(blDateLabel(D.y, D.m, D.d)) + ', il faut une extraction arrêtée au <b>' + esc(fr(attendu, true)) + '</b> : sinon les repos décalés faussent les deltas.</span>' : '');
   if (!match || (!match.manquants.length && !match.ambigus.length)) return;
   const names = octime.rows.map(function (r) { return r.nom; }).sort(function (a, b) { return a.localeCompare(b, 'fr'); });
   const rowsHtml = match.ambigus.map(function (a) { return [a.p, a.candidats.map(function (c) { return c.nom; })]; })
