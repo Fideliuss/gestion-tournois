@@ -17,7 +17,8 @@ async function init(user) {
     catch (e) { panels = []; }
   }
   // Chacun ne voit que les guides des espaces auxquels il a droit (les admins voient tout)
-  GUIDES = AIDE_GUIDES.filter(function (g) { return isAdmin || !g.panel || panels.indexOf(g.panel) >= 0; });
+  // (un guide marqué `admin: true` ne s'adresse qu'aux administrateurs)
+  GUIDES = AIDE_GUIDES.filter(function (g) { return isAdmin || (!g.admin && (!g.panel || panels.indexOf(g.panel) >= 0)); });
   window.addEventListener('hashchange', show);
   document.getElementById('aide-list').addEventListener('click', function (e) {          // sommaire : défilement jusqu'à l'étape, sans changer de guide
     const a = e.target.closest('a[data-step]');
@@ -25,9 +26,54 @@ async function init(user) {
     e.preventDefault();
     document.getElementById('aide-step-' + a.dataset.step).scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+  initSpaceMenu();
   let busy = false;
   window.addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(function () { busy = false; spy(); }); } }, { passive: true });
   show();
+}
+
+// ── Liste déroulante des espaces (carte stylisée, comme les menus de la barre) ──
+// Les options sont des liens #<espace> : choisir un espace ouvre son premier guide. La carte est en position fixe pour ne pas
+// être coupée par la colonne de gauche, qui défile.
+
+function spaceMenuClose() {
+  const pop = document.querySelector('.aide-dd-pop'), btn = document.querySelector('.aide-dd-btn');
+  if (pop) pop.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function spaceMenuOpen() {
+  const pop = document.querySelector('.aide-dd-pop'), btn = document.querySelector('.aide-dd-btn');
+  if (!pop || !btn) return;
+  const r = btn.getBoundingClientRect();
+  pop.style.top = (r.bottom + 6) + 'px'; pop.style.left = r.left + 'px'; pop.style.width = r.width + 'px';
+  pop.hidden = false;
+  btn.setAttribute('aria-expanded', 'true');
+  const cur = pop.querySelector('[aria-selected="true"]');
+  if (cur) cur.focus({ preventScroll: true });
+}
+
+function initSpaceMenu() {
+  document.getElementById('aide-list').addEventListener('click', function (e) {
+    if (e.target.closest('.aide-dd-btn')) {
+      const open = document.querySelector('.aide-dd-pop').hidden;
+      if (open) spaceMenuOpen(); else spaceMenuClose();
+      return;
+    }
+    const opt = e.target.closest('.aide-dd-opt');
+    if (opt && opt.getAttribute('aria-selected') === 'true') { e.preventDefault(); spaceMenuClose(); }   // espace déjà affiché : rien à changer
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest('.aide-dd')) spaceMenuClose(); });
+  document.addEventListener('keydown', function (e) {
+    const pop = document.querySelector('.aide-dd-pop');
+    if (!pop || pop.hidden) return;
+    if (e.key === 'Escape') { spaceMenuClose(); document.querySelector('.aide-dd-btn').focus(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const opts = Array.prototype.slice.call(pop.querySelectorAll('.aide-dd-opt')), i = opts.indexOf(document.activeElement);
+    opts[(i + (e.key === 'ArrowDown' ? 1 : opts.length - 1)) % opts.length].focus();
+  });
+  window.addEventListener('scroll', spaceMenuClose, { passive: true });
 }
 
 /** Met en évidence, dans le sommaire, l'étape en cours de lecture (la dernière dont le haut a passé le bas de la barre) */
@@ -55,19 +101,27 @@ function show() {
     box.innerHTML = '<div class="aide-empty">Aucun guide n\'est disponible pour vos accès pour le moment.</div>';
     return;
   }
-  // liste groupée par espace
+  // Liste de l'espace du guide affiché seulement ; un sélecteur d'espace n'apparaît que si l'on a accès à plusieurs espaces
+  const g = GUIDES.find(function (x) { return x.id === id; });
   const spaces = [];
-  GUIDES.forEach(function (g) { if (spaces.indexOf(g.space) < 0) spaces.push(g.space); });
-  list.innerHTML = spaces.map(function (s) {
-    return '<div class="aide-grp"><h3>' + esc(AIDE_ESPACES[s] || s) + '</h3>' + GUIDES.filter(function (g) { return g.space === s; }).map(function (g) {
-      return '<a href="#' + esc(g.id) + '"' + (g.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(g.title) + '</a>'
-        + (g.id === id ? '<ol class="aide-toc" aria-label="Sommaire du guide">' + g.steps.map(function (s, k) {
-          return '<li><a href="#" data-step="' + k + '">' + esc(s.title) + '</a></li>';
-        }).join('') + '</ol>' : '');
-    }).join('') + '</div>';
-  }).join('');
+  GUIDES.forEach(function (x) { if (spaces.indexOf(x.space) < 0) spaces.push(x.space); });
+  const switcher = spaces.length > 1
+    ? '<div class="aide-dd"><button type="button" class="aide-dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Espace">'
+      + '<span>' + esc(AIDE_ESPACES[g.space] || g.space) + '</span>'
+      + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'
+      + '<div class="aide-dd-pop" role="listbox" aria-label="Espaces" hidden>' + spaces.map(function (s) {
+        return '<a class="aide-dd-opt" role="option" href="#' + esc(s) + '" aria-selected="' + (s === g.space) + '">' + esc(AIDE_ESPACES[s] || s) + '</a>';
+      }).join('') + '</div></div>'
+    : '';
+  list.innerHTML = switcher + '<div class="aide-grp"><h3>' + esc(AIDE_ESPACES[g.space] || g.space) + '</h3>' + GUIDES.filter(function (x) { return x.space === g.space; }).map(function (x) {
+    return '<a href="#' + esc(x.id) + '"' + (x.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(x.title) + '</a>'
+      + (x.id === id ? '<ol class="aide-toc" aria-label="Sommaire du guide">' + x.steps.map(function (s, k) {
+        return '<li><a href="#" data-step="' + k + '">' + esc(s.title) + '</a></li>';
+      }).join('') + '</ol>' : '');
+  }).join('') + '</div>';
+  if (typeof NAV !== 'undefined' && NAV.setSpace) NAV.setSpace(g.space);          // la barre de navigation suit l'espace du guide lu
 
-  const g = GUIDES.find(function (x) { return x.id === id; }), i = GUIDES.indexOf(g);
+  const mates = GUIDES.filter(function (x) { return x.space === g.space; }), i = mates.indexOf(g);   // guide précédent / suivant : dans le même espace
   box.innerHTML = '<div class="aide-head"><div><span class="aide-tag">' + esc(AIDE_ESPACES[g.space] || g.space) + '</span><h2>' + esc(g.title) + '</h2></div>'
     + '<button class="btn btn-ghost aide-print" type="button" onclick="printGuide()"><i class="ico ico-print"></i> Imprimer ce guide</button></div>'
     + (g.intro ? '<p class="aide-intro">' + g.intro + '</p>' : '')
@@ -75,8 +129,8 @@ function show() {
       return '<li id="aide-step-' + k + '"><div class="aide-step-h"><span class="aide-n"></span><h3>' + esc(s.title) + '</h3></div><div class="aide-txt">' + s.text + '</div>'
         + (s.imgs || []).map(function (im) { return '<figure><img src="' + esc(im.src) + '" alt="' + esc(im.alt || '') + '" loading="lazy"/></figure>'; }).join('') + '</li>';
     }).join('') + '</ol>'
-    + '<div class="aide-nav">' + (GUIDES[i - 1] ? '<a href="#' + esc(GUIDES[i - 1].id) + '">← ' + esc(GUIDES[i - 1].title) + '</a>' : '<span></span>')
-    + (GUIDES[i + 1] ? '<a href="#' + esc(GUIDES[i + 1].id) + '">' + esc(GUIDES[i + 1].title) + ' →</a>' : '') + '</div>';
+    + '<div class="aide-nav">' + (mates[i - 1] ? '<a href="#' + esc(mates[i - 1].id) + '">← ' + esc(mates[i - 1].title) + '</a>' : '<span></span>')
+    + (mates[i + 1] ? '<a href="#' + esc(mates[i + 1].id) + '">' + esc(mates[i + 1].title) + ' →</a>' : '') + '</div>';
   window.scrollTo(0, 0);
   spy();
   document.title = 'Aide - ' + g.title + ' - Barrière Casino Bordeaux';

@@ -406,7 +406,7 @@
     .ranking-doc .rp-doc    { font-family: 'Bebas Neue', sans-serif; display: flex; flex-direction: column; }
     .ranking-doc .rp-top    { text-align: center; }
     .ranking-doc .rp-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px; padding-top: 16px; }
-    .ranking-doc .rp-logo   { height: 48px; width: auto; display: block; margin: 0 auto; }
+    .ranking-doc .rp-logo   { width: 100%; height: auto; display: block; margin: 0 auto; }
     .ranking-doc .rp-hr     { height: 2px; background: #C37814; margin: 16px 0; border: none; }
     .ranking-doc .rp-main-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .08em; color: #873200; margin-bottom: 4px; }
     .ranking-doc .rp-challenge  { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #888; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 4px; }

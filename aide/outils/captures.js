@@ -21,6 +21,14 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; cha
 
 const PLANNING = data.planning(), OCTIME = data.octimeTsv();
 
+// Espace Tournois : barèmes réels de l'application (aucun nom de personne), saison, extras et courriers fictifs
+const TOURNOIS = require('vm').runInNewContext(fs.readFileSync(path.join(ROOT, 'shared', 'tournaments.js'), 'utf8') + ';TOURNAMENT_DEFAULTS');
+const SAISON = data.saison(TOURNOIS), EXTRAS = data.extras(), STAFF = data.encadrement(), TPL = data.courriersGabarits();
+const TOTAUX = {};
+SAISON.results.forEach(function (r) { TOTAUX[r.player] = (TOTAUX[r.player] || 0) + r.points; });
+const PREMIER = Object.keys(TOTAUX).sort(function (a, b) { return TOTAUX[b] - TOTAUX[a]; })[0];
+const SESSION_VENDREDI = SAISON.sessions.filter(function (x) { return x.date === '2026-10-09'; })[0];
+
 // Date figée : mercredi 14 octobre 2026, 20 h
 const FIGE = `<script>(function(){var R=Date,T=new R(2026,9,14,20,0,0).getTime();function D(){if(!(this instanceof D))return new R(T).toString();var a=[].slice.call(arguments);return a.length?new (Function.prototype.bind.apply(R,[null].concat(a)))():new R(T);}D.prototype=R.prototype;D.now=function(){return T};D.UTC=R.UTC;D.parse=R.parse;window.Date=D;})();</script>`;
 
@@ -29,6 +37,16 @@ const BASE = `<script>(function(){var P=${JSON.stringify(PLANNING)};
 window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:async function(){},
 getBreakListPlanning:async function(k){return k==='2026-10'?JSON.parse(JSON.stringify(P)):null},listBreakListPlannings:async function(){return[{mois:'2026-10',updated_at:'2026-10-12T18:05:00.000Z'}]},
 saveBreakListPlanning:async function(){},deleteBreakListPlanning:async function(){},getBreakListConfig:async function(){return null},saveBreakListConfig:async function(){}};})();</script>`;
+
+// Base simulée de l'espace Tournois : administrateur, tournois, saison complète, extras ; rien n'est écrit
+const BASE_TN = `<script>(function(){var R=${JSON.stringify(SAISON.results)},S=${JSON.stringify(SAISON.sessions)},T=${JSON.stringify(TOURNOIS)},X=${JSON.stringify(EXTRAS)};
+var cp=function(o){return JSON.parse(JSON.stringify(o))},nop=async function(){};
+window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
+getResults:async function(){return cp(R)},getResultsByMonth:async function(m){return cp(R.filter(function(r){return r.date.slice(0,7)===m}))},getSessions:async function(){return cp(S)},getSeasonClosures:async function(){return[]},
+insertResults:async function(a){return a},insertSession:nop,updateResult:nop,deleteResult:nop,deleteResultsBySession:nop,updateSession:nop,deleteSession:nop,closeSeason:nop,reopenSeason:nop,
+getTournaments:async function(){return cp(T)},upsertTournament:nop,deleteTournament:nop,getExtras:async function(){return cp(X)},insertExtra:nop,updateExtra:nop,deleteExtra:nop};})();</script>`;
+// Réglages enregistrés dans le navigateur : l'encadrement et les courriers par défaut de l'application contiennent de vrais noms, on les remplace
+const SEED_TN = `<script>try{localStorage.setItem('decl_staff',${JSON.stringify(JSON.stringify(STAFF))});localStorage.setItem('courriers_tpl',${JSON.stringify(JSON.stringify(TPL))});localStorage.setItem('extras_emarg_2026_42',${JSON.stringify(JSON.stringify({ x1: { lun: true, mer: true, ven: true }, x2: { lun: true, mar: true, jeu: true }, x3: { mer: true, ven: true, sam: true, dim: true, _hours: { dim: '17:30' } }, x4: { mar: true, mer: true }, x5: { ven: true, sam: true, dim: true }, x6: { lun: true, jeu: true, ven: true }, x7: { mer: true, jeu: true }, _dayHours: { sam: '21:30' } }))});}catch(e){}</script>`;
 
 const coller = function (txt) { return `var ta=document.getElementById('octime-paste');ta.value=${JSON.stringify(txt)};ta.dispatchEvent(new Event('input'));`; };
 const COLLER = coller(OCTIME);
@@ -65,11 +83,50 @@ const CAPTURES = [
   { nom: 'bl_param_feuilles', page: 'break_list/parametres.html', w: 1180, h: 1500, actions: "showTab('feuilles');", css: MASQUER_BARRE },
 ];
 
+// ── Espace Tournois ──
+const NU = 'header.nav{display:none!important} *{transition:none!important} .decl-toast{display:none!important}';   // sans la barre de navigation
+const PP = "applyPreset('friday-highstack');";
+const SAISIR = "showTab('saisir');setTimeout(function(){onDateChange();setTimeout(function(){var n=['ARNAUD ADRIEN','BERTRAND CLEMENT','CHEVALIER DAMIEN','DELMAS EMILIE','ESTEVE FABIEN'];n.forEach(function(v,i){document.getElementById('player-'+(i+1)).value=v});document.getElementById('inp-entrees').value=64;updateCagnotte();},500)},400);";
+const CAPTURES_TN = [
+  { nom: 'tn_accueil', page: 'tournois.html', w: 1400, h: 330, actions: '', css: '*{transition:none!important}' },
+  { nom: 'tn_menu_admin', page: 'prize_pool/prize_pool.html', w: 1400, h: 440, actions: "Array.prototype.find.call(document.querySelectorAll('nav.nav-items button'),function(b){return /Administration/.test(b.textContent)}).click();", css: '*{transition:none!important}' },
+  // Prize Pool
+  { nom: 'pp_choix', page: 'prize_pool/prize_pool.html', w: 1180, h: 640, actions: PP, css: NU + SEULE_CARTE('.card-print') },
+  { nom: 'pp_tournoi', page: 'prize_pool/prize_pool.html', w: 1180, h: 1080, actions: PP + "suggest();", css: NU + SEULE_CARTE('.pp-presets-card') + SEULE_CARTE('.app > .card:not(.card-print):not(.pp-presets-card)') },
+  { nom: 'pp_restant', page: 'prize_pool/prize_pool.html', w: 1180, h: 820, actions: PP + "clearAmounts();[1500,1100,850,650,500,400,300,250].forEach(function(v,i){document.getElementById('amt-'+(i+1)).value=v;onAmountChange(i+1,v)});", css: NU + SEULE_CARTE('.pp-presets-card') + SEULE_CARTE('.app > .card:not(.card-print):not(.pp-presets-card)') + SEULE_CARTE('.card-print .igrid-2') + SEULE_CARTE('.tog-row') + SEULE_CARTE('.suggest-row') },
+  // Challenge saisonnier
+  { nom: 'lb_classement', page: 'leaderboard/leaderboard.html', w: 1180, h: 1100, actions: '', css: NU },
+  { nom: 'lb_saisir', page: 'leaderboard/leaderboard.html', w: 1180, h: 1120, actions: SAISIR, css: NU },
+  { nom: 'lb_doublon', page: 'leaderboard/leaderboard.html', w: 1180, h: 560, actions: "showTab('saisir');setTimeout(function(){document.getElementById('inp-date').value='2026-10-09';onDateChange();setTimeout(function(){window.scrollTo(0,0)},800)},400);", css: NU + SEULE_CARTE('.hdr') },
+  { nom: 'lb_historique', page: 'leaderboard/leaderboard.html', w: 1180, h: 1250, actions: "showTab('historique');setTimeout(function(){toggleCalSession(" + SESSION_VENDREDI.id + ")},700);", css: NU },
+  { nom: 'lb_ranking', page: 'leaderboard/leaderboard.html', w: 1400, h: 820, actions: "showTab('ranking');", css: NU },
+  { nom: 'lb_joueur', page: 'leaderboard/leaderboard.html', w: 1180, h: 760, actions: "openPlayerModal(" + JSON.stringify(PREMIER) + ");", css: NU },
+  { nom: 'lb_saison', page: 'leaderboard/leaderboard.html', w: 1180, h: 820, actions: "setTimeout(function(){openCloseSeason()},600);", css: NU },
+  // Administration : déclarations
+  { nom: 'ad_declaration', page: 'admin/declaration/declaration.html', w: 1280, h: 900, actions: '', css: NU },
+  { nom: 'ad_decl_extras', page: 'admin/declaration/declaration.html', w: 1280, h: 760, actions: "showDeclaration('extras');", css: NU },
+  { nom: 'ad_decl_reglages', page: 'admin/declaration/declaration.html', w: 1280, h: 640, actions: "openView('cfg');", css: NU },
+  { nom: 'ad_decl_encadrement', page: 'admin/declaration/declaration.html', w: 1280, h: 780, actions: "openView('cfg');showDeclTab('encadrement');", css: NU },
+  { nom: 'ad_decl_annexes', page: 'admin/declaration/declaration.html', w: 1280, h: 900, actions: "openView('cfg');showDeclTab('annexes');", css: NU },
+  { nom: 'ad_decl_adhoc', page: 'admin/declaration/declaration.html', w: 1280, h: 1060, actions: "openView('adhoc');document.getElementById('adhoc-date').value='2026-11-14';document.getElementById('adhoc-cave').value=200;document.getElementById('adhoc-annexe').value=4;addAdhoc();document.getElementById('exc-date').value='2026-11-20';onExcDateChange();applyException();", css: NU },
+  // Administration : courriers
+  { nom: 'ad_courrier', page: 'admin/declaration/courriers.html', w: 1180, h: 560, actions: '', css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier_reglages', page: 'admin/declaration/courriers.html', w: 1180, h: 1010, actions: "toggleTplPanel();", css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier_annul', page: 'admin/declaration/courriers.html', w: 1180, h: 900, actions: "selectDocType('annulation');['2026-11-17','2026-11-24'].forEach(function(d){document.getElementById('annul-date-input').value=d;addAnnulDate()});document.getElementById('annul-motif').value='de travaux prévus dans la salle de poker';renderAnnulation();", css: NU + '.letter-preview-wrap{display:none!important}' },
+  // Administration : extras
+  { nom: 'ad_extras_liste', page: 'admin/extras/extras.html', w: 1180, h: 800, actions: '', css: NU },
+  { nom: 'ad_extras_emarg', page: 'admin/extras/extras.html', w: 1180, h: 900, actions: "showTab('emargement');", css: NU + '#emarg-output{display:none!important}' },
+  // Administration : calendrier et barèmes
+  { nom: 'ad_calendrier', page: 'admin/config_tournois.html', w: 1280, h: 820, actions: '', css: NU },
+  { nom: 'ad_calendrier_form', page: 'admin/config_tournois.html', w: 1180, h: 760, actions: "editTournament('friday-highstack');", css: NU },
+];
+CAPTURES.push.apply(CAPTURES, CAPTURES_TN);
+
 function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
   h = h.replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2"><\/script>\s*/, '')
-    .replace(/<script src="[^"]*supabase\.js"><\/script>/, BASE)
-    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE)   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
+    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : BASE_TN; })
+    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 ? '' : SEED_TN))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')
     .replace('</body>', '<script>window.addEventListener("load",function(){setTimeout(function(){' + c.actions + '},900)});</script></body>');
   const file = path.join(path.dirname(path.join(ROOT, c.page)), '_qa_aide_' + c.nom + '.html');
@@ -87,7 +144,7 @@ const server = http.createServer(function (req, res) {
 /** Lance Chrome sans interface (asynchrone : le serveur local doit pouvoir répondre pendant ce temps) ; échoue après 60 s */
 function photographier(url, png, w, h) {
   return new Promise(function (resolve) {
-    const p = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1', '--window-size=' + w + ',' + h,
+    const p = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--lang=fr-FR', '--force-device-scale-factor=1', '--window-size=' + w + ',' + h,
       '--virtual-time-budget=9000', '--screenshot=' + png, url], { stdio: 'ignore' });
     const t = setTimeout(function () { p.kill(); resolve(false); }, 60000);
     p.on('exit', function (code) { clearTimeout(t); resolve(code === 0 && fs.existsSync(png)); });
