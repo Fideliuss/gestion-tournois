@@ -197,9 +197,9 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── break_list/
 │   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
 │   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
-│   ├── break_list_common.js       - Réglages, messages et dates communs aux pages
+│   ├── break_list_common.js       - Paramètres, messages et dates communs aux pages
 │   ├── planning.html / .js        - Import du planning mensuel (CSV), consultation, correction d'une case
-│   ├── reglages.html / .js        - Grades, horaires, postes, break list imprimable, rapprochements
+│   ├── parametres.html / .js      - Grades, horaires, absences, postes, break list imprimable, rapprochements
 │   └── break_list.css
 │
 └── supabase/

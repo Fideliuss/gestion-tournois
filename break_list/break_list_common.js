@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  BREAK LIST - helpers communs aux pages (réglages, messages, dates)
+//  BREAK LIST - helpers communs aux pages (paramètres, messages, dates)
 //  À charger après break_list_core.js et supabase.js
 // ══════════════════════════════════════════════════════
 
@@ -15,10 +15,10 @@ function blMerge(def, over) {
   return out;
 }
 
-/** Réglages enregistrés, complétés par les valeurs par défaut pour toute clé manquante */
+/** Paramètres enregistrés, complétés par les valeurs par défaut pour toute clé manquante */
 async function blLoadConfig() {
   let saved = null;
-  try { saved = await SB.getBreakListConfig(); } catch (e) { console.warn('Réglages Break list : lecture impossible', e); }
+  try { saved = await SB.getBreakListConfig(); } catch (e) { console.warn('Paramètres Break list : lecture impossible', e); }
   BL_CONFIG = blMerge(BL_DEFAULT_CONFIG, saved);
   return BL_CONFIG;
 }
@@ -35,6 +35,12 @@ function blDateLabel(y, m, d) {
 }
 
 function blDaysIn(y, m) { return new Date(y, m, 0).getDate(); }
+
+/** « d'Octobre » devant une voyelle (Avril, Août, Octobre), « de Novembre » sinon : à placer après « Planning », « Remplacer le planning »... */
+function blMoisDe(m) {
+  const n = BL_MOIS[m - 1], nom = n.charAt(0).toUpperCase() + n.slice(1);
+  return (/^[aeiouyh]/i.test(n) ? "d'" : 'de ') + nom;
+}
 
 function blMonthLabel(y, m) {
   const n = BL_MOIS[m - 1];

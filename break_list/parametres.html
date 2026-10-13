@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paramètres - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css"/>
+  <link rel="stylesheet" href="break_list.css"/>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
+</button>
+
+<div class="app">
+  <a href="../index.html" class="back">← Accueil</a>
+
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Break list <em>paramètres</em></div>
+  </div>
+
+  <div class="seg" id="pm-tabs" role="tablist" aria-label="Rubrique">
+    <button class="seg-btn active" role="tab" data-tab="equipe"  aria-selected="true"  onclick="showTab('equipe')">Équipe</button>
+    <button class="seg-btn"        role="tab" data-tab="soiree"  aria-selected="false" onclick="showTab('soiree')">Séance</button>
+    <button class="seg-btn"        role="tab" data-tab="feuilles" aria-selected="false" onclick="showTab('feuilles')">Feuilles imprimées</button>
+  </div>
+
+  <!-- ══ Équipe : grades, horaires, absences ══ -->
+  <section class="pm-view" id="pm-equipe">
+
+    <div class="card bl-card">
+      <div class="sec">Grades</div>
+      <p class="pm-sub">Ils classent et colorent les noms de la break list, dans l'ordre ci-dessous.</p>
+      <table class="cf-tbl">
+        <thead><tr><th style="width:100px">Code</th><th>Nom du grade</th><th style="width:76px">Couleur</th><th style="width:90px">Peut être chef</th><th style="width:130px"></th></tr></thead>
+        <tbody id="tb-grades"></tbody>
+      </table>
+      <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="addGrade()"><i class="ico ico-plus"></i> Ajouter un grade</button></div>
+    </div>
+
+    <div class="card bl-card">
+      <div class="sec">Horaires de présence</div>
+      <p class="pm-sub">Les horaires du planning qui veulent dire « présent à la séance ».</p>
+      <table class="cf-tbl">
+        <thead><tr><th style="width:120px">Horaire</th><th>Groupe</th><th style="width:100px">C'est le floor</th><th style="width:60px"></th></tr></thead>
+        <tbody id="tb-codes"></tbody>
+      </table>
+      <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="addCode()"><i class="ico ico-plus"></i> Ajouter un horaire</button></div>
+    </div>
+
+    <div class="card bl-card">
+      <div class="sec">Types d'absence</div>
+      <p class="pm-sub">Les autres codes du planning : pourquoi quelqu'un n'est pas là. Une case vide veut dire « non planifié ».</p>
+      <table class="cf-tbl">
+        <thead><tr><th style="width:120px">Code</th><th>Signification</th><th style="width:76px">Couleur</th><th style="width:60px"></th></tr></thead>
+        <tbody id="tb-absences"></tbody>
+      </table>
+      <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="addAbsence()"><i class="ico ico-plus"></i> Ajouter un type d'absence</button></div>
+    </div>
+  </section>
+
+  <!-- ══ Séance : postes, affichage, extraction Octime, rapprochements ══ -->
+  <section class="pm-view" id="pm-soiree" hidden>
+
+    <div class="card bl-card">
+      <div class="sec">Postes proposés à chaque séance</div>
+      <p class="pm-sub">Valeurs de départ de la page Départs, que l'on peut changer séance par séance.</p>
+      <div class="pm-rows">
+        <div class="pm-row"><div class="pm-txt"><b>Stackers</b><small>Nombre de personnes, dont un chef</small></div><div class="pm-ctl"><input type="number" id="cf-stackers" min="0" max="12"/></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Compteurs</b><small>Nombre de personnes</small></div><div class="pm-ctl"><input type="number" id="cf-compteurs" min="0" max="10"/></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Cartes</b><small>Nombre de personnes</small></div><div class="pm-ctl"><input type="number" id="cf-cartes" min="0" max="10"/></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Salle ouverte</b><small>Un chef est alors placé en salle</small></div><div class="pm-ctl"><select id="cf-salle"><option value="0">Non</option><option value="1">Oui</option></select></div></div>
+      </div>
+    </div>
+
+    <div class="card bl-card">
+      <div class="sec">Affichage</div>
+      <div class="pm-rows">
+        <div class="pm-row"><div class="pm-txt"><b>Écriture des noms</b><small>Dans la répartition et sur la feuille des départs</small></div><div class="pm-ctl"><select id="cf-affichage"><option value="PRENOM_N">Prénom N. (Alex M.)</option><option value="N_PRENOM">N. Prénom (M. Alex)</option></select></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Changement de séance</b><small>Avant cette heure, la page affiche encore la séance de la veille</small></div><div class="pm-ctl pm-unit"><input type="number" id="cf-bascule" min="0" max="12"/><span>h</span></div></div>
+      </div>
+    </div>
+
+    <div class="card bl-card">
+      <div class="sec">Extraction Octime</div>
+      <div class="pm-rows">
+        <div class="pm-row"><div class="pm-txt"><b>Arrêtée le</b><small>Jour d'arrêt attendu pour le fichier ; l'application avertit s'il est arrêté un autre jour, car les repos décalés fausseraient les deltas</small></div><div class="pm-ctl"><select id="cf-arrete"><option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option><option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option></select></div></div>
+      </div>
+    </div>
+
+    <div class="card bl-card">
+      <div class="sec">Rapprochements de noms</div>
+      <p class="pm-sub">Un nom du planning relié à son nom dans Octime, quand ils sont écrits différemment. Ils se créent depuis la page Départs.</p>
+      <div id="alias-out"></div>
+    </div>
+  </section>
+
+  <!-- ══ Feuilles imprimées : break list (recto, verso) ══ -->
+  <section class="pm-view" id="pm-feuilles" hidden>
+
+    <div class="card bl-card">
+      <div class="sec">Break list : recto</div>
+      <p class="pm-sub">La grille des pauses, avec les présents de la séance à gauche.</p>
+      <div class="pm-rows">
+        <div class="pm-row"><div class="pm-txt"><b>Colonnes libres</b><small>À remplir à la main pendant la séance</small></div><div class="pm-ctl"><input type="number" id="cf-colonnes" min="1" max="40"/></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Liste répétée</b><small>Nombre de fois où la liste des présents est imprimée (2 : la seconde sert quand la séance déborde)</small></div><div class="pm-ctl"><input type="number" id="cf-blocs" min="1" max="4"/></div></div>
+        <div class="pm-row"><div class="pm-txt"><b>Repère du floor</b><small>Lettre placée à côté de son nom</small></div><div class="pm-ctl"><input type="text" id="cf-floor" maxlength="3"/></div></div>
+      </div>
+    </div>
+
+    <div class="card bl-card">
+      <div class="sec">Break list : verso</div>
+      <p class="pm-sub">Le tableau de situation des tables.</p>
+      <div class="pm-rows">
+        <div class="pm-row"><div class="pm-txt"><b>Colonnes</b><small>Une par moment de relevé</small></div><div class="pm-ctl"><input type="number" id="cf-colverso" min="1" max="8"/></div></div>
+        <div class="pm-row pm-col"><div class="pm-txt"><b>Lignes du tableau</b><small>Une ligne par table. Une ligne qui commence par TOTAL est grisée</small></div><textarea id="cf-tables" spellcheck="false"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card bl-card">
+      <div class="sec">Aperçu</div>
+      <div class="pm-prev" id="pm-prev"></div>
+    </div>
+  </section>
+
+  <div class="pm-foot bl-card"><button class="btn btn-ghost btn-sm" onclick="resetDefaults()">Rétablir les valeurs d'origine</button></div>
+
+  <!-- Barre d'enregistrement : visible dès qu'une modification n'est pas enregistrée -->
+  <div class="pm-bar" id="pm-bar" hidden>
+    <span>Modifications non enregistrées</span>
+    <button class="btn btn-ghost btn-sm" onclick="cancelChanges()">Annuler</button>
+    <button class="btn btn-gold btn-sm" id="btn-save" onclick="saveConfig()">Enregistrer</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="break_list_core.js"></script>
+<script src="break_list_common.js"></script>
+<script src="parametres.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', panel: 'break-list' }).then(function (u) { if (u) init(); });</script>
+</body>
+</html>

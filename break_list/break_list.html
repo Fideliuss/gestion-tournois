@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Break list du soir - Barrière Casino Bordeaux</title>
+  <title>Break list - Barrière Casino Bordeaux</title>
   <link rel="stylesheet" href="../shared/barriere.css"/>
   <link rel="stylesheet" href="break_list.css"/>
 </head>
@@ -22,13 +22,14 @@
       <i>|</i>
       <button type="button" role="tab" data-part="departs" aria-selected="false" onclick="showPart('departs')">Départs</button>
     </div>
+    <div class="bl-day" id="day-line"></div>
   </div>
 
-  <!-- ══ Break list : la soirée, les présents, l'impression de la feuille ══ -->
+  <!-- ══ Break list : la séance, les présents, l'impression de la feuille ══ -->
   <section class="bl-part bl-view bl-no-print" id="part-breaklist">
 
     <div class="card bl-card">
-      <div class="sec">Soirée</div>
+      <div class="sec">Séance</div>
       <div class="period-row">
         <div class="fg fg-date">
           <label class="fl">Date</label>
@@ -50,7 +51,7 @@
     </div>
 
     <div class="card bl-card">
-      <div class="sec">Présents ce soir</div>
+      <div class="sec">Présents de la séance</div>
       <div class="bl-eff" id="count-out" hidden></div>
       <div id="presents-out"></div>
       <div class="bl-add" id="add-box" hidden>
@@ -61,15 +62,13 @@
     </div>
 
     <details class="card bl-card bl-abs" id="abs-box" hidden>
-      <summary><span class="sec">Absents ce soir <b id="abs-count"></b></span></summary>
+      <summary><span class="sec">Absents de la séance <b id="abs-count"></b></span></summary>
       <div id="abs-out"></div>
     </details>
   </section>
 
   <!-- ══ Départs : extraction Octime et répartition ══ -->
   <section class="bl-part bl-view bl-no-print" id="part-departs" hidden>
-
-    <div class="bl-muted bl-card" id="dep-date" style="margin:-8px 0 16px"></div>
 
     <div class="card bl-card">
       <div class="sec">Extraction Octime</div>
