@@ -11,12 +11,6 @@ let saved = [];           // mois déjà enregistrés
 
 async function init() {
   cfg = await blLoadConfig();
-  const sel = document.getElementById('sel-month');
-  BL_MOIS.forEach(function (n, i) {
-    const o = document.createElement('option');
-    o.value = i + 1; o.textContent = n.charAt(0).toUpperCase() + n.slice(1);
-    sel.appendChild(o);
-  });
   const t = blAujourdhui(new Date(), cfg);
   Y = t.year; M = t.month;
   await refresh();
@@ -45,18 +39,21 @@ async function refresh() {
 
 function render() {
   document.getElementById('btn-del').hidden = !plan;
-  document.getElementById('saved-months').innerHTML = saved.length
-    ? 'Plannings enregistrés : ' + saved.map(function (s) {
-        const y = Number(s.mois.slice(0, 4)), m = Number(s.mois.slice(5));
-        return '<a href="#" style="color:var(--gold-dim);text-decoration:underline;margin-right:10px" onclick="goMonth(' + y + ',' + m + ');return false">' + esc(blMonthLabel(y, m)) + '</a>';
-      }).join('')
-    : 'Aucun planning enregistré pour le moment.';
+  fillMonths();
   renderPending();
-  document.getElementById('plan-title').textContent = 'Planning de ' + blMonthLabel(Y, M);
+  document.getElementById('plan-title').textContent = 'Planning ' + blMoisDe(M) + ' ' + Y;
   renderTable();
 }
 
-function goMonth(y, m) { Y = y; M = m; pending = null; refresh(); }
+/** Liste des mois de l'année affichée : une coche verte devant chaque mois dont le planning est enregistré */
+function fillMonths() {
+  const sel = document.getElementById('sel-month'), has = {};
+  saved.forEach(function (s) { if (s.mois.slice(0, 4) === String(Y)) has[Number(s.mois.slice(5))] = true; });
+  sel.innerHTML = BL_MOIS.map(function (n, i) {
+    return '<option value="' + (i + 1) + '"' + (has[i + 1] ? ' class="has"' : '') + '>' + (has[i + 1] ? '✓ ' : '') + n.charAt(0).toUpperCase() + n.slice(1) + '</option>';
+  }).join('');
+  sel.value = M;
+}
 
 // ── Import ───────────────────────────────────────────
 
@@ -94,7 +91,7 @@ function renderPending() {
   if (!pending) return;
   const p = pending.planning, old = pending.old, diffs = old ? blDiffPlanning(old, p) : [];
   const unk = blCodesInconnus(p, cfg);
-  document.getElementById('pending-title').textContent = (old ? 'Remplacer le planning de ' : 'Nouveau planning de ') + blMonthLabel(p.year, p.month);
+  document.getElementById('pending-title').textContent = (old ? 'Remplacer le planning ' : 'Nouveau planning ') + blMoisDe(p.month) + ' ' + p.year;
   document.getElementById('btn-confirm').textContent = old ? 'Remplacer le planning' : 'Enregistrer le planning';
   let html = '<div class="bl-muted">' + p.rows.length + ' salariés · ' + p.days + ' jours.</div>';
   if (old) {
@@ -107,7 +104,7 @@ function renderPending() {
           }).join('') + (diffs.length > 300 ? '<div>… et ' + (diffs.length - 300) + ' autres</div>' : '') + '</div>'
       : '<div class="bl-muted" style="margin-top:8px">Identique au planning enregistré : rien ne change.</div>';
   }
-  if (unk.length) html += '<div class="bl-warn">Codes non reconnus (traités comme absents) : ' + unk.map(function (u) { return esc(u.code) + ' (' + u.nb + ' fois)'; }).join(', ') + '. À déclarer dans <a href="reglages.html" style="text-decoration:underline">Réglages</a> (horaires ou absences) si besoin.</div>';
+  if (unk.length) html += '<div class="bl-warn">Codes non reconnus (traités comme absents) : ' + unk.map(function (u) { return esc(u.code) + ' (' + u.nb + ' fois)'; }).join(', ') + '. À déclarer dans <a href="parametres.html" style="color:inherit;text-decoration:underline">Paramètres</a> (horaires ou absences) si besoin.</div>';
   document.getElementById('pending-body').innerHTML = html;
 }
 
@@ -127,7 +124,7 @@ async function confirmImport() {
 function cancelImport() { pending = null; refresh(); }
 
 async function deletePlanning() {
-  if (!plan || !confirm('Supprimer le planning de ' + blMonthLabel(Y, M) + ' ?')) return;
+  if (!plan || !confirm('Supprimer le planning ' + blMoisDe(M) + ' ' + Y + ' ?')) return;
   try { await SB.deleteBreakListPlanning(blMonthKey(Y, M)); flash('Planning supprimé'); await refresh(); }
   catch (e) { console.error(e); flash('Suppression impossible'); }
 }

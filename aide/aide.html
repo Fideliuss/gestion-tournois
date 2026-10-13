@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aide - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css"/>
+  <link rel="stylesheet" href="aide.css"/>
+</head>
+<body>
+
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title"><em>Aide</em></div>
+  </div>
+
+  <div class="aide-wrap">
+    <nav class="aide-list" id="aide-list" aria-label="Guides"></nav>
+    <article class="card aide-guide" id="aide-guide"></article>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="aide_guides.js"></script>
+<script src="aide.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html' }).then(function (u) { if (u) init(u); });</script>
+</body>
+</html>

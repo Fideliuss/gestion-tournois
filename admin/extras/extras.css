@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    extras.css - Gestion des Extras : liste et émargement
-   Barrière Casino Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Tournois
 ═══════════════════════════════════════════════════════ */
 
 /* ── Conteneurs d'onglets (centrage) ── */
@@ -200,8 +200,6 @@ body.light .xt-modal { background: rgba(255,252,244,.98); box-shadow: 0 8px 32px
   html, body { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important; }
 
   /* Masquer UI commune dans les deux modes */
-  body[data-print] .theme-toggle,
-  body[data-print] .back,
   body[data-print] .hdr,
   body[data-print] #xt-tabs,
   body[data-print] .footer,

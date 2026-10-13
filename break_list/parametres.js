@@ -1,13 +1,58 @@
 // ══════════════════════════════════════════════════════
-//  BREAK LIST - page « Réglages » : grades, horaires du planning, postes, break list imprimable, rapprochements
+//  BREAK LIST - page « Paramètres » : grades, horaires du planning, postes, break list imprimable, rapprochements
 //  Tout est enregistré en un bloc (table breaklist_config, clé 'config'), complété par les valeurs par défaut.
 // ══════════════════════════════════════════════════════
 
-let W = null;     // copie de travail des réglages
+let W = null;     // copie de travail des paramètres
+let dirty = false;
 
 async function init() {
   W = await blLoadConfig();
   render();
+  let tab = 'equipe';
+  try { tab = sessionStorage.getItem('pm_tab') || 'equipe'; } catch (e) { tab = 'equipe'; }
+  showTab(tab);
+  // toute saisie ou tout choix dans la page marque une modification non enregistrée
+  document.querySelector('.app').addEventListener('input', function (e) { if (e.target.closest('.pm-view')) { markDirty(); if (e.target.closest('#pm-feuilles')) { collect(); renderPreview(); } } });
+  document.querySelector('.app').addEventListener('change', function (e) { if (e.target.closest('.pm-view')) { markDirty(); collect(); renderPreview(); } });
+  window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+}
+
+function showTab(name) {
+  try { sessionStorage.setItem('pm_tab', name); } catch (e) { /* stockage indisponible : l'onglet n'est pas retenu */ }
+  document.querySelectorAll('#pm-tabs .seg-btn').forEach(function (b) {
+    const on = b.dataset.tab === name;
+    b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on));
+  });
+  ['equipe', 'soiree', 'feuilles'].forEach(function (t) { document.getElementById('pm-' + t).hidden = t !== name; });
+}
+
+function markDirty() { dirty = true; document.getElementById('pm-bar').hidden = false; }
+function clearDirty() { dirty = false; document.getElementById('pm-bar').hidden = true; }
+
+async function cancelChanges() {
+  W = await blLoadConfig();
+  render();
+  clearDirty();
+}
+
+/** Aperçu des deux feuilles d'après les paramètres en cours de saisie */
+function renderPreview() {
+  const b = W.breaklist, cols = Math.max(1, b.colonnes | 0), blocs = Math.max(1, b.blocs | 0), kc = Math.max(1, b.colonnesVerso | 0);
+  const cells = function (n) { return '<i></i>'.repeat(n); };
+  const names = ['Alex', 'Basile', 'Camille', 'Dorian'];
+  let recto = '<div class="pv-title">Breaklist du mercredi 07 octobre</div>';
+  for (let k = 0; k < blocs; k++) {
+    recto += '<div class="pv-block">' + names.map(function (n, i) {
+      const g = W.grades[i % Math.max(W.grades.length, 1)];
+      return '<div class="pv-row"><span class="pv-n" style="background:' + esc(g ? g.color : '#ccc') + '">' + n + '</span><span class="pv-g" style="grid-template-columns:repeat(' + cols + ',1fr)">'
+        + (i === 1 ? '<i>' + esc(b.floorMarque) + '</i>' + cells(cols - 1) : cells(cols)) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  const verso = b.tables.map(function (l) {
+    return '<div class="pv-row' + (/^TOTAL\b/i.test(l) ? ' tot' : '') + '"><span class="pv-n">' + esc(l) + '</span><span class="pv-g" style="grid-template-columns:repeat(' + kc + ',1fr)">' + cells(kc) + '</span></div>';
+  }).join('');
+  document.getElementById('pm-prev').innerHTML = '<div><div class="pv-cap">Recto</div><div class="pv-sheet">' + recto + '</div></div><div><div class="pv-cap">Verso</div><div class="pv-sheet pv-v">' + verso + '</div></div>';
 }
 
 function render() {
@@ -49,6 +94,7 @@ function render() {
   document.getElementById('alias-out').innerHTML = al.length ? al.map(function (k) {
     return '<div class="cf-alias"><span>' + esc(k) + ' <small>→ ' + esc(W.aliases[k]) + '</small></span><button class="btn btn-icon danger" title="Supprimer" onclick="delAlias(this.dataset.k)" data-k="' + esc(k) + '"><i class="ico ico-del"></i></button></div>';
   }).join('') : '<div class="bl-muted">Aucun rapprochement enregistré.</div>';
+  renderPreview();
 }
 
 /** Relit les champs de la page dans la copie de travail (avant toute modification de structure) */
@@ -75,20 +121,21 @@ function collect() {
   };
 }
 
-function addGrade() { collect(); W.grades.push({ code: '', label: '', color: '#CCCCCC', chef: false }); render(); }
-function delGrade(i) { collect(); W.grades.splice(i, 1); render(); }
-function moveGrade(i, d) { collect(); const g = W.grades.splice(i, 1)[0]; W.grades.splice(i + d, 0, g); render(); }
-function addCode() { collect(); W.codes.push({ code: '', groupe: '21h', floor: false }); render(); }
-function delCode(i) { collect(); W.codes.splice(i, 1); render(); }
-function addAbsence() { collect(); W.absences.push({ code: '', label: '', color: '#8C8577' }); render(); }
-function delAbsence(i) { collect(); W.absences.splice(i, 1); render(); }
-function delAlias(k) { collect(); delete W.aliases[k]; render(); }
+function addGrade() { collect(); W.grades.push({ code: '', label: '', color: '#CCCCCC', chef: false }); markDirty(); render(); }
+function delGrade(i) { collect(); W.grades.splice(i, 1); markDirty(); render(); }
+function moveGrade(i, d) { collect(); const g = W.grades.splice(i, 1)[0]; W.grades.splice(i + d, 0, g); markDirty(); render(); }
+function addCode() { collect(); W.codes.push({ code: '', groupe: '21h', floor: false }); markDirty(); render(); }
+function delCode(i) { collect(); W.codes.splice(i, 1); markDirty(); render(); }
+function addAbsence() { collect(); W.absences.push({ code: '', label: '', color: '#8C8577' }); markDirty(); render(); }
+function delAbsence(i) { collect(); W.absences.splice(i, 1); markDirty(); render(); }
+function delAlias(k) { collect(); delete W.aliases[k]; markDirty(); render(); }
 
 function resetDefaults() {
-  if (!confirm('Rétablir tous les réglages d\'origine ? Les rapprochements de noms sont conservés.')) return;
+  if (!confirm('Rétablir tous les paramètres d\'origine ? Les rapprochements de noms sont conservés.')) return;
   const keep = W.aliases;
   W = blMerge(BL_DEFAULT_CONFIG, {});
   W.aliases = keep;
+  markDirty();
   render();
   flash('Valeurs d\'origine chargées : pensez à enregistrer');
 }
@@ -118,7 +165,7 @@ async function saveConfig() {
   }
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
-  try { await SB.saveBreakListConfig(W); flash('Réglages enregistrés'); }
+  try { await SB.saveBreakListConfig(W); clearDirty(); flash('Paramètres enregistrés'); }
   catch (e) { console.error(e); flash('Enregistrement impossible'); }
   btn.disabled = false;
 }

@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    courriers.js - Générateur de courriers PN
-   Barrière Casino Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Tournois
 ═══════════════════════════════════════════════════════ */
 
 /* ── Constantes ── */

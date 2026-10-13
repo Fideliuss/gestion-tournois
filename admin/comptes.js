@@ -19,12 +19,12 @@ let _emailTouched = false;                          // l'adresse proposée n'est
 
 // `short` : intitulé de la colonne dans la matrice
 const PANELS = [
-  { id: 'tournois', label: 'Outils Tournois', children: [
+  { id: 'tournois', label: 'Tournois', children: [
     { id: 'prize-pool',     label: 'Prize Pool',              short: 'Prize Pool'      },
     { id: 'leaderboard',    label: 'Leaderboard',             short: 'Leaderboard'     },
     { id: 'admin-tournois', label: 'Administration tournois', short: 'Admin. tournois' },
   ]},
-  { id: 'training', label: 'Training Croupier', children: [
+  { id: 'training', label: 'Training', children: [
     { id: 'training-suivi', label: 'Suivi équipe', short: 'Suivi équipe' },
   ]},
   { id: 'break-list', label: 'Break list', children: [] },

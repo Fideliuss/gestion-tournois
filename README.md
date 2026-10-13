@@ -4,17 +4,18 @@ Outils internes du casino, regroupés dans une seule application web déployée 
 
 **URL de production :** https://fideliuss.github.io/gestion-tournois/
 
-L'application est organisée en 3 grands panneaux d'accès, chacun filtrable par rôle :
+L'application est organisée en espaces (Tournois, Training, Break list), chacun filtrable par rôle :
 
-| Panneau | Description |
+| Espace | Description |
 |---------|-------------|
-| 🎯 **Outils Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes - dans le menu de la barre) |
-| 🎓 **Training Croupier** | Modules d'entraînement Blackjack et Roulette Anglaise |
+| 🎯 **Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes - dans le menu de la barre) |
+| 🎓 **Training** | Modules d'entraînement Blackjack et Roulette Anglaise |
+| 📋 **Break list** | Présents de la séance depuis le planning mensuel, extraction Octime, répartition et départs, break list et feuille des départs à imprimer |
 | 👤 **Gestion des comptes** | Comptes (liste filtrable), rôles personnalisables et accès par page *(admin uniquement)* |
 
 ---
 
-## 🎯 Outils Tournois
+## 🎯 Tournois
 
 ### Prize Pool Builder
 Calcule automatiquement la répartition des gains selon le nombre de joueurs et la structure du buy-in.
@@ -59,7 +60,7 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 
 ---
 
-## 🎓 Training Croupier
+## 🎓 Training
 
 Modules d'entraînement pour les croupiers, avec sessions chronométrées, score, niveaux de difficulté (Facile / Médium / Expert) et configuration admin par jeu.
 
@@ -84,7 +85,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 ### Suivi des résultats
 
 - **Mes résultats** (tous les croupiers) - pour chaque module : sessions, record, moyenne des 5 dernières, tendance, historique, filtre par niveau, meilleur temps par table (Tables ×). Navigation par jeu (Black Jack / Roulette / Ultimate Texas Hold'em) puis par module
-- **Suivi équipe** (rôles disposant du panel « Suivi Training », et admins) - *Classement* par module et niveau (meilleur temps par table pour les Tables ×), *Progression* d'un croupier dans le temps, *Points faibles* (taux d'erreur par type de mise, table, numéro, combinaison, situation… pour l'équipe ou un croupier), *Activité* (sessions par semaine, croupiers inactifs). Le droit se donne dans Gestion Comptes, sous Training Croupier
+- **Suivi équipe** (rôles disposant du panel « Suivi Training », et admins) - *Classement* par module et niveau (meilleur temps par table pour les Tables ×), *Progression* d'un croupier dans le temps, *Points faibles* (taux d'erreur par type de mise, table, numéro, combinaison, situation… pour l'équipe ou un croupier), *Activité* (sessions par semaine, croupiers inactifs). Le droit se donne dans Gestion Comptes, sous Training
 
 Toutes les sessions et résultats de training sont enregistrés dans **Supabase** (historique par utilisateur). Les paramètres (timers, plages de mise, valeurs de pièces) sont configurables par un admin depuis chaque hub de module.
 
@@ -94,7 +95,7 @@ Toutes les sessions et résultats de training sont enregistrés dans **Supabase*
 
 - **Comptes** : création / édition / suppression (e-mail + mot de passe) via une Edge Function Supabase sécurisée (vérification admin côté serveur, jamais côté client). La liste se filtre par recherche, par rôle ou par « inactifs », se trie par colonne et peut se regrouper par rôle
 - **Rôles personnalisables** : au-delà des rôles par défaut (Admin, MCD, Floor), création de rôles sur mesure avec libellé et couleur
-- **Rôles & accès** : un tableau rôles × pages à cocher, enregistré d'un coup ; chaque rôle a une liste de panneaux autorisés (Outils Tournois et ses sous-panneaux, Training) - un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
+- **Rôles & accès** : un tableau rôles × pages à cocher, enregistré d'un coup ; chaque rôle a une liste de panneaux autorisés (Tournois et ses sous-panneaux, Training) - un rôle non listé sur un panneau ne le voit pas dans les hubs et ne peut pas accéder à l'URL directement
 - Les admins ont toujours accès à tout, quels que soient les panneaux configurés
 
 ---
@@ -107,7 +108,7 @@ L'application est sécurisée par **e-mail + mot de passe** (Supabase Auth). Les
 1. Ouvrir https://fideliuss.github.io/gestion-tournois/
 2. Saisir son adresse e-mail et son mot de passe
 3. Redirection automatique selon le rôle - session valable **7 jours**
-4. Changement de mot de passe disponible depuis le badge utilisateur (icône 🔑)
+4. Changement de mot de passe disponible depuis le menu utilisateur de la barre de navigation
 
 ### Gestion des comptes et permissions
 Accessible depuis le menu **Gestion** de la barre (réservé aux admins) :
@@ -130,7 +131,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 
 ```
 ├── index.html                     - Hub principal (guard auth, filtrage panneaux par rôle)
-├── outils_tournois.html           - Sous-hub Outils Tournois
+├── tournois.html           - Sous-hub Tournois
 ├── login.html                     - Page de connexion (e-mail + mot de passe)
 │
 ├── shared/
@@ -140,7 +141,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
 │   ├── supabase.js                - Client Supabase + objet SB (CRUD complet + auth + app_roles + training + mappers)
 │   ├── nav.js / nav.css           - Barre de navigation commune (lanceur d'espaces, pages, menu Gestion, menu mobile), adaptée aux droits
-│   ├── auth.js                    - AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), badge utilisateur, cache panels
+│   ├── auth.js                    - AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), bandeau de secours, cache panels
 │   ├── changelog.js                - Mis à jour manuellement avant chaque PR de release
 │   ├── logos/                     - Logos (écran + impression)
 │   └── favicon/                   - Favicon et icônes PWA
@@ -169,7 +170,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │       └── extras.css / .js
 │
 ├── training/
-│   ├── training.html              - Training Croupier : tous les modules, groupés par jeu
+│   ├── training.html              - Training : tous les modules, groupés par jeu
 │   ├── training.css               - Styles partagés training
 │   ├── suivi/
 │   │   ├── suivi_croupier.html / .js  - Mes résultats
@@ -194,12 +195,18 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │       ├── roulette_couleur.html / .js     - Couleur Numéro
 │       └── roulette_tables.html / .js      - Tables de multiplication
 │
+├── aide/
+│   ├── aide.html / .js / .css     - Page Aide : liste des guides (selon les droits), guide affiché, impression
+│   ├── aide_guides.js             - Contenu des guides (texte et captures)
+│   ├── captures/                  - Captures des guides (données fictives)
+│   └── outils/                    - captures.js (génération des captures avec Chrome) et donnees_fictives.js
+│
 ├── break_list/
 │   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
 │   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
-│   ├── break_list_common.js       - Réglages, messages et dates communs aux pages
+│   ├── break_list_common.js       - Paramètres, messages et dates communs aux pages
 │   ├── planning.html / .js        - Import du planning mensuel (CSV), consultation, correction d'une case
-│   ├── reglages.html / .js        - Grades, horaires, postes, break list imprimable, rapprochements
+│   ├── parametres.html / .js      - Grades, horaires, absences, postes, break list imprimable, rapprochements
 │   └── break_list.css
 │
 └── supabase/
@@ -246,7 +253,7 @@ Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
 | Sunday 40K | Dimanche | 180 € | 20 € | 200 € | 17 |
 | Le 33 (VSD) | Événement | 295 € | 35 € | 330 € | 20 |
 
-Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessible. Les tournois réels sont entièrement configurables depuis **Outils Tournois → Administration tournois → Calendrier & barèmes**.
+Cette liste sert de fallback (`TOURNAMENT_DEFAULTS`) si Supabase est inaccessible. Les tournois réels sont entièrement configurables depuis **Tournois → Administration tournois → Calendrier & barèmes**.
 
 ---
 

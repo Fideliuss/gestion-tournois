@@ -2,14 +2,14 @@
 //  BREAK LIST - cœur de calcul (sans accès au DOM ni à la base)
 //  · lecture du planning mensuel (CSV) et de l'extraction Octime (texte collé, CSV ou lignes d'un classeur)
 //  · rapprochement des noms entre le planning et Octime
-//  · répartition du soir (stackers, compteurs, cartes, salle, départs)
+//  · répartition de la séance (stackers, compteurs, cartes, salle, départs)
 //  Chargé par les pages de l'espace ; testable sous Node (module.exports en bas de fichier).
 // ══════════════════════════════════════════════════════
 
 const BL_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 const BL_JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 
-// Réglages par défaut : tout se modifie dans la page « Réglages » et s'enregistre dans la base (clé 'config')
+// Réglages par défaut : tout se modifie dans la page « Paramètres » et s'enregistre dans la base (clé 'config')
 const BL_DEFAULT_CONFIG = {
   // Grades du planning, du plus haut au plus bas (l'ordre sert au tri de la break list) ; `chef` : peut être le chef des stackers ou de la salle
   grades: [
@@ -20,9 +20,9 @@ const BL_DEFAULT_CONFIG = {
     { code: '3E',  label: 'Croupier 3e échelon',  color: '#00FFFF', chef: false },
     { code: 'DEB', label: 'Croupier débutant',    color: '#EA4335', chef: false },
   ],
-  // Codes du planning qui signifient « présent ce soir » ; tout autre code (R, CP, M, ABS, case vide...) = absent
+  // Codes du planning qui signifient « présent à la séance » ; tout autre code (R, CP, M, ABS, case vide...) = absent
   //   groupe : '20h' (arrivé à 19h55), '21h' (arrivé à 20h55), 'depart' (part en premier, sans poste)
-  //   floor  : le salarié est le floor du soir (repéré « T » sur la break list)
+  //   floor  : le salarié est le floor de la séance (repéré « T » sur la break list)
   codes: [
     { code: '19:55', groupe: '20h',    floor: false },
     { code: '20:55', groupe: '21h',    floor: false },
@@ -57,8 +57,8 @@ const BL_DEFAULT_CONFIG = {
              'BJE 1600', 'BJE 1800', 'TOTAL BJE', 'TOTAL GEN'],
   },
   affichage: 'PRENOM_N',   // « Prénom N. (+16h50) » ou « N. Prénom (+16h50) » (N_PRENOM)
-  bascule: 6,              // avant cette heure, « aujourd'hui » est encore la soirée de la veille
-  arreteJour: 0,           // jour de la semaine où s'arrêtent les extractions Octime (0 = dimanche) : le dimanche qui suit la soirée, pour ne pas fausser les deltas avec des repos décalés
+  bascule: 6,              // avant cette heure, « aujourd'hui » est encore la séance de la veille
+  arreteJour: 0,           // jour de la semaine où s'arrêtent les extractions Octime (0 = dimanche) : le dimanche qui suit la séance, pour ne pas fausser les deltas avec des repos décalés
   aliases: {},             // rapprochement manuel planning → Octime : { 'NOM PRENOM du planning': 'NOM PRENOM Octime' }
 };
 
@@ -184,7 +184,7 @@ function blAbsence(code, config) {
   return a ? { code: a.code, label: a.label, color: a.color } : null;
 }
 
-/** Codes du planning ni horaire de présence ni type d'absence : sûrement un oubli à déclarer dans les réglages (ou une faute de frappe) */
+/** Codes du planning ni horaire de présence ni type d'absence : sûrement un oubli à déclarer dans les paramètres (ou une faute de frappe) */
 function blCodesInconnus(planning, config) {
   const out = {};
   planning.rows.forEach(function (r) {
@@ -297,7 +297,7 @@ function blDateFr(v) {
   return m ? Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1])) : null;
 }
 
-/** Date d'arrêté attendue pour une soirée : le prochain jour `dow` (0 = dimanche) à partir de la soirée incluse, en horodatage UTC */
+/** Date d'arrêté attendue pour une séance : le prochain jour `dow` (0 = dimanche) à partir de la séance incluse, en horodatage UTC */
 function blArreteAttendu(y, m, d, dow) {
   const t = new Date(Date.UTC(y, m - 1, d));
   t.setUTCDate(t.getUTCDate() + ((dow - t.getUTCDay() + 7) % 7));
@@ -374,7 +374,7 @@ function blDeltaH(minutes) {
   return (minutes < 0 ? '-' : '+') + h + 'h' + (m ? String(m).padStart(2, '0') : '');
 }
 
-// ── Répartition du soir ──────────────────────────────
+// ── Répartition de la séance ──────────────────────────────
 
 /**
  * Répartit les présents. Reprend la logique du script Google Sheets (v3) :
@@ -455,7 +455,7 @@ function blRepartir(personnes, opts) {
 
 // ── Break list imprimable ────────────────────────────
 
-/** Présents classés par grade (ordre des réglages) puis par ordre du planning */
+/** Présents classés par grade (ordre des paramètres) puis par ordre du planning */
 function blOrdreBreakList(presents) {
   return presents.slice().sort(function (a, b) { return (a.rang - b.rang) || (a.ordre - b.ordre); });
 }
@@ -466,7 +466,7 @@ function blLignesVerso(config) {
     .map(function (l) { return { label: l, total: /^TOTAL\b/i.test(l) }; });
 }
 
-/** Jour (1 à 31) et mois de « aujourd'hui », avant l'heure de bascule on est encore sur la soirée de la veille */
+/** Jour (1 à 31) et mois de « aujourd'hui », avant l'heure de bascule on est encore sur la séance de la veille */
 function blAujourdhui(now, config) {
   const d = new Date(now || Date.now());
   if (d.getHours() < (config && config.bascule != null ? config.bascule : 6)) d.setDate(d.getDate() - 1);

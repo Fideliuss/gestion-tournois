@@ -8,13 +8,7 @@
   <link rel="stylesheet" href="break_list.css"/>
 </head>
 <body>
-<button class="theme-toggle" onclick="toggleTheme()">
-  <span id="theme-icon">☀️</span> <span id="theme-label">Mode jour</span>
-</button>
-
 <div class="app">
-  <a href="../index.html" class="back">← Accueil</a>
-
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Planning <em>mensuel</em></div>
@@ -37,7 +31,6 @@
         <input type="file" id="plan-file" accept=".csv,.txt" hidden onchange="onPlanFile(this)"/>
       </div>
     </div>
-    <div class="bl-muted" id="saved-months" style="margin-top:12px"></div>
     <div class="bl-warn" id="plan-error" hidden></div>
   </div>
 

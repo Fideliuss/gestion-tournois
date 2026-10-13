@@ -1,0 +1,104 @@
+/* ═══════════════════════════════════════════════════════
+   aide.css - Page Aide : liste de guides et guide affiché
+   Barrière Casino Bordeaux
+═══════════════════════════════════════════════════════ */
+
+.aide-wrap { width: 100%; max-width: 1180px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
+.aide-list { position: sticky; top: 76px; display: flex; flex-direction: column; gap: 18px; max-height: calc(100vh - 96px); overflow-y: auto; }
+/* Liste déroulante des espaces */
+.aide-dd-btn {
+  position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 42px; padding: 0 40px;
+  font-family: inherit; background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: 999px; cursor: pointer;
+  font-size: 12px; font-weight: 600; font-style: italic; letter-spacing: .06em; text-transform: uppercase; color: var(--cream);
+  transition: border-color .15s;
+}
+.aide-dd-btn:hover, .aide-dd-btn[aria-expanded="true"] { border-color: var(--gold); }
+.aide-dd-btn svg { position: absolute; right: 16px; top: 14px; transition: transform .15s; }
+.aide-dd-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.aide-dd-pop {
+  position: fixed; z-index: 50; box-sizing: border-box; padding: 8px; border-radius: 22px;
+  background: #17130E; box-shadow: inset 0 0 0 1px var(--gold-bd), 0 10px 20px rgba(0,0,0,.4);
+}
+body.light .aide-dd-pop { background: #F4EFE6; box-shadow: 0 8px 16px rgba(0,0,0,.16); }
+.aide-dd-opt {
+  display: block; padding: 10px 16px; border-radius: 14px; font-family: inherit; font-size: 13px; font-weight: 500; text-align: center; color: var(--cream);
+  text-decoration: none; transition: background .12s;
+}
+body.light .aide-dd-opt { color: #1A1208; }
+.aide-dd-opt:hover, .aide-dd-opt:focus-visible { background: rgba(195,120,20,.16); outline: none; }
+body.light .aide-dd-opt:hover, body.light .aide-dd-opt:focus-visible { background: #E7DFD0; }
+.aide-dd-opt[aria-selected="true"] { background: var(--gold-solid); color: #1A1208; }
+/* Barre de défilement de la liste : fine et discrète, aux couleurs de l'application */
+.aide-list { scrollbar-width: thin; scrollbar-color: rgba(195,120,20,.35) transparent; padding-right: 6px; }
+.aide-list::-webkit-scrollbar { width: 6px; }
+.aide-list::-webkit-scrollbar-track { background: transparent; }
+.aide-list::-webkit-scrollbar-thumb { background: rgba(195,120,20,.3); border-radius: 999px; }
+.aide-list::-webkit-scrollbar-thumb:hover { background: rgba(195,120,20,.6); }
+.aide-grp h3 { margin: 0 0 8px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.aide-grp a {
+  display: block; padding: 9px 14px; margin-bottom: 4px; border-radius: var(--r-field); border: 1px solid transparent;
+  font-size: 14px; color: var(--text-dim); text-decoration: none; transition: color .18s, background .18s, border-color .18s;
+}
+.aide-grp a:hover { color: var(--cream); background: var(--gold-bg); }
+.aide-grp a.on { color: var(--cream); background: var(--gold-bg); border-color: var(--gold-bd); }
+
+/* Sommaire du guide affiché, sous son titre dans la liste */
+.aide-toc { list-style: none; counter-reset: toc; margin: 2px 0 10px 16px; padding: 0 0 0 10px; border-left: 1px solid var(--gold-bd); }
+.aide-toc li { counter-increment: toc; }
+.aide-grp .aide-toc a { display: flex; gap: 8px; padding: 5px 10px; margin: 0; font-size: 13px; border-radius: 8px; background: none; border-color: transparent; }
+.aide-toc a::before { content: counter(toc) '.'; flex: none; font-family: var(--f-num); color: var(--text-muted); }
+.aide-grp .aide-toc a:hover { color: var(--cream); }
+.aide-grp .aide-toc a.on { color: var(--gold-dim); background: none; }
+.aide-grp .aide-toc a.on::before { color: var(--gold); }
+.aide-steps > li { scroll-margin-top: 80px; }
+
+.aide-guide { max-width: none; margin: 0; padding: 30px 36px 34px; }
+.aide-empty { padding: 40px 12px; text-align: center; color: var(--text-dim); font-size: 14px; }
+.aide-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+.aide-tag { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.aide-head h2 { margin: 4px 0 0; font-size: 28px; font-style: italic; font-weight: 700; color: var(--cream); line-height: 1.15; }
+.aide-intro { margin: 0 0 8px; font-size: 15px; line-height: 1.7; color: var(--text); max-width: 760px; }
+
+.aide-steps { list-style: none; margin: 0; padding: 0; counter-reset: step; }
+.aide-steps > li { counter-increment: step; padding: 26px 0; border-top: 1px solid rgba(195,120,20,.14); break-inside: avoid; }
+.aide-steps > li:first-child { margin-top: 18px; }
+.aide-step-h { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.aide-n { flex: 0 0 34px; height: 34px; border-radius: 50%; background: var(--gold-solid); display: grid; place-items: center; }
+.aide-n::before { content: counter(step); font-family: var(--f-num); font-size: 15px; font-weight: 600; color: #1A1208; }
+.aide-step-h h3 { margin: 0; font-size: 19px; font-weight: 600; color: var(--cream); }
+.aide-txt { margin-left: 48px; font-size: 14.5px; line-height: 1.75; color: var(--text); max-width: 760px; }
+.aide-txt p { margin: 0 0 10px; }
+.aide-txt ul { margin: 0 0 10px; padding-left: 20px; }
+.aide-txt li { margin-bottom: 5px; }
+.aide-txt b { color: var(--cream); font-weight: 600; }
+.aide-steps figure { margin: 14px 0 0 48px; }
+.aide-steps img { display: block; max-width: 100%; height: auto; border-radius: var(--r-box); border: 1px solid var(--gold-bd); box-shadow: 0 4px 22px rgba(0,0,0,.28); }
+.aide-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; padding-top: 20px; border-top: 1px solid rgba(195,120,20,.14); }
+.aide-nav a { color: var(--gold-dim); text-decoration: none; font-size: 14px; }
+.aide-nav a:hover { text-decoration: underline; }
+
+@media (max-width: 860px) {
+  .aide-wrap { grid-template-columns: 1fr; }
+  .aide-list { position: static; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
+  .aide-toc { display: none; }
+  .aide-dd { flex: 1 1 100%; }
+  .aide-guide { padding: 24px 20px 28px; }
+  .aide-txt, .aide-steps figure { margin-left: 0; }
+  .aide-head { flex-direction: column; }
+}
+
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { size: A4 portrait; margin: 12mm; }
+  html, body { background: #fff !important; color: #000 !important; }
+  header.nav, .hdr, .aide-list, .aide-print, .aide-nav, #auth-fallback, #auth-overlay { display: none !important; }
+  .app { background: none !important; padding: 0 !important; min-height: 0 !important; display: block !important; }
+  .aide-wrap { display: block; max-width: none; }
+  .aide-guide { background: none; border: 0; box-shadow: none; padding: 0; }
+  .aide-guide::before { display: none; }
+  .aide-head h2, .aide-step-h h3, .aide-txt b { color: #000; }
+  .aide-intro, .aide-txt { color: #222; }
+  .aide-steps > li { padding: 14px 0; }
+  .aide-steps img { max-height: 78mm; width: auto; box-shadow: none; border-color: #999; }
+}
+.aide-dd + .aide-grp h3 { display: none; }   /* le sélecteur d'espace donne déjà le nom de l'espace */

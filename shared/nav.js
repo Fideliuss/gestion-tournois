@@ -2,14 +2,14 @@
 //  NAV - barre de navigation commune
 //  Injectée par AUTH.guard une fois l'accès validé (auth.js charge ce fichier et nav.css).
 //
-//  Structure : des ESPACES (Outils Tournois, Training Croupier…) qui ont chacun leurs pages ; un lanceur d'espaces ;
+//  Structure : des ESPACES (Tournois, Training, Break list…) qui ont chacun leurs pages ; un lanceur d'espaces ;
 //  des menus déroulants pour les pages qui regroupent des modules ; un menu Administration (admin) à droite
 //  (gestion des comptes, config Training).
 //
 //  La barre s'adapte aux droits de l'utilisateur (admin = tout, sinon les panels de son rôle) :
 //   · un seul espace accessible  → pas de lanceur, le nom de l'espace est un simple titre ;
 //   · à l'ouverture (index.html) → un seul espace : on y entre directement ;
-//   · espace Outils Tournois avec une seule page accessible → on arrive directement sur cette page ;
+//   · espace Tournois avec une seule page accessible → on arrive directement sur cette page ;
 //   · un droit sur une sous-page seule suffit à afficher l'espace, avec cette page.
 //
 //  Pour ajouter une page : la déclarer dans SPACES (menu) ; pour un nouvel espace, ajouter une entrée à SPACES.
@@ -20,7 +20,7 @@ const NAV = (function () {
   // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
   const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'break_list/';
   const SPACES = [
-    { id: 'tournois', label: 'Outils Tournois', note: 'Prize pool, classement, administration', href: 'outils_tournois.html', panel: 'tournois', items: [
+    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, administration', href: 'tournois.html', panel: 'tournois', items: [
       { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
       { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
       { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
@@ -30,7 +30,7 @@ const NAV = (function () {
         { label: 'Calendrier & barèmes',  href: 'admin/config_tournois.html' },
       ] },
     ] },
-    { id: 'training', label: 'Training Croupier', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
+    { id: 'training', label: 'Training', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
       { label: 'Black Jack', id: 'blackjack', menu: [
         { label: 'BJ Paiement', href: BJ + 'blackjack.html' },
         { label: 'BJ Score',    href: BJ + 'blackjack_score.html' },
@@ -49,10 +49,10 @@ const NAV = (function () {
       ] },
       { label: 'Mes résultats', href: T + 'suivi/suivi_croupier.html' },
     ] },
-    { id: 'break-list', label: 'Break list', note: 'Break list du soir, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
+    { id: 'break-list', label: 'Break list', note: 'Break list, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
       { label: 'Aujourd\'hui', href: BL + 'break_list.html' },
       { label: 'Planning',     href: BL + 'planning.html' },
-      { label: 'Réglages',     href: BL + 'reglages.html' },
+      { label: 'Paramètres',   href: BL + 'parametres.html' },
     ] },
   ];
 
@@ -74,6 +74,7 @@ const NAV = (function () {
     menu:  '<path d="M4 7h16M4 12h16M4 17h16"/>',
     x:     '<path d="M6 6l12 12M18 6L6 18"/>',
     down:  '<path d="M6 9l6 6 6-6"/>',
+    help:  '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.8M12 17h.01"/>',
   };
 
   function el(tag, attrs, kids) {
@@ -97,8 +98,36 @@ const NAV = (function () {
     return s;
   }
 
+  // Guide ouvert par le bouton « Aide » (id d'un guide de aide/aide_guides.js) : celui de la page si elle en a un, sinon celui de l'espace courant ; sans entrée : la page Aide
+  const HELP = {
+    'tournois': 'tournois-pour-commencer',
+    'prize_pool/prize_pool.html': 'tournois-prize-pool',
+    'leaderboard/leaderboard.html': 'tournois-classement',
+    'admin/declaration/declaration.html': 'tournois-declaration',
+    'admin/declaration/courriers.html': 'tournois-courriers',
+    'admin/extras/extras.html': 'tournois-extras',
+    'admin/config_tournois.html': 'tournois-calendrier',
+    'training': 'training-pour-commencer',
+    'training/blackjack/blackjack.html': 'training-blackjack',
+    'training/blackjack/blackjack_score.html': 'training-blackjack',
+    'training/roulette/roulette_paiement.html': 'training-roulette-calculs',
+    'training/roulette/roulette_conversion.html': 'training-roulette-calculs',
+    'training/roulette/roulette_tables.html': 'training-roulette-calculs',
+    'training/roulette/roulette_pointage.html': 'training-roulette-tapis',
+    'training/roulette/roulette_couleur.html': 'training-roulette-tapis',
+    'training/uth/uth_main.html': 'training-uth',
+    'training/uth/uth_gagnant.html': 'training-uth',
+    'training/uth/uth_gains.html': 'training-uth',
+    'training/suivi/suivi_croupier.html': 'training-mes-resultats',
+    'training/suivi/suivi_manager.html': 'training-suivi-equipe',
+    'admin/config_training.html': 'training-configuration',
+    'break-list': 'break-list-pour-commencer',
+    'break_list/planning.html': 'break-list-planning',
+    'break_list/parametres.html': 'break-list-parametres',
+  };
+
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
-  const PAGES = { 'index.html': {} };
+  const PAGES = { 'index.html': {}, 'aide/aide.html': { help: true } };
   GESTION.groups.forEach(function (g) { g.items.forEach(function (it) { PAGES[it.href] = { admin: true }; }); });
   // Suivi équipe et Configuration des modules restent dans le contexte Training : la barre de l'espace est affichée, « Gestion » surligné
   PAGES[T + 'suivi/suivi_manager.html'].s = 'training';
@@ -151,9 +180,19 @@ const NAV = (function () {
     return space.parent ? space.href : (space.items[0] && itemHref(space.items[0])) || space.href;
   }
 
-  // opts : { root, loginUrl, email, role, isAdmin, panels, color }
+  // Sur la page Aide, l'espace affiché dans la barre est celui du guide lu : on le lit dans l'adresse (#<espace> ou #<espace>-<guide>)
+  function spaceFromHash() {
+    const h = decodeURIComponent(location.hash.replace(/^#/, ''));
+    const sp = SPACES.find(function (x) { return h === x.id || h.indexOf(x.id + '-') === 0; });
+    return sp ? sp.id : null;
+  }
+
+  let lastOpts = null, shownSpace = null, offDoc = null;
+
+  // opts : { root, loginUrl, email, role, isAdmin, panels, color } ; opts.space force l'espace affiché (page Aide)
   // Renvoie true si la barre est en place (ou si l'on est redirigé), false pour retomber sur l'ancienne interface
   function mount(opts) {
+    lastOpts = opts;
     const root = opts.root, key = pageKey(), page = (key && PAGES[key]) || {};
     const spaces = visibleSpaces(opts);
     const href = function (p) { return root + p; };
@@ -165,10 +204,9 @@ const NAV = (function () {
       if (sp && sp.items.length === 1 && itemHref(sp.items[0]) !== key) { location.replace(href(itemHref(sp.items[0]))); return true; }
     }
 
-    const current = spaces.find(function (s) { return s.id === page.s; }) || null;
-
-    // Ancienne interface flottante (retour, thème, badge) : remplacée par la barre
-    document.querySelectorAll('.back, .theme-toggle, #auth-badge').forEach(function (n) { n.remove(); });
+    const spaceId = opts.space || (key === 'aide/aide.html' ? spaceFromHash() : null) || page.s;
+    const current = spaces.find(function (s) { return s.id === spaceId; }) || null;
+    shownSpace = current ? current.id : null;
 
     // ── Menus déroulants : un seul ouvert à la fois ──
     const dropdowns = [];
@@ -189,8 +227,12 @@ const NAV = (function () {
       });
       return el('div', { class: 'nav-dd' }, [btn, pop]);
     };
-    document.addEventListener('click', function (e) { if (!e.target.closest('.nav-pop-wrap')) closeAll(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(); });
+    const onDocClick = function (e) { if (!e.target.closest('.nav-pop-wrap')) closeAll(); };
+    const onDocKey = function (e) { if (e.key === 'Escape') closeAll(); };
+    if (offDoc) offDoc();                                            // barre reconstruite : on retire les écouteurs de l'ancienne
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onDocKey);
+    offDoc = function () { document.removeEventListener('click', onDocClick); document.removeEventListener('keydown', onDocKey); };
 
     const row = function (label, to, on, sub) {
       const a = el('a', { class: 'nav-row', href: href(to), role: 'menuitem' }, [el('span', { text: label }), sub ? el('small', { text: sub }) : null]);
@@ -246,6 +288,12 @@ const NAV = (function () {
       });
       tools.push(dropdown(abtn, entries, true));
     }
+    // Aide : le guide de l'espace courant (ou la page Aide)
+    const helpId = HELP[key] || HELP[page.s];
+    const helpTarget = 'aide/aide.html' + (helpId ? '#' + helpId : '');
+    const helpBtn = el('a', { class: 'nav-btn', href: href(helpTarget), title: 'Aide', 'aria-label': 'Aide' }, [icon('help'), el('span', { class: 'nav-btn-label', text: 'Aide' })]);
+    if (page.help) helpBtn.setAttribute('aria-current', 'page');
+    if (key !== 'index.html') tools.push(helpBtn);                  // pas d'aide sur l'accueil : aucun guide ne s'y rapporte
     const themeBtn = el('button', { class: 'nav-btn nav-theme', type: 'button', 'aria-label': 'Changer de thème', on: { click: function () { toggleTheme(); } } }, [
       icon('sun', 'i-sun'), icon('moon', 'i-moon'),
       el('span', { id: 'theme-icon', hidden: true }), el('span', { id: 'theme-label', class: 'nav-btn-label', text: 'Mode jour' }),
@@ -279,6 +327,7 @@ const NAV = (function () {
     gestion.forEach(function (g) { groups.push(group(GESTION.label + ' · ' + g.title, g.items.map(function (it) { return plink(it.label, it.href, key === it.href); }))); });
     const panel = el('div', { class: 'nav-panel', id: 'nav-panel' }, groups.concat([el('div', { class: 'grp acts' }, [
       el('div', { class: 'who', text: (opts.name ? opts.name + ' · ' : '') + opts.email + ' · ' + roleLabel(opts.role) }),
+      key !== 'index.html' ? plink('Aide', helpTarget, page.help) : null,
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),
       el('button', { type: 'button', text: 'Changer le mot de passe', on: { click: function () { AUTH._openChangePwd(); } } }),
       el('button', { type: 'button', text: 'Déconnexion', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }),
@@ -297,5 +346,13 @@ const NAV = (function () {
     return true;
   }
 
-  return { mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf };
+  // Change l'espace affiché (page Aide, quand on passe d'un guide à un autre espace) : la barre est reconstruite
+  function setSpace(id) {
+    if (!lastOpts || id === shownSpace) return;
+    const old = document.querySelector('header.nav');
+    if (old) old.remove();
+    mount(Object.assign({}, lastOpts, { space: id }));
+  }
+
+  return { setSpace: setSpace, mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf };
 })();
