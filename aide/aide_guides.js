@@ -10,6 +10,7 @@
 
 var AIDE_ESPACES = {
   'tournois': 'Tournois',
+  'training': 'Training',
   'break-list': 'Break list',
 };
 
@@ -387,6 +388,321 @@ var AIDE_GUIDES = [
       {
         title: "Une page ou un menu n'apparaît pas",
         text: "<p>Chacun ne voit que les pages auxquelles son compte donne accès. S'il en manque une, demandez l'accès à l'administrateur.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  // ══ Training ══
+
+  {
+    id: 'training-pour-commencer', space: 'training', panel: 'training',
+    title: 'Pour commencer',
+    intro: "L'espace Training sert à s'entraîner aux calculs et aux réflexes de la table : Black Jack, roulette anglaise et Ultimate Texas Hold'em. Chaque module pose des questions, corrige tout de suite et garde la trace de vos séances.",
+    steps: [
+      {
+        title: "Choisir un module",
+        text: "<p>La page d'accueil de l'espace réunit tous les modules, groupés par jeu. Cliquez sur une tuile pour lancer l'entraînement. La tuile « Ordre Paiement » est grisée : ce module n'est pas encore disponible.</p>"
+          + "<p>La barre du haut donne les mêmes accès : un menu par jeu, et <b>Mes résultats</b>.</p>",
+        imgs: [{ src: 'captures/tr_accueil.png', alt: "La page d'accueil de l'espace Training" }],
+      },
+      {
+        title: "Une session, de la première question au bilan",
+        text: "<p>Une session compte <b>10 questions</b> (15 pour Couleur numéro, 20 cartes pour Tables de multiplication). En haut de l'écran, le numéro de la question, votre score et une barre de progression suivent l'avancement.</p>"
+          + "<p>Validez une réponse avec la touche <b>Entrée</b> ou le bouton <b>→</b>. La correction s'affiche aussitôt, en vert si c'est juste, en rouge sinon avec la bonne réponse. À la fin, le bilan donne votre score, un pourcentage et un mot d'appréciation, puis propose de rejouer.</p>",
+        imgs: [],
+      },
+      {
+        title: "Niveaux et chronomètre",
+        text: "<p>Certains modules proposent trois <b>niveaux</b>, Facile, Médium et Expert : plus le niveau monte, plus le temps de réponse est court ou plus la situation est chargée. Le temps de chaque niveau est affiché sur sa carte.</p>"
+          + "<p>Les modules de l'Ultimate Texas Hold'em, BJ Paiement et Calcul paiement n'ont pas de chronomètre. Tables de multiplication a un chronomètre libre, qui mesure le temps total.</p>",
+        imgs: [],
+      },
+      {
+        title: "Ce qui est enregistré",
+        text: "<p>Une session est enregistrée <b>quand elle est terminée</b>. Si vous quittez la page en cours de route, elle n'est pas comptée : elle est effacée à la prochaine ouverture du module.</p>"
+          + "<p>Vos sessions terminées se retrouvent dans <b>Mes résultats</b> (guide « Suivre ses résultats »). Les responsables d'équipe voient les résultats de chacun.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'training-blackjack', space: 'training', panel: 'training',
+    title: "S'entraîner au Black Jack",
+    intro: "Deux modules : BJ Paiement, pour le calcul du paiement d'un blackjack, et BJ Score, pour lire la valeur d'une main sous le chronomètre.",
+    steps: [
+      {
+        title: "BJ Paiement : calculer le paiement",
+        text: "<p>Une mise s'affiche sur le tapis, avec le rapport de paiement du blackjack (3 pour 2). Tapez le montant à payer, en euros, puis validez. Les décimales sont acceptées, avec une virgule ou un point.</p>"
+          + "<p>Il n'y a ni niveau ni chronomètre. Après chaque réponse, la correction s'affiche et la question suivante arrive toute seule.</p>",
+        imgs: [{ src: 'captures/tr_bj_paiement.png', alt: 'BJ Paiement : la mise et la zone de réponse' }],
+      },
+      {
+        title: "Lire la correction",
+        text: "<p>Une bonne réponse s'affiche en vert. En cas d'erreur, la barre passe en rouge et donne le montant exact, pour comprendre avant de passer à la suite.</p>",
+        imgs: [{ src: 'captures/tr_bj_faux.png', alt: 'Une réponse fausse et sa correction' }],
+      },
+      {
+        title: "BJ Score : choisir son niveau",
+        text: "<p>BJ Score montre une main de cartes : il faut en donner la <b>valeur</b> avant la fin du temps. Choisissez d'abord un niveau. Il fixe le temps disponible (15, 10 ou 5 secondes au départ) et la longueur des mains : plus le niveau est élevé, plus il y a de cartes.</p>",
+        imgs: [{ src: 'captures/tr_bjs_niveaux.png', alt: 'Le choix du niveau de BJ Score' }],
+      },
+      {
+        title: "BJ Score : répondre avant la fin du temps",
+        text: "<p>Le chronomètre et sa barre se vident pendant que vous comptez. Tapez la valeur en points et validez. Une main avec un As accepte ses deux totaux possibles ; une main qui dépasse 21 est annoncée « Bust » avec son total. Si le temps est écoulé, la question compte comme fausse et la correction s'affiche.</p>",
+        imgs: [{ src: 'captures/tr_bjs_question.png', alt: 'BJ Score : une main, le chronomètre et la zone de réponse' }],
+      },
+      {
+        title: "Le bilan",
+        text: "<p>Le bilan donne le score sur 10, le pourcentage et un mot d'appréciation : Parfait, Excellent, Bien, À améliorer ou À reprendre. <b>Nouvelle session</b> (ou <b>Rejouer</b> dans BJ Score) recommence, <b>← Training</b> revient aux modules.</p>",
+        imgs: [{ src: 'captures/tr_bj_bilan.png', alt: "Le bilan d'une session" }],
+      },
+    ],
+  },
+
+  {
+    id: 'training-roulette-calculs', space: 'training', panel: 'training',
+    title: 'Roulette : les calculs',
+    intro: "Trois modules de calcul pour la roulette anglaise : compter le paiement d'une mise, convertir des pièces en euros et apprendre les tables de multiplication des paiements.",
+    steps: [
+      {
+        title: "Calcul paiement : choisir le niveau",
+        text: "<p>Le niveau fixe le nombre de pièces misées : 1 à 3 pièces en Facile, 1 à 10 en Médium, le maximum en Expert. Il n'y a pas de chronomètre.</p>",
+        imgs: [{ src: 'captures/tr_rp_niveaux.png', alt: 'Calcul paiement : le choix du niveau' }],
+      },
+      {
+        title: "Calcul paiement : compter les pièces",
+        text: "<p>Un numéro sort, et des pièces sont posées sur le tapis. Pour chaque mise, il faut combiner le type de mise et le nombre de pièces. Tapez le <b>nombre total de pièces</b> à payer, puis validez.</p>",
+        imgs: [{ src: 'captures/tr_rp_question.png', alt: 'Calcul paiement : un numéro tiré et des mises sur le tapis' }],
+      },
+      {
+        title: "Calcul paiement : comprendre une erreur",
+        text: "<p>Quand la réponse est fausse, les pièces du tapis prennent la couleur de leur type de mise, et la barre rouge détaille le calcul de chaque type : par exemple « Cheval 11×17=187 ». Prenez le temps de la lire, puis cliquez sur <b>Question suivante</b>. Une bonne réponse, elle, enchaîne toute seule.</p>",
+        imgs: [{ src: 'captures/tr_rp_faux.png', alt: 'Calcul paiement : la correction détaillée par type de mise' }],
+      },
+      {
+        title: "Conversion pièces : valeur de la pièce, puis niveau",
+        text: "<p>Commencez par choisir la <b>valeur de la pièce</b> (2,50 €, 5 €, 10 €... selon ce que l'administrateur a proposé). Elle reste la même pendant toute la session. Choisissez ensuite le niveau : le temps par question est de 12, 8 ou 4 secondes au départ.</p>",
+        imgs: [{ src: 'captures/tr_rc_valeur.png', alt: 'Conversion pièces : le choix de la valeur de la pièce' }],
+      },
+      {
+        title: "Conversion pièces : donner la valeur totale",
+        text: "<p>Le nombre de pièces payées s'affiche avec leur valeur. Tapez le total en euros avant la fin du temps. Le nombre de pièces correspond à un vrai paiement de roulette, donc il varie selon le niveau.</p>"
+          + "<p>Après une erreur ou un temps écoulé, la bonne valeur s'affiche et un bouton <b>Question suivante</b> apparaît.</p>",
+        imgs: [{ src: 'captures/tr_rc_question.png', alt: 'Conversion pièces : le nombre de pièces et la zone de réponse' }],
+      },
+      {
+        title: "Tables de multiplication : choisir la table",
+        text: "<p>Choisissez la table à réviser : ×35, ×17, ×11, ×8 ou ×5, les rapports de paiement de la roulette. Une session est un paquet de <b>20 cartes</b> : les multiplications de ×1 à ×20, une fois chacune, dans le désordre.</p>",
+        imgs: [{ src: 'captures/tr_rt_choix.png', alt: 'Tables de multiplication : le choix de la table' }],
+      },
+      {
+        title: "Tables de multiplication : retourner la carte",
+        text: "<p>Un chronomètre libre tourne du début à la fin du paquet : l'objectif est d'aller vite sans se tromper. Tapez le résultat et validez : la carte se retourne et montre la bonne réponse, en vert si vous aviez juste, en rouge sinon.</p>"
+          + "<p>Le temps final figure dans le bilan, et vos meilleurs temps par table sont gardés dans <b>Mes résultats</b> (pour les sessions sans erreur).</p>",
+        imgs: [{ src: 'captures/tr_rt_carte.png', alt: 'Tables de multiplication : une carte à calculer' }, { src: 'captures/tr_rt_reponse.png', alt: 'La carte retournée avec la bonne réponse' }],
+      },
+    ],
+  },
+
+  {
+    id: 'training-roulette-tapis', space: 'training', panel: 'training',
+    title: 'Roulette : le tapis',
+    intro: "Deux modules pour connaître le tapis par cœur : retrouver un numéro sur le tapis, et reconnaître la couleur d'un numéro.",
+    steps: [
+      {
+        title: "Pointage numéro : retrouver le numéro",
+        text: "<p>Choisissez un niveau (10, 6 ou 3 secondes au départ). Le cylindre annonce un numéro : cliquez sur sa case, <b>avant la fin du temps</b>. Les numéros sont masqués sur le tapis, et celui-ci peut être inversé d'une question à l'autre (le zéro est à gauche ou à droite) pour ne pas apprendre par cœur une seule orientation.</p>",
+        imgs: [{ src: 'captures/tr_rpt_question.png', alt: 'Pointage numéro : un numéro annoncé et le tapis aux numéros masqués' }],
+      },
+      {
+        title: "Pointage numéro : la correction",
+        text: "<p>Après chaque réponse, la bonne case est surlignée. En cas d'erreur ou de temps écoulé, un message indique où se trouvait le numéro : le zéro, ou la première, la deuxième ou la troisième douzaine. Un bouton <b>Question suivante</b> laisse le temps de regarder.</p>",
+        imgs: [],
+      },
+      {
+        title: "Couleur numéro : rouge, noir ou zéro",
+        text: "<p>Un numéro s'affiche : cliquez sur <b>Rouge</b>, <b>Noir</b> ou <b>Zéro</b> avant la fin du temps (5, 3 ou 2 secondes au départ). Une session compte 15 questions. La correction indique la bonne couleur, puis la question suivante arrive.</p>",
+        imgs: [{ src: 'captures/tr_rcol_question.png', alt: 'Couleur numéro : un numéro et les trois réponses' }],
+      },
+    ],
+  },
+
+  {
+    id: 'training-uth', space: 'training', panel: 'training',
+    title: "S'entraîner à l'Ultimate Texas Hold'em",
+    intro: "Trois modules pour s'exercer à l'Ultimate Texas Hold'em. Aucun n'a de niveau ni de chronomètre : la session démarre dès l'ouverture de la page, avec des donnes tirées au hasard.",
+    steps: [
+      {
+        title: "Meilleure main : trouver la combinaison",
+        text: "<p>Vous voyez sept cartes : deux au joueur, cinq au board. Choisissez la <b>meilleure combinaison de cinq cartes</b> parmi les dix proposées, de Carte haute à Quinte flush royale.</p>"
+          + "<p>Certaines donnes sont des pièges, avec par exemple deux combinaisons possibles : lisez bien toutes les cartes.</p>",
+        imgs: [{ src: 'captures/tr_uth_main.png', alt: 'Meilleure main : sept cartes et dix combinaisons à choisir' }],
+      },
+      {
+        title: "Meilleure main : la correction",
+        text: "<p>Votre choix est coloré en rouge s'il est faux, la bonne combinaison en vert. Les cinq cartes de la meilleure main restent bien visibles et les deux autres sont atténuées. Cliquez sur <b>Suivant</b> pour continuer ; une bonne réponse sur une donne simple enchaîne seule.</p>",
+        imgs: [{ src: 'captures/tr_uth_main_reponse.png', alt: 'Meilleure main : la correction, avec les cinq cartes de la meilleure main' }],
+      },
+      {
+        title: "Qui gagne ? : deux questions par donne",
+        text: "<p>Pour chaque donne, répondez à <b>deux questions</b>. La première : la banque est-elle qualifiée (au moins une paire) ? La seconde, qui apparaît ensuite : qui gagne, le joueur, la banque, ou l'égalité ?</p>"
+          + "<p>La donne ne compte comme juste que si les deux réponses sont justes. La correction montre les deux meilleures mains, avec une explication du résultat ; un clic sur <b>Suivant</b> passe à la donne suivante.</p>",
+        imgs: [{ src: 'captures/tr_uth_gagnant.png', alt: 'Qui gagne ? : la banque est-elle qualifiée, puis qui gagne' }],
+      },
+      {
+        title: "Calcul des gains : lire la situation",
+        text: "<p>Une phrase décrit ce que fait le joueur (par exemple « se couche »). Dessous, le tapis montre la banque, le board et les mises du joueur avec leurs jetons : le <b>Bonus</b> en losange, le voyant rouge du <b>Prog</b>, puis <b>Blind</b>, <b>Ante</b> et <b>Play</b>.</p>",
+        imgs: [{ src: 'captures/tr_uth_gains.png', alt: 'Calcul des gains : le tapis et les mises du joueur' }],
+      },
+      {
+        title: "Calcul des gains : répondre mise par mise",
+        text: "<p>Cliquez sur chaque mise : une fenêtre propose <b>Je paie</b> (tapez alors le gain à payer, mise rendue non comprise, puis <b>OK</b>), <b>Je laisse</b> (la mise est rendue) ou <b>Je ramasse</b> (la mise est perdue). Le compteur indique le nombre de mises traitées.</p>"
+          + "<p>Quand toutes les mises sont renseignées, <b>Valider</b> donne la correction, mise par mise. La donne n'est juste que si toutes les mises le sont. Le jackpot du Prog n'est pas corrigé : un simple rappel signale qu'il se fait valider par le superviseur.</p>",
+        imgs: [{ src: 'captures/tr_uth_gains_mise.png', alt: "La fenêtre de réponse d'une mise" }],
+      },
+    ],
+  },
+
+  {
+    id: 'training-mes-resultats', space: 'training', panel: 'training',
+    title: 'Suivre ses résultats',
+    intro: "La page Mes résultats garde toutes vos sessions terminées : vos records, votre moyenne récente, votre tendance et l'historique, module par module.",
+    steps: [
+      {
+        title: "La vue d'ensemble",
+        text: "<p>Ouvrez <b>Mes résultats</b> dans la barre ou sur la page d'accueil du Training. La vue d'ensemble donne quatre chiffres : le nombre de sessions, la précision globale, le nombre de modules essayés et la date de la dernière session.</p>"
+          + "<p>En dessous, un tableau par jeu : pour chaque module, vos sessions, votre <b>record</b>, la <b>moyenne</b> de vos cinq dernières sessions et la <b>tendance</b>. Cliquez sur une ligne pour ouvrir le module.</p>",
+        imgs: [{ src: 'captures/tr_resultats.png', alt: "Mes résultats : la vue d'ensemble" }],
+      },
+      {
+        title: "Comprendre la tendance",
+        text: "<p>La tendance compare la moyenne de vos cinq dernières sessions à celle des cinq précédentes : une flèche vers le haut vaut une progression, vers le bas un recul. Il faut au moins <b>huit sessions</b> dans le module pour qu'elle s'affiche ; avant, la page indique « Pas assez de sessions ».</p>",
+        imgs: [],
+      },
+      {
+        title: "Un jeu, un module",
+        text: "<p>Les onglets du haut (Black Jack, Roulette Anglaise, Ultimate Texas Hold'em) affichent leurs sessions ; les puces permettent de choisir un module, ou tous. Pour les modules à niveaux, d'autres puces filtrent Facile, Médium ou Expert.</p>"
+          + "<p>Chaque module montre ses chiffres, un histogramme de vos douze dernières sessions (la plus récente à droite) et l'historique : date, niveau, score et pourcentage. <b>Tout voir</b> déplie la liste complète.</p>",
+        imgs: [],
+      },
+      {
+        title: "Les meilleurs temps aux tables",
+        text: "<p>Pour Tables de multiplication, l'historique indique la table jouée et le temps. Au-dessus, le <b>meilleur temps par table</b> ne tient compte que des sessions sans erreur.</p>",
+        imgs: [{ src: 'captures/tr_resultats_module.png', alt: 'Tables de multiplication : meilleurs temps et historique' }],
+      },
+    ],
+  },
+
+  {
+    id: 'training-suivi-equipe', space: 'training', panel: 'training-suivi',
+    title: "Suivre l'équipe",
+    intro: "Le Suivi équipe donne aux responsables les résultats de l'entraînement de toute l'équipe, en quatre vues. Il s'ouvre depuis le menu Gestion de la barre, rubrique Training.",
+    steps: [
+      {
+        title: "Classement",
+        text: "<p>Choisissez un module avec les puces (et un niveau, ou une table pour Tables de multiplication) : le classement range les croupiers selon la moyenne de leurs cinq dernières sessions. La colonne « Record » donne leur meilleur score, « Dernière » le temps écoulé depuis leur dernière session.</p>"
+          + "<p>Un croupier doit avoir fait <b>trois sessions</b> pour être classé ; les autres sont listés dessous, sans numéro. Un clic sur un nom ouvre sa progression.</p>",
+        imgs: [{ src: 'captures/tr_equipe_classement.png', alt: "Le classement de l'équipe sur un module" }],
+      },
+      {
+        title: "Progression",
+        text: "<p>Choisissez un croupier, puis un module et un niveau : la courbe montre le score de chaque session (un point par session) et, en trait épais, la moyenne glissante sur cinq sessions. Au-dessus, ses chiffres : sessions, record, moyenne récente et tendance.</p>",
+        imgs: [{ src: 'captures/tr_equipe_progression.png', alt: "La progression d'un croupier sur un module" }],
+      },
+      {
+        title: "Points faibles",
+        text: "<p>Cette vue cherche où l'équipe se trompe le plus. Choisissez un module, et le périmètre : toute l'équipe ou un croupier. Les lignes sont triées par <b>taux d'erreur</b> : par exemple, pour Calcul paiement, le type de mise le plus souvent raté.</p>"
+          + "<p>Une ligne n'apparaît qu'à partir de 5 tentatives pour l'équipe, 3 pour un croupier seul, pour que les chiffres aient du sens.</p>",
+        imgs: [{ src: 'captures/tr_equipe_faibles.png', alt: "Les points faibles de l'équipe sur Calcul paiement" }],
+      },
+      {
+        title: "Activité",
+        text: "<p>Choisissez la période (7, 30 ou 90 jours) : la vue donne le nombre de sessions, de croupiers actifs, d'<b>inactifs depuis plus de 14 jours</b> et la date de la dernière session. Le graphique montre les sessions des douze dernières semaines, et le tableau détaille chaque croupier, avec un repère « Inactif » quand il en est un.</p>",
+        imgs: [{ src: 'captures/tr_equipe_activite.png', alt: "L'activité de l'équipe" }],
+      },
+    ],
+  },
+
+  {
+    id: 'training-configuration', space: 'training', panel: 'training', admin: true,
+    title: 'Configurer les modules',
+    intro: "Un administrateur règle ici les modules d'entraînement : plages de mises, chronomètres, cartes, valeurs de pièces. La page s'ouvre depuis le menu Gestion, rubrique Training. Les changements s'appliquent à la prochaine session de chaque croupier.",
+    steps: [
+      {
+        title: "Black Jack",
+        text: "<p>Trois réglages. Les <b>plages de mises</b> de BJ Paiement : deux plages (minimum, maximum, pas) avec un poids qui dit la fréquence : 80 / 20 signifie que 80 % des mises tombent dans la première. Un poids de 0 à la deuxième plage la désactive.</p>"
+          + "<p>Le <b>chronomètre par niveau</b> de BJ Score (3 secondes au minimum), et le <b>nombre de cartes par niveau</b> : minimum, maximum (0 pour illimité) et seuil d'arrêt, 17 pour tirer comme la banque, 20 pour tirer comme un client.</p>",
+        imgs: [{ src: 'captures/tr_config_bj.png', alt: 'Les réglages du Black Jack' }],
+      },
+      {
+        title: "Roulette anglaise",
+        text: "<p>Le <b>chronomètre par niveau</b> de Couleur numéro, Pointage numéro et Conversion pièces (2 secondes au minimum). Pour Conversion pièces, cochez aussi les <b>valeurs de pièces proposées</b> : une au moins est obligatoire.</p>"
+          + "<p>Calcul paiement et Tables de multiplication n'ont rien à régler.</p>",
+        imgs: [{ src: 'captures/tr_config_roulette.png', alt: 'Les réglages de la roulette anglaise' }],
+      },
+      {
+        title: "Ultimate Texas Hold'em",
+        text: "<p>Un seul réglage : le <b>montant maximum des mises</b> de Calcul des gains, de 5 à 200 €, par pas de 5 €. Meilleure main et Qui gagne ? n'ont rien à régler.</p>",
+        imgs: [{ src: 'captures/tr_config_uth.png', alt: "Le réglage de l'Ultimate Texas Hold'em" }],
+      },
+      {
+        title: "Enregistrer",
+        text: "<p>Chaque jeu a son bouton <b>Enregistrer</b> : il n'enregistre que les réglages de cet onglet. Une valeur impossible (un maximum inférieur au minimum, par exemple) est refusée avec un message précis, et rien n'est envoyé. « Enregistré » confirme que c'est pris en compte.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'training-depannage', space: 'training', panel: 'training',
+    title: 'Résolution des problèmes courants',
+    intro: "Les situations les plus courantes de l'espace Training, et ce qu'il faut regarder.",
+    steps: [
+      {
+        title: "« Pas de résultats » dans Mes résultats",
+        text: "<p>Seules les sessions <b>terminées</b> comptent. Allez jusqu'au bilan de la session, puis revenez : elle apparaîtra.</p>",
+        imgs: [],
+      },
+      {
+        title: "Ma session n'a pas été comptée",
+        text: "<p>Elle a été interrompue avant la dernière question (page fermée, retour en arrière...). Une session incomplète n'est pas conservée. Refaites-la en entier.</p>",
+        imgs: [],
+      },
+      {
+        title: "La tendance affiche « Pas assez de sessions »",
+        text: "<p>La tendance compare vos cinq dernières sessions aux cinq précédentes : il en faut au moins huit dans le module (en tenant compte du niveau choisi, si vous filtrez).</p>",
+        imgs: [],
+      },
+      {
+        title: "Rien ne se passe quand je valide",
+        text: "<p>Le champ de réponse est vide ou ne contient pas un nombre. Tapez une valeur, puis validez avec Entrée ou le bouton →. Dans Calcul des gains, le bouton <b>Valider</b> reste grisé tant que toutes les mises n'ont pas de réponse (et un montant pour « Je paie »).</p>",
+        imgs: [],
+      },
+      {
+        title: "Le temps est trop court ou trop long",
+        text: "<p>Le chronomètre de chaque niveau est réglé par un administrateur (guide « Configurer les modules »). Demandez-lui de l'ajuster.</p>",
+        imgs: [],
+      },
+      {
+        title: "La question suivante n'arrive pas toute seule",
+        text: "<p>Après une erreur dans les modules de roulette, un bouton <b>Question suivante</b> laisse le temps de lire la correction. Dans Meilleure main, c'est <b>Suivant</b>. Une bonne réponse, elle, enchaîne automatiquement.</p>",
+        imgs: [],
+      },
+      {
+        title: "Un croupier n'est pas numéroté au classement",
+        text: "<p>Il doit avoir fait au moins trois sessions dans le module (et le niveau) choisi. Avant, il est listé sous la ligne « pas encore classés ».</p>",
+        imgs: [],
+      },
+      {
+        title: "« Impossible de charger » les résultats",
+        text: "<p>La connexion avec le serveur a échoué. Vérifiez votre connexion, rechargez la page et recommencez. Si le message revient, prévenez l'administrateur.</p>",
+        imgs: [],
+      },
+      {
+        title: "Une page ou un menu n'apparaît pas",
+        text: "<p>Chacun ne voit que les pages auxquelles son compte donne accès : le Suivi équipe est réservé aux responsables, la Configuration des modules aux administrateurs. S'il en manque une, demandez l'accès à l'administrateur.</p>",
         imgs: [],
       },
     ],

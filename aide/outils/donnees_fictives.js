@@ -139,4 +139,41 @@ function courriersGabarits() {
   };
 }
 
-module.exports = { planning: planning, octimeTsv: octimeTsv, joueurs: joueurs, saison: saison, extras: extras, encadrement: encadrement, courriersGabarits: courriersGabarits };
+// ── Espace Training : croupiers fictifs et leurs sessions d'entraînement (80 jours avant le 14 octobre 2026) ──
+
+const T_CROUPIERS = ['emma.delmas', 'hugo.jacquot', 'lina.maurin', 'noah.pelletier', 'jade.roussel', 'theo.simonet', 'lou.thibaut', 'axel.vidal'];
+// module : [game, nombre de questions, niveaux ?, part de réussite habituelle (0-1), poids (fréquence de jeu)]
+const T_MODULES = [
+  ['blackjack', 10, false, 0.86, 6], ['blackjack-score', 10, true, 0.72, 8], ['roulette-paiement', 10, true, 0.68, 8], ['roulette-conversion', 10, true, 0.7, 5],
+  ['roulette-couleur', 15, true, 0.88, 4], ['roulette-pointage', 10, true, 0.74, 5], ['roulette-tables', 20, false, 0.9, 6],
+  ['uth-main', 10, false, 0.8, 4], ['uth-gagnant', 10, false, 0.78, 3], ['uth-gains', 10, false, 0.62, 3],
+];
+
+/** { croupiers: [{ id, label }], sessions: [...] } ; id au format uuid (le premier est l'utilisateur de démonstration) */
+function entrainement() {
+  const rnd = prng(31), now = new Date(2026, 9, 14, 20, 0, 0).getTime();
+  const croupiers = T_CROUPIERS.map(function (l, i) { return { id: 'a0000000-0000-4000-8000-00000000000' + (i + 1), label: l, niveau: 0.62 + rnd() * 0.5, actif: i < 6 ? 1 : 0.15 }; });
+  const sessions = [];
+  let id = 1;
+  croupiers.forEach(function (c, ci) {
+    const n = Math.round((c.actif === 1 ? 45 : 5) * (0.6 + rnd() * 0.8));
+    for (let k = 0; k < n; k++) {
+      const m = (function () { const tot = T_MODULES.reduce(function (a, x) { return a + x[4]; }, 0); let r = rnd() * tot; for (let j = 0; j < T_MODULES.length; j++) { r -= T_MODULES[j][4]; if (r <= 0) return T_MODULES[j]; } return T_MODULES[0]; })();
+      const age = Math.floor(Math.pow(rnd(), 1.4) * (c.actif === 1 ? 80 : 60)) + (c.actif === 1 ? 0 : 20);
+      const when = new Date(now - age * 86400000); when.setHours(19 + Math.floor(rnd() * 4), Math.floor(rnd() * 60), 0, 0);
+      const progres = Math.max(0.6, 1 - age / 200);                          // on s'améliore avec le temps
+      const level = m[2] ? ['facile', 'medium', 'expert'][Math.floor(rnd() * 3)] : null;
+      const part = Math.max(0.2, Math.min(1, m[3] * (0.45 + 0.6 * c.niveau * progres) - (level === 'expert' ? 0.12 : level === 'medium' ? 0.05 : 0) + (rnd() - 0.5) * 0.2));
+      const total = m[1], correct = Math.min(total, Math.max(0, Math.round(total * part)));
+      const meta = {};
+      if (level) meta.level = level;
+      if (m[0] === 'roulette-tables') { meta.ratio = [35, 17, 11, 8, 5][Math.floor(rnd() * 5)]; meta.elapsedMs = Math.round((55 + rnd() * 90) * 1000); }
+      if (m[0] === 'roulette-conversion') meta.chipValue = [2.5, 5, 10, 20][Math.floor(rnd() * 4)];
+      sessions.push({ id: id++, user_id: c.id, user_label: c.label, game: m[0], started_at: when.toISOString(), ended_at: new Date(when.getTime() + 180000).toISOString(), total: total, correct: correct, meta: meta });
+    }
+  });
+  sessions.sort(function (a, b) { return a.started_at < b.started_at ? 1 : -1; });
+  return { croupiers: croupiers.map(function (c) { return { id: c.id, label: c.label }; }), sessions: sessions };
+}
+
+module.exports = { planning: planning, octimeTsv: octimeTsv, entrainement: entrainement, joueurs: joueurs, saison: saison, extras: extras, encadrement: encadrement, courriersGabarits: courriersGabarits };
