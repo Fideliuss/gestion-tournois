@@ -21,12 +21,13 @@ async function init(user) {
   GUIDES = AIDE_GUIDES.filter(function (g) { return isAdmin || (!g.admin && (!g.panel || panels.indexOf(g.panel) >= 0)); });
   window.addEventListener('hashchange', show);
   document.getElementById('aide-list').addEventListener('click', function (e) {          // sommaire : défilement jusqu'à l'étape, sans changer de guide
-    const sp = e.target.closest('button[data-space]');           // sélecteur d'espace : premier guide de l'espace choisi
-    if (sp) { location.hash = '#' + sp.dataset.space; return; }
     const a = e.target.closest('a[data-step]');
     if (!a) return;
     e.preventDefault();
     document.getElementById('aide-step-' + a.dataset.step).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.getElementById('aide-list').addEventListener('change', function (e) {          // liste déroulante des espaces : premier guide de l'espace choisi
+    if (e.target.matches('select[data-space]')) location.hash = '#' + e.target.value;
   });
   let busy = false;
   window.addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(function () { busy = false; spy(); }); } }, { passive: true });
@@ -63,9 +64,9 @@ function show() {
   const spaces = [];
   GUIDES.forEach(function (x) { if (spaces.indexOf(x.space) < 0) spaces.push(x.space); });
   const switcher = spaces.length > 1
-    ? '<div class="seg sm aide-spaces" role="tablist" aria-label="Espace">' + spaces.map(function (s) {
-        return '<button type="button" class="seg-btn' + (s === g.space ? ' active' : '') + '" role="tab" aria-selected="' + (s === g.space) + '" data-space="' + esc(s) + '">' + esc(AIDE_ESPACES[s] || s) + '</button>';
-      }).join('') + '</div>'
+    ? '<select class="aide-spaces" data-space aria-label="Espace">' + spaces.map(function (s) {
+        return '<option value="' + esc(s) + '"' + (s === g.space ? ' selected' : '') + '>' + esc(AIDE_ESPACES[s] || s) + '</option>';
+      }).join('') + '</select>'
     : '';
   list.innerHTML = switcher + '<div class="aide-grp"><h3>' + esc(AIDE_ESPACES[g.space] || g.space) + '</h3>' + GUIDES.filter(function (x) { return x.space === g.space; }).map(function (x) {
     return '<a href="#' + esc(x.id) + '"' + (x.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(x.title) + '</a>'
