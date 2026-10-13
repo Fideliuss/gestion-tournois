@@ -48,6 +48,33 @@ getTournaments:async function(){return cp(T)},upsertTournament:nop,deleteTournam
 // Réglages enregistrés dans le navigateur : l'encadrement et les courriers par défaut de l'application contiennent de vrais noms, on les remplace
 const SEED_TN = `<script>try{localStorage.setItem('decl_staff',${JSON.stringify(JSON.stringify(STAFF))});localStorage.setItem('courriers_tpl',${JSON.stringify(JSON.stringify(TPL))});localStorage.setItem('extras_emarg_2026_42',${JSON.stringify(JSON.stringify({ x1: { lun: true, mer: true, ven: true }, x2: { lun: true, mar: true, jeu: true }, x3: { mer: true, ven: true, sam: true, dim: true, _hours: { dim: '17:30' } }, x4: { mar: true, mer: true }, x5: { ven: true, sam: true, dim: true }, x6: { lun: true, jeu: true, ven: true }, x7: { mer: true, jeu: true }, _dayHours: { sam: '21:30' } }))});}catch(e){}</script>`;
 
+// Espace Training : croupiers fictifs et leurs sessions ; les fonctions de suivi de la base sont recalculées ici à partir des sessions
+const TR = data.entrainement();
+const isTr = function (c) { return c.page.indexOf('training/') === 0 || c.page === 'admin/config_training.html'; };
+const BASE_TR = `<script>(function(){var S=${JSON.stringify(TR.sessions)},U=${JSON.stringify(TR.croupiers)},ME=U[0].id,NOW=new Date(2026,9,14,20,0,0).getTime();
+var cp=function(o){return JSON.parse(JSON.stringify(o))},nop=async function(){};
+var pct=function(s){return s.total?Math.round(100*s.correct/s.total):0},avg=function(l){return l.length?Math.round(l.reduce(function(a,s){return a+pct(s)},0)/l.length):0};
+var of=function(u,g,lv){return S.filter(function(s){return s.user_id===u&&s.game===g&&(!lv||(s.meta&&s.meta.level)===lv)})};
+var day=function(iso){var d=new Date(iso);return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()};
+var WEAK={'roulette-paiement':[['Type de mise','plein',120,12],['Type de mise','cheval',140,31],['Type de mise','transversale',90,28],['Type de mise','carre',75,29],['Type de mise','sixain',80,14]],
+ 'uth-gains':[['Mise','ante',160,18],['Mise','blind',160,41],['Mise','play',150,22],['Mise','trips',70,17],['Mise','jp1',60,5]]};
+window.SB={getSession:async function(){return{user:{id:ME,email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
+getTrainingConfig:async function(){return null},updateTrainingConfig:nop,startTrainingSession:async function(){return{id:1}},endTrainingSession:nop,addTrainingResult:nop,
+getMyTrainingSessions:async function(){return cp(S.filter(function(s){return s.user_id===ME}))},
+getTrainingSessionsOf:async function(u,g){return cp(S.filter(function(s){return s.user_id===u&&(!g||s.game===g)}))},
+getTrainingActivity:async function(d){return U.map(function(c){var m=S.filter(function(s){return s.user_id===c.id}),p=m.filter(function(s){return NOW-new Date(s.started_at)<=d*86400000});
+ var days={};p.forEach(function(s){days[day(s.started_at)]=1});return{user_id:c.id,user_label:c.label,sessions_period:p.length,active_days:Object.keys(days).length,sessions_total:m.length,last_at:m.length?m[0].started_at:null}})},
+getTrainingActivityWeekly:async function(w){var out=[],mon=new Date(NOW);mon.setHours(0,0,0,0);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+ for(var i=w-1;i>=0;i--){var a=new Date(mon);a.setDate(a.getDate()-7*i);var b=new Date(a);b.setDate(b.getDate()+7);var l=S.filter(function(s){var t=new Date(s.started_at);return t>=a&&t<b}),us={};l.forEach(function(s){us[s.user_id]=1});
+  out.push({week_start:a.getFullYear()+'-'+String(a.getMonth()+1).padStart(2,'0')+'-'+String(a.getDate()).padStart(2,'0'),sessions:l.length,users:Object.keys(us).length})}return out},
+getTrainingRanking:async function(g,lv,min){var rows=U.map(function(c){var l=of(c.id,g,lv);return l.length?{user_id:c.id,user_label:c.label,sessions:l.length,best_pct:Math.max.apply(null,l.map(pct)),avg_recent:avg(l.slice(0,5)),last_at:l[0].started_at,ranked:l.length>=min}:null}).filter(Boolean);
+ return rows.sort(function(a,b){return (b.ranked-a.ranked)||(b.avg_recent-a.avg_recent)})},
+getTrainingTablesBest:async function(r){return U.map(function(c){var l=of(c.id,'roulette-tables').filter(function(s){return !r||s.meta.ratio===r});if(!l.length)return null;var ok=l.filter(function(s){return s.correct===s.total});
+ return{user_id:c.id,user_label:c.label,best_ms:ok.length?Math.min.apply(null,ok.map(function(s){return s.meta.elapsedMs})):null,perfect_runs:ok.length,sessions:l.length,last_at:l[0].started_at}}).filter(Boolean).sort(function(a,b){return (a.best_ms===null)-(b.best_ms===null)||a.best_ms-b.best_ms})},
+getTrainingWeakPoints:async function(g,u){return(WEAK[g]||[]).map(function(r){return{facet:r[0],value:r[1],attempts:r[2],errors:r[3]}})}};})();</script>`;
+// Tirage aléatoire fixé (graine propre à chaque capture) : les questions affichées sont toujours les mêmes
+const SEED = function (n) { return `<script>(function(){var a=${n};Math.random=function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}})();</script>`; };
+
 const coller = function (txt) { return `var ta=document.getElementById('octime-paste');ta.value=${JSON.stringify(txt)};ta.dispatchEvent(new Event('input'));`; };
 const COLLER = coller(OCTIME);
 // extraction avec deux anomalies : arrêtée un samedi (et non le dimanche attendu) et un nom écrit autrement que dans le planning
@@ -122,11 +149,54 @@ const CAPTURES_TN = [
 ];
 CAPTURES.push.apply(CAPTURES, CAPTURES_TN);
 
+// ── Espace Training ──
+// Questions : pas d'enchaînement automatique après une réponse, chronomètres figés à leur valeur de départ
+const FIGER = "var _st=window.setTimeout;window.setTimeout=function(f,t){return(t===700||t===800||t===900||t===1000||t===1400||t===1700||t===1800)?0:_st(f,t)};window.setInterval=function(){return 0};";
+const CAPTURES_TR = [
+  { nom: 'tr_accueil', page: 'training/training.html', w: 1400, h: 900, actions: '', css: '*{transition:none!important}' },
+  // Black Jack
+  { nom: 'tr_bj_paiement', page: 'training/blackjack/blackjack.html', w: 900, h: 660, actions: "document.getElementById('answer-input').value='225';", css: NU },
+  { nom: 'tr_bj_faux', page: 'training/blackjack/blackjack.html', w: 900, h: 660, actions: FIGER + "document.getElementById('answer-input').value='10';submitAnswer();", css: NU },
+  { nom: 'tr_bj_bilan', page: 'training/blackjack/blackjack.html', w: 900, h: 460, actions: "_correct=8;_qIndex=10;showSummary();", css: NU },
+  { nom: 'tr_bjs_niveaux', page: 'training/blackjack/blackjack_score.html', w: 900, h: 460, actions: '', css: NU },
+  { nom: 'tr_bjs_question', page: 'training/blackjack/blackjack_score.html', w: 900, h: 520, actions: FIGER + "startWithLevel('medium');setTimeout(function(){document.getElementById('answer-input').value='18'},500);", css: NU },
+  // Roulette : calculs
+  { nom: 'tr_rp_niveaux', page: 'training/roulette/roulette_paiement.html', w: 900, h: 340, actions: '', css: NU },
+  { nom: 'tr_rp_question', page: 'training/roulette/roulette_paiement.html', w: 900, h: 980, actions: FIGER + "startPaiementLevel('medium');", css: NU, seed: 11 },
+  { nom: 'tr_rp_faux', page: 'training/roulette/roulette_paiement.html', w: 900, h: 1060, actions: FIGER + "startPaiementLevel('medium');setTimeout(function(){document.getElementById('rp-answer-input').value='3';submitPaiement()},500);", css: NU, seed: 11 },
+  { nom: 'tr_rc_valeur', page: 'training/roulette/roulette_conversion.html', w: 900, h: 460, actions: '', css: NU },
+  { nom: 'tr_rc_question', page: 'training/roulette/roulette_conversion.html', w: 900, h: 700, actions: FIGER + "selectChipValue(5);setTimeout(function(){startConversionLevel('medium');setTimeout(function(){document.getElementById('cv-answer-input').value='60'},500)},500);", css: NU },
+  { nom: 'tr_rt_choix', page: 'training/roulette/roulette_tables.html', w: 900, h: 460, actions: '', css: NU },
+  { nom: 'tr_rt_carte', page: 'training/roulette/roulette_tables.html', w: 900, h: 560, actions: FIGER + "selectTable(35);setTimeout(function(){var q=document.getElementById('tb-question').textContent.split(String.fromCharCode(215));document.getElementById('tb-answer-input').value=parseInt(q[0])*parseInt(q[1]);},500);", css: NU },
+  { nom: 'tr_rt_reponse', page: 'training/roulette/roulette_tables.html', w: 900, h: 560, actions: FIGER + "selectTable(35);setTimeout(function(){var q=document.getElementById('tb-question').textContent.split(String.fromCharCode(215));document.getElementById('tb-answer-input').value=parseInt(q[0])*parseInt(q[1]);submitTables()},500);", css: NU },
+  // Roulette : le tapis
+  { nom: 'tr_rpt_question', page: 'training/roulette/roulette_pointage.html', w: 900, h: 640, actions: FIGER + "startPointageLevel('medium');", css: NU, seed: 5 },
+  { nom: 'tr_rcol_question', page: 'training/roulette/roulette_couleur.html', w: 900, h: 560, actions: FIGER + "startCouleurLevel('medium');", css: NU, seed: 12 },
+  // Ultimate Texas Hold'em
+  { nom: 'tr_uth_main', page: 'training/uth/uth_main.html', w: 900, h: 940, actions: '', css: NU, seed: 3 },
+  { nom: 'tr_uth_main_reponse', page: 'training/uth/uth_main.html', w: 900, h: 1080, actions: FIGER + "setTimeout(function(){umAnswer(2)},500);", css: NU, seed: 3 },
+  { nom: 'tr_uth_gagnant', page: 'training/uth/uth_gagnant.html', w: 900, h: 920, actions: FIGER + "setTimeout(function(){ugPickQualified(true)},500);", css: NU, seed: 9 },
+  { nom: 'tr_uth_gains', page: 'training/uth/uth_gains.html', w: 900, h: 940, actions: '', css: NU, seed: 4 },
+  { nom: 'tr_uth_gains_mise', page: 'training/uth/uth_gains.html', w: 900, h: 940, actions: "setTimeout(function(){ucOpen(ucBets()[0].bet)},500);", css: NU, seed: 4 },
+  // Suivi
+  { nom: 'tr_resultats', page: 'training/suivi/suivi_croupier.html', w: 1180, h: 960, actions: '', css: NU },
+  { nom: 'tr_resultats_module', page: 'training/suivi/suivi_croupier.html', w: 1180, h: 1100, actions: "location.hash='#roulette/roulette-tables';", css: NU },
+  { nom: 'tr_equipe_classement', page: 'training/suivi/suivi_manager.html', w: 1180, h: 760, actions: '', css: NU },
+  { nom: 'tr_equipe_progression', page: 'training/suivi/suivi_manager.html', w: 1180, h: 1000, actions: "svmGo('progression');", css: NU },
+  { nom: 'tr_equipe_faibles', page: 'training/suivi/suivi_manager.html', w: 1180, h: 760, actions: "svmGo('faibles');", css: NU },
+  { nom: 'tr_equipe_activite', page: 'training/suivi/suivi_manager.html', w: 1180, h: 960, actions: "svmGo('activite');", css: NU },
+  // Configuration des modules
+  { nom: 'tr_config_bj', page: 'admin/config_training.html', w: 1180, h: 950, actions: '', css: NU },
+  { nom: 'tr_config_roulette', page: 'admin/config_training.html', w: 1180, h: 1080, actions: "location.hash='#roulette';", css: NU },
+  { nom: 'tr_config_uth', page: 'admin/config_training.html', w: 1180, h: 520, actions: "location.hash='#uth';", css: NU },
+];
+CAPTURES.push.apply(CAPTURES, CAPTURES_TR);
+
 function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
   h = h.replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2"><\/script>\s*/, '')
-    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : BASE_TN; })
-    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 ? '' : SEED_TN))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
+    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : BASE_TN; })
+    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 ? '' : isTr(c) ? SEED(c.seed || 7) : SEED_TN))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')
     .replace('</body>', '<script>window.addEventListener("load",function(){setTimeout(function(){' + c.actions + '},900)});</script></body>');
   const file = path.join(path.dirname(path.join(ROOT, c.page)), '_qa_aide_' + c.nom + '.html');
