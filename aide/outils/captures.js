@@ -30,8 +30,14 @@ window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.c
 getBreakListPlanning:async function(k){return k==='2026-10'?JSON.parse(JSON.stringify(P)):null},listBreakListPlannings:async function(){return[{mois:'2026-10',updated_at:'2026-10-12T18:05:00.000Z'}]},
 saveBreakListPlanning:async function(){},deleteBreakListPlanning:async function(){},getBreakListConfig:async function(){return null},saveBreakListConfig:async function(){}};})();</script>`;
 
-const COLLER = `var ta=document.getElementById('octime-paste');ta.value=${JSON.stringify(OCTIME)};ta.dispatchEvent(new Event('input'));`;
-const MASQUER_BARRE = 'header.nav{display:none!important} .bl-toast{display:none!important}';
+const coller = function (txt) { return `var ta=document.getElementById('octime-paste');ta.value=${JSON.stringify(txt)};ta.dispatchEvent(new Event('input'));`; };
+const COLLER = coller(OCTIME);
+// extraction avec deux anomalies : arrêtée un samedi (et non le dimanche attendu) et un nom écrit autrement que dans le planning
+const COLLER_ANOMALIES = coller(OCTIME.replace(/18\/10\/2026/g, '17/10/2026').replace('MARCHAL LEA', 'MARCHAL DUVAL LEA'));
+// planning à importer : trois cases changées par rapport à celui enregistré et un code inconnu
+const IMPORT = "var np=JSON.parse(JSON.stringify(plan));np.rows[2].codes[14]='CP';np.rows[5].codes[20]='M';np.rows[9].codes[3]='20:55';np.rows[7].codes[25]='TT';pending={planning:np,old:plan};render();";
+const SEULE_CARTE = function (sel) { return sel + '{display:none!important}'; };
+const MASQUER_BARRE = 'header.nav{display:none!important} .bl-toast{display:none!important} *{transition:none!important}';
 const FEUILLE = '.bl-toast{display:none!important} .app{padding:12px!important;background:#222!important} .hdr,.bl-part,header.nav{display:none!important} body{background:#222!important}';
 
 // nom, page, taille de la fenêtre, actions (exécutées après le chargement), CSS ajouté
@@ -42,6 +48,21 @@ const CAPTURES = [
   { nom: 'bl_verso', page: 'break_list/break_list.html', w: 1140, h: 762, actions: "document.getElementById('bl-print').hidden=false;", css: FEUILLE + ' #bl-print{max-width:none!important} #bl-print .bl-page:nth-child(1){display:none!important}' },
   { nom: 'bl_departs', page: 'break_list/break_list.html', w: 1180, h: 900, actions: COLLER + "setTimeout(function(){showPart('departs')},600);", css: MASQUER_BARRE },
   { nom: 'bl_feuille_departs', page: 'break_list/break_list.html', w: 860, h: 500, actions: COLLER, css: FEUILLE + ' #dep-print{display:block!important;max-width:794px;margin:0 auto}' },
+  // Planning
+  { nom: 'bl_planning', page: 'break_list/planning.html', w: 1280, h: 760, actions: '', css: MASQUER_BARRE },
+  { nom: 'bl_planning_import', page: 'break_list/planning.html', w: 1280, h: 670, actions: IMPORT, css: MASQUER_BARRE + SEULE_CARTE('#plan-card') },
+  // Présents et absents de la séance
+  { nom: 'bl_ajout', page: 'break_list/break_list.html', w: 1180, h: 760, actions: '', css: MASQUER_BARRE + SEULE_CARTE('#part-breaklist > .card:first-child') + SEULE_CARTE('#abs-box') + ' .hdr{display:none!important}' },
+  { nom: 'bl_absents', page: 'break_list/break_list.html', w: 1180, h: 390, actions: "document.getElementById('abs-box').open=true;", css: MASQUER_BARRE + SEULE_CARTE('#part-breaklist > .card:not(.bl-abs)') + ' .hdr{display:none!important}' },
+  // Départs
+  { nom: 'bl_extraction', page: 'break_list/break_list.html', w: 1180, h: 430, actions: COLLER_ANOMALIES + "setTimeout(function(){showPart('departs')},600);", css: MASQUER_BARRE + SEULE_CARTE('#part-departs > .card:nth-child(2)') + ' .hdr{display:none!important}' },
+  { nom: 'bl_departs_main', page: 'break_list/break_list.html', w: 1180, h: 480, actions: COLLER + "setTimeout(function(){showPart('departs');var q=function(i){document.querySelectorAll('#rep-out li')[i].click()};setTimeout(function(){q(0);setTimeout(function(){q(8);setTimeout(function(){q(3)},250)},250)},300)},600);", css: MASQUER_BARRE + SEULE_CARTE('#part-departs > .card:first-child') + ' .hdr{display:none!important}' },
+  // Paramètres
+  { nom: 'bl_param_equipe', page: 'break_list/parametres.html', w: 1180, h: 1075, actions: '', css: MASQUER_BARRE },
+  { nom: 'bl_param_absences', page: 'break_list/parametres.html', w: 1180, h: 580, actions: '', css: MASQUER_BARRE + SEULE_CARTE('#pm-equipe > .card:nth-child(-n+2)') + SEULE_CARTE('#pm-tabs') + SEULE_CARTE('.hdr') },
+  { nom: 'bl_param_barre', page: 'break_list/parametres.html', w: 1180, h: 420, actions: "showTab('soiree');var i=document.getElementById('cf-stackers');i.value=6;i.dispatchEvent(new Event('input',{bubbles:true}));", css: MASQUER_BARRE + SEULE_CARTE('.hdr') + SEULE_CARTE('#pm-tabs') + SEULE_CARTE('.pm-foot') + SEULE_CARTE('#pm-soiree > .card:nth-child(n+2)') },
+  { nom: 'bl_param_seance', page: 'break_list/parametres.html', w: 1180, h: 1260, actions: "showTab('soiree');", css: MASQUER_BARRE },
+  { nom: 'bl_param_feuilles', page: 'break_list/parametres.html', w: 1180, h: 1500, actions: "showTab('feuilles');", css: MASQUER_BARRE },
 ];
 
 function buildPage(c) {
