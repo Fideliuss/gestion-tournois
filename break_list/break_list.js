@@ -77,7 +77,10 @@ async function loadPlan() {
 
 // ── Partie affichée : Break list (en premier, c'est la première chose à faire le soir) ou Départs ──
 
+let _part = 'breaklist';
+
 function showPart(name) {
+  _part = name;
   try { sessionStorage.setItem('bl_part', name); } catch (e) { /* stockage indisponible : le choix n'est pas retenu */ }
   document.querySelectorAll('#bl-switch button').forEach(function (b) {
     const on = b.dataset.part === name;
@@ -85,6 +88,7 @@ function showPart(name) {
   });
   document.getElementById('part-breaklist').hidden = name !== 'breaklist';
   document.getElementById('part-departs').hidden = name !== 'departs';
+  renderDayLine();
 }
 
 // ── Rendu général ────────────────────────────────────
@@ -96,7 +100,7 @@ function renderAll() {
   match = octime && _presents.length ? blRapprocher(_presents, octime.rows, cfg.aliases) : null;
   const info = document.getElementById('plan-info');
   if (!plan) info.innerHTML = 'Aucun planning pour ' + esc(blMonthLabel(D.y, D.m)) + '. <a href="planning.html" style="color:var(--gold-dim);text-decoration:underline">Importer le planning</a>';
-  else info.textContent = 'Planning de ' + blMonthLabel(D.y, D.m) + ' · ' + plan.rows.length + ' salariés · ' + blDateLabel(D.y, D.m, D.d);
+  else info.textContent = 'Planning ' + blMoisDe(D.m) + ' ' + D.y + ' · ' + plan.rows.length + ' salariés';
   document.getElementById('plan-maj').textContent = plan && planMaj ? 'Dernière mise à jour du planning : ' + blStamp(planMaj) : '';
   renderCount();
   renderPresents();
@@ -104,7 +108,18 @@ function renderAll() {
   renderOctime();
   renderRepartition();
   renderPrint();
-  document.getElementById('dep-date').textContent = 'Séance du ' + blDateLabel(D.y, D.m, D.d) + ' · ' + _presents.length + ' présents';
+  renderDayLine();
+}
+
+/** Ligne sous le choix Break list | Départs. Break list : « Nous sommes le … » (la séance du jour, selon l'heure de changement de séance
+ *  des paramètres, jamais la date brute de minuit). Départs : la séance affichée, avec un avertissement si ce n'est pas celle du jour */
+function renderDayLine() {
+  const el = document.getElementById('day-line');
+  if (!el || !cfg) return;
+  const t = blAujourdhui(new Date(), cfg), jour = t.year === D.y && t.month === D.m && t.day === D.d;
+  if (_part === 'departs') {
+    el.innerHTML = esc('Séance du ' + blDateLabel(D.y, D.m, D.d) + ' · ' + _presents.length + ' présents') + (jour ? '' : ' · <span class="warn">pas la séance du jour</span>');
+  } else el.textContent = 'Nous sommes le ' + blDateLabel(t.year, t.month, t.day);
 }
 
 // ── Effectif de la séance : une pastille par horaire du planning, puis le total ──

@@ -36,6 +36,12 @@ function blDateLabel(y, m, d) {
 
 function blDaysIn(y, m) { return new Date(y, m, 0).getDate(); }
 
+/** « d'Octobre » devant une voyelle (Avril, Août, Octobre), « de Novembre » sinon : à placer après « Planning », « Remplacer le planning »... */
+function blMoisDe(m) {
+  const n = BL_MOIS[m - 1], nom = n.charAt(0).toUpperCase() + n.slice(1);
+  return (/^[aeiouyh]/i.test(n) ? "d'" : 'de ') + nom;
+}
+
 function blMonthLabel(y, m) {
   const n = BL_MOIS[m - 1];
   return n.charAt(0).toUpperCase() + n.slice(1) + ' ' + y;

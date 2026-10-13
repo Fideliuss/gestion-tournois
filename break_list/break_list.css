@@ -8,6 +8,9 @@
 .bl-part { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .bl-part[hidden] { display: none; }
 
+.bl-day { margin-top: 12px; font-size: 14px; color: var(--text-dim); text-align: center; }
+.bl-day .warn { color: #D9864A; }
+
 /* Titre de page à deux choix : Break list | Départs */
 .bl-switch { display: flex; justify-content: center; align-items: baseline; gap: 18px; }
 .bl-switch button { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; font-style: italic; color: var(--text-dim); transition: color .18s; }

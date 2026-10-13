@@ -22,6 +22,7 @@
       <i>|</i>
       <button type="button" role="tab" data-part="departs" aria-selected="false" onclick="showPart('departs')">Départs</button>
     </div>
+    <div class="bl-day" id="day-line"></div>
   </div>
 
   <!-- ══ Break list : la séance, les présents, l'impression de la feuille ══ -->
@@ -68,8 +69,6 @@
 
   <!-- ══ Départs : extraction Octime et répartition ══ -->
   <section class="bl-part bl-view bl-no-print" id="part-departs" hidden>
-
-    <div class="bl-muted bl-card" id="dep-date" style="margin:-8px 0 16px"></div>
 
     <div class="card bl-card">
       <div class="sec">Extraction Octime</div>

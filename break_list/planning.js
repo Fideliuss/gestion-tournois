@@ -41,7 +41,7 @@ function render() {
   document.getElementById('btn-del').hidden = !plan;
   fillMonths();
   renderPending();
-  document.getElementById('plan-title').textContent = 'Planning de ' + blMonthLabel(Y, M);
+  document.getElementById('plan-title').textContent = 'Planning ' + blMoisDe(M) + ' ' + Y;
   renderTable();
 }
 
@@ -91,7 +91,7 @@ function renderPending() {
   if (!pending) return;
   const p = pending.planning, old = pending.old, diffs = old ? blDiffPlanning(old, p) : [];
   const unk = blCodesInconnus(p, cfg);
-  document.getElementById('pending-title').textContent = (old ? 'Remplacer le planning de ' : 'Nouveau planning de ') + blMonthLabel(p.year, p.month);
+  document.getElementById('pending-title').textContent = (old ? 'Remplacer le planning ' : 'Nouveau planning ') + blMoisDe(p.month) + ' ' + p.year;
   document.getElementById('btn-confirm').textContent = old ? 'Remplacer le planning' : 'Enregistrer le planning';
   let html = '<div class="bl-muted">' + p.rows.length + ' salariés · ' + p.days + ' jours.</div>';
   if (old) {
@@ -124,7 +124,7 @@ async function confirmImport() {
 function cancelImport() { pending = null; refresh(); }
 
 async function deletePlanning() {
-  if (!plan || !confirm('Supprimer le planning de ' + blMonthLabel(Y, M) + ' ?')) return;
+  if (!plan || !confirm('Supprimer le planning ' + blMoisDe(M) + ' ' + Y + ' ?')) return;
   try { await SB.deleteBreakListPlanning(blMonthKey(Y, M)); flash('Planning supprimé'); await refresh(); }
   catch (e) { console.error(e); flash('Suppression impossible'); }
 }
