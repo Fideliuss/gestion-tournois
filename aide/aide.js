@@ -26,12 +26,54 @@ async function init(user) {
     e.preventDefault();
     document.getElementById('aide-step-' + a.dataset.step).scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-  document.getElementById('aide-list').addEventListener('change', function (e) {          // liste déroulante des espaces : premier guide de l'espace choisi
-    if (e.target.matches('select[data-space]')) location.hash = '#' + e.target.value;
-  });
+  initSpaceMenu();
   let busy = false;
   window.addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(function () { busy = false; spy(); }); } }, { passive: true });
   show();
+}
+
+// ── Liste déroulante des espaces (carte stylisée, comme les menus de la barre) ──
+// Les options sont des liens #<espace> : choisir un espace ouvre son premier guide. La carte est en position fixe pour ne pas
+// être coupée par la colonne de gauche, qui défile.
+
+function spaceMenuClose() {
+  const pop = document.querySelector('.aide-dd-pop'), btn = document.querySelector('.aide-dd-btn');
+  if (pop) pop.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function spaceMenuOpen() {
+  const pop = document.querySelector('.aide-dd-pop'), btn = document.querySelector('.aide-dd-btn');
+  if (!pop || !btn) return;
+  const r = btn.getBoundingClientRect();
+  pop.style.top = (r.bottom + 6) + 'px'; pop.style.left = r.left + 'px'; pop.style.width = r.width + 'px';
+  pop.hidden = false;
+  btn.setAttribute('aria-expanded', 'true');
+  const cur = pop.querySelector('[aria-selected="true"]');
+  if (cur) cur.focus({ preventScroll: true });
+}
+
+function initSpaceMenu() {
+  document.getElementById('aide-list').addEventListener('click', function (e) {
+    if (e.target.closest('.aide-dd-btn')) {
+      const open = document.querySelector('.aide-dd-pop').hidden;
+      if (open) spaceMenuOpen(); else spaceMenuClose();
+      return;
+    }
+    const opt = e.target.closest('.aide-dd-opt');
+    if (opt && opt.getAttribute('aria-selected') === 'true') { e.preventDefault(); spaceMenuClose(); }   // espace déjà affiché : rien à changer
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest('.aide-dd')) spaceMenuClose(); });
+  document.addEventListener('keydown', function (e) {
+    const pop = document.querySelector('.aide-dd-pop');
+    if (!pop || pop.hidden) return;
+    if (e.key === 'Escape') { spaceMenuClose(); document.querySelector('.aide-dd-btn').focus(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    e.preventDefault();
+    const opts = Array.prototype.slice.call(pop.querySelectorAll('.aide-dd-opt')), i = opts.indexOf(document.activeElement);
+    opts[(i + (e.key === 'ArrowDown' ? 1 : opts.length - 1)) % opts.length].focus();
+  });
+  window.addEventListener('scroll', spaceMenuClose, { passive: true });
 }
 
 /** Met en évidence, dans le sommaire, l'étape en cours de lecture (la dernière dont le haut a passé le bas de la barre) */
@@ -64,9 +106,12 @@ function show() {
   const spaces = [];
   GUIDES.forEach(function (x) { if (spaces.indexOf(x.space) < 0) spaces.push(x.space); });
   const switcher = spaces.length > 1
-    ? '<select class="aide-spaces" data-space aria-label="Espace">' + spaces.map(function (s) {
-        return '<option value="' + esc(s) + '"' + (s === g.space ? ' selected' : '') + '>' + esc(AIDE_ESPACES[s] || s) + '</option>';
-      }).join('') + '</select>'
+    ? '<div class="aide-dd"><button type="button" class="aide-dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Espace">'
+      + '<span>' + esc(AIDE_ESPACES[g.space] || g.space) + '</span>'
+      + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'
+      + '<div class="aide-dd-pop" role="listbox" aria-label="Espaces" hidden>' + spaces.map(function (s) {
+        return '<a class="aide-dd-opt" role="option" href="#' + esc(s) + '" aria-selected="' + (s === g.space) + '">' + esc(AIDE_ESPACES[s] || s) + '</a>';
+      }).join('') + '</div></div>'
     : '';
   list.innerHTML = switcher + '<div class="aide-grp"><h3>' + esc(AIDE_ESPACES[g.space] || g.space) + '</h3>' + GUIDES.filter(function (x) { return x.space === g.space; }).map(function (x) {
     return '<a href="#' + esc(x.id) + '"' + (x.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(x.title) + '</a>'
