@@ -269,7 +269,7 @@
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   @page { size: A4 landscape; margin: 8mm; }
   html, body { background: #fff !important; }
-  header.nav, .theme-toggle, .back, .hdr, .bl-no-print, .bl-toast, #auth-badge, #auth-overlay { display: none !important; }
+  header.nav, .hdr, .bl-no-print, .bl-toast, #auth-overlay { display: none !important; }
   .app { background: none !important; padding: 0 !important; min-height: 0 !important; display: block !important; }
   #bl-print { display: block !important; max-width: none; }
   .bl-view { display: none !important; }

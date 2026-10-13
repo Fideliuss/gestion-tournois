@@ -44,9 +44,8 @@ const AUTH = {
    *   loginUrl    {string}              - chemin relatif vers login.html depuis cette page
    *   role        {string|string[]|null} - 'admin', ['admin','mcd'], ou null = tout connecté
    *   panel       {string|string[]|null} - panel(s) requis ; les admins passent toujours
-   *   nav         {boolean}             - barre de navigation commune (true par défaut) ; false = ancienne interface flottante
    */
-  async guard({ loginUrl = 'login.html', role = null, panel = null, nav = true } = {}) {
+  async guard({ loginUrl = 'login.html', role = null, panel = null } = {}) {
     // Overlay immédiat pour éviter le flash de contenu
     const overlay = document.createElement('div');
     overlay.id = 'auth-overlay';
@@ -92,17 +91,15 @@ const AUTH = {
     // La barre est montée avant de retirer l'overlay : une redirection d'entrée (un seul espace accessible)
     // ne laisse alors voir aucune page intermédiaire
     let navOk = false;
-    if (nav) {
-      try {
-        const cached = _rolePanelsCache[userRole] || {};
-        navOk = (await _loadNav()) && NAV.mount({
-          root, loginUrl, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
-          panels: cached.panels || [], color: cached.color || null,
-        });
-      } catch (e) { navOk = false; }
-    }
+    try {
+      const cached = _rolePanelsCache[userRole] || {};
+      navOk = (await _loadNav()) && NAV.mount({
+        root, loginUrl, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
+        panels: cached.panels || [], color: cached.color || null,
+      });
+    } catch (e) { navOk = false; }
     overlay.remove();
-    if (!navOk) AUTH._addBadge(loginUrl, session.user.email, userRole);   // repli : ancienne interface
+    if (!navOk) AUTH._navFallback(root, loginUrl);
     return session.user;
   },
 
@@ -135,21 +132,15 @@ const AUTH = {
     window.location.replace(loginUrl);
   },
 
-  _addBadge(loginUrl, email, role) {
-    const badge = document.createElement('div');
-    badge.id = 'auth-badge';
-    const short      = email.split('@')[0];
-    const roleLabel  = role === 'admin' ? 'Admin' : role === 'mcd' ? 'MCD' : role === 'floor' ? 'Floor'
-                     : role.charAt(0).toUpperCase() + role.slice(1);
-    const defaults   = { admin: '#C37814', mcd: '#3264C8', floor: '#0075A9' };
-    const cached     = _rolePanelsCache && _rolePanelsCache[role];
-    const color      = (cached && cached.color) || defaults[role] || '#0075A9';
-    badge.innerHTML = `
-      <span class="auth-email">${short}</span>
-      <span class="auth-chip" style="background:${color}28;color:${color}">${roleLabel}</span>
-      <button class="auth-pwd-btn" onclick="AUTH._openChangePwd()" title="Changer le mot de passe">🔑</button>
-      <button class="auth-logout" onclick="AUTH.signOut('${loginUrl}')">Déconnexion</button>`;
-    document.body.appendChild(badge);
+  /** Barre de navigation indisponible (fichiers non chargés) : bandeau minimal pour ne pas rester bloqué */
+  _navFallback(root, loginUrl) {
+    const bar = document.createElement('div');
+    bar.id = 'auth-fallback';
+    bar.innerHTML = 'Navigation indisponible'
+      + '<a href="' + root + 'index.html">Accueil</a>'
+      + '<a href="#" onclick="location.reload(); return false">Recharger</a>'
+      + '<a href="#" onclick="AUTH.signOut(\'' + loginUrl + '\'); return false">Déconnexion</a>';
+    document.body.insertBefore(bar, document.body.firstChild);
   },
 
   // ── Modal changement de mot de passe ──────────────────

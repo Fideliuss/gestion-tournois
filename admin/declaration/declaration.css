@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    declaration.css - Déclaration mensuelle PN
-   Barrière Casino Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Tournois
 ═══════════════════════════════════════════════════════ */
 
 /* ── Sélecteur de période ── */
@@ -294,8 +294,6 @@ body.light .annexe-card { background: rgba(247,243,233,.97); border-color: rgba(
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
   /* Masquer toute l'interface - ne garder que tableau + annexes */
-  .theme-toggle,
-  .back,
   #period-card,
   #decl-main-tabs,
   .decl-toast,
