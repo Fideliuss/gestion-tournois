@@ -67,7 +67,7 @@ var AIDE_GUIDES = [
       },
       {
         title: "Importer le fichier CSV",
-        text: "<p>Cliquez sur <b>Importer un planning (CSV)</b> et choisissez le fichier du mois. Le mois et l'année sont lus dans le fichier : le sélecteur se place dessus tout seul.</p>"
+        text: "<p>Cliquez sur <b>Importer un planning (CSV)</b> et choisissez le fichier du mois. Ce fichier doit être une extraction (au format CSV) du planning Google Sheet : ce planning est standardisé, l'application en reconnaît donc la mise en forme. Le mois et l'année sont lus dans le fichier : le sélecteur se place dessus tout seul.</p>"
           + "<p>Rien n'est enregistré tout de suite : un aperçu s'affiche d'abord, avec le nombre de salariés et de jours. Vérifiez-le, puis validez avec le bouton en bas à droite, ou cliquez sur <b>Annuler</b>.</p>",
         imgs: [],
       },
