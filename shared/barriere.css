@@ -142,32 +142,13 @@ body.light .app {
 }
 @keyframes auth-spin { to { transform: rotate(360deg); } }
 
-/* ── Auth badge (utilisateur connecté) ── */
-#auth-badge {
-  position: fixed; top: 56px; right: 16px; z-index: 200;
-  display: flex; align-items: center; gap: 6px;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 5px 10px 5px 12px;
-  font-family: var(--f-ui); font-size: 11px;
-  backdrop-filter: blur(8px);
+/* ── Bandeau de secours : la barre de navigation n'a pas pu se charger ── */
+#auth-fallback {
+  position: sticky; top: 0; z-index: 200; padding: 9px 16px; text-align: center;
+  font-family: var(--f-ui); font-size: 12px; color: var(--text-dim);
+  background: var(--bg-card); border-bottom: 1px solid var(--gold-bd);
 }
-.auth-email  { color: var(--text-muted); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.auth-chip   { border-radius: 10px; padding: 2px 7px; font-size: 10px; font-weight: 700; letter-spacing: .04em; }
-.auth-chip-admin { background: rgba(195,120,20,.18); color: var(--gold, #C37814); }
-.auth-chip-mcd   { background: rgba(50,100,200,.18); color: #7fa3e8; }
-.auth-chip-floor { background: rgba(0,117,169,.18); color: #5bc0e8; }
-.auth-logout {
-  background: none; border: none; cursor: pointer; padding: 2px 4px;
-  color: var(--text-muted); font-size: 11px; border-radius: 6px;
-  transition: color .15s;
-}
-.auth-logout:hover { color: #e74c3c; }
-.auth-pwd-btn {
-  background: none; border: none; cursor: pointer; padding: 2px 4px;
-  color: var(--text-muted); font-size: 11px; border-radius: 6px;
-  transition: color .15s; font-family: var(--f-ui);
-}
-.auth-pwd-btn:hover { color: var(--gold, #C37814); }
+#auth-fallback a { color: var(--gold-dim); margin: 0 8px; }
 
 /* ── Modal changement mot de passe ── */
 #auth-pwd-overlay {
@@ -213,7 +194,7 @@ body.light .app {
 .auth-pwd-msg.err { color: var(--red, #e74c3c); }
 .auth-pwd-msg.ok  { color: #6da; }
 
-@media print { #auth-badge, #auth-overlay, #auth-pwd-overlay { display: none !important; } }
+@media print { #auth-fallback, #auth-overlay, #auth-pwd-overlay { display: none !important; } }
 
 /* ── Header ── */
 .hdr { text-align: center; margin-bottom: 44px; }
@@ -333,16 +314,6 @@ body.light .card {
 
 /* ── Séparateur ── */
 .div { height: 1px; background: linear-gradient(90deg, transparent, rgba(195,120,20,.16), transparent); margin: 22px 0; }
-
-/* ── Lien retour ← (fixé en haut à gauche) ── */
-.back {
-  position: fixed; top: 16px; left: 16px; z-index: 50;
-  font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--gold-dim); text-decoration: none;
-  display: flex; align-items: center; gap: 6px; transition: color .18s;
-}
-.back:hover { color: var(--gold); }
-@media print { .back { display: none !important; } }
 
 /* ── État vide ── */
 .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }

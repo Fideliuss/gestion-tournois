@@ -167,9 +167,6 @@ const NAV = (function () {
 
     const current = spaces.find(function (s) { return s.id === page.s; }) || null;
 
-    // Ancienne interface flottante (retour, thème, badge) : remplacée par la barre
-    document.querySelectorAll('.back, .theme-toggle, #auth-badge').forEach(function (n) { n.remove(); });
-
     // ── Menus déroulants : un seul ouvert à la fois ──
     const dropdowns = [];
     const closeAll = function (except) {
