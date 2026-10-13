@@ -14,8 +14,8 @@ var AIDE_ESPACES = {
 
 var AIDE_GUIDES = [
   {
-    id: 'break-list-vue-ensemble', space: 'break-list', panel: 'break-list',
-    title: 'Vue d\'ensemble',
+    id: 'break-list-pour-commencer', space: 'break-list', panel: 'break-list',
+    title: 'Pour commencer',
     intro: 'L\'espace Break list prépare la séance : qui est présent, la feuille de pauses à imprimer et les départs de fin de séance. Il remplace l\'ancien tableur et son script.',
     steps: [
       {

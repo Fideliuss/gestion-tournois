@@ -99,7 +99,7 @@ const NAV = (function () {
   }
 
   // Guide ouvert par le bouton « Aide » selon l'espace de la page courante (id d'un guide de aide/aide_guides.js) ; sans entrée : la page Aide
-  const HELP = { 'break-list': 'break-list-vue-ensemble' };
+  const HELP = { 'break-list': 'break-list-pour-commencer' };
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
   const PAGES = { 'index.html': {}, 'aide/aide.html': { help: true } };
