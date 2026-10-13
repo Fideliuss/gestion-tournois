@@ -98,8 +98,8 @@ const NAV = (function () {
     return s;
   }
 
-  // Guide ouvert par le bouton « Aide » selon l'espace de la page courante (id d'un guide de aide/aide_guides.js) ; sans entrée : la page Aide
-  const HELP = { 'break-list': 'break-list-pour-commencer' };
+  // Guide ouvert par le bouton « Aide » (id d'un guide de aide/aide_guides.js) : celui de la page si elle en a un, sinon celui de l'espace courant ; sans entrée : la page Aide
+  const HELP = { 'break-list': 'break-list-pour-commencer', 'break_list/planning.html': 'break-list-planning', 'break_list/parametres.html': 'break-list-parametres' };
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
   const PAGES = { 'index.html': {}, 'aide/aide.html': { help: true } };
@@ -248,7 +248,8 @@ const NAV = (function () {
       tools.push(dropdown(abtn, entries, true));
     }
     // Aide : le guide de l'espace courant (ou la page Aide)
-    const helpTarget = 'aide/aide.html' + (HELP[page.s] ? '#' + HELP[page.s] : '');
+    const helpId = HELP[key] || HELP[page.s];
+    const helpTarget = 'aide/aide.html' + (helpId ? '#' + helpId : '');
     const helpBtn = el('a', { class: 'nav-btn', href: href(helpTarget), title: 'Aide', 'aria-label': 'Aide' }, [icon('help'), el('span', { class: 'nav-btn-label', text: 'Aide' })]);
     if (page.help) helpBtn.setAttribute('aria-current', 'page');
     tools.push(helpBtn);
