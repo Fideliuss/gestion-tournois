@@ -12,7 +12,7 @@
   <div class="hdr">
     <span class="hdr-logo">Barrière Casino · Bordeaux</span>
     <div class="hdr-title">Éditions du <em>règlement TDA</em></div>
-    <div class="hdr-sub">Importer une nouvelle édition et choisir celle que les comptes consultent</div>
+    <div class="hdr-sub">Déposer le PDF d'une nouvelle édition et choisir celle que les comptes consultent</div>
   </div>
 
   <section class="te-sec" aria-labelledby="te-h-liste">
@@ -23,8 +23,8 @@
   <section class="te-sec" aria-labelledby="te-h-import">
     <h2 class="te-h" id="te-h-import">Importer une édition</h2>
     <label class="btn btn-ghost te-file" id="te-file-label">
-      Choisir le fichier de l'édition
-      <input type="file" id="te-fichier" accept=".json,application/json" hidden />
+      Choisir le PDF du règlement
+      <input type="file" id="te-fichier" accept=".pdf,application/pdf" hidden />
     </label>
     <div id="te-apercu" aria-live="polite"></div>
   </section>
@@ -34,6 +34,8 @@
 <script src="../shared/barriere.js"></script>
 <script src="../shared/supabase.js"></script>
 <script src="../shared/auth.js"></script>
+<script src="../tda/tda_analyse.js"></script>
+<script src="../tda/tda_pdf.js"></script>
 <script src="tda_editions.js"></script>
 <script>
 AUTH.guard({ loginUrl: '../login.html', role: 'admin' }).then(function(user) {

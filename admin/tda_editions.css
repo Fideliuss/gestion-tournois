@@ -33,6 +33,19 @@ body.light .te-badge.warn { color: #b5483a; border-color: rgba(181,72,58,.5); }
 .te-apercu { margin-top: 18px; padding: 16px 18px; border: 1px solid var(--gold-bd); border-radius: var(--r-box); }
 .te-apercu .te-actions { margin-top: 14px; }
 
+.te-champs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin-bottom: 4px; }
+.te-resume { margin: 14px 0 12px; font-size: 13px; line-height: 1.7; color: var(--text); }
+.te-controles { list-style: none; margin: 0 0 4px; padding: 0; font-size: 12px; line-height: 1.5; color: var(--text-dim); }
+.te-c { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; padding: 5px 0; border-top: 1px solid var(--gold-bd); }
+.te-c:first-child { border-top: 0; }
+.te-c-n { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #6dcc8e; padding-top: 2px; }
+.te-c.avert .te-c-n { color: var(--gold); }
+.te-c.erreur .te-c-n { color: #e07a68; }
+.te-c.erreur { color: #e07a68; }
+body.light .te-c-n { color: #2e7d4f; }
+body.light .te-c.avert .te-c-n { color: var(--gold); }
+body.light .te-c.erreur, body.light .te-c.erreur .te-c-n { color: #b5483a; }
+
 .te-msg { margin: 12px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-dim); }
 .te-msg.ok  { color: #6dcc8e; }
 .te-msg.err { color: #e07a68; }
@@ -41,4 +54,6 @@ body.light .te-msg.err { color: #b5483a; }
 
 @media (max-width: 620px) {
   .te-actions { width: 100%; }
+  .te-champs { grid-template-columns: 1fr; }
+  .te-c { grid-template-columns: 52px minmax(0, 1fr); }
 }

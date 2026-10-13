@@ -465,7 +465,16 @@ const SB = {
     return count;
   },
 
-  // Importe un fichier produit par tda/outils/extraire_tda.js ({ edition, sections, blocs }) en brouillon.
+  // Nombre de blocs d'une édition, par type ({ regle: 74, rp: 29, exemple: 15, glossaire: 49, rp_intro: 1 })
+  async countTdaParType(editionId) {
+    const { data, error } = await _sb.from('tda_blocs').select('kind').eq('edition_id', editionId);
+    if (error) throw error;
+    const n = {};
+    (data || []).forEach(function (b) { n[b.kind] = (n[b.kind] || 0) + 1; });
+    return n;
+  },
+
+  // Importe une édition analysée par tda_analyse.js ({ edition, sections, blocs }) en brouillon.
   // Le brouillon est supprimé si l'import échoue en cours de route (jamais d'édition à moitié importée).
   async importTdaEdition(fichier, onProgress) {
     const e = fichier.edition, blocs = fichier.blocs;
