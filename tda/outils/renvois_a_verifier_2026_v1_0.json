@@ -1,0 +1,8 @@
+[
+  { "bloc": "r16",       "cible": "r58", "attendu": null,  "note": "La règle 58 (mises en plusieurs fois) ne semble pas correspondre à l'exception évoquée ici." },
+  { "bloc": "r59",       "cible": "r40", "attendu": null,  "note": "La règle 40 (carte brûlée après une action substantielle) ne semble pas concerner les mises confuses." },
+  { "bloc": "r70",       "cible": "r66", "attendu": null,  "note": "La règle 66 (jetons perdus et retrouvés) ne semble pas concerner la façon de coucher sa main." },
+  { "bloc": "rp12",      "cible": "r49", "attendu": "r51", "note": "Le texte parle de la règle « accepter l'action », qui est la règle 51 et non la 49." },
+  { "bloc": "ex_55_a_2", "cible": "r36", "attendu": "r38", "note": "Le texte parle de l'action substantielle, qui est la règle 38 et non la 36." },
+  { "bloc": "ex_55_a_2", "cible": "r58", "attendu": null,  "note": "La règle 58 (mises en plusieurs fois) ne semble pas concerner ce fold anticipé." }
+]
