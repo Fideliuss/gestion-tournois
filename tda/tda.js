@@ -63,11 +63,10 @@ function fmtDate(iso) {
 
 function afficherEntete() {
   const e = D.edition;
-  $('td-sub').textContent = [e.libelle, e.date_publication ? 'du ' + fmtDate(e.date_publication) : ''].filter(Boolean).join(' ');
   // Mention obligatoire du TDA, sur chaque page, avec un lien actif vers son site
   const mention = esc(e.mention).replace(/https?:\/\/[^\s,]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">' + u + '</a>'; });
   $('td-mention').innerHTML = '<p>' + mention + '</p>' +
-    (e.traduction ? '<p>' + esc(e.libelle) + ', traduction française de ' + esc(e.traduction) + '.</p>' : '');
+    '<p>' + esc(e.libelle) + (e.date_publication ? ' du ' + fmtDate(e.date_publication) : '') + (e.traduction ? ', traduction française de ' + esc(e.traduction) : '') + '.</p>';
 }
 
 // ── Routage ──────────────────────────────────────────
@@ -139,7 +138,7 @@ function afficherAccueil(vue) {
   } else if (e.introduction) {
     html += '<p class="td-p">' + esc(e.introduction) + '</p>';
   }
-  html += '<p class="td-aide">' + (vue === 'procedures' ? 'Choisissez une procédure dans le sommaire.' : 'Choisissez une règle dans le sommaire.') + '</p></div>';
+  html += '</div>';
   $('td-main').innerHTML = html;
   window.scrollTo(0, 0);
 }

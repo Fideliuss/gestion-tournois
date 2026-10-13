@@ -111,7 +111,6 @@ body.light .td-pop { background: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,.15
 .td-back { display: none; margin-bottom: 16px; font-size: 13px; color: var(--gold-dim); text-decoration: none; }
 
 /* ── Accueil et glossaire ── */
-.td-accueil .td-aide { margin: 18px 0 0; font-size: 13px; color: var(--text-dim); }
 .td-gloss { max-width: 860px; margin: 0 auto; width: 100%; padding: 12px 40px 30px; }
 .td-gloss .td-sec { margin-top: 28px; }
 .td-dl { margin: 0; }
