@@ -64,6 +64,7 @@ body.light .nav-brand .logo-dark { display: block; }
   font-size: 12px; font-weight: 500; letter-spacing: .03em; color: var(--text-dim); cursor: pointer;
   transition: color .15s, border-color .15s;
 }
+a.nav-btn { text-decoration: none; }
 .nav-btn:hover, .nav-btn[aria-expanded="true"], .nav-btn[aria-current] { color: var(--cream); border-color: var(--gold-bd); }
 .nav-btn svg { width: 16px; height: 16px; flex: none; }
 .nav-theme .i-moon { display: none; }
