@@ -1,3 +1,6 @@
 barriere_data.json
 extras_data.json
 .claude/
+
+# Texte du règlement TDA extrait du PDF : ne JAMAIS commiter (dépôt public, droits du TDA)
+tda/outils/sortie/

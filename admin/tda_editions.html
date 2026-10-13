@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Éditions du règlement TDA - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="tda_editions.css" />
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Éditions du <em>règlement TDA</em></div>
+    <div class="hdr-sub">Importer une nouvelle édition et choisir celle que les comptes consultent</div>
+  </div>
+
+  <section class="te-sec" aria-labelledby="te-h-liste">
+    <h2 class="te-h" id="te-h-liste">Éditions</h2>
+    <div id="te-liste" aria-live="polite"><p class="te-vide">Chargement...</p></div>
+  </section>
+
+  <section class="te-sec" aria-labelledby="te-h-import">
+    <h2 class="te-h" id="te-h-import">Importer une édition</h2>
+    <label class="btn btn-ghost te-file" id="te-file-label">
+      Choisir le fichier de l'édition
+      <input type="file" id="te-fichier" accept=".json,application/json" hidden />
+    </label>
+    <div id="te-apercu" aria-live="polite"></div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="tda_editions.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', role: 'admin' }).then(function(user) {
+  if (!user) return;
+  initEditionsTda();
+});
+</script>
+</body>
+</html>

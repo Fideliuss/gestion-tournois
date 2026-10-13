@@ -439,6 +439,67 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Règlement TDA (éditions et contenu) ─────────────
+  // Lecture : l'édition active seulement (RLS), réservée au panel 'tda'. Écriture : admins (page « Éditions du règlement »).
+  // Édition active + tous ses blocs (≈ 170 lignes, < 1000 : pas de pagination), ou null si aucune édition n'est active
+  async getTdaActive() {
+    const { data: ed, error } = await _sb.from('tda_editions').select('*').eq('active', true).maybeSingle();
+    if (error) throw error;
+    if (!ed) return null;
+    const { data: blocs, error: e2 } = await _sb.from('tda_blocs')
+      .select('id, kind, numero, section, titre, ordre, data').eq('edition_id', ed.id).order('ordre');
+    if (e2) throw e2;
+    return { edition: ed, blocs: blocs || [] };
+  },
+
+  async listTdaEditions() {
+    const { data, error } = await _sb.from('tda_editions')
+      .select('id, libelle, date_publication, traduction, nb_blocs, active, importe_le').order('importe_le', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async countTdaBlocs(editionId) {
+    const { count, error } = await _sb.from('tda_blocs').select('*', { count: 'exact', head: true }).eq('edition_id', editionId);
+    if (error) throw error;
+    return count;
+  },
+
+  // Importe un fichier produit par tda/outils/extraire_tda.js ({ edition, sections, blocs }) en brouillon.
+  // Le brouillon est supprimé si l'import échoue en cours de route (jamais d'édition à moitié importée).
+  async importTdaEdition(fichier, onProgress) {
+    const e = fichier.edition, blocs = fichier.blocs;
+    const { error } = await _sb.from('tda_editions').insert({
+      id: e.id, libelle: e.libelle, date_publication: e.date_publication || null, traduction: e.traduction || null,
+      introduction: e.introduction || null, mention: e.mention, sections: fichier.sections || [], nb_blocs: blocs.length,
+    });
+    if (error) throw error;
+    try {
+      const LOT = 40;
+      for (let i = 0; i < blocs.length; i += LOT) {
+        const lot = blocs.slice(i, i + LOT).map(function (b) {
+          return { edition_id: e.id, id: b.id, kind: b.kind, numero: b.numero || '', section: b.section, titre: b.titre, ordre: b.ordre, data: b.data || {} };
+        });
+        const { error: e2 } = await _sb.from('tda_blocs').insert(lot);
+        if (e2) throw e2;
+        if (onProgress) onProgress(Math.min(i + LOT, blocs.length), blocs.length);
+      }
+    } catch (err) {
+      await _sb.from('tda_editions').delete().eq('id', e.id);
+      throw err;
+    }
+  },
+
+  async activateTdaEdition(id) {
+    const { error } = await _sb.rpc('tda_activer_edition', { p_id: id });
+    if (error) throw error;
+  },
+
+  async deleteTdaEdition(id) {
+    const { error } = await _sb.from('tda_editions').delete().eq('id', id);
+    if (error) throw error;
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);

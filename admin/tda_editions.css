@@ -1,0 +1,44 @@
+/* ═══════════════════════════════════════════════
+   Éditions du règlement TDA - page d'administration
+   Lignes simples, boutons de la charte : pas de panneaux encadrés
+═══════════════════════════════════════════════ */
+
+.app { padding: 52px 20px 80px; align-items: stretch; }
+.app > .hdr, .app > .te-sec { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
+
+.te-sec { padding: 22px 0; border-bottom: 1px solid var(--gold-bd); }
+.te-sec:first-of-type { padding-top: 4px; }
+.te-h { margin: 0 0 14px; font-family: var(--f-ui); font-size: 15px; font-weight: 600; color: var(--cream); }
+
+.te-vide { margin: 0; font-size: 13px; color: var(--text-muted); }
+
+/* ── Une édition par ligne ── */
+.te-ligne { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; }
+.te-ligne + .te-ligne { border-top: 1px solid var(--gold-bd); }
+.te-info { min-width: 0; flex: 1 1 260px; }
+.te-nom { font-size: 14px; font-weight: 500; color: var(--cream); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.te-meta { margin-top: 3px; font-size: 12px; line-height: 1.5; color: var(--text-dim); }
+.te-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.te-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; letter-spacing: .02em;
+  border: 1px solid var(--gold-bd); color: var(--text-dim);
+}
+.te-badge.on   { background: var(--gold-solid); border-color: var(--gold-solid); color: #1A1208; }
+.te-badge.warn { border-color: rgba(224,122,104,.5); color: #e07a68; }
+body.light .te-badge.warn { color: #b5483a; border-color: rgba(181,72,58,.5); }
+
+/* ── Import ── */
+.te-file { cursor: pointer; }
+.te-apercu { margin-top: 18px; padding: 16px 18px; border: 1px solid var(--gold-bd); border-radius: var(--r-box); }
+.te-apercu .te-actions { margin-top: 14px; }
+
+.te-msg { margin: 12px 0 0; font-size: 12px; line-height: 1.5; color: var(--text-dim); }
+.te-msg.ok  { color: #6dcc8e; }
+.te-msg.err { color: #e07a68; }
+body.light .te-msg.ok  { color: #2e7d4f; }
+body.light .te-msg.err { color: #b5483a; }
+
+@media (max-width: 620px) {
+  .te-actions { width: 100%; }
+}
