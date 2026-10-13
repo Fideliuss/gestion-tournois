@@ -28,6 +28,12 @@ body.light .aide-dd-opt { color: #1A1208; }
 .aide-dd-opt:hover, .aide-dd-opt:focus-visible { background: rgba(195,120,20,.16); outline: none; }
 body.light .aide-dd-opt:hover, body.light .aide-dd-opt:focus-visible { background: #E7DFD0; }
 .aide-dd-opt[aria-selected="true"] { background: var(--gold-solid); color: #1A1208; }
+/* Barre de défilement de la liste : fine et discrète, aux couleurs de l'application */
+.aide-list { scrollbar-width: thin; scrollbar-color: rgba(195,120,20,.35) transparent; padding-right: 6px; }
+.aide-list::-webkit-scrollbar { width: 6px; }
+.aide-list::-webkit-scrollbar-track { background: transparent; }
+.aide-list::-webkit-scrollbar-thumb { background: rgba(195,120,20,.3); border-radius: 999px; }
+.aide-list::-webkit-scrollbar-thumb:hover { background: rgba(195,120,20,.6); }
 .aide-grp h3 { margin: 0 0 8px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
 .aide-grp a {
   display: block; padding: 9px 14px; margin-bottom: 4px; border-radius: var(--r-field); border: 1px solid transparent;
