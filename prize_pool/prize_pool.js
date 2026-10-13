@@ -39,7 +39,7 @@ function genPayouts(pool, spots, buyinTotal, lastMult, firstPctDecimal) {
   if (last <= 0 || last >= pool) return null;
 
   if (spots === 2) {
-    const first = pool - last;
+    const first = cent(pool - last);
     return first > last ? [first, last] : null;
   }
 
@@ -70,7 +70,7 @@ function genPayouts(pool, spots, buyinTotal, lastMult, firstPctDecimal) {
   }
 
   const sumRest = amounts.reduce((a, b) => a + b, 0);
-  const first   = pool - sumRest;
+  const first   = cent(pool - sumRest);
   if (first <= amounts[amounts.length - 1]) return null;
 
   return [first, ...amounts.reverse()];

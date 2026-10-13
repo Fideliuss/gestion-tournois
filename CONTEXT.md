@@ -210,6 +210,8 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 12 | roulette_tapis.js | Positionnement chips par formules de grille (`ZERO_W` + % colonnes) fragile aux changements de CSS → remplacé par `getBoundingClientRect()` sur les cellules `[data-num]` réellement rendues |
 | 13 | roulette_tapis.js | Carré 0-1-2-3 positionné au centre vertical de la colonne 0 (chevauchait le plein) → repositionné au coin supérieur (bord 0/col1 × bord supérieur du tapis), conforme à la vraie position casino |
 | 14 | barriere.css | Modaux collés en haut du document après défilement (toutes les pages) - l'animation d'entrée de `body` en `animation-fill-mode: both` laissait un `transform` permanent sur `body`, qui devient le repère des éléments `position:fixed` → `backwards` |
+| 15 | prize_pool.js | Suggestion : le montant du 1er gardait un résidu de calcul (ex. 2789.2000000000007) - arrondi au centime (`cent()`) |
+| 16 | leaderboard.css | Document ranking à l'écran : le logo (SVG très large) dépassait du cadre blanc - largeur limitée à celle du document |
 
 ---
 
@@ -298,12 +300,14 @@ Remplace le Google Sheet + script Apps Script « Break List » (répartition de 
 
 
 ### Page Aide (`aide/`)
-Tutoriel de l'application pour les collègues moins à l'aise avec l'outil (demande du chef : former les MCD et lui-même). **Commencé par la Break list.** Vouvoiement.
+Tutoriel de l'application pour les collègues moins à l'aise avec l'outil (demande du chef : former les MCD et lui-même). **Espaces documentés : Tournois et Break list** (Training à venir). Vouvoiement.
 - **Accès** : bouton « ? Aide » dans la barre de navigation (et dans le menu replié), **contextuel** : sur une page d'un espace qui a un guide, il ouvre ce guide (`HELP` dans `nav.js` : chemin de page ou espace → id de guide), sinon la page Aide. Lien direct : `aide/aide.html#<id du guide>` ou `#<espace>` (premier guide de l'espace).
 - **Page** : liste des guides à gauche (groupés par espace) avec, sous le guide affiché, un **sommaire cliquable de ses étapes** (défilement jusqu'à l'étape, l'étape en cours de lecture est mise en évidence ; masqué sur téléphone), guide à droite : étapes numérotées avec texte et capture(s), « Imprimer ce guide » (A4 portrait), guide précédent / suivant. **Chacun ne voit que les guides des espaces auxquels il a droit** (champ `panel` du guide, les admins voient tout).
 - **Contenu** : `aide/aide_guides.js` (`AIDE_ESPACES`, `AIDE_GUIDES` : `{ id, space, panel, title, intro, steps: [{ title, text (HTML), imgs: [{ src, alt }] }] }`). Pour ajouter un guide, une entrée suffit ; pour un nouvel espace, l'ajouter à `AIDE_ESPACES` et à `HELP` dans `nav.js`.
 - **Captures** : `aide/captures/*.png`, **générées avec des données entièrement fictives** (aucun vrai nom) par `node aide/outils/captures.js [nom ...]` (Node et Chrome requis, variable `CHROME` si besoin ; données dans `aide/outils/donnees_fictives.js`, date figée au mercredi 14 octobre 2026 à 20 h). À refaire après toute modification d'un écran décrit dans un guide. L'outil lance un serveur local et Chrome sans interface ; **le serveur et Chrome doivent tourner dans des processus séparés** (appel asynchrone), sinon blocage.
 - **Guides de la Break list** (livrés) : Pour commencer, Importer le planning du mois, Présents et absents de la séance, Faire les départs, Régler les paramètres, Résolution des problèmes courants. **Ne décrivent pas l'extraction Octime elle-même** (hors application, choix de l'utilisateur : le guide commence au collage dans l'application). Le bouton « ? » ouvre le guide de la page courante si elle en a un (Planning, Paramètres), sinon celui de l'espace.
+- **Guides de l'espace Tournois** (livrés, 10) : Pour commencer, Préparer le prize pool, Saisir les résultats d'un tournoi, Consulter le classement et l'historique, Clôturer la saison (**réservé aux administrateurs** : champ `admin: true` du guide), Déclaration mensuelle, Générer les courriers, Gérer les extras, Calendrier et barèmes, Résolution des problèmes courants. Chaque guide a son droit (`prize-pool`, `leaderboard`, `admin-tournois`, `tournois`). Le bouton « ? » de chaque page de l'espace ouvre le guide correspondant. Le guide précédent / suivant reste dans le même espace.
+- **Captures de l'espace Tournois** : données fictives de `donnees_fictives.js` (joueurs, saison complète 2025 / 2026, extras, encadrement, gabarits de courriers). L'encadrement, les courriers et l'émargement sont injectés dans le `localStorage` de la page de capture (`decl_staff`, `courriers_tpl`, `extras_emarg_*`) car les valeurs par défaut de l'application contiennent de vrais noms : **ne jamais photographier ces pages sans cette injection**.
 
 ### Training
 

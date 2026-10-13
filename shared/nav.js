@@ -99,7 +99,18 @@ const NAV = (function () {
   }
 
   // Guide ouvert par le bouton « Aide » (id d'un guide de aide/aide_guides.js) : celui de la page si elle en a un, sinon celui de l'espace courant ; sans entrée : la page Aide
-  const HELP = { 'break-list': 'break-list-pour-commencer', 'break_list/planning.html': 'break-list-planning', 'break_list/parametres.html': 'break-list-parametres' };
+  const HELP = {
+    'tournois': 'tournois-pour-commencer',
+    'prize_pool/prize_pool.html': 'tournois-prize-pool',
+    'leaderboard/leaderboard.html': 'tournois-classement',
+    'admin/declaration/declaration.html': 'tournois-declaration',
+    'admin/declaration/courriers.html': 'tournois-courriers',
+    'admin/extras/extras.html': 'tournois-extras',
+    'admin/config_tournois.html': 'tournois-calendrier',
+    'break-list': 'break-list-pour-commencer',
+    'break_list/planning.html': 'break-list-planning',
+    'break_list/parametres.html': 'break-list-parametres',
+  };
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
   const PAGES = { 'index.html': {}, 'aide/aide.html': { help: true } };

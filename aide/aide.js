@@ -17,7 +17,8 @@ async function init(user) {
     catch (e) { panels = []; }
   }
   // Chacun ne voit que les guides des espaces auxquels il a droit (les admins voient tout)
-  GUIDES = AIDE_GUIDES.filter(function (g) { return isAdmin || !g.panel || panels.indexOf(g.panel) >= 0; });
+  // (un guide marqué `admin: true` ne s'adresse qu'aux administrateurs)
+  GUIDES = AIDE_GUIDES.filter(function (g) { return isAdmin || (!g.admin && (!g.panel || panels.indexOf(g.panel) >= 0)); });
   window.addEventListener('hashchange', show);
   document.getElementById('aide-list').addEventListener('click', function (e) {          // sommaire : défilement jusqu'à l'étape, sans changer de guide
     const a = e.target.closest('a[data-step]');
@@ -67,7 +68,8 @@ function show() {
     }).join('') + '</div>';
   }).join('');
 
-  const g = GUIDES.find(function (x) { return x.id === id; }), i = GUIDES.indexOf(g);
+  const g = GUIDES.find(function (x) { return x.id === id; });
+  const mates = GUIDES.filter(function (x) { return x.space === g.space; }), i = mates.indexOf(g);   // guide précédent / suivant : dans le même espace
   box.innerHTML = '<div class="aide-head"><div><span class="aide-tag">' + esc(AIDE_ESPACES[g.space] || g.space) + '</span><h2>' + esc(g.title) + '</h2></div>'
     + '<button class="btn btn-ghost aide-print" type="button" onclick="printGuide()"><i class="ico ico-print"></i> Imprimer ce guide</button></div>'
     + (g.intro ? '<p class="aide-intro">' + g.intro + '</p>' : '')
@@ -75,8 +77,8 @@ function show() {
       return '<li id="aide-step-' + k + '"><div class="aide-step-h"><span class="aide-n"></span><h3>' + esc(s.title) + '</h3></div><div class="aide-txt">' + s.text + '</div>'
         + (s.imgs || []).map(function (im) { return '<figure><img src="' + esc(im.src) + '" alt="' + esc(im.alt || '') + '" loading="lazy"/></figure>'; }).join('') + '</li>';
     }).join('') + '</ol>'
-    + '<div class="aide-nav">' + (GUIDES[i - 1] ? '<a href="#' + esc(GUIDES[i - 1].id) + '">← ' + esc(GUIDES[i - 1].title) + '</a>' : '<span></span>')
-    + (GUIDES[i + 1] ? '<a href="#' + esc(GUIDES[i + 1].id) + '">' + esc(GUIDES[i + 1].title) + ' →</a>' : '') + '</div>';
+    + '<div class="aide-nav">' + (mates[i - 1] ? '<a href="#' + esc(mates[i - 1].id) + '">← ' + esc(mates[i - 1].title) + '</a>' : '<span></span>')
+    + (mates[i + 1] ? '<a href="#' + esc(mates[i + 1].id) + '">' + esc(mates[i + 1].title) + ' →</a>' : '') + '</div>';
   window.scrollTo(0, 0);
   spy();
   document.title = 'Aide - ' + g.title + ' - Barrière Casino Bordeaux';
