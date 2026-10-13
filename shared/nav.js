@@ -2,14 +2,14 @@
 //  NAV - barre de navigation commune
 //  Injectée par AUTH.guard une fois l'accès validé (auth.js charge ce fichier et nav.css).
 //
-//  Structure : des ESPACES (Outils Tournois, Training Croupier…) qui ont chacun leurs pages ; un lanceur d'espaces ;
+//  Structure : des ESPACES (Tournois, Training, Break list…) qui ont chacun leurs pages ; un lanceur d'espaces ;
 //  des menus déroulants pour les pages qui regroupent des modules ; un menu Administration (admin) à droite
 //  (gestion des comptes, config Training).
 //
 //  La barre s'adapte aux droits de l'utilisateur (admin = tout, sinon les panels de son rôle) :
 //   · un seul espace accessible  → pas de lanceur, le nom de l'espace est un simple titre ;
 //   · à l'ouverture (index.html) → un seul espace : on y entre directement ;
-//   · espace Outils Tournois avec une seule page accessible → on arrive directement sur cette page ;
+//   · espace Tournois avec une seule page accessible → on arrive directement sur cette page ;
 //   · un droit sur une sous-page seule suffit à afficher l'espace, avec cette page.
 //
 //  Pour ajouter une page : la déclarer dans SPACES (menu) ; pour un nouvel espace, ajouter une entrée à SPACES.
@@ -20,7 +20,7 @@ const NAV = (function () {
   // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
   const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'break_list/';
   const SPACES = [
-    { id: 'tournois', label: 'Outils Tournois', note: 'Prize pool, classement, administration', href: 'outils_tournois.html', panel: 'tournois', items: [
+    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, administration', href: 'tournois.html', panel: 'tournois', items: [
       { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
       { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
       { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
@@ -30,7 +30,7 @@ const NAV = (function () {
         { label: 'Calendrier & barèmes',  href: 'admin/config_tournois.html' },
       ] },
     ] },
-    { id: 'training', label: 'Training Croupier', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
+    { id: 'training', label: 'Training', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
       { label: 'Black Jack', id: 'blackjack', menu: [
         { label: 'BJ Paiement', href: BJ + 'blackjack.html' },
         { label: 'BJ Score',    href: BJ + 'blackjack_score.html' },

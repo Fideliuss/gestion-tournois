@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    prize-pool.js - Prize Pool Builder
-   Barrière Casino Bordeaux · Outils Tournois
+   Barrière Casino Bordeaux · Tournois
 ═══════════════════════════════════════════════════════ */
 
 const RAKE_RATE = 0.04;
