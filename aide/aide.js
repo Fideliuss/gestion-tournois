@@ -21,6 +21,8 @@ async function init(user) {
   GUIDES = AIDE_GUIDES.filter(function (g) { return isAdmin || (!g.admin && (!g.panel || panels.indexOf(g.panel) >= 0)); });
   window.addEventListener('hashchange', show);
   document.getElementById('aide-list').addEventListener('click', function (e) {          // sommaire : défilement jusqu'à l'étape, sans changer de guide
+    const sp = e.target.closest('button[data-space]');           // sélecteur d'espace : premier guide de l'espace choisi
+    if (sp) { location.hash = '#' + sp.dataset.space; return; }
     const a = e.target.closest('a[data-step]');
     if (!a) return;
     e.preventDefault();
@@ -56,19 +58,23 @@ function show() {
     box.innerHTML = '<div class="aide-empty">Aucun guide n\'est disponible pour vos accès pour le moment.</div>';
     return;
   }
-  // liste groupée par espace
-  const spaces = [];
-  GUIDES.forEach(function (g) { if (spaces.indexOf(g.space) < 0) spaces.push(g.space); });
-  list.innerHTML = spaces.map(function (s) {
-    return '<div class="aide-grp"><h3>' + esc(AIDE_ESPACES[s] || s) + '</h3>' + GUIDES.filter(function (g) { return g.space === s; }).map(function (g) {
-      return '<a href="#' + esc(g.id) + '"' + (g.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(g.title) + '</a>'
-        + (g.id === id ? '<ol class="aide-toc" aria-label="Sommaire du guide">' + g.steps.map(function (s, k) {
-          return '<li><a href="#" data-step="' + k + '">' + esc(s.title) + '</a></li>';
-        }).join('') + '</ol>' : '');
-    }).join('') + '</div>';
-  }).join('');
-
+  // Liste de l'espace du guide affiché seulement ; un sélecteur d'espace n'apparaît que si l'on a accès à plusieurs espaces
   const g = GUIDES.find(function (x) { return x.id === id; });
+  const spaces = [];
+  GUIDES.forEach(function (x) { if (spaces.indexOf(x.space) < 0) spaces.push(x.space); });
+  const switcher = spaces.length > 1
+    ? '<div class="seg sm aide-spaces" role="tablist" aria-label="Espace">' + spaces.map(function (s) {
+        return '<button type="button" class="seg-btn' + (s === g.space ? ' active' : '') + '" role="tab" aria-selected="' + (s === g.space) + '" data-space="' + esc(s) + '">' + esc(AIDE_ESPACES[s] || s) + '</button>';
+      }).join('') + '</div>'
+    : '';
+  list.innerHTML = switcher + '<div class="aide-grp"><h3>' + esc(AIDE_ESPACES[g.space] || g.space) + '</h3>' + GUIDES.filter(function (x) { return x.space === g.space; }).map(function (x) {
+    return '<a href="#' + esc(x.id) + '"' + (x.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(x.title) + '</a>'
+      + (x.id === id ? '<ol class="aide-toc" aria-label="Sommaire du guide">' + x.steps.map(function (s, k) {
+        return '<li><a href="#" data-step="' + k + '">' + esc(s.title) + '</a></li>';
+      }).join('') + '</ol>' : '');
+  }).join('') + '</div>';
+  if (typeof NAV !== 'undefined' && NAV.setSpace) NAV.setSpace(g.space);          // la barre de navigation suit l'espace du guide lu
+
   const mates = GUIDES.filter(function (x) { return x.space === g.space; }), i = mates.indexOf(g);   // guide précédent / suivant : dans le même espace
   box.innerHTML = '<div class="aide-head"><div><span class="aide-tag">' + esc(AIDE_ESPACES[g.space] || g.space) + '</span><h2>' + esc(g.title) + '</h2></div>'
     + '<button class="btn btn-ghost aide-print" type="button" onclick="printGuide()"><i class="ico ico-print"></i> Imprimer ce guide</button></div>'
