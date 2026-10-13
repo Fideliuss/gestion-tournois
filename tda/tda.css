@@ -1,0 +1,147 @@
+/* ═══════════════════════════════════════════════
+   Règlement TDA - consultation
+   Ordinateur : sommaire à gauche, texte à droite. Téléphone et tablette : le sommaire occupe l'écran,
+   une règle ouverte le remplace (bouton « Sommaire »). Couleurs et arrondis : variables de la charte.
+═══════════════════════════════════════════════ */
+
+.app { padding: 36px 20px 80px; align-items: stretch; }
+.app > .hdr { margin-bottom: 28px; }
+.td-tabs { margin-bottom: 28px; }
+.td-wrap, .td-mention { width: 100%; max-width: 1080px; margin-left: auto; margin-right: auto; }
+[hidden] { display: none !important; }
+
+.td-etat { margin: 40px 0; text-align: center; font-size: 14px; color: var(--text-dim); }
+
+/* ── Mise en page ── */
+.td-wrap { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 36px; align-items: start; }
+.td-wrap.vue-glossaire { grid-template-columns: minmax(0, 1fr); }
+.td-side {
+  position: sticky; top: 76px; max-height: calc(100vh - 96px); overflow-y: auto; padding-right: 8px;
+  scrollbar-width: thin; scrollbar-color: rgba(195,120,20,.35) transparent;
+}
+.td-main { min-width: 0; outline: none; }
+
+/* ── Sommaire ── */
+.td-sec {
+  margin: 26px 0 8px; font-family: var(--f-ui); font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--gold);
+}
+.td-side > .td-sec:first-child { margin-top: 0; }
+.td-item {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: baseline; gap: 4px; padding: 10px 12px; min-height: 44px; box-sizing: border-box;
+  border-radius: 12px; text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.4;
+}
+.td-item:hover { background: var(--gold-bg); color: var(--cream); }
+.td-item:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.td-item.on { background: var(--gold-bg); color: var(--cream); box-shadow: inset 3px 0 0 var(--gold-solid); }
+.td-num { font-family: var(--f-num); font-size: 12px; font-weight: 600; color: var(--gold); font-variant-numeric: tabular-nums; }
+
+/* ── Texte d'une règle ── */
+.td-art, .td-accueil, .td-gloss {
+  position: relative; background: var(--bg-card); border: 1px solid var(--gold-bd); border-radius: var(--r-card); padding: 34px 40px 40px; box-sizing: border-box;
+}
+.td-art::before, .td-accueil::before {
+  content: ''; position: absolute; left: 0; top: 30px; bottom: 30px; width: 3px; border-radius: 0 3px 3px 0; background: var(--gold-solid); pointer-events: none;
+}
+body.light .td-art, body.light .td-accueil, body.light .td-gloss { background: rgba(247,243,233,.97); border-color: rgba(135,50,0,.2); box-shadow: 0 2px 16px rgba(0,0,0,.06); }
+.td-kicker { margin-bottom: 8px; font-size: 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--text-dim); }
+.td-titre { margin: 0 0 22px; font-family: var(--f-ui); font-size: clamp(22px, 3vw, 28px); font-weight: 600; line-height: 1.25; color: var(--cream); }
+.td-n { margin-right: 12px; font-style: italic; color: var(--gold); white-space: nowrap; }
+.td-h3 { margin: 0 0 12px; font-family: var(--f-ui); font-size: 15px; font-weight: 600; color: var(--cream); }
+
+.td-p, .td-pt, .td-sub, .td-ul, .td-note { font-size: 16px; line-height: 1.65; color: var(--text); }
+.td-p { margin: 0 0 14px; }
+.td-pt, .td-sub { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 4px; margin: 0 0 14px; }
+.td-sub { margin-left: 30px; }
+.td-lab { font-weight: 600; color: var(--gold); }
+.td-ul { margin: 0 0 14px; padding-left: 22px; }
+.td-ul li { margin-bottom: 6px; padding-left: 4px; }
+.td-ul li::marker { color: var(--gold); }
+.td-note { display: flex; gap: 10px; margin: 6px 0 16px; padding: 12px 16px; background: var(--gold-bg); border-radius: 14px; }
+.td-note-v { background: none; border: 1px solid var(--gold-bd); color: var(--text-dim); }
+.td-mq { flex: none; color: var(--gold); line-height: 1.65; }
+
+.td-pt.flash, .td-ex.flash { animation: td-flash 2.2s ease-out; }
+@keyframes td-flash { 0%, 55% { background: var(--gold-bg); box-shadow: 0 0 0 6px var(--gold-bg); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
+.td-art [id], .td-gloss [id] { scroll-margin-top: 84px; }
+
+/* ── Liens, termes, renvois à vérifier ── */
+.td-ref { color: var(--gold-dim); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.td-ref:hover { color: var(--cream); }
+.td-ref-verif { text-decoration-style: dashed; }
+.td-verif {
+  display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin: 0 2px 0 4px; padding: 0; vertical-align: 1px;
+  border: 1px solid rgba(224,122,104,.6); border-radius: 50%; background: none; cursor: pointer;
+  font-family: var(--f-ui); font-size: 11px; font-weight: 600; color: #e07a68;
+}
+.td-verif:hover { background: rgba(224,122,104,.12); }
+body.light .td-verif { color: #b5483a; border-color: rgba(181,72,58,.6); }
+.td-terme { border-bottom: 1px dotted var(--gold); cursor: help; }
+.td-terme:hover, .td-terme:focus-visible { background: var(--gold-bg); outline: none; }
+.td-ref:focus-visible, .td-verif:focus-visible, .td-back:focus-visible, .td-pager a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+
+.td-pop {
+  position: fixed; z-index: 400; max-width: 320px; box-sizing: border-box; padding: 14px 16px; font-size: 13px; line-height: 1.5; color: var(--text);
+  background: var(--bg-card); border: 1px solid var(--gold); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.4); backdrop-filter: blur(10px);
+}
+body.light .td-pop { background: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+.td-pop-t { margin-bottom: 4px; font-weight: 600; color: var(--cream); }
+.td-pop a { display: inline-block; margin-top: 8px; color: var(--gold-dim); }
+
+/* ── Exemples d'illustration (repliables) ── */
+.td-exemples { margin-top: 30px; }
+.td-ex { margin-bottom: 10px; border: 1px solid var(--gold-bd); border-radius: var(--r-box); }
+.td-ex summary {
+  display: flex; align-items: baseline; gap: 12px; padding: 14px 44px 14px 18px; position: relative; cursor: pointer; list-style: none;
+  font-size: 15px; font-weight: 500; color: var(--cream);
+}
+.td-ex summary::-webkit-details-marker { display: none; }
+.td-ex summary::after { content: ''; position: absolute; right: 20px; top: 50%; width: 8px; height: 8px; border: solid var(--gold); border-width: 0 2px 2px 0; transform: translateY(-70%) rotate(45deg); transition: transform .15s; }
+.td-ex[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
+.td-ex summary:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; border-radius: var(--r-box); }
+.td-ex-n { flex: none; font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); }
+.td-ex-corps { padding: 2px 20px 12px; }
+.td-ex-corps .td-p { font-size: 15px; }
+
+/* ── Règle précédente / suivante ── */
+.td-pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 34px; }
+.td-pager a { display: block; padding: 12px 16px; border: 1px solid var(--gold-bd); border-radius: var(--r-box); text-decoration: none; font-size: 13px; line-height: 1.4; color: var(--cream); }
+.td-pager a:hover { border-color: var(--gold); background: var(--gold-bg); }
+.td-pager small { display: block; margin-bottom: 2px; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--text-dim); }
+.td-next { text-align: right; grid-column: 2; }
+.td-back { display: none; margin-bottom: 16px; font-size: 13px; color: var(--gold-dim); text-decoration: none; }
+
+/* ── Accueil et glossaire ── */
+.td-accueil .td-aide { margin: 18px 0 0; font-size: 13px; color: var(--text-dim); }
+.td-gloss { max-width: 860px; margin: 0 auto; width: 100%; padding: 12px 40px 30px; }
+.td-gloss .td-sec { margin-top: 28px; }
+.td-dl { margin: 0; }
+.td-dt-dd { padding: 12px 0; border-bottom: 1px solid var(--gold-bd); }
+.td-dt-dd:last-child { border-bottom: 0; }
+.td-dt-dd dt { font-size: 15px; font-weight: 600; color: var(--cream); }
+.td-dt-dd dd { margin: 4px 0 0; font-size: 15px; line-height: 1.55; color: var(--text); }
+.td-dt-dd.flash { animation: td-flash 2.2s ease-out; border-radius: 8px; }
+
+/* ── Mention du TDA (obligatoire sur chaque page) ── */
+.td-mention { margin-top: 44px; text-align: center; font-size: 11px; line-height: 1.6; color: var(--text-muted); }
+.td-mention p { margin: 0 0 4px; }
+.td-mention a { color: var(--text-dim); }
+
+/* ── Téléphone et tablette : une colonne, le sommaire puis la règle ── */
+@media (max-width: 899px) {
+  .td-wrap { display: block; }
+  .td-side { position: static; max-height: none; overflow: visible; padding-right: 0; }
+  .td-main { display: none; }
+  .td-wrap.lecture .td-side { display: none; }
+  .td-wrap.lecture .td-main, .td-wrap.vue-glossaire .td-main { display: block; }
+  .td-back { display: inline-block; }
+  .td-art, .td-gloss { padding: 24px 20px 28px; }
+  .td-art::before { top: 22px; bottom: 22px; }
+  .td-ex summary { padding-left: 14px; flex-direction: column; gap: 2px; }
+  .td-sub { margin-left: 18px; }
+}
+@media (max-width: 520px) {
+  .td-pager { grid-template-columns: 1fr; }
+  .td-next { grid-column: 1; text-align: left; }
+  .td-p, .td-pt, .td-sub, .td-ul, .td-note { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .td-pt.flash, .td-ex.flash, .td-dt-dd.flash { animation: none; } }
