@@ -19,7 +19,25 @@ async function init(user) {
   // Chacun ne voit que les guides des espaces auxquels il a droit (les admins voient tout)
   GUIDES = AIDE_GUIDES.filter(function (g) { return isAdmin || !g.panel || panels.indexOf(g.panel) >= 0; });
   window.addEventListener('hashchange', show);
+  document.getElementById('aide-list').addEventListener('click', function (e) {          // sommaire : défilement jusqu'à l'étape, sans changer de guide
+    const a = e.target.closest('a[data-step]');
+    if (!a) return;
+    e.preventDefault();
+    document.getElementById('aide-step-' + a.dataset.step).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  let busy = false;
+  window.addEventListener('scroll', function () { if (!busy) { busy = true; requestAnimationFrame(function () { busy = false; spy(); }); } }, { passive: true });
   show();
+}
+
+/** Met en évidence, dans le sommaire, l'étape en cours de lecture (la dernière dont le haut a passé le bas de la barre) */
+function spy() {
+  const steps = document.querySelectorAll('.aide-steps > li'), links = document.querySelectorAll('.aide-toc a');
+  if (!steps.length || !links.length) return;
+  let cur = 0;
+  steps.forEach(function (li, k) { if (li.getBoundingClientRect().top <= 140) cur = k; });
+  if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = steps.length - 1;   // en bas de page : la dernière
+  links.forEach(function (a) { a.classList.toggle('on', Number(a.dataset.step) === cur); });
 }
 
 function currentId() {
@@ -42,7 +60,10 @@ function show() {
   GUIDES.forEach(function (g) { if (spaces.indexOf(g.space) < 0) spaces.push(g.space); });
   list.innerHTML = spaces.map(function (s) {
     return '<div class="aide-grp"><h3>' + esc(AIDE_ESPACES[s] || s) + '</h3>' + GUIDES.filter(function (g) { return g.space === s; }).map(function (g) {
-      return '<a href="#' + esc(g.id) + '"' + (g.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(g.title) + '</a>';
+      return '<a href="#' + esc(g.id) + '"' + (g.id === id ? ' class="on" aria-current="page"' : '') + '>' + esc(g.title) + '</a>'
+        + (g.id === id ? '<ol class="aide-toc" aria-label="Sommaire du guide">' + g.steps.map(function (s, k) {
+          return '<li><a href="#" data-step="' + k + '">' + esc(s.title) + '</a></li>';
+        }).join('') + '</ol>' : '');
     }).join('') + '</div>';
   }).join('');
 
@@ -50,13 +71,14 @@ function show() {
   box.innerHTML = '<div class="aide-head"><div><span class="aide-tag">' + esc(AIDE_ESPACES[g.space] || g.space) + '</span><h2>' + esc(g.title) + '</h2></div>'
     + '<button class="btn btn-ghost aide-print" type="button" onclick="printGuide()"><i class="ico ico-print"></i> Imprimer ce guide</button></div>'
     + (g.intro ? '<p class="aide-intro">' + g.intro + '</p>' : '')
-    + '<ol class="aide-steps">' + g.steps.map(function (s) {
-      return '<li><div class="aide-step-h"><span class="aide-n"></span><h3>' + esc(s.title) + '</h3></div><div class="aide-txt">' + s.text + '</div>'
+    + '<ol class="aide-steps">' + g.steps.map(function (s, k) {
+      return '<li id="aide-step-' + k + '"><div class="aide-step-h"><span class="aide-n"></span><h3>' + esc(s.title) + '</h3></div><div class="aide-txt">' + s.text + '</div>'
         + (s.imgs || []).map(function (im) { return '<figure><img src="' + esc(im.src) + '" alt="' + esc(im.alt || '') + '" loading="lazy"/></figure>'; }).join('') + '</li>';
     }).join('') + '</ol>'
     + '<div class="aide-nav">' + (GUIDES[i - 1] ? '<a href="#' + esc(GUIDES[i - 1].id) + '">← ' + esc(GUIDES[i - 1].title) + '</a>' : '<span></span>')
     + (GUIDES[i + 1] ? '<a href="#' + esc(GUIDES[i + 1].id) + '">' + esc(GUIDES[i + 1].title) + ' →</a>' : '') + '</div>';
   window.scrollTo(0, 0);
+  spy();
   document.title = 'Aide - ' + g.title + ' - Barrière Casino Bordeaux';
 }
 
