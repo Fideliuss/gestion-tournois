@@ -61,7 +61,6 @@ const NAV = (function () {
   // (`role: 'admin'` = admins seulement ; `panel` = droit de l'espace, comme dans les gardes de page)
   const GESTION = { label: 'Gestion', groups: [
     { title: 'Comptes',  items: [ { label: 'Gestion des comptes',       href: 'admin/comptes.html',            role: 'admin' } ] },
-    { title: 'Tournois', items: [ { label: 'Éditions du règlement TDA', href: 'admin/tda_editions.html',       role: 'admin' } ] },
     { title: 'Training', items: [
       { label: 'Suivi équipe',              href: T + 'suivi/suivi_manager.html', panel: 'training-suivi' },
       { label: 'Configuration des modules', href: 'admin/config_training.html',   role: 'admin' },
@@ -134,7 +133,6 @@ const NAV = (function () {
   // Suivi équipe et Configuration des modules restent dans le contexte Training : la barre de l'espace est affichée, « Gestion » surligné
   PAGES[T + 'suivi/suivi_manager.html'].s = 'training';
   PAGES['admin/config_training.html'].s = 'training';
-  PAGES['admin/tda_editions.html'].s = 'tournois';
   SPACES.forEach(function (s) {
     PAGES[s.href] = { s: s.id };
     s.items.forEach(function (it) {
