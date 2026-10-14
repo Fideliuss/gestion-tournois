@@ -452,21 +452,6 @@ const SB = {
     return { edition: ed, blocs: blocs || [] };
   },
 
-  // Favoris de l'utilisateur connecté : identifiants de blocs ('r45', 'rp5', 'g_8'), du plus ancien au plus récent
-  async getTdaFavoris() {
-    const { data, error } = await _sb.from('tda_favoris').select('bloc_id').order('cree_le');
-    if (error) throw error;
-    return (data || []).map(function (r) { return r.bloc_id; });
-  },
-
-  async setTdaFavori(blocId, actif) {
-    const q = actif
-      ? _sb.from('tda_favoris').upsert({ bloc_id: blocId }, { onConflict: 'user_id,bloc_id', ignoreDuplicates: true })
-      : _sb.from('tda_favoris').delete().eq('bloc_id', blocId);
-    const { error } = await q;
-    if (error) throw error;
-  },
-
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);
