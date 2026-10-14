@@ -27,7 +27,7 @@
 }
 .td-side > .td-sec:first-child { margin-top: 0; }
 .td-item {
-  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: baseline; gap: 4px; padding: 10px 12px; min-height: 44px; box-sizing: border-box;
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: baseline; gap: 4px; padding: 10px 12px; min-height: 44px; box-sizing: border-box;
   border-radius: 12px; text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.4;
 }
 .td-item:hover { background: var(--gold-bg); color: var(--cream); }
@@ -60,11 +60,6 @@ body.light .td-art, body.light .td-accueil, body.light .td-gloss { background: r
 .td-note-v { background: none; border: 1px solid var(--gold-bd); color: var(--text-dim); }
 .td-mq { flex: none; color: var(--gold); line-height: 1.65; }
 
-.td-nbcas { align-self: center; min-width: 20px; padding: 1px 6px; border-radius: 999px; box-sizing: border-box; text-align: center; font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--gold); border: 1px solid var(--gold-bd); }
-.td-cas-lien { display: inline-flex; align-items: center; margin: -8px 0 18px; padding: 6px 14px; min-height: 32px; box-sizing: border-box; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 500; color: var(--cream); background: var(--gold-bg); border: 1px solid var(--gold-bd); cursor: pointer; }
-.td-cas-lien:hover { border-color: var(--gold); }
-.td-cas-lien:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.td-jur.flash { animation: td-flash 2.2s ease-out; border-radius: 8px; }
 .td-pt.flash, .td-ex.flash { animation: td-flash 2.2s ease-out; }
 @keyframes td-flash { 0%, 55% { background: var(--gold-bg); box-shadow: 0 0 0 6px var(--gold-bg); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
 .td-art [id], .td-gloss [id] { scroll-margin-top: 84px; }
@@ -239,7 +234,7 @@ body.light .td-err { color: #b5483a; }
   .td-next { grid-column: 1; text-align: left; }
   .td-p, .td-pt, .td-sub, .td-ul, .td-note { font-size: 16px; }
 }
-@media (prefers-reduced-motion: reduce) { .td-pt.flash, .td-ex.flash, .td-dt-dd.flash, .td-jur.flash { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .td-pt.flash, .td-ex.flash, .td-dt-dd.flash { animation: none; } }
 
 /* Gestion des sanctions (validateurs) */
 .td-sanc-liste { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
