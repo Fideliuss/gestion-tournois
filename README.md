@@ -8,7 +8,7 @@ L'application est organisée en espaces (Tournois, Training, Break list), chacun
 
 | Espace | Description |
 |---------|-------------|
-| 🎯 **Tournois** | Prize Pool, Challenge Saisonnier, Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes - dans le menu de la barre) |
+| 🎯 **Tournois** | Prize Pool, Challenge Saisonnier, Règlement TDA (consultation et recherche), Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes - dans le menu de la barre) |
 | 🎓 **Training** | Modules d'entraînement Blackjack et Roulette Anglaise |
 | 📋 **Break list** | Présents de la séance depuis le planning mensuel, extraction Octime, répartition et départs, break list et feuille des départs à imprimer |
 | 👤 **Gestion des comptes** | Comptes (liste filtrable), rôles personnalisables et accès par page *(admin uniquement)* |
@@ -201,6 +201,13 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── captures/                  - Captures des guides (données fictives)
 │   └── outils/                    - captures.js (génération des captures avec Chrome) et donnees_fictives.js
 │
+├── tda/
+│   ├── tda.html / .js / .css      - Règlement TDA : règles, procédures, glossaire, recherche (panel tda)
+│   ├── tda_rendu.js               - Mise en forme du texte : renvois, termes du glossaire, exemples
+│   ├── tda_recherche.js           - Moteur de recherche (accents, synonymes, fautes, accès par numéro)
+│   ├── *.test.js                  - Tests Node (`node tda/tda_recherche.test.js`)
+│   └── outils/                    - extraire_tda.js : extraction d'une édition du PDF (le texte n'est jamais commité)
+│
 ├── break_list/
 │   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
 │   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
@@ -217,7 +224,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
         ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
         ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
-        └── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
+        ├── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
+        └── tda.sql                          - règlement TDA : éditions et blocs de texte (lecture par panel tda)
 ```
 
 ---
