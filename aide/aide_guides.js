@@ -21,19 +21,20 @@ var AIDE_GUIDES = [
   {
     id: 'tournois-pour-commencer', space: 'tournois', panel: 'tournois',
     title: 'Pour commencer',
-    intro: "L'espace Tournois réunit les outils des tournois de poker : le calcul du prize pool, le challenge saisonnier et, pour les personnes qui en ont l'accès, l'administration (déclarations, courriers, extras, calendrier).",
+    intro: "L'espace Tournois réunit les outils des tournois de poker : le calcul du prize pool, le challenge saisonnier, le règlement TDA et, pour les personnes qui en ont l'accès, l'administration (déclarations, courriers, extras, calendrier).",
     steps: [
       {
-        title: "Les deux outils de l'espace",
-        text: "<p>La page d'accueil de l'espace propose deux outils.</p><ul>"
+        title: "Les outils de l'espace",
+        text: "<p>La page d'accueil de l'espace propose trois outils.</p><ul>"
           + "<li><b>Prize Pool Builder</b> : prépare la répartition des gains d'un tournoi et imprime le tableau.</li>"
-          + "<li><b>Challenge Saisonnier</b> : saisit les résultats de chaque tournoi et tient le classement de la saison.</li></ul>"
+          + "<li><b>Challenge Saisonnier</b> : saisit les résultats de chaque tournoi et tient le classement de la saison.</li>"
+          + "<li><b>Règlement TDA</b> : le règlement du Poker TDA, à consulter et à interroger par une recherche.</li></ul>"
           + "<p>Vous ne voyez que les outils auxquels votre compte donne accès.</p>",
         imgs: [{ src: 'captures/tn_accueil.png', alt: "La page d'accueil de l'espace Tournois" }],
       },
       {
         title: "La barre de navigation",
-        text: "<p>Dans la barre du haut, <b>Prize Pool</b> et <b>Leaderboard</b> ouvrent les deux outils. Le menu <b>Administration tournois</b> regroupe quatre pages : <b>Déclarations</b>, <b>Générateur de courrier</b>, <b>Gestion des Extras</b> et <b>Calendrier &amp; barèmes</b>.</p>"
+        text: "<p>Dans la barre du haut, <b>Prize Pool</b>, <b>Leaderboard</b> et <b>Règlement TDA</b> ouvrent les trois outils. Le menu <b>Administration tournois</b> regroupe quatre pages : <b>Déclarations</b>, <b>Générateur de courrier</b>, <b>Gestion des Extras</b> et <b>Calendrier &amp; barèmes</b>.</p>"
           + "<p>Le bouton <b>Aide</b> ouvre le guide de la page où vous êtes.</p>",
         imgs: [{ src: 'captures/tn_menu_admin.png', alt: "Le menu Administration tournois dans la barre de navigation" }],
       },
@@ -167,6 +168,80 @@ var AIDE_GUIDES = [
         title: "Consulter une autre saison",
         text: "<p>La saison court du 1er novembre au 31 octobre. Elle est reconnue toute seule d'après la date des résultats : la suivante démarre avec le premier tournoi daté du 1er novembre, et les points comme la cagnotte repartent de zéro.</p>"
           + "<p>À gauche de la barre d'onglets, un sélecteur permet de revenir sur les saisons précédentes (elles apparaissent dès qu'elles ont des résultats). À côté, un libellé indique si la saison est en cours, terminée ou clôturée.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'tournois-tda', space: 'tournois', panel: 'tda',
+    title: 'Consulter le règlement TDA',
+    intro: "Le règlement du Poker TDA est consultable dans l'application : les règles, les procédures recommandées et le glossaire, avec des renvois cliquables entre les règles. Sur les captures de ce guide, les textes sont des exemples fictifs.",
+    steps: [
+      {
+        title: "Ouvrir le règlement",
+        text: "<p>Dans la barre du haut, <b>Règlement TDA</b> ouvre la page (ou la tuile de l'accueil de l'espace Tournois). Trois onglets : <b>Règles</b>, <b>Procédures</b> et <b>Glossaire</b>.</p>"
+          + "<p>Le sommaire de l'onglet est à gauche : cliquez sur une règle pour la lire. La barre de recherche, sous les onglets, a son propre guide.</p>",
+        imgs: [{ src: 'captures/tda_sommaire.png', alt: "La page du règlement TDA avec les onglets, la recherche et le sommaire des règles" }],
+      },
+      {
+        title: "Lire une règle",
+        text: "<p>La règle s'affiche à droite, avec ses points repérés par une lettre (A, B, C...) et ses remarques sur un fond distinct. Les <b>exemples d'illustration</b> de la règle sont en dessous : cliquez sur un exemple pour le déplier.</p>"
+          + "<p>Les boutons <b>Précédente</b> et <b>Suivante</b>, en bas, passent à la règle voisine ; <b>Sommaire</b>, en haut, revient à la liste.</p>",
+        imgs: [{ src: 'captures/tda_regle.png', alt: "Une règle avec ses points, une remarque et un exemple d'illustration replié" }],
+      },
+      {
+        title: "Procédures et glossaire",
+        text: "<p>L'onglet <b>Procédures</b> contient les procédures recommandées par le TDA, lues de la même façon que les règles. L'onglet <b>Glossaire</b> explique les termes du jeu, classés par groupe.</p>",
+        imgs: [{ src: 'captures/tda_glossaire.png', alt: "L'onglet Glossaire, termes classés par groupe" }],
+      },
+      {
+        title: "Suivre un renvoi",
+        text: "<p>Quand un texte cite une autre règle (par exemple « règle 47-B »), la mention est soulignée en couleur : un clic ouvre cette règle et met en évidence le point cité. <b>Voir exemples</b> ouvre les exemples de la règle en cours.</p>"
+          + "<p>Le bouton « retour » de votre navigateur ramène à la règle d'où vous veniez.</p>",
+        imgs: [],
+      },
+      {
+        title: "Comprendre un terme",
+        text: "<p>Les mots du glossaire sont soulignés en pointillés dans le texte. Un clic affiche leur définition dans une bulle, avec un lien <b>Voir au glossaire</b>. Cliquez ailleurs ou appuyez sur Échap pour la fermer.</p>",
+        imgs: [{ src: 'captures/tda_terme.png', alt: "La définition d'un terme affichée dans une bulle" }],
+      },
+      {
+        title: "Un renvoi marqué d'un point d'interrogation",
+        text: "<p>Dans la traduction française, quelques renvois citent un numéro qui semble erroné. Ils sont signalés par un petit <b>?</b> : un clic explique le doute et propose la règle probable. En cas de doute sur un point, le texte officiel du TDA, en anglais, fait foi.</p>",
+        imgs: [{ src: 'captures/tda_renvoi.png', alt: "La bulle d'un renvoi à vérifier, avec un lien vers la règle probable" }],
+      },
+      {
+        title: "Sur téléphone et tablette",
+        text: "<p>La page s'adapte à l'écran. Sur un petit écran, le sommaire occupe toute la page : touchez une règle pour la lire, puis <b>Sommaire</b> pour revenir à la liste.</p>",
+        imgs: [{ src: 'captures/tda_mobile.png', alt: "Une règle affichée sur un écran de téléphone" }],
+      },
+    ],
+  },
+
+  {
+    id: 'tournois-tda-recherche', space: 'tournois', panel: 'tda',
+    title: 'Rechercher dans le règlement',
+    intro: "La barre de recherche du règlement TDA trouve un mot, une question ou un numéro de règle dans les règles, les procédures, les exemples et le glossaire.",
+    steps: [
+      {
+        title: "Lancer une recherche",
+        text: "<p>Tapez dans la barre <b>Rechercher un mot ou un numéro</b> (la touche <b>/</b> y amène le curseur). Les résultats s'affichent en direct, rangés par partie : <b>Règles</b>, <b>Procédures recommandées</b>, <b>Exemples d'illustration</b> et <b>Glossaire</b>. Les mots cherchés sont surlignés dans un extrait.</p>",
+        imgs: [{ src: 'captures/tda_recherche.png', alt: "Les résultats d'une recherche, rangés par partie, avec les mots surlignés" }],
+      },
+      {
+        title: "Aller directement à une règle",
+        text: "<p>Pour une règle dont vous connaissez le numéro, tapez-le : <b>45</b> ouvre la règle 45, <b>55-A</b> son point A, <b>RP-5</b> la procédure recommandée 5. Appuyez sur Entrée pour l'ouvrir.</p>",
+        imgs: [],
+      },
+      {
+        title: "Écrire comme on parle",
+        text: "<p>Les accents et les majuscules n'ont pas d'importance, et une petite faute de frappe est pardonnée. Les termes anglais usuels (raise, call, fold, all-in) retrouvent les règles écrites en français. Vous pouvez aussi taper une question entière : le règlement renvoie les règles qui contiennent le plus de vos mots.</p>",
+        imgs: [],
+      },
+      {
+        title: "Ouvrir un résultat et revenir",
+        text: "<p>Cliquez sur un résultat (ou appuyez sur Entrée pour ouvrir le premier) : la règle s'ouvre avec vos mots surlignés. Le bouton « retour » du navigateur revient aux résultats. <b>Échap</b> efface la recherche.</p>",
         imgs: [],
       },
     ],
@@ -383,6 +458,16 @@ var AIDE_GUIDES = [
       {
         title: "La déclaration est vide ou incomplète",
         text: "<p>Ouvrez <b>Réglages</b> : un jour décoché dans <b>Actif</b> n'apparaît pas. Pour un tournoi exceptionnel ou une annulation, passez par <b>Ajout/Modifications</b>. Un total des annexes différent de 100 % s'affiche en rouge dans l'onglet Annexes.</p>",
+        imgs: [],
+      },
+      {
+        title: "Le règlement TDA ne se charge pas",
+        text: "<p>« Le règlement n'a pas pu être chargé » : vérifiez la connexion, puis rechargez la page. Si le message « Aucune édition du règlement n'est disponible » s'affiche, prévenez l'administrateur : le texte n'est pas activé.</p>",
+        imgs: [],
+      },
+      {
+        title: "La recherche du règlement ne trouve rien",
+        text: "<p>Essayez un mot plus court ou le numéro de la règle (par exemple <b>45</b>). Les accents et les majuscules n'ont pas d'importance. Le guide « Rechercher dans le règlement » détaille ce que la recherche comprend.</p>",
         imgs: [],
       },
       {
