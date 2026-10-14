@@ -389,5 +389,24 @@ fs.writeFileSync(path.join(SORTIE, 'tda_' + EDITION + '.json'), JSON.stringify({
 rapport.push('', '── Inventaire des renvois (de → citation → vers) ──');
 inventaire.forEach(function (r) { rapport.push((r.probleme ? '! ' : '  ') + r.de + '  « ' + r.ref + ' »  →  ' + r.vers + (r.probleme ? '   [' + r.probleme + ']' : '')); });
 fs.writeFileSync(path.join(SORTIE, 'rapport_' + EDITION + '.txt'), rapport.join('\n'), 'utf8');
+// Fichiers SQL d'import et d'activation (à passer à « supabase db query --linked -f ») : même effet que l'import fait pour 2026
+(function ecrireSql() {
+  const TAG = '$tdaimport9x$';
+  const blocsJson = JSON.stringify(blocs), sectionsJson = JSON.stringify(sections);
+  if (blocsJson.includes(TAG) || sectionsJson.includes(TAG)) { avert('un marqueur SQL est présent dans les données : fichiers SQL non écrits.'); return; }
+  const q = function (v) { return v == null ? 'NULL' : TAG + v + TAG; };
+  const e = edition;
+  fs.writeFileSync(path.join(SORTIE, 'import_' + EDITION + '.sql'),
+    'INSERT INTO public.tda_editions (id, libelle, date_publication, traduction, introduction, mention, sections, nb_blocs)\n' +
+    'VALUES (' + q(e.id) + ', ' + q(e.libelle) + ', ' + (e.date_publication ? q(e.date_publication) + '::date' : 'NULL') + ', ' + q(e.traduction) + ', ' + q(e.introduction) + ', ' + q(e.mention) + ', ' + q(sectionsJson) + '::jsonb, ' + blocs.length + ');\n\n' +
+    'INSERT INTO public.tda_blocs (edition_id, id, kind, numero, section, titre, ordre, data)\n' +
+    'SELECT ' + q(e.id) + ", b.id, b.kind, COALESCE(b.numero, ''), b.section, b.titre, b.ordre, COALESCE(b.data, '{}'::jsonb)\n" +
+    'FROM jsonb_to_recordset(' + q(blocsJson) + '::jsonb) AS b(id text, kind text, numero text, section text, titre text, ordre integer, data jsonb);\n', 'utf8');
+  const complet = "(SELECT count(*) FROM public.tda_blocs WHERE edition_id = '" + EDITION + "') = " + blocs.length;
+  fs.writeFileSync(path.join(SORTIE, 'activer_' + EDITION + '.sql'),
+    "-- Active l'édition seulement si tous ses blocs sont présents ; l'ancienne devient un brouillon\n" +
+    "UPDATE public.tda_editions SET active = false WHERE active AND id <> '" + EDITION + "' AND " + complet + ";\n" +
+    "UPDATE public.tda_editions SET active = true WHERE id = '" + EDITION + "' AND " + complet + ";\n", 'utf8');
+})();
 console.log(rapport.filter(function (l) { return !/^[ !] /.test(l) && l.indexOf('──') < 0; }).join('\n'));
 console.log('\nFichiers écrits dans ' + SORTIE);
