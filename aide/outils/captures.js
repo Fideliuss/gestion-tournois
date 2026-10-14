@@ -72,6 +72,11 @@ getTrainingRanking:async function(g,lv,min){var rows=U.map(function(c){var l=of(
 getTrainingTablesBest:async function(r){return U.map(function(c){var l=of(c.id,'roulette-tables').filter(function(s){return !r||s.meta.ratio===r});if(!l.length)return null;var ok=l.filter(function(s){return s.correct===s.total});
  return{user_id:c.id,user_label:c.label,best_ms:ok.length?Math.min.apply(null,ok.map(function(s){return s.meta.elapsedMs})):null,perfect_runs:ok.length,sessions:l.length,last_at:l[0].started_at}}).filter(Boolean).sort(function(a,b){return (a.best_ms===null)-(b.best_ms===null)||a.best_ms-b.best_ms})},
 getTrainingWeakPoints:async function(g,u){return(WEAK[g]||[]).map(function(r){return{facet:r[0],value:r[1],attempts:r[2],errors:r[3]}})}};})();</script>`;
+// Règlement TDA : édition fictive (aucun texte du vrai règlement dans le dépôt public), administrateur ; rien n'est écrit
+const isTda = function (c) { return c.page.indexOf('tda/') === 0; };
+const BASE_TDA = `<script>(function(){var D=${JSON.stringify(data.tda())};var nop=async function(){};
+window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
+getTdaActive:async function(){return JSON.parse(JSON.stringify({edition:D.edition,blocs:D.blocs}))}};})();</script>`;
 // Tirage aléatoire fixé (graine propre à chaque capture) : les questions affichées sont toujours les mêmes
 const SEED = function (n) { return `<script>(function(){var a=${n};Math.random=function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}})();</script>`; };
 
@@ -192,11 +197,23 @@ const CAPTURES_TR = [
 ];
 CAPTURES.push.apply(CAPTURES, CAPTURES_TR);
 
+// ── Règlement TDA (texte fictif) ──
+const CAPTURES_TDA = [
+  { nom: 'tda_sommaire', page: 'tda/tda.html', w: 1180, h: 760, actions: '', css: '*{transition:none!important}' },
+  { nom: 'tda_regle', page: 'tda/tda.html', w: 1180, h: 800, actions: "location.hash='#r3';", css: NU },
+  { nom: 'tda_terme', page: 'tda/tda.html', w: 1180, h: 470, actions: "location.hash='#r2';setTimeout(function(){document.querySelector('.td-terme').click()},500);", css: NU },
+  { nom: 'tda_renvoi', page: 'tda/tda.html', w: 1180, h: 470, actions: "location.hash='#r4';setTimeout(function(){document.querySelector('.td-verif').click()},500);", css: NU },
+  { nom: 'tda_recherche', page: 'tda/tda.html', w: 1180, h: 760, actions: "location.hash='#q=exemple';var q=document.getElementById('td-q');q.value='exemple';", css: NU },
+  { nom: 'tda_glossaire', page: 'tda/tda.html', w: 1180, h: 560, actions: "location.hash='#glossaire';", css: NU },
+  { nom: 'tda_mobile', page: 'tda/tda.html', w: 390, h: 820, actions: "location.hash='#r3';", css: NU },
+];
+CAPTURES.push.apply(CAPTURES, CAPTURES_TDA);
+
 function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
   h = h.replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2"><\/script>\s*/, '')
-    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : BASE_TN; })
-    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 ? '' : isTr(c) ? SEED(c.seed || 7) : SEED_TN))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
+    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : BASE_TN; })
+    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 || isTda(c) ? '' : isTr(c) ? SEED(c.seed || 7) : SEED_TN))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')
     .replace('</body>', '<script>window.addEventListener("load",function(){setTimeout(function(){' + c.actions + '},900)});</script></body>');
   const file = path.join(path.dirname(path.join(ROOT, c.page)), '_qa_aide_' + c.nom + '.html');

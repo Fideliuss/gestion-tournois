@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Règlement TDA - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="tda.css" />
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Règlement <em>TDA</em></div>
+  </div>
+
+  <div class="seg td-tabs" role="tablist" aria-label="Parties du règlement" id="td-tabs">
+    <button class="seg-btn" role="tab" data-vue="regles">Règles</button>
+    <button class="seg-btn" role="tab" data-vue="procedures">Procédures</button>
+    <button class="seg-btn" role="tab" data-vue="glossaire">Glossaire</button>
+  </div>
+
+  <div class="td-recherche" role="search">
+    <input type="search" id="td-q" placeholder="Rechercher un mot ou un numéro" aria-label="Rechercher dans le règlement" autocomplete="off" enterkeyhint="search" />
+  </div>
+
+  <div class="td-wrap" id="td-wrap">
+    <nav class="td-side" id="td-side" aria-label="Sommaire"></nav>
+    <main class="td-main" id="td-main" tabindex="-1"><p class="td-etat">Chargement...</p></main>
+  </div>
+
+  <footer class="td-mention" id="td-mention"></footer>
+</div>
+<div class="td-pop" id="td-pop" role="dialog" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="tda_rendu.js"></script>
+<script src="tda_recherche.js"></script>
+<script src="tda.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'tda' }).then(function (user) {
+  if (!user) return;
+  initTda();
+});
+</script>
+</body>
+</html>

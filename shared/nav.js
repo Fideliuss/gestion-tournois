@@ -20,9 +20,10 @@ const NAV = (function () {
   // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
   const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'break_list/';
   const SPACES = [
-    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, administration', href: 'tournois.html', panel: 'tournois', items: [
+    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, règlement TDA, administration', href: 'tournois.html', panel: 'tournois', items: [
       { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
       { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
+      { label: 'Règlement TDA', href: 'tda/tda.html', panel: 'tda' },
       { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
         { label: 'Déclarations',          href: 'admin/declaration/declaration.html' },
         { label: 'Générateur de courrier', href: 'admin/declaration/courriers.html' },
@@ -103,6 +104,7 @@ const NAV = (function () {
     'tournois': 'tournois-pour-commencer',
     'prize_pool/prize_pool.html': 'tournois-prize-pool',
     'leaderboard/leaderboard.html': 'tournois-classement',
+    'tda/tda.html': 'tournois-tda',
     'admin/declaration/declaration.html': 'tournois-declaration',
     'admin/declaration/courriers.html': 'tournois-courriers',
     'admin/extras/extras.html': 'tournois-extras',

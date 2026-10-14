@@ -439,6 +439,19 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Règlement TDA (lecture seule) ───────────────────
+  // L'édition active seulement (RLS), réservée au panel 'tda'. Le contenu est importé par l'administrateur technique (voir CONTEXT.md).
+  // Édition active + tous ses blocs (≈ 170 lignes, < 1000 : pas de pagination), ou null si aucune édition n'est active
+  async getTdaActive() {
+    const { data: ed, error } = await _sb.from('tda_editions').select('*').eq('active', true).maybeSingle();
+    if (error) throw error;
+    if (!ed) return null;
+    const { data: blocs, error: e2 } = await _sb.from('tda_blocs')
+      .select('id, kind, numero, section, titre, ordre, data').eq('edition_id', ed.id).order('ordre');
+    if (e2) throw e2;
+    return { edition: ed, blocs: blocs || [] };
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);
