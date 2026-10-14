@@ -144,6 +144,7 @@ body.light mark { background: rgba(195,120,20,.28); }
 .td-cas-page { max-width: 860px; margin: 0 auto; width: 100%; }
 .td-cas-barre { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
 .td-cas-barre .seg { margin: 0; }
+.td-actions-barre { margin-top: 0; }
 a.seg-btn { text-decoration: none; }
 .td-cas-filtres { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 10px; align-items: center; margin-bottom: 16px; }
 .td-cas-filtres select, .td-cas-filtres input[type="text"] { width: 100%; box-sizing: border-box; }
@@ -234,3 +235,16 @@ body.light .td-err { color: #b5483a; }
   .td-p, .td-pt, .td-sub, .td-ul, .td-note { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .td-pt.flash, .td-ex.flash, .td-dt-dd.flash { animation: none; } }
+
+/* Gestion des sanctions (validateurs) */
+.td-sanc-liste { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.td-sanc-ligne, .td-sanc-ajout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.td-sanc-ligne input, .td-sanc-ajout input { width: 100%; box-sizing: border-box; }
+.td-sanc-ligne.off input { opacity: .55; }
+.td-sanc-btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.td-sanc-ajout { padding-top: 16px; border-top: 1px solid var(--gold-bd); }
+@media (max-width: 760px) {
+  .td-sanc-ligne, .td-sanc-ajout { grid-template-columns: 1fr; padding-bottom: 12px; border-bottom: 1px solid var(--gold-bd); }
+  .td-sanc-ajout { border-bottom: 0; }
+  .td-sanc-btns { justify-content: flex-start; }
+}

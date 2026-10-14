@@ -1,22 +1,21 @@
 // ══════════════════════════════════════════════════════
 //  Jurisprudence TDA - logique sans DOM (testable sous Node, voir tda_cas_outils.test.js)
-//  Libellés des sanctions et des états, vérification de la saisie d'un cas (mêmes bornes que la base, voir
-//  supabase/migrations/tda_jurisprudence.sql : la base reste la vraie barrière), dates, transformation des cas en blocs
+//  Libellés des sanctions (liste modifiable, table tda_sanctions) et des états, vérification de la saisie d'un cas (mêmes bornes que la base, voir
+//  supabase/migrations/tda_jurisprudence*.sql : la base reste la vraie barrière), dates, transformation des cas en blocs
 //  pour la recherche.
 // ══════════════════════════════════════════════════════
 (function (root) {
   'use strict';
 
-  const SANCTIONS = [
-    ['aucune', 'Aucune sanction'],
-    ['avertissement', 'Avertissement verbal'],
-    ['main_penalite', 'Main de pénalité'],
-    ['tour_penalite', 'Tour de pénalité'],
-    ['penalite_jetons', 'Pénalité en jetons'],
-    ['disqualification', 'Disqualification'],
-    ['autre', 'Autre'],
-  ];
-  const VARIANTES = ['NLHE', 'PLO', 'Stud', 'Mixte', 'Autre'];
+  // Liste des sanctions : table tda_sanctions, modifiable par les validateurs (chargée par tda_cas.js via definirSanctions)
+  // { id, libelle, unite (« main » : un nombre est demandé, sinon null), ordre, actif }
+  let sanctions = [];
+  function definirSanctions(liste) {
+    sanctions = (liste || []).slice().sort(function (a, b) { return (a.ordre - b.ordre) || String(a.libelle).localeCompare(String(b.libelle)); });
+  }
+  function sanction(id) { return sanctions.find(function (s) { return s.id === id; }) || null; }
+  // Sanctions à proposer dans un formulaire : les actives, plus celle déjà portée par le cas modifié
+  function sanctionsProposees(gardee) { return sanctions.filter(function (s) { return s.actif || s.id === gardee; }); }
 
   // classe : suffixe de la couleur du badge (on = en attente, ok = validé, warn = à préciser, ko = refusé, off = archivé)
   const STATUTS = {
@@ -27,11 +26,23 @@
     archive:    { libelle: 'Archivé', classe: 'off' },
   };
 
-  const BORNES = { titre: [5, 140], faits: [20, 4000], decision: [10, 4000], sanction_precision: [0, 500], variante: [0, 40], commentaire: [0, 1000], archive_motif: [0, 500] };
+  const BORNES = { titre: [3, 140], faits: [10, 4000], decision: [0, 4000], sanction_precision: [0, 500], quantite: [1, 10000], commentaire: [0, 1000], archive_motif: [0, 500] };
 
   function libelleSanction(type) {
-    const s = SANCTIONS.find(function (x) { return x[0] === type; });
-    return s ? s[1] : String(type || '');
+    const s = sanction(type);
+    return s ? s.libelle : String(type || '');
+  }
+
+  // « 2 mains » : l'unité s'accorde (un mot simple, « main », « tour », « jeton »)
+  function uniteAccordee(unite, n) {
+    return unite + (n > 1 && !/s$/i.test(unite) ? 's' : '');
+  }
+
+  // « Main de pénalité (2 mains) » pour un cas
+  function texteSanction(c) {
+    const s = sanction(c.sanction_type);
+    const base = libelleSanction(c.sanction_type);
+    return c.sanction_quantite && s && s.unite ? base + ' (' + c.sanction_quantite + ' ' + uniteAccordee(s.unite, c.sanction_quantite) + ')' : base;
   }
 
   function statut(s) { return STATUTS[s] || { libelle: String(s || ''), classe: 'off' }; }
@@ -57,12 +68,14 @@
     else if (long('faits') > BORNES.faits[1]) e.faits = 'Les faits sont limités à ' + BORNES.faits[1] + ' caractères.';
     if (!Array.isArray(c.regles) || !c.regles.length) e.regles = 'Choisissez au moins une règle ou procédure applicable.';
     else if (c.regles.length > 12) e.regles = 'Douze règles au maximum.';
-    if (long('decision') < BORNES.decision[0]) e.decision = 'Indiquez la décision prise (au moins ' + BORNES.decision[0] + ' caractères).';
-    else if (long('decision') > BORNES.decision[1]) e.decision = 'La décision est limitée à ' + BORNES.decision[1] + ' caractères.';
-    if (!SANCTIONS.some(function (s) { return s[0] === c.sanction_type; })) e.sanction_type = 'Choisissez une sanction.';
+    if (long('decision') > BORNES.decision[1]) e.decision = 'La décision est limitée à ' + BORNES.decision[1] + ' caractères.';
+    const s = sanction(c.sanction_type);
+    if (!s) e.sanction_type = 'Choisissez une sanction.';
+    else if (s.unite) {
+      const n = Number(c.sanction_quantite);
+      if (c.sanction_quantite == null || c.sanction_quantite === '' || !Number.isInteger(n) || n < BORNES.quantite[0] || n > BORNES.quantite[1]) e.sanction_quantite = 'Indiquez le nombre (' + s.unite + ').';
+    }
     if (long('sanction_precision') > BORNES.sanction_precision[1]) e.sanction_precision = 'La précision est limitée à ' + BORNES.sanction_precision[1] + ' caractères.';
-    if (long('variante') > BORNES.variante[1]) e.variante = 'Variante trop longue.';
-    if (c.date_cas && !/^\d{4}-\d{2}-\d{2}$/.test(c.date_cas)) e.date_cas = 'Date invalide.';
     return { erreurs: e, ok: Object.keys(e).length === 0 };
   }
 
@@ -78,7 +91,9 @@
   // Les cas validés rejoignent la recherche comme des blocs de type « cas » (id : cas/<uuid>, adresse #cas/<uuid>)
   function enBlocs(cas) {
     return (cas || []).map(function (c, i) {
-      const el = [{ t: 'p', texte: c.faits }, { t: 'p', texte: c.decision }, { t: 'p', texte: libelleSanction(c.sanction_type) + (c.sanction_precision ? ' : ' + c.sanction_precision : '') }];
+      const el = [{ t: 'p', texte: c.faits }];
+      if (c.decision) el.push({ t: 'p', texte: c.decision });
+      el.push({ t: 'p', texte: texteSanction(c) + (c.sanction_precision ? ' : ' + c.sanction_precision : '') });
       return { id: 'cas/' + c.id, kind: 'cas', numero: '', section: 'cas', titre: c.titre, ordre: 100000 + i, data: { elements: el } };
     });
   }
@@ -100,7 +115,7 @@
     }).slice(0, limite || 8);
   }
 
-  const API = { SANCTIONS: SANCTIONS, VARIANTES: VARIANTES, STATUTS: STATUTS, libelleSanction: libelleSanction, statut: statut, libelleEdition: libelleEdition,
+  const API = { definirSanctions: definirSanctions, sanction: sanction, sanctionsProposees: sanctionsProposees, toutesSanctions: function () { return sanctions; }, STATUTS: STATUTS, libelleSanction: libelleSanction, texteSanction: texteSanction, uniteAccordee: uniteAccordee, statut: statut, libelleEdition: libelleEdition,
     dateFr: dateFr, verifier: verifier, verifierDecision: verifierDecision, enBlocs: enBlocs, suggestions: suggestions };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   else root.TDA_CAS = API;

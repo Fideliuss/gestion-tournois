@@ -26,7 +26,10 @@ async function initCas(user) {
       moi.validateur = !!(r && (r.panels || []).indexOf('tda-validation') >= 0);
     } catch (e) { moi.validateur = false; }
   }
-  try { casValides = await SB.listTdaCas(['valide']); casActifs = true; } catch (e) { casActifs = false; casValides = []; }
+  try {
+    TDA_CAS.definirSanctions(await SB.listTdaSanctions());
+    casValides = await SB.listTdaCas(['valide']); casActifs = true;
+  } catch (e) { casActifs = false; casValides = []; }
   $('td-tab-cas').hidden = !casActifs;
   if (casActifs) await majCompteursCas();
 }
@@ -74,7 +77,9 @@ function barreCas(vue) {
   return '<div class="td-cas-barre"><div class="seg sm">' +
     lien('valides', '', 'Cas validés', 0) + lien('mes', '/mes', 'Mes propositions', compteursCas.aPreciser) +
     (moi.validateur ? lien('a-valider', '/a-valider', 'À valider', compteursCas.aValider) : '') +
-    '</div><a class="btn btn-gold" href="#nouveau">Proposer un cas</a></div>';
+    '</div><div class="td-actions td-actions-barre">' +
+    (moi.validateur ? '<a class="btn btn-ghost' + (vue === 'sanctions' ? ' active' : '') + '" href="#jurisprudence/sanctions">Sanctions</a>' : '') +
+    '<a class="btn btn-gold" href="#nouveau">Proposer un cas</a></div></div>';
 }
 
 function carteCas(c, options) {
@@ -82,10 +87,9 @@ function carteCas(c, options) {
   const meta = [];
   if (o.auteur) meta.push('Proposé par ' + esc(c.auteur_nom || '') + ' le ' + TDA_CAS.dateFr(c.soumis_le));
   else if (c.statut === 'valide' && c.valide_le) meta.push('Validé le ' + TDA_CAS.dateFr(c.valide_le) + (c.traite_par_nom ? ' par ' + esc(c.traite_par_nom) : ''));
-  if (c.date_cas) meta.push('Cas du ' + TDA_CAS.dateFr(c.date_cas));
   return '<a class="td-cas" href="#cas/' + esc(c.id) + '">' +
     '<span class="td-cas-t">' + esc(c.titre) + (o.statut ? ' ' + badgeStatut(c.statut) : '') + '</span>' +
-    '<span class="td-cas-m">' + puces(c) + '<span class="td-sanc">' + esc(TDA_CAS.libelleSanction(c.sanction_type)) + '</span></span>' +
+    '<span class="td-cas-m">' + puces(c) + '<span class="td-sanc">' + esc(TDA_CAS.texteSanction(c)) + '</span></span>' +
     '<span class="td-cas-x">' + esc(c.faits) + '</span>' +
     (o.commentaire && c.commentaire && (c.statut === 'a_preciser' || c.statut === 'refuse') ? '<span class="td-cas-c">' + esc(c.traite_par_nom || 'Validateur') + ' : ' + esc(c.commentaire) + '</span>' : '') +
     (meta.length ? '<span class="td-cas-p">' + meta.join(' · ') + '</span>' : '') + '</a>';
@@ -107,6 +111,7 @@ function afficherJurisprudence(h) {
 
 // ── Listes ───────────────────────────────────────────
 async function afficherListeCas(sous) {
+  if (sous === 'sanctions' && moi.validateur) return afficherSanctions();
   const vue = sous === 'mes' ? 'mes' : (sous === 'a-valider' && moi.validateur) ? 'a-valider' : 'valides';
   const entete = barreCas(vue) + blocMessage();
   $('td-main').innerHTML = '<div class="td-cas-page">' + entete + '<p class="td-etat" role="status">Chargement...</p></div>';
@@ -135,7 +140,7 @@ async function afficherListeCas(sous) {
 }
 
 function formulaireFiltres() {
-  const opt = TDA_CAS.SANCTIONS.map(function (s) { return '<option value="' + s[0] + '"' + (filtreCas.sanction === s[0] ? ' selected' : '') + '>' + esc(s[1]) + '</option>'; }).join('');
+  const opt = TDA_CAS.toutesSanctions().map(function (s) { return '<option value="' + esc(s.id) + '"' + (filtreCas.sanction === s.id ? ' selected' : '') + '>' + esc(s.libelle) + '</option>'; }).join('');
   return '<div class="td-cas-filtres"><select id="fc-sanction" aria-label="Sanction"><option value="">Toutes les sanctions</option>' + opt + '</select>' +
     '<input type="text" id="fc-regle" placeholder="Règle (45, RP-5)" aria-label="Règle" value="' + esc(filtreCas.regle) + '" autocomplete="off" />' +
     (moi.validateur ? '<label class="td-coche"><input type="checkbox" id="fc-archives"' + (filtreCas.archives ? ' checked' : '') + ' /> Archivés</label>' : '') + '</div>';
@@ -169,7 +174,7 @@ function casPourBloc(b) {
   const liste = casValides.filter(function (c) { return (c.regles || []).indexOf(b.id) >= 0; });
   return '<section class="td-jur" id="td-jurisprudence" aria-label="Jurisprudence">' +
     (liste.length ? '<h3 class="td-h3">Jurisprudence</h3>' + liste.map(function (c) {
-      return '<a class="td-cas td-cas-mini" href="#cas/' + esc(c.id) + '"><span class="td-cas-t">' + esc(c.titre) + '</span><span class="td-sanc">' + esc(TDA_CAS.libelleSanction(c.sanction_type)) + '</span></a>';
+      return '<a class="td-cas td-cas-mini" href="#cas/' + esc(c.id) + '"><span class="td-cas-t">' + esc(c.titre) + '</span><span class="td-sanc">' + esc(TDA_CAS.texteSanction(c)) + '</span></a>';
     }).join('') : '') +
     '<a class="btn btn-ghost btn-sm" href="#nouveau/' + esc(b.id) + '">Proposer un cas sur ' + (b.kind === 'rp' ? 'cette procédure' : 'cette règle') + '</a></section>';
 }
@@ -194,8 +199,6 @@ async function afficherCasVue(id) {
   const meta = [];
   meta.push('Proposé par ' + esc(c.auteur_nom || '') + ' le ' + TDA_CAS.dateFr(c.soumis_le));
   if (c.statut === 'valide' && c.valide_le) meta.push('Validé par ' + esc(c.traite_par_nom || '') + ' le ' + TDA_CAS.dateFr(c.valide_le));
-  if (c.date_cas) meta.push('Cas du ' + TDA_CAS.dateFr(c.date_cas));
-  if (c.variante) meta.push(esc(c.variante));
   if (c.edition_id) meta.push('Règlement ' + esc(TDA_CAS.libelleEdition(c.edition_id)));
 
   let html = '<div class="td-cas-page"><article class="td-art td-casv"><a class="td-back-l" href="#jurisprudence' + retour + '">&lsaquo; Jurisprudence</a>' +
@@ -206,8 +209,8 @@ async function afficherCasVue(id) {
     '<h3 class="td-h3">Faits</h3><p class="td-p td-multi">' + esc(c.faits) + '</p>' +
     '<h3 class="td-h3">Règles applicables</h3><div class="td-regles-l">' + regles + '</div>' +
     (autreEdition ? '<p class="td-p td-attention">Ce cas a été établi sous le règlement ' + esc(TDA_CAS.libelleEdition(c.edition_id)) + ' : vérifiez que les règles citées correspondent toujours.</p>' : '') +
-    '<h3 class="td-h3">Décision</h3><p class="td-p td-multi">' + esc(c.decision) + '</p>' +
-    '<h3 class="td-h3">Sanction</h3><p class="td-p"><span class="td-sanc">' + esc(TDA_CAS.libelleSanction(c.sanction_type)) + '</span>' + (c.sanction_precision ? ' ' + esc(c.sanction_precision) : '') + '</p>' +
+    '<h3 class="td-h3">Sanction</h3><p class="td-p"><span class="td-sanc">' + esc(TDA_CAS.texteSanction(c)) + '</span>' + (c.sanction_precision ? ' ' + esc(c.sanction_precision) : '') + '</p>' +
+    (c.decision ? '<h3 class="td-h3">Décision</h3><p class="td-p td-multi">' + esc(c.decision) + '</p>' : '') +
     '<p class="td-cas-meta">' + meta.join(' · ') + '</p>' + actionsCas(c, auteur) + '</article></div>';
   $('td-main').innerHTML = html;
   if (surligner && surligner.length) surlignerDom($('td-main').querySelector('.td-art'), surligner);
@@ -302,9 +305,8 @@ async function afficherFormulaire(idCas, regleLiee) {
     if (!droit) { $('td-main').innerHTML = '<div class="td-cas-page"><a class="td-back-l" href="#jurisprudence">&lsaquo; Jurisprudence</a><p class="td-etat">Ce cas ne peut pas être modifié.</p></div>'; return; }
   }
   formRegles = c ? (c.regles || []).slice() : (regleLiee && parId[regleLiee] ? [regleLiee] : []);
-  const v = c || { titre: '', faits: '', decision: '', sanction_type: '', sanction_precision: '', date_cas: '', variante: '' };
-  const sanctions = '<option value="">Choisir...</option>' + TDA_CAS.SANCTIONS.map(function (s) { return '<option value="' + s[0] + '"' + (v.sanction_type === s[0] ? ' selected' : '') + '>' + esc(s[1]) + '</option>'; }).join('');
-  const variantes = '<option value="">Variante (facultatif)</option>' + TDA_CAS.VARIANTES.map(function (x) { return '<option' + (v.variante === x ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('');
+  const v = c || { titre: '', faits: '', decision: '', sanction_type: '', sanction_quantite: null, sanction_precision: '' };
+  const sanctions = '<option value="">Choisir...</option>' + TDA_CAS.sanctionsProposees(v.sanction_type).map(function (s) { return '<option value="' + esc(s.id) + '"' + (v.sanction_type === s.id ? ' selected' : '') + '>' + esc(s.libelle) + '</option>'; }).join('');
   const champ = function (id, libelle, corps) { return '<div class="fg"><label class="fl" for="' + id + '">' + libelle + '</label>' + corps + '<div class="td-err" id="' + id + '-e"></div></div>'; };
   $('td-main').innerHTML = '<div class="td-cas-page"><article class="td-art td-form">' +
     '<a class="td-back-l" href="' + (c ? '#cas/' + esc(c.id) : '#jurisprudence') + '">&lsaquo; ' + (c ? 'Retour au cas' : 'Jurisprudence') + '</a>' +
@@ -313,19 +315,28 @@ async function afficherFormulaire(idCas, regleLiee) {
     champ('fc-titre', 'Titre', '<input type="text" id="fc-titre" maxlength="140" value="' + esc(v.titre) + '" autocomplete="off" />') +
     champ('fc-faits', 'Faits', '<textarea id="fc-faits" rows="6" maxlength="4000" placeholder="Décrivez la situation sans nom de joueur : joueur A, joueur B...">' + esc(v.faits) + '</textarea>') +
     champ('fc-regles', 'Règles applicables', '<div id="fc-puces" class="td-puces"></div><input type="text" id="fc-regle-saisie" placeholder="Ajouter : numéro ou mot (45, RP-5, relance)" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="fc-sugg" /><ul id="fc-sugg" class="td-sugg" role="listbox" hidden></ul>') +
-    champ('fc-decision', 'Décision', '<textarea id="fc-decision" rows="5" maxlength="4000">' + esc(v.decision) + '</textarea>') +
     '<div class="td-form-ligne">' +
       champ('fc-sanction', 'Sanction', '<select id="fc-sanction">' + sanctions + '</select>') +
-      champ('fc-precision', 'Précision de la sanction', '<input type="text" id="fc-precision" maxlength="500" value="' + esc(v.sanction_precision || '') + '" autocomplete="off" />') +
-    '</div><div class="td-form-ligne">' +
-      champ('fc-date', 'Date du cas (facultatif)', '<input type="date" id="fc-date" value="' + esc(v.date_cas || '') + '" />') +
-      champ('fc-variante', 'Variante', '<select id="fc-variante">' + variantes + '</select>') +
+      champ('fc-quantite', '<span id="fc-quantite-l">Nombre</span>', '<input type="number" id="fc-quantite" min="1" max="10000" step="1" inputmode="numeric" value="' + esc(v.sanction_quantite == null ? '' : v.sanction_quantite) + '" />') +
     '</div>' +
+    champ('fc-precision', 'Précision sur la sanction (facultatif)', '<input type="text" id="fc-precision" maxlength="500" value="' + esc(v.sanction_precision || '') + '" autocomplete="off" />') +
+    champ('fc-decision', 'Décision (facultatif)', '<textarea id="fc-decision" rows="4" maxlength="4000">' + esc(v.decision || '') + '</textarea>') +
     (!c && moi.validateur ? '<label class="td-coche"><input type="checkbox" id="fc-direct" /> Enregistrer directement comme cas validé</label>' : '') +
     '<div id="fc-erreur"></div><div class="td-actions"><button type="button" class="btn btn-gold" id="fc-envoyer">' + (c ? 'Enregistrer' : 'Soumettre') + '</button>' +
     '<a class="btn btn-ghost" href="' + (c ? '#cas/' + esc(c.id) : '#jurisprudence') + '">Annuler</a></div></article></div>';
   majPuces();
+  majQuantite();
+  $('fc-sanction').addEventListener('change', majQuantite);
   branchementFormulaire(c);
+}
+
+// Le champ « nombre » n'apparaît que pour une sanction qui en demande un (main, tour...)
+function majQuantite() {
+  const s = TDA_CAS.sanction($('fc-sanction').value);
+  const groupe = $('fc-quantite').closest('.fg');
+  groupe.hidden = !(s && s.unite);
+  if (s && s.unite) $('fc-quantite-l').textContent = 'Nombre de ' + TDA_CAS.uniteAccordee(s.unite, 2);
+  else $('fc-quantite').value = '';
 }
 
 function majPuces() {
@@ -363,13 +374,15 @@ function branchementFormulaire(c) {
 
 async function envoyerFormulaire(c) {
   const val = function (id) { return $(id).value.trim(); };
+  const sanction = TDA_CAS.sanction($('fc-sanction').value);
   const cas = {
-    titre: val('fc-titre'), faits: val('fc-faits'), regles: formRegles.slice(), decision: val('fc-decision'),
-    sanction_type: $('fc-sanction').value, sanction_precision: val('fc-precision') || null, date_cas: $('fc-date').value || null, variante: $('fc-variante').value || null,
+    titre: val('fc-titre'), faits: val('fc-faits'), regles: formRegles.slice(), decision: val('fc-decision') || null,
+    sanction_type: $('fc-sanction').value, sanction_quantite: sanction && sanction.unite ? val('fc-quantite') : null, sanction_precision: val('fc-precision') || null,
   };
   const r = TDA_CAS.verifier(cas);
-  ['titre', 'faits', 'regles', 'decision', 'sanction', 'precision', 'date', 'variante'].forEach(function (k) { $('fc-' + k + '-e').textContent = ''; });
-  const cle = { titre: 'titre', faits: 'faits', regles: 'regles', decision: 'decision', sanction_type: 'sanction', sanction_precision: 'precision', date_cas: 'date', variante: 'variante' };
+  if (cas.sanction_quantite !== null) cas.sanction_quantite = Number(cas.sanction_quantite);
+  ['titre', 'faits', 'regles', 'decision', 'sanction', 'quantite', 'precision'].forEach(function (k) { $('fc-' + k + '-e').textContent = ''; });
+  const cle = { titre: 'titre', faits: 'faits', regles: 'regles', decision: 'decision', sanction_type: 'sanction', sanction_quantite: 'quantite', sanction_precision: 'precision' };
   Object.keys(r.erreurs).forEach(function (k) { $('fc-' + cle[k] + '-e').textContent = r.erreurs[k]; });
   if (!r.ok) { const premier = document.querySelector('.td-err:not(:empty)'); if (premier) premier.scrollIntoView({ block: 'center' }); return; }
   const b = $('fc-envoyer');
@@ -388,4 +401,70 @@ async function envoyerFormulaire(c) {
     b.disabled = false;
     $('fc-erreur').innerHTML = '<p class="te-msg err" role="status">Enregistrement impossible : ' + esc(e.message || e) + '</p>';
   }
+}
+
+// ── Sanctions : la liste se modifie ici (validateurs) ─
+// Une sanction avec une unité (main, tour...) demande un nombre dans le cas : « Main de pénalité (2 mains) ».
+async function afficherSanctions() {
+  const entete = barreCas('sanctions') + blocMessage();
+  $('td-main').innerHTML = '<div class="td-cas-page">' + entete + '<p class="td-etat" role="status">Chargement...</p></div>';
+  let liste;
+  try { liste = await SB.listTdaSanctions(); TDA_CAS.definirSanctions(liste); liste = TDA_CAS.toutesSanctions(); }
+  catch (e) { $('td-main').innerHTML = '<div class="td-cas-page">' + entete + '<p class="te-msg err" role="status">Lecture impossible : ' + esc(e.message || e) + '</p></div>'; return; }
+
+  const ligne = function (s, i) {
+    return '<div class="td-sanc-ligne' + (s.actif ? '' : ' off') + '" data-id="' + esc(s.id) + '">' +
+      '<input type="text" class="sl-libelle" value="' + esc(s.libelle) + '" maxlength="60" aria-label="Nom de la sanction" autocomplete="off" />' +
+      '<input type="text" class="sl-unite" value="' + esc(s.unite || '') + '" maxlength="20" placeholder="Unité (main, tour...)" aria-label="Unité du nombre, vide si aucun nombre" autocomplete="off" />' +
+      '<span class="td-sanc-btns">' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-sa="monter" aria-label="Monter"' + (i === 0 ? ' disabled' : '') + '>&uarr;</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-sa="descendre" aria-label="Descendre"' + (i === liste.length - 1 ? ' disabled' : '') + '>&darr;</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-sa="enregistrer">Enregistrer</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-sa="actif">' + (s.actif ? 'Désactiver' : 'Réactiver') + '</button>' +
+        '<button type="button" class="btn btn-red btn-sm" data-sa="supprimer">Supprimer</button>' +
+      '</span></div>';
+  };
+  $('td-main').innerHTML = '<div class="td-cas-page">' + entete + '<div id="sa-erreur"></div><div class="td-sanc-liste">' + liste.map(ligne).join('') + '</div>' +
+    '<div class="td-sanc-ajout"><input type="text" id="sa-libelle" maxlength="60" placeholder="Nouvelle sanction" aria-label="Nom de la nouvelle sanction" autocomplete="off" />' +
+    '<input type="text" id="sa-unite" maxlength="20" placeholder="Unité (main, tour...)" aria-label="Unité du nombre, vide si aucun nombre" autocomplete="off" />' +
+    '<button type="button" class="btn btn-gold" id="sa-ajouter">Ajouter</button></div></div>';
+
+  const erreur = function (t) { $('sa-erreur').innerHTML = t ? '<p class="te-msg err" role="status">' + esc(t) + '</p>' : ''; };
+  const recharger = async function (texte) { messageCas = texte ? { texte: texte, genre: 'ok' } : null; await afficherSanctions(); };
+  const traduire = function (e) { return e && e.code === '23503' ? 'Cette sanction est utilisée par des cas : désactivez-la plutôt que de la supprimer.' : (e && e.message) || String(e); };
+
+  $('sa-ajouter').addEventListener('click', async function () {
+    const libelle = $('sa-libelle').value.trim(), unite = $('sa-unite').value.trim();
+    if (libelle.length < 2) { erreur('Donnez un nom à la sanction.'); return; }
+    this.disabled = true;
+    try { await SB.createTdaSanction({ libelle: libelle, unite: unite || null, ordre: liste.length + 1 }); await recharger('Sanction ajoutée.'); }
+    catch (e) { this.disabled = false; erreur('Ajout impossible : ' + traduire(e)); }
+  });
+
+  document.querySelectorAll('.td-sanc-ligne [data-sa]').forEach(function (b) {
+    b.addEventListener('click', async function () {
+      const rangee = b.closest('.td-sanc-ligne'), id = rangee.dataset.id, i = liste.findIndex(function (s) { return s.id === id; }), s = liste[i];
+      const act = b.dataset.sa;
+      erreur('');
+      if (act === 'supprimer' && !b.dataset.confirme) {                  // premier clic : confirmer
+        b.dataset.confirme = '1'; b.textContent = 'Confirmer'; setTimeout(function () { delete b.dataset.confirme; b.textContent = 'Supprimer'; }, 4000); return;
+      }
+      b.disabled = true;
+      try {
+        if (act === 'enregistrer') {
+          const libelle = rangee.querySelector('.sl-libelle').value.trim();
+          if (libelle.length < 2) { erreur('Donnez un nom à la sanction.'); b.disabled = false; return; }
+          await SB.updateTdaSanction(id, { libelle: libelle, unite: rangee.querySelector('.sl-unite').value.trim() || null });
+          await recharger('Sanction enregistrée.');
+        } else if (act === 'actif') { await SB.updateTdaSanction(id, { actif: !s.actif }); await recharger(s.actif ? 'Sanction désactivée : elle n\'est plus proposée.' : 'Sanction réactivée.'); }
+        else if (act === 'supprimer') { await SB.deleteTdaSanction(id); await recharger('Sanction supprimée.'); }
+        else {                                                           // monter / descendre : on renumérote toute la liste
+          const j = act === 'monter' ? i - 1 : i + 1;
+          const ordre = liste.slice(); ordre.splice(i, 1); ordre.splice(j, 0, s);
+          await Promise.all(ordre.map(function (x, k) { return x.ordre === k + 1 ? null : SB.updateTdaSanction(x.id, { ordre: k + 1 }); }));
+          await recharger(null);
+        }
+      } catch (e) { b.disabled = false; erreur('Action impossible : ' + traduire(e)); }
+    });
+  });
 }

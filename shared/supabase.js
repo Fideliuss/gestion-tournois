@@ -515,8 +515,35 @@ const SB = {
 
   _champsCas(c) {
     const out = {};
-    ['titre', 'faits', 'regles', 'decision', 'sanction_type', 'sanction_precision', 'date_cas', 'variante'].forEach(function (k) { if (c[k] !== undefined) out[k] = c[k]; });
+    ['titre', 'faits', 'regles', 'decision', 'sanction_type', 'sanction_quantite', 'sanction_precision'].forEach(function (k) { if (c[k] !== undefined) out[k] = c[k]; });
     return out;
+  },
+
+  // ── Sanctions de la jurisprudence (liste modifiable par les validateurs) ───────────────
+  async listTdaSanctions() {
+    const { data, error } = await _sb.from('tda_sanctions').select('*').order('ordre').order('libelle');
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createTdaSanction(s) {
+    const { data, error } = await _sb.from('tda_sanctions').insert({ libelle: s.libelle, unite: s.unite || null, ordre: s.ordre || 0, actif: true }).select('*').single();
+    if (error) throw error;
+    return data;
+  },
+
+  // `patch` : libelle, unite, ordre, actif
+  async updateTdaSanction(id, patch) {
+    const champs = {};
+    ['libelle', 'unite', 'ordre', 'actif'].forEach(function (k) { if (patch[k] !== undefined) champs[k] = patch[k]; });
+    const { error } = await _sb.from('tda_sanctions').update(champs).eq('id', id);
+    if (error) throw error;
+  },
+
+  // Refusée par la base tant que des cas portent cette sanction (on la désactive alors)
+  async deleteTdaSanction(id) {
+    const { error } = await _sb.from('tda_sanctions').delete().eq('id', id);
+    if (error) throw error;
   },
 
   // ── Import (outil de migration) ────────────────────
