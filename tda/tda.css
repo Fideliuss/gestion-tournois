@@ -14,7 +14,7 @@
 
 /* ── Mise en page ── */
 .td-wrap { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 36px; align-items: start; }
-.td-wrap.vue-glossaire { grid-template-columns: minmax(0, 1fr); }
+.td-wrap.vue-glossaire, .td-wrap.vue-recherche { grid-template-columns: minmax(0, 1fr); }
 .td-side {
   position: sticky; top: 76px; max-height: calc(100vh - 96px); overflow-y: auto; padding-right: 8px;
   scrollbar-width: thin; scrollbar-color: rgba(195,120,20,.35) transparent;
@@ -114,11 +114,47 @@ body.light .td-pop { background: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,.15
 .td-gloss { max-width: 860px; margin: 0 auto; width: 100%; padding: 12px 40px 30px; }
 .td-gloss .td-sec { margin-top: 28px; }
 .td-dl { margin: 0; }
-.td-dt-dd { padding: 12px 0; border-bottom: 1px solid var(--gold-bd); }
+.td-dt-dd { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gold-bd); }
 .td-dt-dd:last-child { border-bottom: 0; }
 .td-dt-dd dt { font-size: 15px; font-weight: 600; color: var(--cream); }
 .td-dt-dd dd { margin: 4px 0 0; font-size: 15px; line-height: 1.55; color: var(--text); }
 .td-dt-dd.flash { animation: td-flash 2.2s ease-out; border-radius: 8px; }
+
+/* ── Recherche ── */
+.td-recherche { width: 100%; max-width: 560px; margin: 0 auto 26px; }
+.td-recherche input { width: 100%; box-sizing: border-box; padding: 12px 18px; border-radius: 999px; font-size: 15px; }
+.td-recherche input::placeholder { color: var(--text-dim); }
+.td-res-liste { max-width: 860px; margin: 0 auto; width: 100%; }
+.td-res-liste > .td-sec:first-child { margin-top: 0; }
+.td-nb { margin: 0 0 4px; font-size: 12px; color: var(--text-dim); }
+.td-res, .td-saut {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: baseline; gap: 6px; padding: 12px 14px; margin-bottom: 4px; border-radius: 14px;
+  text-decoration: none; color: var(--text); font-size: 14px; line-height: 1.45;
+}
+.td-res:hover, .td-saut:hover { background: var(--gold-bg); }
+.td-res:focus-visible, .td-saut:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.td-saut { margin-bottom: 14px; padding: 14px 16px; border: 1px solid var(--gold); color: var(--cream); font-weight: 500; font-size: 15px; }
+.td-res-c { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.td-res-t { font-weight: 500; color: var(--cream); }
+.td-res-x { font-size: 13px; color: var(--text-dim); overflow-wrap: anywhere; }
+mark { background: rgba(195,120,20,.38); color: inherit; border-radius: 3px; padding: 0 1px; }
+body.light mark { background: rgba(195,120,20,.28); }
+
+/* ── Favoris ── */
+.td-entete { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.td-entete .td-titre { flex: 1; min-width: 0; }
+.td-fav {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; cursor: pointer;
+  border: 1px solid var(--gold-bd); border-radius: 50%; background: none; color: var(--gold); transition: background .15s, border-color .15s;
+}
+.td-fav:hover { background: var(--gold-bg); border-color: var(--gold); }
+.td-fav:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.td-fav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+.td-fav[aria-pressed="true"] svg { fill: var(--gold-solid); stroke: var(--gold-solid); }
+.td-dt-dd .td-fav { width: 34px; height: 34px; }
+.td-dt-dd .td-fav svg { width: 17px; height: 17px; }
+.td-info { min-height: 18px; margin-top: 16px; text-align: center; font-size: 12px; color: #e07a68; }
+body.light .td-info { color: #b5483a; }
 
 /* ── Mention du TDA (obligatoire sur chaque page) ── */
 .td-mention { margin-top: 44px; text-align: center; font-size: 11px; line-height: 1.6; color: var(--text-muted); }
@@ -131,7 +167,7 @@ body.light .td-pop { background: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,.15
   .td-side { position: static; max-height: none; overflow: visible; padding-right: 0; }
   .td-main { display: none; }
   .td-wrap.lecture .td-side { display: none; }
-  .td-wrap.lecture .td-main, .td-wrap.vue-glossaire .td-main { display: block; }
+  .td-wrap.lecture .td-main, .td-wrap.vue-glossaire .td-main, .td-wrap.vue-recherche .td-main { display: block; }
   .td-back { display: inline-block; }
   .td-art, .td-gloss { padding: 24px 20px 28px; }
   .td-art::before { top: 22px; bottom: 22px; }
