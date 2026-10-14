@@ -452,6 +452,73 @@ const SB = {
     return { edition: ed, blocs: blocs || [] };
   },
 
+  // ── Jurisprudence TDA (cas proposés par les floors, validés par les MCD) ───────────────
+  // Les droits et le circuit (propose, valide, a_preciser, refuse, archive) sont imposés par la base (tda_jurisprudence.sql) :
+  // ces méthodes ne font que lire et écrire, une écriture interdite revient en erreur.
+  async getTdaCas(id) {
+    const { data, error } = await _sb.from('tda_cas').select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return data;
+  },
+
+  // Cas d'un état : 'valide' (lisible par tous ceux qui ont le panel tda), les autres selon les droits (validateurs et auteur)
+  async listTdaCas(statuts) {
+    const { data, error } = await _sb.from('tda_cas').select('*').in('statut', statuts)
+      .order(statuts.length === 1 && statuts[0] === 'valide' ? 'valide_le' : 'soumis_le', { ascending: statuts.length === 1 && statuts[0] === 'valide' ? false : true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Propositions de l'utilisateur connecté, toutes les plus récentes d'abord (un validateur voit tout : on filtre sur l'auteur)
+  async listMesTdaCas() {
+    const { data: s } = await _sb.auth.getSession();
+    const uid = s && s.session && s.session.user.id;
+    if (!uid) return [];
+    const { data, error } = await _sb.from('tda_cas').select('*').eq('auteur_id', uid).order('soumis_le', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async countTdaCas(statut, mesCas) {
+    let q = _sb.from('tda_cas').select('*', { count: 'exact', head: true }).eq('statut', statut);
+    if (mesCas) {
+      const { data: s } = await _sb.auth.getSession();
+      q = q.eq('auteur_id', s && s.session ? s.session.user.id : '');
+    }
+    const { count, error } = await q;
+    if (error) throw error;
+    return count || 0;
+  },
+
+  // Seuls ces champs sont envoyés : l'auteur, l'édition et les dates sont posés par la base
+  async createTdaCas(c) {
+    const champs = SB._champsCas(c);
+    if (c.statut === 'valide') champs.statut = 'valide';             // réservé aux validateurs : sinon la base remet « propose »
+    const { data, error } = await _sb.from('tda_cas').insert(champs).select('id').single();
+    if (error) throw error;
+    return data.id;
+  },
+
+  // `patch` : champs du cas, et pour un validateur statut / commentaire / archive_motif
+  async updateTdaCas(id, patch) {
+    const champs = SB._champsCas(patch);
+    ['statut', 'commentaire', 'archive_motif'].forEach(function (k) { if (patch[k] !== undefined) champs[k] = patch[k]; });
+    const { data, error } = await _sb.from('tda_cas').update(champs).eq('id', id).select('*').single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteTdaCas(id) {
+    const { error } = await _sb.from('tda_cas').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  _champsCas(c) {
+    const out = {};
+    ['titre', 'faits', 'regles', 'decision', 'sanction_type', 'sanction_precision', 'date_cas', 'variante'].forEach(function (k) { if (c[k] !== undefined) out[k] = c[k]; });
+    return out;
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);

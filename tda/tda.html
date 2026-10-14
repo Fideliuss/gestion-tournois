@@ -18,6 +18,7 @@
     <button class="seg-btn" role="tab" data-vue="regles">Règles</button>
     <button class="seg-btn" role="tab" data-vue="procedures">Procédures</button>
     <button class="seg-btn" role="tab" data-vue="glossaire">Glossaire</button>
+    <button class="seg-btn" role="tab" data-vue="jurisprudence" id="td-tab-cas" hidden>Jurisprudence <span class="seg-n" id="td-nb-cas" hidden>0</span></button>
   </div>
 
   <div class="td-recherche" role="search">
@@ -39,11 +40,13 @@
 <script src="../shared/auth.js"></script>
 <script src="tda_rendu.js"></script>
 <script src="tda_recherche.js"></script>
+<script src="tda_cas_outils.js"></script>
 <script src="tda.js"></script>
+<script src="tda_cas.js"></script>
 <script>
 AUTH.guard({ loginUrl: '../login.html', panel: 'tda' }).then(function (user) {
   if (!user) return;
-  initTda();
+  initTda(user);
 });
 </script>
 </body>

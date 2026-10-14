@@ -21,7 +21,7 @@ let surligner = null;                              // mots à surligner à l'ouv
 let delaiRecherche = null;
 
 // ── Chargement ───────────────────────────────────────
-async function initTda() {
+async function initTda(user) {
   try {
     D = await SB.getTdaActive();
   } catch (err) {
@@ -30,6 +30,8 @@ async function initTda() {
   }
   if (!D) { etat('Aucune édition du règlement n\'est disponible pour le moment.'); return; }
   indexer();
+  await initCas(user);
+  if (casActifs) reindexerCas();
   afficherEntete();
   $('td-tabs').addEventListener('click', function (e) {
     const b = e.target.closest('button[data-vue]');
@@ -90,6 +92,7 @@ function route() {
   const h = lireHash();
   fermerPop();
   if (h.recherche !== null) { afficherRecherche(h.recherche); return; }
+  if (casActifs && ['jurisprudence', 'cas', 'nouveau', 'modifier'].indexOf(h.id) >= 0) { afficherJurisprudence(h); return; }
   let vue = 'regles', courant = null, sous = h.sous, exemple = null;
   if (VUES.indexOf(h.id) >= 0) vue = h.id;
   else if (parId[h.id]) {
@@ -105,7 +108,7 @@ function route() {
 }
 
 function afficherVue(vue, courant, sous, exemple) {
-  document.querySelectorAll('#td-tabs .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.vue === vue)); });
+  marquerOnglet(vue);
   $('td-wrap').className = 'td-wrap vue-' + vue + (courant && vue !== 'glossaire' ? ' lecture' : '');
   $('td-side').hidden = vue === 'glossaire';
   if (vue !== 'glossaire') afficherSommaire(vue, courant);
@@ -113,6 +116,19 @@ function afficherVue(vue, courant, sous, exemple) {
   else if (courant) afficherBloc(vue, courant, sous, exemple);
   else afficherAccueil(vue);
   document.title = (courant ? (courant.numero ? courant.numero + ' - ' : '') + courant.titre + ' - ' : '') + 'Règlement TDA - Barrière Casino Bordeaux';
+}
+
+// Onglet actif ; si la barre déborde (petit écran), elle défile pour le montrer
+function marquerOnglet(vue) {
+  document.querySelectorAll('#td-tabs .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.vue === vue)); });
+  const montrer = function () {
+    const on = document.querySelector('#td-tabs .seg-btn[aria-selected="true"]'), barre = $('td-tabs');
+    if (!on || barre.scrollWidth <= barre.clientWidth) return;
+    const d = on.getBoundingClientRect(), b = barre.getBoundingClientRect();
+    if (d.left < b.left || d.right > b.right) barre.scrollLeft += (d.left + d.right) / 2 - (b.left + b.right) / 2;
+  };
+  montrer();
+  setTimeout(montrer, 400);                      // la police et les compteurs peuvent encore changer les largeurs
 }
 
 // ── Sommaire ─────────────────────────────────────────
@@ -173,6 +189,7 @@ function afficherBloc(vue, b, sous, exemple) {
     '<h2 class="td-titre"><span class="td-n">' + esc(b.numero.replace('RP-', 'RP ')) + '</span>' + esc(b.titre) + '</h2>' +
     TDA_RENDU.elementsHtml(b.data.elements, ctx, b.id) +
     TDA_RENDU.exemplesHtml(lesExemples, ctx) +
+    casPourBloc(b) +
     '<div class="td-pager">' +
       (i > 0 ? '<a class="td-prev" href="#' + esc(liste[i - 1].id) + '"><small>Précédente</small>' + libelle(liste[i - 1]) + '</a>' : '<span></span>') +
       (i < liste.length - 1 ? '<a class="td-next" href="#' + esc(liste[i + 1].id) + '"><small>Suivante</small>' + libelle(liste[i + 1]) + '</a>' : '<span></span>') +
@@ -279,7 +296,7 @@ function texteSurligne(texte, plages) {
   return html + esc(texte.slice(pos));
 }
 
-const GROUPES_RESULTATS = [['regle', 'Règles'], ['rp', 'Procédures recommandées'], ['exemple', 'Exemples d\'illustration'], ['glossaire', 'Glossaire']];
+const GROUPES_RESULTATS = [['cas', 'Jurisprudence'], ['regle', 'Règles'], ['rp', 'Procédures recommandées'], ['exemple', 'Exemples d\'illustration'], ['glossaire', 'Glossaire']];
 
 function afficherRecherche(q) {
   document.querySelectorAll('#td-tabs .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', 'false'); });
@@ -302,7 +319,7 @@ function afficherRecherche(q) {
     const liste = r.resultats.filter(function (x) { return x.kind === g[0]; });
     if (!liste.length) return;
     html += '<h2 class="td-sec">' + g[1] + '</h2>' + liste.map(function (x) {
-      const num = x.kind === 'glossaire' ? 'Gl.' : x.kind === 'exemple' ? 'Ex. ' + x.numero : x.numero.replace('RP-', 'RP ');
+      const num = x.kind === 'cas' ? 'Cas' : x.kind === 'glossaire' ? 'Gl.' : x.kind === 'exemple' ? 'Ex. ' + x.numero : x.numero.replace('RP-', 'RP ');
       return '<a class="td-res" href="#' + esc(x.id) + '" data-q="1"><span class="td-num">' + esc(num) + '</span><span class="td-res-c">' +
         '<span class="td-res-t">' + texteSurligne(x.titre, x.plagesTitre) + '</span>' +
         (x.extrait ? '<span class="td-res-x">' + (x.extrait.debut ? '… ' : '') + texteSurligne(x.extrait.texte, x.extrait.plages) + (x.extrait.fin ? ' …' : '') + '</span>' : '') +
