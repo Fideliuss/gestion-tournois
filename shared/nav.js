@@ -104,6 +104,7 @@ const NAV = (function () {
     'tournois': 'tournois-pour-commencer',
     'prize_pool/prize_pool.html': 'tournois-prize-pool',
     'leaderboard/leaderboard.html': 'tournois-classement',
+    'tda/tda.html': 'tournois-tda',
     'admin/declaration/declaration.html': 'tournois-declaration',
     'admin/declaration/courriers.html': 'tournois-courriers',
     'admin/extras/extras.html': 'tournois-extras',

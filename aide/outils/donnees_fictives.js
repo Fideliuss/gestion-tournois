@@ -176,4 +176,52 @@ function entrainement() {
   return { croupiers: croupiers.map(function (c) { return { id: c.id, label: c.label }; }), sessions: sessions };
 }
 
-module.exports = { planning: planning, octimeTsv: octimeTsv, entrainement: entrainement, joueurs: joueurs, saison: saison, extras: extras, encadrement: encadrement, courriersGabarits: courriersGabarits };
+/** Règlement TDA fictif pour les captures : AUCUN texte du vrai règlement (le dépôt est public). Format de la table tda_blocs.
+ *  Dans un texte, {r3/B|règle 3-B} devient un renvoi (cible r3, point B) dont le libellé est « règle 3-B ». */
+function tda() {
+  const el = function (t, n, texte, extra) {
+    let out = '', renvois = [], pos = 0, m;
+    const re = /\{([a-z0-9_]+)(?:\/([A-Z]))?\|([^}]+)\}/g;
+    while ((m = re.exec(texte))) {
+      out += texte.slice(pos, m.index); const a = out.length; out += m[3];
+      const r = { a: a, b: out.length, cible: m[1], sous: m[2] || null };
+      if (extra && extra.verifier) r.verifier = extra.verifier;
+      renvois.push(r); pos = m.index + m[0].length;
+    }
+    out += texte.slice(pos);
+    const e = { t: t, texte: out }; if (n) e.n = n; if (renvois.length) e.renvois = renvois;
+    return e;
+  };
+  const regle = function (num, section, titre, elements) { return { id: 'r' + num, kind: 'regle', numero: String(num), section: section, titre: titre, ordre: num, data: { elements: elements } }; };
+  const blocs = [
+    regle(1, 's1', 'Exemple de règle simple', [el('p', null, "Texte d'exemple pour illustrer une règle courte. Il n'a aucune valeur : seul le règlement officiel fait foi.")]),
+    regle(2, 's1', 'Exemple de règle avec renvoi', [
+      el('pt', 'A', "Texte d'exemple : une phrase peut renvoyer à une autre règle, comme ici la {r3/B|règle 3-B}. Un clic sur le renvoi ouvre la règle et surligne le point."),
+      el('pt', 'B', "Un mot du glossaire, comme blind ou tapis, est souligné : un clic affiche sa définition."),
+    ]),
+    regle(3, 's2', 'Exemple de règle en plusieurs points', [
+      el('pt', 'A', "Premier point d'exemple, à lire avec la {r2/A|règle 2-A}. Voir exemples."),
+      el('pt', 'B', "Deuxième point d'exemple : le joueur annonce son action avant le flop. Les points sont repérés par une lettre."),
+      el('note', null, "Note d'exemple : les remarques du règlement sont présentées sur un fond distinct."),
+      el('pt', 'C', "Troisième point d'exemple, avec un showdown fictif."),
+    ]),
+    regle(4, 's2', 'Exemple de règle avec renvoi à vérifier', [
+      el('p', null, "Texte d'exemple : ce renvoi vers la {r1|règle 1}", { verifier: { note: "Le numéro cité dans la traduction semble erroné : ce renvoi est signalé pour vérification.", attendu: 'r3' } }),
+    ]),
+    { id: 'ex_3_1', kind: 'exemple', numero: '3', section: 'ex', titre: "Exemple d'illustration de la règle 3", ordre: 20, data: { regle: '3', elements: [el('p', null, "Exemple fictif : joueur-A annonce son action, joueur-B répond. Les exemples se replient et se déplient.")] } },
+    { id: 'rp_intro', kind: 'rp_intro', numero: '', section: 'rp', titre: 'Procédures recommandées (exemple)', ordre: 30, data: { elements: [el('p', null, "Texte d'introduction fictif des procédures recommandées. Voir la {r1|règle 1}.")] } },
+    { id: 'rp1', kind: 'rp', numero: 'RP-1', section: 'rp', titre: 'Exemple de procédure', ordre: 31, data: { elements: [el('p', null, "Texte d'exemple d'une procédure recommandée."), el('pt', 'A', "Premier point d'exemple de la procédure."), el('pt', 'B', "Second point d'exemple de la procédure.")] } },
+    { id: 'rp2', kind: 'rp', numero: 'RP-2', section: 'rp', titre: "Autre exemple de procédure", ordre: 32, data: { elements: [el('p', null, "Autre texte d'exemple, à la suite de la première procédure.")] } },
+  ];
+  const termes = [['Blind', 'Mise forcée posée avant la distribution.'], ['Flop', 'Les trois premières cartes communes.'], ['Showdown', 'Abattage des mains en fin de partie.'], ['Tapis', 'Mise de tous ses jetons (all-in).']];
+  termes.forEach(function (t, i) { blocs.push({ id: 'g_' + (i + 1), kind: 'glossaire', numero: '', section: 'gl', titre: t[0], ordre: 40 + i, data: { groupe: 'Termes de jeu', definition: t[1] } }); });
+  return {
+    edition: { id: 'exemple', libelle: "Règles d'exemple", date_publication: '2026-01-01', traduction: 'Traducteur fictif', active: true,
+      introduction: "Édition fictive : ces textes illustrent l'aide, ils ne sont pas ceux du règlement.",
+      mention: 'TDA rules used by permission of the Poker TDA, Copyright 2026, http://www.pokertda.com, All rights reserved.',
+      sections: [{ id: 's1', titre: 'Concepts généraux', ordre: 1 }, { id: 's2', titre: 'Mises et relances', ordre: 2 }] },
+    blocs: blocs,
+  };
+}
+
+module.exports = { tda: tda, planning: planning, octimeTsv: octimeTsv, entrainement: entrainement, joueurs: joueurs, saison: saison, extras: extras, encadrement: encadrement, courriersGabarits: courriersGabarits };
