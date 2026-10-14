@@ -24,6 +24,7 @@ const PANELS = [
     { id: 'leaderboard',    label: 'Leaderboard',             short: 'Leaderboard'     },
     { id: 'admin-tournois', label: 'Administration tournois', short: 'Admin. tournois' },
     { id: 'tda',            label: 'Règlement TDA',           short: 'TDA'             },
+    { id: 'tda-validation', label: 'Validation jurisprudence TDA', short: 'Valid. TDA' },
   ]},
   { id: 'training', label: 'Training', children: [
     { id: 'training-suivi', label: 'Suivi équipe', short: 'Suivi équipe' },
