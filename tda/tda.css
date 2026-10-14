@@ -114,7 +114,7 @@ body.light .td-pop { background: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,.15
 .td-gloss { max-width: 860px; margin: 0 auto; width: 100%; padding: 12px 40px 30px; }
 .td-gloss .td-sec { margin-top: 28px; }
 .td-dl { margin: 0; }
-.td-dt-dd { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gold-bd); }
+.td-dt-dd { padding: 12px 0; border-bottom: 1px solid var(--gold-bd); }
 .td-dt-dd:last-child { border-bottom: 0; }
 .td-dt-dd dt { font-size: 15px; font-weight: 600; color: var(--cream); }
 .td-dt-dd dd { margin: 4px 0 0; font-size: 15px; line-height: 1.55; color: var(--text); }
@@ -139,22 +139,6 @@ body.light .td-pop { background: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,.15
 .td-res-x { font-size: 13px; color: var(--text-dim); overflow-wrap: anywhere; }
 mark { background: rgba(195,120,20,.38); color: inherit; border-radius: 3px; padding: 0 1px; }
 body.light mark { background: rgba(195,120,20,.28); }
-
-/* ── Favoris ── */
-.td-entete { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
-.td-entete .td-titre { flex: 1; min-width: 0; }
-.td-fav {
-  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; cursor: pointer;
-  border: 1px solid var(--gold-bd); border-radius: 50%; background: none; color: var(--gold); transition: background .15s, border-color .15s;
-}
-.td-fav:hover { background: var(--gold-bg); border-color: var(--gold); }
-.td-fav:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.td-fav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
-.td-fav[aria-pressed="true"] svg { fill: var(--gold-solid); stroke: var(--gold-solid); }
-.td-dt-dd .td-fav { width: 34px; height: 34px; }
-.td-dt-dd .td-fav svg { width: 17px; height: 17px; }
-.td-info { min-height: 18px; margin-top: 16px; text-align: center; font-size: 12px; color: #e07a68; }
-body.light .td-info { color: #b5483a; }
 
 /* ── Mention du TDA (obligatoire sur chaque page) ── */
 .td-mention { margin-top: 44px; text-align: center; font-size: 11px; line-height: 1.6; color: var(--text-muted); }

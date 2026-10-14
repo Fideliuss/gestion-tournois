@@ -1,24 +1,22 @@
 // ══════════════════════════════════════════════════════
 //  RÈGLEMENT TDA - consultation
-//  Charge l'édition active (SB.getTdaActive), puis affiche cinq vues : Règles, Procédures recommandées, Glossaire, Favoris
+//  Charge l'édition active (SB.getTdaActive), puis affiche quatre vues : Règles, Procédures recommandées, Glossaire
 //  et les résultats d'une recherche. Tout est dans l'adresse (hash) pour pouvoir partager et revenir en arrière :
 //    #r45  une règle   ·  #r47/B  un point de la règle   ·  #r45/exemples  les exemples de la règle
-//    #rp5  une procédure   ·  #g_8  un terme du glossaire   ·  #regles / #procedures / #glossaire / #favoris  une vue
+//    #rp5  une procédure   ·  #g_8  un terme du glossaire   ·  #regles / #procedures / #glossaire  une vue
 //    #q=relance%20minimum  une recherche (« / » met le curseur dans le champ)
 //  Téléphone et tablette : le sommaire occupe l'écran, une règle ouverte le remplace (bouton « Sommaire » pour revenir).
 //  Ordinateur : sommaire fixe à gauche, règle à droite. La mise en forme du contenu est dans tda_rendu.js, la recherche
-//  dans tda_recherche.js. Les favoris sont propres à chaque utilisateur (table tda_favoris) ; si cette table n'existe pas
-//  encore, la page fonctionne sans favoris.
+//  dans tda_recherche.js.
 // ══════════════════════════════════════════════════════
 
 const $ = function (id) { return document.getElementById(id); };
 const esc = TDA_RENDU.esc;
 
-const VUES = ['regles', 'procedures', 'glossaire', 'favoris'];
+const VUES = ['regles', 'procedures', 'glossaire'];
 let D = null;                       // { edition, blocs }
 let parId = {}, regles = [], procedures = [], exemplesDe = {}, glossaire = [], ctxBase = null, sectionsParId = {};
 let indexRecherche = null;
-let favoris = [], favorisActifs = false;          // identifiants de blocs ; actifs seulement si la table des favoris répond
 let surligner = null;                              // mots à surligner à l'ouverture d'un résultat de recherche (une seule fois)
 let delaiRecherche = null;
 
@@ -32,9 +30,6 @@ async function initTda() {
   }
   if (!D) { etat('Aucune édition du règlement n\'est disponible pour le moment.'); return; }
   indexer();
-  try { favoris = await SB.getTdaFavoris(); favorisActifs = true; } catch (e) { favoris = []; favorisActifs = false; }
-  $('td-tab-fav').hidden = !favorisActifs;
-  majCompteurFavoris();
   afficherEntete();
   $('td-tabs').addEventListener('click', function (e) {
     const b = e.target.closest('button[data-vue]');
@@ -105,7 +100,6 @@ function route() {
     else if (b.kind === 'exemple') { vue = 'regles'; courant = parId['r' + b.data.regle.replace(/\D.*/, '')] || null; exemple = b.id; sous = 'exemples'; }
     else if (b.kind === 'rp_intro') vue = 'procedures';
   }
-  if (vue === 'favoris' && !favorisActifs) vue = 'regles';
   if (document.activeElement !== $('td-q')) $('td-q').value = '';
   afficherVue(vue, courant, sous, exemple);
 }
@@ -139,9 +133,6 @@ function afficherSommaire(vue, courant) {
       }
       html += lienSommaire(b, courant);
     });
-  } else if (vue === 'favoris') {
-    const ordre = regles.concat(procedures, glossaire).filter(function (b) { return favoris.indexOf(b.id) >= 0; });
-    html += ordre.map(function (b) { return lienSommaire(b, courant); }).join('');
   } else {
     html += '<h2 class="td-sec">Procédures recommandées</h2>' + procedures.map(function (b) { return lienSommaire(b, courant); }).join('');
   }
@@ -154,12 +145,10 @@ function afficherSommaire(vue, courant) {
 // ── Accueil d'une vue (rien d'ouvert) ────────────────
 function afficherAccueil(vue) {
   const e = D.edition;
-  let html = '<div class="td-accueil"><h2 class="td-titre">' + (vue === 'procedures' ? 'Procédures recommandées' : vue === 'favoris' ? 'Favoris' : esc(e.libelle)) + '</h2>';
+  let html = '<div class="td-accueil"><h2 class="td-titre">' + (vue === 'procedures' ? 'Procédures recommandées' : esc(e.libelle)) + '</h2>';
   if (vue === 'procedures') {
     const intro = D.blocs.find(function (b) { return b.kind === 'rp_intro'; });
     if (intro) html += TDA_RENDU.elementsHtml(intro.data.elements, Object.assign({}, ctxBase), intro.id);
-  } else if (vue === 'favoris') {
-    if (!favoris.some(function (id) { return parId[id]; })) html += '<p class="td-p">Aucun favori.</p>';
   } else if (e.introduction) {
     html += '<p class="td-p">' + esc(e.introduction) + '</p>';
   }
@@ -169,13 +158,6 @@ function afficherAccueil(vue) {
 }
 
 // ── Une règle ou une procédure ───────────────────────
-function boutonFavori(id) {
-  if (!favorisActifs) return '';
-  const on = favoris.indexOf(id) >= 0;
-  return '<button type="button" class="td-fav" data-fav="' + esc(id) + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Retirer des favoris' : 'Ajouter aux favoris') + '">' +
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.8l6.1-.7z"/></svg></button>';
-}
-
 function afficherBloc(vue, b, sous, exemple) {
   const liste = vue === 'procedures' ? procedures : regles;
   const i = liste.indexOf(b);
@@ -188,7 +170,7 @@ function afficherBloc(vue, b, sous, exemple) {
   const html = '<article class="td-art">' +
     '<a class="td-back" href="#' + vue + '">&lsaquo; Sommaire</a>' +
     '<div class="td-kicker">' + esc(section) + '</div>' +
-    '<div class="td-entete"><h2 class="td-titre"><span class="td-n">' + esc(b.numero.replace('RP-', 'RP ')) + '</span>' + esc(b.titre) + '</h2>' + boutonFavori(b.id) + '</div>' +
+    '<h2 class="td-titre"><span class="td-n">' + esc(b.numero.replace('RP-', 'RP ')) + '</span>' + esc(b.titre) + '</h2>' +
     TDA_RENDU.elementsHtml(b.data.elements, ctx, b.id) +
     TDA_RENDU.exemplesHtml(lesExemples, ctx) +
     '<div class="td-pager">' +
@@ -258,7 +240,7 @@ function afficherGlossaire(courant) {
   });
   $('td-main').innerHTML = '<div class="td-gloss">' + groupes.map(function (grp) {
     return '<section><h2 class="td-sec">' + esc(grp.nom) + '</h2><dl class="td-dl">' + grp.termes.map(function (g) {
-      return '<div class="td-dt-dd" id="' + esc(g.id) + '"><div><dt>' + esc(g.titre) + '</dt><dd>' + esc(g.data.definition) + '</dd></div>' + boutonFavori(g.id) + '</div>';
+      return '<div class="td-dt-dd" id="' + esc(g.id) + '"><dt>' + esc(g.titre) + '</dt><dd>' + esc(g.data.definition) + '</dd></div>';
     }).join('') + '</dl></section>';
   }).join('') + '</div>';
   const cible = courant && $(courant.id);
@@ -331,41 +313,6 @@ function afficherRecherche(q) {
   window.scrollTo(0, 0);
 }
 
-// ── Favoris ──────────────────────────────────────────
-function majCompteurFavoris() {
-  $('td-nb-fav').textContent = favoris.filter(function (id) { return parId[id]; }).length;
-}
-
-function messageInfo(texte) {
-  const el = $('td-info');
-  el.textContent = texte;
-  clearTimeout(messageInfo.t);
-  messageInfo.t = setTimeout(function () { el.textContent = ''; }, 4000);
-}
-
-async function basculerFavori(id) {
-  const avant = favoris.slice();
-  const on = favoris.indexOf(id) < 0;
-  favoris = on ? favoris.concat(id) : favoris.filter(function (x) { return x !== id; });
-  majBoutonsFavori(id);
-  majCompteurFavoris();
-  try { await SB.setTdaFavori(id, on); }
-  catch (err) {
-    favoris = avant;
-    majBoutonsFavori(id); majCompteurFavoris();
-    messageInfo('Le favori n\'a pas pu être enregistré. Vérifiez la connexion.');
-  }
-  if (lireHash().id === 'favoris') route();
-}
-
-function majBoutonsFavori(id) {
-  const on = favoris.indexOf(id) >= 0;
-  document.querySelectorAll('.td-fav[data-fav="' + id + '"]').forEach(function (b) {
-    b.setAttribute('aria-pressed', String(on));
-    b.setAttribute('aria-label', on ? 'Retirer des favoris' : 'Ajouter aux favoris');
-  });
-}
-
 // ── Info-bulles : terme du glossaire, renvoi à vérifier ──
 function fermerPop() { $('td-pop').hidden = true; }
 
@@ -381,8 +328,6 @@ function ouvrirPop(cible, html) {
 }
 
 function clicDocument(e) {
-  const fav = e.target.closest('.td-fav');
-  if (fav) { basculerFavori(fav.dataset.fav); return; }
   const res = e.target.closest('.td-res, .td-saut');
   if (res) surligner = window.__tdaTermes || null;                              // la recherche d'où l'on vient
   const terme = e.target.closest('.td-terme');
