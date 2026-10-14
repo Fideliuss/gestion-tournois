@@ -168,10 +168,39 @@ function branchementFiltres() {
   if ($('fc-archives')) $('fc-archives').addEventListener('change', function () { filtreCas.archives = $('fc-archives').checked; afficherListeCas(''); });
 }
 
+// ── Repères « cas similaire » sur une règle ──────────
+function casDuBloc(b) {
+  if (!casActifs || (b.kind !== 'regle' && b.kind !== 'rp')) return [];
+  return casValides.filter(function (c) { return (c.regles || []).indexOf(b.id) >= 0; });
+}
+
+// Bouton sous le titre de la règle : mène à la section Jurisprudence en bas de page
+function boutonCas(b) {
+  const n = casDuBloc(b).length;
+  return n ? '<button type="button" class="td-cas-lien" data-jur="1">' + n + (n > 1 ? ' cas similaires' : ' cas similaire') + '</button>' : '';
+}
+
+function branchementBoutonCas() {
+  const bouton = document.querySelector('#td-main [data-jur]');
+  if (!bouton) return;
+  bouton.addEventListener('click', function () {
+    const cible = $('td-jurisprudence');
+    if (!cible) return;
+    cible.scrollIntoView({ block: 'start' });
+    cible.classList.remove('flash'); void cible.offsetWidth; cible.classList.add('flash');
+  });
+}
+
+// Petit compteur dans le sommaire, à côté des règles qui ont des cas
+function pastilleCas(b) {
+  const n = casDuBloc(b).length;
+  return n ? '<span class="td-nbcas" title="' + n + (n > 1 ? ' cas similaires' : ' cas similaire') + '" aria-label="' + n + (n > 1 ? ' cas similaires' : ' cas similaire') + '">' + n + '</span>' : '';
+}
+
 // ── Section sous une règle ou une procédure ──────────
 function casPourBloc(b) {
   if (!casActifs || (b.kind !== 'regle' && b.kind !== 'rp')) return '';
-  const liste = casValides.filter(function (c) { return (c.regles || []).indexOf(b.id) >= 0; });
+  const liste = casDuBloc(b);
   return '<section class="td-jur" id="td-jurisprudence" aria-label="Jurisprudence">' +
     (liste.length ? '<h3 class="td-h3">Jurisprudence</h3>' + liste.map(function (c) {
       return '<a class="td-cas td-cas-mini" href="#cas/' + esc(c.id) + '"><span class="td-cas-t">' + esc(c.titre) + '</span><span class="td-sanc">' + esc(TDA_CAS.texteSanction(c)) + '</span></a>';

@@ -135,7 +135,7 @@ function marquerOnglet(vue) {
 function lienSommaire(b, courant) {
   const num = b.kind === 'glossaire' ? 'Gl.' : b.numero.replace('RP-', 'RP ');
   return '<a class="td-item' + (courant && courant.id === b.id ? ' on' : '') + '" href="#' + esc(b.id) + '"' + (courant && courant.id === b.id ? ' aria-current="page"' : '') + '>' +
-    '<span class="td-num">' + esc(num) + '</span><span class="td-tit">' + esc(b.titre) + '</span></a>';
+    '<span class="td-num">' + esc(num) + '</span><span class="td-tit">' + esc(b.titre) + '</span>' + pastilleCas(b) + '</a>';
 }
 
 function afficherSommaire(vue, courant) {
@@ -187,6 +187,7 @@ function afficherBloc(vue, b, sous, exemple) {
     '<a class="td-back" href="#' + vue + '">&lsaquo; Sommaire</a>' +
     '<div class="td-kicker">' + esc(section) + '</div>' +
     '<h2 class="td-titre"><span class="td-n">' + esc(b.numero.replace('RP-', 'RP ')) + '</span>' + esc(b.titre) + '</h2>' +
+    boutonCas(b) +
     TDA_RENDU.elementsHtml(b.data.elements, ctx, b.id) +
     TDA_RENDU.exemplesHtml(lesExemples, ctx) +
     casPourBloc(b) +
@@ -195,6 +196,7 @@ function afficherBloc(vue, b, sous, exemple) {
       (i < liste.length - 1 ? '<a class="td-next" href="#' + esc(liste[i + 1].id) + '"><small>Suivante</small>' + libelle(liste[i + 1]) + '</a>' : '<span></span>') +
     '</div></article>';
   $('td-main').innerHTML = html;
+  branchementBoutonCas();
 
   // Mots de la recherche d'où l'on vient : surlignés une fois
   let premier = null;
