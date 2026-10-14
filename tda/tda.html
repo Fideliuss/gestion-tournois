@@ -18,12 +18,13 @@
     <button class="seg-btn" role="tab" data-vue="regles">Règles</button>
     <button class="seg-btn" role="tab" data-vue="procedures">Procédures</button>
     <button class="seg-btn" role="tab" data-vue="glossaire">Glossaire</button>
-    <button class="seg-btn" role="tab" data-vue="favoris" id="td-tab-fav" hidden>Favoris <span class="seg-n" id="td-nb-fav">0</span></button>
   </div>
 
   <div class="td-recherche" role="search">
     <input type="search" id="td-q" placeholder="Rechercher un mot ou un numéro" aria-label="Rechercher dans le règlement" autocomplete="off" enterkeyhint="search" />
   </div>
+
+  <nav class="td-favs" id="td-favs" aria-label="Favoris" hidden></nav>
 
   <div class="td-wrap" id="td-wrap">
     <nav class="td-side" id="td-side" aria-label="Sommaire"></nav>

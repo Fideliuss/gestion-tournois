@@ -1,9 +1,9 @@
 // ══════════════════════════════════════════════════════
 //  RÈGLEMENT TDA - consultation
-//  Charge l'édition active (SB.getTdaActive), puis affiche cinq vues : Règles, Procédures recommandées, Glossaire, Favoris
-//  et les résultats d'une recherche. Tout est dans l'adresse (hash) pour pouvoir partager et revenir en arrière :
+//  Charge l'édition active (SB.getTdaActive), puis affiche quatre vues : Règles, Procédures recommandées, Glossaire
+//  et les résultats d'une recherche ; les favoris sont une barre de pastilles sous le champ de recherche, sur toutes les pages. Tout est dans l'adresse (hash) pour pouvoir partager et revenir en arrière :
 //    #r45  une règle   ·  #r47/B  un point de la règle   ·  #r45/exemples  les exemples de la règle
-//    #rp5  une procédure   ·  #g_8  un terme du glossaire   ·  #regles / #procedures / #glossaire / #favoris  une vue
+//    #rp5  une procédure   ·  #g_8  un terme du glossaire   ·  #regles / #procedures / #glossaire  une vue
 //    #q=relance%20minimum  une recherche (« / » met le curseur dans le champ)
 //  Téléphone et tablette : le sommaire occupe l'écran, une règle ouverte le remplace (bouton « Sommaire » pour revenir).
 //  Ordinateur : sommaire fixe à gauche, règle à droite. La mise en forme du contenu est dans tda_rendu.js, la recherche
@@ -14,13 +14,14 @@
 const $ = function (id) { return document.getElementById(id); };
 const esc = TDA_RENDU.esc;
 
-const VUES = ['regles', 'procedures', 'glossaire', 'favoris'];
+const VUES = ['regles', 'procedures', 'glossaire'];
 let D = null;                       // { edition, blocs }
 let parId = {}, regles = [], procedures = [], exemplesDe = {}, glossaire = [], ctxBase = null, sectionsParId = {};
 let indexRecherche = null;
 let favoris = [], favorisActifs = false;          // identifiants de blocs ; actifs seulement si la table des favoris répond
 let surligner = null;                              // mots à surligner à l'ouverture d'un résultat de recherche (une seule fois)
 let delaiRecherche = null;
+let courantId = null;                              // règle, procédure ou terme ouvert (pour la pastille mise en évidence)
 
 // ── Chargement ───────────────────────────────────────
 async function initTda() {
@@ -33,8 +34,7 @@ async function initTda() {
   if (!D) { etat('Aucune édition du règlement n\'est disponible pour le moment.'); return; }
   indexer();
   try { favoris = await SB.getTdaFavoris(); favorisActifs = true; } catch (e) { favoris = []; favorisActifs = false; }
-  $('td-tab-fav').hidden = !favorisActifs;
-  majCompteurFavoris();
+  majBarreFavoris();
   afficherEntete();
   $('td-tabs').addEventListener('click', function (e) {
     const b = e.target.closest('button[data-vue]');
@@ -105,12 +105,13 @@ function route() {
     else if (b.kind === 'exemple') { vue = 'regles'; courant = parId['r' + b.data.regle.replace(/\D.*/, '')] || null; exemple = b.id; sous = 'exemples'; }
     else if (b.kind === 'rp_intro') vue = 'procedures';
   }
-  if (vue === 'favoris' && !favorisActifs) vue = 'regles';
   if (document.activeElement !== $('td-q')) $('td-q').value = '';
   afficherVue(vue, courant, sous, exemple);
 }
 
 function afficherVue(vue, courant, sous, exemple) {
+  courantId = courant ? courant.id : null;
+  majBarreFavoris();
   document.querySelectorAll('#td-tabs .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.vue === vue)); });
   $('td-wrap').className = 'td-wrap vue-' + vue + (courant && vue !== 'glossaire' ? ' lecture' : '');
   $('td-side').hidden = vue === 'glossaire';
@@ -139,9 +140,6 @@ function afficherSommaire(vue, courant) {
       }
       html += lienSommaire(b, courant);
     });
-  } else if (vue === 'favoris') {
-    const ordre = regles.concat(procedures, glossaire).filter(function (b) { return favoris.indexOf(b.id) >= 0; });
-    html += ordre.map(function (b) { return lienSommaire(b, courant); }).join('');
   } else {
     html += '<h2 class="td-sec">Procédures recommandées</h2>' + procedures.map(function (b) { return lienSommaire(b, courant); }).join('');
   }
@@ -154,12 +152,10 @@ function afficherSommaire(vue, courant) {
 // ── Accueil d'une vue (rien d'ouvert) ────────────────
 function afficherAccueil(vue) {
   const e = D.edition;
-  let html = '<div class="td-accueil"><h2 class="td-titre">' + (vue === 'procedures' ? 'Procédures recommandées' : vue === 'favoris' ? 'Favoris' : esc(e.libelle)) + '</h2>';
+  let html = '<div class="td-accueil"><h2 class="td-titre">' + (vue === 'procedures' ? 'Procédures recommandées' : esc(e.libelle)) + '</h2>';
   if (vue === 'procedures') {
     const intro = D.blocs.find(function (b) { return b.kind === 'rp_intro'; });
     if (intro) html += TDA_RENDU.elementsHtml(intro.data.elements, Object.assign({}, ctxBase), intro.id);
-  } else if (vue === 'favoris') {
-    if (!favoris.some(function (id) { return parId[id]; })) html += '<p class="td-p">Aucun favori.</p>';
   } else if (e.introduction) {
     html += '<p class="td-p">' + esc(e.introduction) + '</p>';
   }
@@ -300,6 +296,8 @@ function texteSurligne(texte, plages) {
 const GROUPES_RESULTATS = [['regle', 'Règles'], ['rp', 'Procédures recommandées'], ['exemple', 'Exemples d\'illustration'], ['glossaire', 'Glossaire']];
 
 function afficherRecherche(q) {
+  courantId = null;
+  majBarreFavoris();
   document.querySelectorAll('#td-tabs .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', 'false'); });
   $('td-wrap').className = 'td-wrap vue-recherche';
   $('td-side').hidden = true;
@@ -332,8 +330,18 @@ function afficherRecherche(q) {
 }
 
 // ── Favoris ──────────────────────────────────────────
-function majCompteurFavoris() {
-  $('td-nb-fav').textContent = favoris.filter(function (id) { return parId[id]; }).length;
+// Barre de pastilles sous la recherche, visible sur toutes les pages : un toucher ouvre le favori. Dans l'ordre du règlement ;
+// la pastille de la page ouverte est mise en évidence. Cachée tant qu'il n'y a aucun favori.
+function majBarreFavoris() {
+  const barre = $('td-favs');
+  const liste = favorisActifs ? regles.concat(procedures, glossaire).filter(function (b) { return favoris.indexOf(b.id) >= 0; }) : [];
+  barre.hidden = !liste.length;
+  barre.innerHTML = liste.map(function (b) {
+    const num = b.kind === 'glossaire' ? '' : b.numero.replace('RP-', 'RP ');
+    const actif = b.id === courantId;
+    return '<a class="td-chip' + (actif ? ' on' : '') + '" href="#' + esc(b.id) + '"' + (actif ? ' aria-current="page"' : '') + '>' +
+      (num ? '<span class="td-num">' + esc(num) + '</span>' : '') + '<span class="td-chip-t">' + esc(b.titre) + '</span></a>';
+  }).join('');
 }
 
 function messageInfo(texte) {
@@ -348,14 +356,13 @@ async function basculerFavori(id) {
   const on = favoris.indexOf(id) < 0;
   favoris = on ? favoris.concat(id) : favoris.filter(function (x) { return x !== id; });
   majBoutonsFavori(id);
-  majCompteurFavoris();
+  majBarreFavoris();
   try { await SB.setTdaFavori(id, on); }
   catch (err) {
     favoris = avant;
-    majBoutonsFavori(id); majCompteurFavoris();
+    majBoutonsFavori(id); majBarreFavoris();
     messageInfo('Le favori n\'a pas pu être enregistré. Vérifiez la connexion.');
   }
-  if (lireHash().id === 'favoris') route();
 }
 
 function majBoutonsFavori(id) {

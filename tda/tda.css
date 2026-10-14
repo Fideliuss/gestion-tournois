@@ -140,7 +140,19 @@ body.light .td-pop { background: #FFFFFF; box-shadow: 0 10px 30px rgba(0,0,0,.15
 mark { background: rgba(195,120,20,.38); color: inherit; border-radius: 3px; padding: 0 1px; }
 body.light mark { background: rgba(195,120,20,.28); }
 
-/* ── Favoris ── */
+/* ── Barre de favoris (sous la recherche) ── */
+.td-favs { width: 100%; max-width: 1080px; margin: -8px auto 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.td-chip {
+  display: inline-flex; align-items: center; gap: 8px; max-width: 280px; padding: 9px 14px; min-height: 40px; box-sizing: border-box;
+  border: 1px solid var(--gold-bd); border-radius: 999px; text-decoration: none; font-size: 13px; color: var(--cream); white-space: nowrap;
+}
+.td-chip:hover { border-color: var(--gold); background: var(--gold-bg); }
+.td-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.td-chip.on { background: var(--gold-solid); border-color: var(--gold-solid); color: #1A1208; }
+.td-chip.on .td-num { color: #1A1208; }
+.td-chip-t { overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Étoile ── */
 .td-entete { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .td-entete .td-titre { flex: 1; min-width: 0; }
 .td-fav {
@@ -173,6 +185,11 @@ body.light .td-info { color: #b5483a; }
   .td-art::before { top: 22px; bottom: 22px; }
   .td-ex summary { padding-left: 14px; flex-direction: column; gap: 2px; }
   .td-sub { margin-left: 18px; }
+}
+@media (max-width: 899px) {
+  .td-favs { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; margin-left: -20px; margin-right: -20px; padding: 2px 20px; width: auto; max-width: none; scrollbar-width: none; }
+  .td-favs::-webkit-scrollbar { display: none; }
+  .td-chip { flex: none; }
 }
 @media (max-width: 520px) {
   .td-pager { grid-template-columns: 1fr; }
