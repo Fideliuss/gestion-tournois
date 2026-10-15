@@ -228,6 +228,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
         ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
         ├── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
+        ├── parametres.sql                   - paramètres partagés entre les postes (clé / valeur JSON), accès par le panel admin-tournois
         └── tda.sql                          - règlement TDA : éditions et blocs de texte (lecture par panel tda)
 ```
 
