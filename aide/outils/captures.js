@@ -34,14 +34,14 @@ const FIGE = `<script>(function(){var R=Date,T=new R(2026,9,14,20,0,0).getTime()
 
 // Base simulée : un administrateur, le planning fictif d'octobre 2026, aucun paramètre enregistré (valeurs par défaut)
 const BASE = `<script>(function(){var P=${JSON.stringify(PLANNING)};
-window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:async function(){},
+window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:async function(){},
 getBreakListPlanning:async function(k){return k==='2026-10'?JSON.parse(JSON.stringify(P)):null},listBreakListPlannings:async function(){return[{mois:'2026-10',updated_at:'2026-10-12T18:05:00.000Z'}]},
 saveBreakListPlanning:async function(){},deleteBreakListPlanning:async function(){},getBreakListConfig:async function(){return null},saveBreakListConfig:async function(){}};})();</script>`;
 
 // Base simulée de l'espace Tournois : administrateur, tournois, saison complète, extras ; rien n'est écrit
 const BASE_TN = `<script>(function(){var R=${JSON.stringify(SAISON.results)},S=${JSON.stringify(SAISON.sessions)},T=${JSON.stringify(TOURNOIS)},X=${JSON.stringify(EXTRAS)};
 var cp=function(o){return JSON.parse(JSON.stringify(o))},nop=async function(){};
-window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
+window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
 getResults:async function(){return cp(R)},getResultsByMonth:async function(m){return cp(R.filter(function(r){return r.date.slice(0,7)===m}))},getSessions:async function(){return cp(S)},getSeasonClosures:async function(){return[]},
 insertResults:async function(a){return a},insertSession:nop,updateResult:nop,deleteResult:nop,deleteResultsBySession:nop,updateSession:nop,deleteSession:nop,closeSeason:nop,reopenSeason:nop,
 getTournaments:async function(){return cp(T)},upsertTournament:nop,deleteTournament:nop,getExtras:async function(){return cp(X)},insertExtra:nop,updateExtra:nop,deleteExtra:nop};})();</script>`;
@@ -58,7 +58,7 @@ var of=function(u,g,lv){return S.filter(function(s){return s.user_id===u&&s.game
 var day=function(iso){var d=new Date(iso);return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()};
 var WEAK={'roulette-paiement':[['Type de mise','plein',120,12],['Type de mise','cheval',140,31],['Type de mise','transversale',90,28],['Type de mise','carre',75,29],['Type de mise','sixain',80,14]],
  'uth-gains':[['Mise','ante',160,18],['Mise','blind',160,41],['Mise','play',150,22],['Mise','trips',70,17],['Mise','jp1',60,5]]};
-window.SB={getSession:async function(){return{user:{id:ME,email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
+window.SB={getSession:async function(){return{user:{id:ME,email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
 getTrainingConfig:async function(){return null},updateTrainingConfig:nop,startTrainingSession:async function(){return{id:1}},endTrainingSession:nop,addTrainingResult:nop,
 getMyTrainingSessions:async function(){return cp(S.filter(function(s){return s.user_id===ME}))},
 getTrainingSessionsOf:async function(u,g){return cp(S.filter(function(s){return s.user_id===u&&(!g||s.game===g)}))},
@@ -75,7 +75,7 @@ getTrainingWeakPoints:async function(g,u){return(WEAK[g]||[]).map(function(r){re
 // Règlement TDA : édition fictive (aucun texte du vrai règlement dans le dépôt public), administrateur ; rien n'est écrit
 const isTda = function (c) { return c.page.indexOf('tda/') === 0; };
 const BASE_TDA = `<script>(function(){var D=${JSON.stringify(data.tda())};var nop=async function(){};
-window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
+window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
 getTdaActive:async function(){return JSON.parse(JSON.stringify({edition:D.edition,blocs:D.blocs}))}};})();</script>`;
 // Tirage aléatoire fixé (graine propre à chaque capture) : les questions affichées sont toujours les mêmes
 const SEED = function (n) { return `<script>(function(){var a=${n};Math.random=function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}})();</script>`; };

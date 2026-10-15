@@ -193,7 +193,7 @@ function renderStaffEditor() {
       <button class="btn-ghost" onclick="addStaff('arbitres')" style="margin-top:8px">+ Ajouter</button>
     </div>`;
 }
-function staffRow(type, i, n) { return `<div class="staff-item"><input type="text" value="${n}" onchange="updateStaff('${type}',${i},this.value)"/><button class="btn-red" onclick="removeStaff('${type}',${i})">×</button></div>`; }
+function staffRow(type, i, n) { return `<div class="staff-item"><input type="text" value="${escapeHtml(n)}" onchange="updateStaff('${type}',${i},this.value)"/><button class="btn-red" onclick="removeStaff('${type}',${i})">×</button></div>`; }
 function updateStaff(type, i, v) { staff[type][i] = v; }
 function addStaff(type)          { staff[type].push(''); saveStaff(); renderStaffEditor(); }
 function removeStaff(type, i)    { staff[type].splice(i,1); saveStaff(); renderStaffEditor(); }
@@ -282,8 +282,8 @@ function renderAdhocList() {
   el.innerHTML = [...list].sort((a,b) => a.d-b.d).map(t => `
     <div class="adhoc-item">
       <div class="adhoc-info">
-        <span class="adhoc-titre">${t.titre}</span>
-        <span class="adhoc-meta">${t.cave}€ · ${t.joueurs} jrs${t.bounty ? ` · Bounty ${t.bounty}€` : ''}${t.annexe ? ` · ${t.annexe}` : ''}</span>
+        <span class="adhoc-titre">${escapeHtml(t.titre)}</span>
+        <span class="adhoc-meta">${escapeHtml(t.cave)}€ · ${escapeHtml(t.joueurs)} jrs${t.bounty ? ` · Bounty ${escapeHtml(t.bounty)}€` : ''}${t.annexe ? ` · ${escapeHtml(t.annexe)}` : ''}</span>
       </div>
       <button class="btn-red" onclick="removeAdhoc(${t.id})">Supprimer</button>
     </div>`).join('');
@@ -359,7 +359,7 @@ function renderExcList() {
     const dateStr = `${JOURS[dow]} ${d} ${MOIS[month-1]} ${year}`;
     const detail  = e.type === 'cancelled'
       ? '<span style="color:#e07a68;font-weight:500">Annulé</span>'
-      : `<span style="color:var(--gold);font-weight:500">Modifié</span> - ${e.cave}€ · ${e.heure}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+e.annexe : ''}`;
+      : `<span style="color:var(--gold);font-weight:500">Modifié</span> - ${escapeHtml(e.cave)}€ · ${escapeHtml(e.heure)}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+escapeHtml(e.annexe) : ''}`;
     return `<div class="adhoc-item">
       <div class="adhoc-info">
         <span class="adhoc-titre">${dateStr}</span>
@@ -425,13 +425,13 @@ function renderExtrasDeclaration() {
       </thead>
       <tbody>${list.map(e => `
         <tr>
-          <td class="det-nom">${e.nom}</td>
-          <td class="det-prenom">${e.prenom.toUpperCase()}</td>
-          <td class="det-italic">${e.dateNaissance || ''}</td>
-          <td class="det-lieu">${e.lieuNaissance || ''}</td>
-          <td>${e.adresse || ''}</td>
-          <td>${e.codePostal || ''}</td>
-          <td class="det-ville">${e.ville || ''}</td>
+          <td class="det-nom">${escapeHtml(e.nom)}</td>
+          <td class="det-prenom">${escapeHtml(e.prenom.toUpperCase())}</td>
+          <td class="det-italic">${escapeHtml(e.dateNaissance || '')}</td>
+          <td class="det-lieu">${escapeHtml(e.lieuNaissance || '')}</td>
+          <td>${escapeHtml(e.adresse || '')}</td>
+          <td>${escapeHtml(e.codePostal || '')}</td>
+          <td class="det-ville">${escapeHtml(e.ville || '')}</td>
         </tr>`).join('')}
       </tbody>
     </table>`;
@@ -445,17 +445,17 @@ function renderDeclaration() {
 
   const staffHtml = `
     <div class="enc-hdr">Directeurs de tournois</div>
-    ${staff.directeurs.map(n => `<div>${n}</div>`).join('')}
+    ${staff.directeurs.map(n => `<div>${escapeHtml(n)}</div>`).join('')}
     <div class="enc-hdr" style="margin-top:5px">Arbitres</div>
-    ${staff.arbitres.map(n => `<div>${n}</div>`).join('')}`;
+    ${staff.arbitres.map(n => `<div>${escapeHtml(n)}</div>`).join('')}`;
 
   const dataHtml = rows.length
     ? rows.map((r,i) => `
         <tr class="drow">
-          <td class="titre-cell">${r.titre}</td>
+          <td class="titre-cell">${escapeHtml(r.titre)}</td>
           <td>${r.cave} €</td><td>${r.joueurs}</td><td>ESPÈCES</td><td>MULTI-TABLES</td><td>1</td>
           <td>${r.rachats ? 'OUI' : 'NON'}</td><td>Level 8</td>
-          <td>${r.bounty > 0 ? r.bounty+' €' : '-'}</td><td>${r.annexe || '-'}</td>
+          <td>${r.bounty > 0 ? escapeHtml(r.bounty)+' €' : '-'}</td><td>${escapeHtml(r.annexe || '-')}</td>
           ${i===0 ? `<td class="staff-col" rowspan="${rows.length}">${staffHtml}</td>` : ''}
         </tr>`).join('')
     : `<tr><td colspan="11" class="empty">Aucun tournoi actif ce mois.</td></tr>`;
@@ -508,7 +508,7 @@ function renderAnnexes() {
     const warn = distSum !== 100 ? `<div class="alert-warn" style="margin-top:8px">⚠ Total répartition : ${distSum} % (doit être 100 %)</div>` : '';
 
     return `<div class="annexe-card">
-      <div class="annexe-title">${a.nom}</div>
+      <div class="annexe-title">${escapeHtml(a.nom)}</div>
       <div class="annexe-subtitle">Tournoi Cash - Répartition des lots</div>
       <div class="annexe-calc">
         <div class="ac-row"><span>Joueurs</span><span class="ac-val">${a.joueurs}</span></div>

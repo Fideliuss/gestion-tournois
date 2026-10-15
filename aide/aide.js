@@ -10,7 +10,7 @@ function esc(s) {
 }
 
 async function init(user) {
-  const role = (user.user_metadata && user.user_metadata.role) || 'floor', isAdmin = role === 'admin';
+  const role = AUTH.roleOf(user), isAdmin = role === 'admin';
   let panels = [];
   if (!isAdmin) {
     try { const r = (await SB.getRoles()).find(function (x) { return x.slug === role; }); panels = (r && r.panels) || []; }

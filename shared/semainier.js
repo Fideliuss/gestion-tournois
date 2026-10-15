@@ -46,9 +46,9 @@ function buildSemainier(tournaments, selectedId, onSelectFn, suggestedDay) {
       var isSuggested = isDaySuggested && !isActive;
       var cls = 'sem-btn' + (isActive ? ' sem-active' : '') + (isSuggested ? ' sem-suggested' : '');
       return '<button class="' + cls + '"'
-        + ' onclick="' + onSelectFn + '(\'' + t.id + '\')"'
-        + ' title="' + t.name + ' · ' + t.buyin + ' €">'
-        + t.name + '</button>';
+        + ' data-id="' + escapeHtml(t.id) + '" onclick="' + onSelectFn + '(this.dataset.id)"'
+        + ' title="' + escapeHtml(t.name) + ' · ' + escapeHtml(t.buyin) + ' €">'
+        + escapeHtml(t.name) + '</button>';
     }).join('');
 
     return '<div class="sem-day' + (isDaySuggested ? ' sem-day-suggested' : '') + '">'
@@ -62,9 +62,9 @@ function buildSemainier(tournaments, selectedId, onSelectFn, suggestedDay) {
     var isActive = t.id === selectedId;
     var cls = 'sem-btn' + (isActive ? ' sem-active' : '');
     return '<button class="' + cls + '"'
-      + ' onclick="' + onSelectFn + '(\'' + t.id + '\')"'
-      + ' title="' + t.name + ' · ' + t.buyin + ' €">'
-      + t.name + '</button>';
+      + ' data-id="' + escapeHtml(t.id) + '" onclick="' + onSelectFn + '(this.dataset.id)"'
+      + ' title="' + escapeHtml(t.name) + ' · ' + escapeHtml(t.buyin) + ' €">'
+      + escapeHtml(t.name) + '</button>';
   }).join('');
 
   var eventsHtml = events.length

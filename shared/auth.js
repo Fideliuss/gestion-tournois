@@ -58,7 +58,7 @@ const AUTH = {
       return null;
     }
 
-    const userRole = session.user.user_metadata?.role || 'floor';
+    const userRole = AUTH.roleOf(session.user);
     const isAdmin  = userRole === 'admin';
 
     const depth = (loginUrl.match(/\.\.\//g) || []).length;
@@ -101,6 +101,15 @@ const AUTH = {
     overlay.remove();
     if (!navOk) AUTH._navFallback(root, loginUrl);
     return session.user;
+  },
+
+  /**
+   * Rôle de l'utilisateur. Lu dans `app_metadata` (posé par la fonction serveur manage-users, non modifiable par l'utilisateur),
+   * comme le font la RLS et la fonction serveur. JAMAIS dans `user_metadata`, que chacun peut modifier lui-même.
+   * Sans rôle : 'floor', le rôle le moins privilégié des rôles de base.
+   */
+  roleOf(user) {
+    return (user && user.app_metadata && user.app_metadata.role) || 'floor';
   },
 
   /**

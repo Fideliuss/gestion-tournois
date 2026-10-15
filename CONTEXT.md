@@ -11,7 +11,7 @@ Application web interne pour le Barrière Casino Bordeaux, organisée en espaces
 
 Conçue pour être **extensible au-delà des tournois** - architecture de panneaux/rôles pensée pour accueillir de futurs modules (Jeux de Tables au sens large).
 
-**Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (privé)
+**Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (**public** : GitHub Pages gratuit l'exige ; ne jamais y mettre de donnée personnelle, de secret ni de texte sous droits)
 **Développeur :** B. Cuvelier (Fideliuss)
 **Convention de nommage :** underscore `_` pour tous les fichiers et dossiers (`prize_pool`, `admin_tournois`, `roulette_paiement`), jamais de tiret.
 
@@ -48,11 +48,12 @@ login.html                    Page de connexion (e-mail + mot de passe, charte g
 shared/
   barriere.css      Styles partagés (thème, composants communs, styles auth : #auth-overlay, #auth-fallback, fenêtre de changement de mot de passe)
   barriere.js       Scripts partagés (toggle jour/nuit, favicon, transitions de page)
+  html.js           escapeHtml() - échappement HTML de toute donnée venant de la base ou de l'utilisateur (testé : `node shared/html.test.js`) ; chargé par toutes les pages, juste après barriere.js
   tournaments.js    TOURNAMENT_DEFAULTS (fallback) + TournamentsStore (lecture/écriture Supabase, source de vérité)
   semainier.js      buildSemainier() - widget sélecteur de tournoi par jour, utilisé par prize_pool + leaderboard
   supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats/sessions/tournois/extras/app_roles/training + auth + Edge Function manage-users)
   nav.js / nav.css  Barre de navigation commune - injectée par AUTH.guard ; voir section « Navigation »
-  auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), AUTH._navFallback(), AUTH.clearRolesCache() - chargé après supabase.js
+  auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.roleOf(user), AUTH.signOut(), AUTH._navFallback(), AUTH.clearRolesCache() - chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
   fonts/            Jost auto-hébergée (variable, normal + italique) - @font-face déclaré dans barriere.css
   icons/            Pictogrammes vectoriels de la charte, extraits en PNG à masque alpha (recolorables via CSS mask)
@@ -224,6 +225,8 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 15 | prize_pool.js | Suggestion : le montant du 1er gardait un résidu de calcul (ex. 2789.2000000000007) - arrondi au centime (`cent()`) |
 | 16 | leaderboard.css | Document ranking à l'écran : le logo (SVG très large) dépassait du cadre blanc - largeur limitée à celle du document |
 | 17 | config_training.html | Le titre « BJ Paiement - chronomètre par niveau » concernait en réalité BJ Score (c'est lui qui lit ce réglage) - titre corrigé |
+| 18 | leaderboard.js, extras.js, declaration.js, semainier.js, config_tournois.html | Durcissement : les données venant de la base (noms de joueurs, extras, noms de tournois) passent par `escapeHtml()` avant d'être insérées dans le HTML ; les `onclick` lisent un `data-*` au lieu d'embarquer la donnée |
+| 19 | auth.js, index.html, tournois.html, aide.js, leaderboard.js | Le rôle est lu à un seul endroit, `AUTH.roleOf()` (`app_metadata`, comme la RLS) |
 
 ---
 
@@ -396,7 +399,9 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - Noms de fonctions : camelCase, verbe + sujet (`renderClassement`, `validateTournament`)
 - IDs HTML : kebab-case (`hist-body`, `rp-chip-overlay`)
 - Classes CSS : kebab-case, préfixe par composant (`rt-chip`, `rp-badge-*`, `sem-day`)
-- Apostrophes dans les onclick : toujours passer par `esc(s)` → `s.replace(/'/g,"\\x27")`
+- **Données dans du HTML construit en chaîne** (`innerHTML`, gabarits) : toute donnée venant de la base ou de l'utilisateur (noms de joueurs, extras, tournois, libellés...) passe par `escapeHtml()` (`shared/html.js`), dans le texte comme dans les attributs (`value="${escapeHtml(x)}"`)
+- **Jamais de donnée dans un `onclick="f('${x}')"`** : le navigateur décode les entités avant d'exécuter le JavaScript, l'échappement HTML n'y protège pas. Mettre la donnée dans un attribut `data-*` (échappé) et lire `this.dataset.xxx` (`onclick="f(this.dataset.id)"`) ou écouter l'événement sur le conteneur (voir le clic sur un joueur dans `leaderboard.js`). L'ancien `esc()` « apostrophe » est supprimé
+- **Rôle de l'utilisateur** : toujours `AUTH.roleOf(user)` (lit `app_metadata`, comme la RLS). Jamais `user_metadata.role`, que chacun peut modifier lui-même ; `user_metadata` ne sert qu'aux prénom et nom affichés
 - IDs d'entrées leaderboard/tournois : générés côté serveur ou `slug + Date.now()` - ne pas passer `id` dans les inserts quand la DB le génère
 - Noms de joueurs : stockés et comparés en MAJUSCULES, affichés via `cap()`
 - Pas de bundler, pas de npm - zéro dépendance locale

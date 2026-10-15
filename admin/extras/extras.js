@@ -28,7 +28,6 @@ let editingId = null;
 function uid()           { return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
 function pad2(n)         { return String(n).padStart(2, '0'); }
 function fmtDate(d)      { return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}`; }
-function esc(s)          { return String(s).replace(/'/g, '\\x27'); }
 function capWords(s)     { return s ? s.toLowerCase().replace(/(?:^|[ \-])\S/g, c => c.toUpperCase()) : ''; }
 function sortedExtras()  { return [...extras].sort((a, b) => a.nom.localeCompare(b.nom, 'fr') || a.prenom.localeCompare(b.prenom, 'fr')); }
 
@@ -112,15 +111,15 @@ function renderExtrasList() {
   }
   el.innerHTML = sortedExtras().map(e => `
     <tr>
-      <td class="xt-nom">${e.nom}</td>
-      <td class="xt-prenom">${e.prenom}</td>
-      <td>${e.dateNaissance || '-'}</td>
-      <td>${e.lieuNaissance || '-'}</td>
-      <td>${e.adresse || '-'}</td>
-      <td>${e.codePostal || '-'}</td>
-      <td>${e.ville || '-'}</td>
-      <td><button class="btn-ghost" onclick="openEditModal('${esc(e.id)}')">✎</button></td>
-      <td><button class="btn-red" onclick="removeExtra('${esc(e.id)}')">×</button></td>
+      <td class="xt-nom">${escapeHtml(e.nom)}</td>
+      <td class="xt-prenom">${escapeHtml(e.prenom)}</td>
+      <td>${escapeHtml(e.dateNaissance || '-')}</td>
+      <td>${escapeHtml(e.lieuNaissance || '-')}</td>
+      <td>${escapeHtml(e.adresse || '-')}</td>
+      <td>${escapeHtml(e.codePostal || '-')}</td>
+      <td>${escapeHtml(e.ville || '-')}</td>
+      <td><button class="btn-ghost" data-id="${escapeHtml(e.id)}" onclick="openEditModal(this.dataset.id)">✎</button></td>
+      <td><button class="btn-red" data-id="${escapeHtml(e.id)}" onclick="removeExtra(this.dataset.id)">×</button></td>
     </tr>`).join('');
 }
 
@@ -236,8 +235,8 @@ function renderAssignTable() {
   const hourCells = DAY_KEYS.map((k, i) => {
     const override = emarg._dayHours?.[k] || '';
     return `<td class="assign-check">
-      <input class="assign-day-hour" type="text" value="${override}"
-        placeholder="${dayTime(i)}" onchange="setDayHour('${k}',this.value)"/>
+      <input class="assign-day-hour" type="text" value="${escapeHtml(override)}"
+        placeholder="${escapeHtml(dayTime(i))}" onchange="setDayHour('${k}',this.value)"/>
     </td>`;
   }).join('');
 
@@ -249,14 +248,14 @@ function renderAssignTable() {
       const override = eData._hours?.[k] || '';
       const ph       = resolveTime(e.id, k, i, emarg);
       return `<td class="assign-check">
-        <input type="checkbox" ${checked ? 'checked' : ''}
-          onchange="toggleDay('${esc(e.id)}','${k}',this.checked)"/>
-        ${checked ? `<input class="assign-cell-hour" type="text" value="${override}"
-          placeholder="${ph}" onchange="setCellHour('${esc(e.id)}','${k}',this.value)"/>` : ''}
+        <input type="checkbox" ${checked ? 'checked' : ''} data-id="${escapeHtml(e.id)}"
+          onchange="toggleDay(this.dataset.id,'${k}',this.checked)"/>
+        ${checked ? `<input class="assign-cell-hour" type="text" value="${escapeHtml(override)}" data-id="${escapeHtml(e.id)}"
+          placeholder="${escapeHtml(ph)}" onchange="setCellHour(this.dataset.id,'${k}',this.value)"/>` : ''}
       </td>`;
     }).join('');
     return `<tr>
-      <td class="assign-name">${capWords(e.prenom)} ${capWords(e.nom)}</td>
+      <td class="assign-name">${escapeHtml(capWords(e.prenom))} ${escapeHtml(capWords(e.nom))}</td>
       ${checks}
     </tr>`;
   }).join('');
@@ -367,7 +366,7 @@ function buildCard(e, week, days, eData, emarg) {
     return `<tr>
       <td class="ec-date">${fmtDate(days[i])}</td>
       <td class="ec-dayl">${DAY_LABELS[i]}</td>
-      <td class="ec-time${cls}">${time}</td>
+      <td class="ec-time${cls}">${escapeHtml(time)}</td>
       <td class="ec-dep"></td>
       <td class="ec-sig"></td>
     </tr>`;
@@ -381,7 +380,7 @@ function buildCard(e, week, days, eData, emarg) {
     <thead><tr>
       <th class="ec-week">${week}</th>
       <th class="ec-j">J</th>
-      <th colspan="3" class="ec-name">${name}</th>
+      <th colspan="3" class="ec-name">${escapeHtml(name)}</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
