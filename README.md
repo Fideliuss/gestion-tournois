@@ -137,11 +137,12 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── shared/
 │   ├── barriere.css               - Styles partagés (thème, composants, styles auth)
 │   ├── barriere.js                - Scripts partagés (thème, favicon)
+│   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
 │   ├── supabase.js                - Client Supabase + objet SB (CRUD complet + auth + app_roles + training + mappers)
 │   ├── nav.js / nav.css           - Barre de navigation commune (lanceur d'espaces, pages, menu Gestion, menu mobile), adaptée aux droits
-│   ├── auth.js                    - AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), bandeau de secours, cache panels
+│   ├── auth.js                    - AUTH.guard({loginUrl, role, panel}), AUTH.roleOf(user), AUTH.signOut(), bandeau de secours, cache panels
 │   ├── changelog.js                - Mis à jour manuellement avant chaque PR de release
 │   ├── logos/                     - Logos (écran + impression)
 │   └── favicon/                   - Favicon et icônes PWA

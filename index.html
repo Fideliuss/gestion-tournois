@@ -81,12 +81,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="shared/changelog.js"></script>
 <script src="shared/barriere.js"></script>
+<script src="shared/html.js"></script>
 <script src="shared/supabase.js"></script>
 <script src="shared/auth.js"></script>
 <script>
 AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
   if (!user) return;
-  const role = user.user_metadata?.role || 'floor';
+  const role = AUTH.roleOf(user);
   const isAdmin = role === 'admin';
 
   // « Bonjour, Prénom » (ou « Bonsoir » à partir de 18 h) ; sans prénom déductible, la salutation seule
