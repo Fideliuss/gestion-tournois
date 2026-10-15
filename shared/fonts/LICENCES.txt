@@ -1,0 +1,14 @@
+Polices hébergées avec l'application
+
+Toutes sont sous licence SIL Open Font License 1.1 (https://openfontlicense.org) : usage libre, y compris professionnel,
+à condition de ne pas les vendre seules. Elles sont distribuées par Google Fonts (https://fonts.google.com).
+
+Jost                (Jost-VariableFont_wght.ttf, Jost-Italic-VariableFont_wght.ttf)   - titres et texte courant
+IBM Plex Mono       (ibm_plex_mono_400 / 500 / 600.woff2)                             - chiffres et données
+Bebas Neue          (bebas_neue_400.woff2)                                            - document du ranking imprimé
+Barlow Condensed    (barlow_condensed_400 / 600 / 700 et _italique .woff2)            - document du ranking imprimé
+
+Les fichiers .woff2 ne contiennent que le sous-ensemble « latin » (lettres accentuées du français, ponctuation, €, œ), tel
+que servi par Google Fonts, pour les garder légers. Ils sont déclarés dans shared/barriere.css (IBM Plex Mono) et
+leaderboard/leaderboard.css (Bebas Neue, Barlow Condensed). Ne pas rétablir de @import vers fonts.googleapis.com : chaque
+affichage enverrait l'adresse IP de l'utilisateur à Google.

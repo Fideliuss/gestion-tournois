@@ -137,6 +137,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── shared/
 │   ├── barriere.css               - Styles partagés (thème, composants, styles auth)
 │   ├── barriere.js                - Scripts partagés (thème, favicon)
+│   ├── vendor/                    - Bibliothèques tierces hébergées (supabase-js, SheetJS), versions fixées : voir LISEZMOI.md
 │   ├── mot_de_passe.js            - Règles de mot de passe, messages et générateur (tests : `node shared/mot_de_passe.test.js`)
 │   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
@@ -240,7 +241,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 | React 18 (CDN) | Interface Prize Pool Builder |
 | Supabase (PostgreSQL cloud) | Persistance (tournois, leaderboard, extras, training) + **authentification** |
 | Supabase Edge Functions (Deno) | `manage-users` - CRUD comptes avec vérification admin côté serveur |
-| supabase-js v2 (CDN) | Client Supabase côté navigateur |
+| supabase-js 2.117.3 (hébergé dans `shared/vendor/`) | Client Supabase côté navigateur |
 | Supabase Auth (e-mail + mot de passe) | Connexion sécurisée, rôles configurables, session 7 jours |
 | `localStorage` | Configs déclaration / courriers / émargements hebdo |
 | GitHub Pages | Hébergement statique (branche `main`, auto-deploy) |

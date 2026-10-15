@@ -56,7 +56,8 @@ shared/
   nav.js / nav.css  Barre de navigation commune - injectée par AUTH.guard ; voir section « Navigation »
   auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.roleOf(user), AUTH.signOut(), AUTH._navFallback(), AUTH.clearRolesCache() - chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
-  fonts/            Jost auto-hébergée (variable, normal + italique) - @font-face déclaré dans barriere.css
+  fonts/            Polices auto-hébergées : Jost (variable, normal + italique), IBM Plex Mono, Bebas Neue, Barlow Condensed (WOFF2, sous-ensemble latin) - @font-face dans barriere.css et leaderboard.css ; licences : LICENCES.txt. **Aucune police ni bibliothèque ne se charge depuis un site tiers** (l'adresse IP des utilisateurs ne doit partir chez personne) : ne pas ajouter de @import vers Google Fonts ni de balise script vers un CDN
+  vendor/           Bibliothèques tierces copiées dans le dépôt, versions fixées : supabase-js 2.117.3 (toutes les pages), SheetJS 0.20.3 (import Excel de la Break list) ; provenance, licences et empreintes : LISEZMOI.md
   icons/            Pictogrammes vectoriels de la charte, extraits en PNG à masque alpha (recolorables via CSS mask)
   logos/            Logos blanc (écran) / noir (impression) / PNG (courriers)
   favicon/          Favicon et icônes PWA
@@ -152,7 +153,7 @@ supabase/
 - **Supabase** (PostgreSQL cloud) pour la persistance (tournois, leaderboard, extras, training) ET l'authentification
   - URL : `https://grpzgidhawyhinzrqiqm.supabase.co`
   - Clé : publishable key (frontend-safe, RLS activé)
-  - Client JS via CDN : `@supabase/supabase-js@2`
+  - Client JS : `@supabase/supabase-js` 2.117.3, **hébergé dans `shared/vendor/supabase_js.js`** (plus de CDN)
   - `shared/supabase.js` : objet `SB` - CRUD complet (résultats, sessions, tournois, extras, app_roles, training_config/sessions/results) + méthodes auth (`getSession`, `signOut`, `updatePassword`) + appel Edge Function (`listUsers`, `createUser`, `updateUser`, `deleteUser`) + mappers camelCase↔snake_case
   - Tables : `results`, `sessions`, `tournaments`, `extras`, `app_roles` (slug PK, label, panels jsonb, color), `training_config`, `training_sessions`, `training_results`
   - **RLS** : politique `authenticated` sur toutes les tables. Écriture admin (`app_roles`, `training_config`) vérifiée via `(auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'` - **`app_metadata` et non `user_metadata`**, car ce dernier est modifiable côté client
@@ -430,7 +431,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - Les semaines utilisent la numérotation ISO (lun=1er jour, `getMondayOfISOWeek`)
 - Le schéma Supabase doit être créé manuellement via le SQL Editor de Supabase avant le premier usage d'une nouvelle table (migrations dans `supabase/migrations/` = documentation/historique, pas d'auto-apply)
 - **Supabase RLS** : toute modification du RLS doit utiliser un bloc `DO $$ ... $$` pour dropper les policies existantes par nom dynamique (les noms varient), ou `DROP POLICY IF EXISTS "nom" ON table` si le nom est connu
-- **Auth guard pattern** : chaque page protégée charge `shared/supabase.js` + `shared/auth.js` via CDN supabase-js, puis appelle `AUTH.guard({ loginUrl, role, panel })` - l'overlay est injecté de façon synchrone pour éviter le flash de contenu
+- **Auth guard pattern** : chaque page protégée charge `shared/vendor/supabase_js.js` (supabase-js hébergé), `shared/supabase.js` et `shared/auth.js`, puis appelle `AUTH.guard({ loginUrl, role, panel })` - l'overlay est injecté de façon synchrone pour éviter le flash de contenu
 - Pour définir le rôle d'un utilisateur : passer par **Gestion Comptes** (jamais directement en base) - modifie `app_metadata` ET `user_metadata` via l'Edge Function
 - `_tournamentsCache` (var privée dans `leaderboard.js`) mis à `null` après chaque upsert/delete de tournoi pour forcer un rechargement depuis Supabase
 - Le modal joueur utilise `_closeModal()` (retire `modal-open` du body) et `body.modal-open { overflow: hidden }` pour bloquer le scroll de fond
