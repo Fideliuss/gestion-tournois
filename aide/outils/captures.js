@@ -211,7 +211,7 @@ CAPTURES.push.apply(CAPTURES, CAPTURES_TDA);
 
 function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
-  h = h.replace(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@supabase\/supabase-js@2"><\/script>\s*/, '')
+  h = h.replace(/<script src="(?:\.\.\/)*shared\/vendor\/supabase_js\.js"><\/script>\s*/, '')
     .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : BASE_TN; })
     .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 || isTda(c) ? '' : isTr(c) ? SEED(c.seed || 7) : SEED_TN))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')

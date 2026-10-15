@@ -272,7 +272,8 @@ async function onOctimeFile(input) {
   try {
     let rows;
     if (/\.xlsx?$/i.test(f.name)) {
-      if (typeof XLSX === 'undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+      // SheetJS 0.20.3 hébergée avec l'application (shared/vendor/), chargée seulement à l'import d'un fichier Excel
+      if (typeof XLSX === 'undefined') await loadScript('../shared/vendor/xlsx.full.min.js');
       const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
       let last = null;
       for (let i = 0; i < wb.SheetNames.length && !rows; i++) {
