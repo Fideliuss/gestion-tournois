@@ -131,7 +131,7 @@ supabase/
     phase3_suivi_meta_et_acces_manager.sql  Phase 3 : training_sessions.meta (jsonb) + user_label, fonction can_view_training_stats(), policies de lecture manager (appliquée sur la base le 2026-10-04)
     phase4_uth_config_initiale.sql          Phase 4 : ligne `training_config` clé `uth` = `{"gains":{"max_bet":50}}` (appliquée sur la base le 2026-10-04)
     phase4_suivi_uth.sql                    Phase 4 : training_weak_points étendue aux 3 modules UTH (appliquée sur la base le 2026-10-04)
-    parametres.sql                          Table parametres (clé / valeur JSON) pour les réglages partagés entre les postes, accès par le panel admin-tournois ; ne contient AUCUNE donnée (à exécuter dans le SQL Editor ou : supabase db query --linked -f supabase/migrations/parametres.sql)
+    parametres.sql                          Table parametres (clé / valeur JSON) pour les réglages partagés entre les postes, accès par le panel admin-tournois ; ne contient AUCUNE donnée (à exécuter dans le SQL Editor ou : supabase db query --linked -f supabase/migrations/parametres.sql ; **appliquée sur la base le 2026-10-15**, clé `declaration_encadrement` inscrite hors dépôt)
     phase3_suivi_fonctions_manager.sql      Phase 3 : fonctions d'agrégat de la vue manager (training_ranking, training_tables_best, training_weak_points, training_activity, training_activity_weekly) - appliquée le 2026-10-04
 ```
 

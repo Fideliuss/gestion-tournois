@@ -25,8 +25,9 @@ AS $$
          );
 $$;
 
--- Appelable seulement par un utilisateur connecté (pas par la clé publique seule)
-REVOKE ALL ON FUNCTION public.can_use_admin_tournois() FROM PUBLIC;
+-- Appelable seulement par un utilisateur connecté (pas par la clé publique seule). Supabase accorde par défaut EXECUTE à
+-- anon sur toute nouvelle fonction du schéma public : il faut le retirer explicitement, PUBLIC ne suffit pas.
+REVOKE ALL ON FUNCTION public.can_use_admin_tournois() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.can_use_admin_tournois() TO authenticated;
 
 CREATE TABLE IF NOT EXISTS public.parametres (
