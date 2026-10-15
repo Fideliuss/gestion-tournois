@@ -79,8 +79,13 @@
     </div>
     <div class="fg form-field" id="fg-password">
       <div class="fl">Mot de passe</div>
-      <input type="password" id="inp-password" placeholder="8 caractères minimum"
-             onkeydown="if(event.key==='Enter') saveForm()" />
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="password" id="inp-password" placeholder="12 caractères minimum" autocomplete="new-password" style="flex:1"
+               oninput="majReglesMotDePasse()" onkeydown="if(event.key==='Enter') saveForm()" />
+        <button type="button" class="btn btn-ghost btn-sm" onclick="genererMotDePasse()"
+                title="Génère un mot de passe conforme et l'affiche, pour le transmettre à la personne">Générer</button>
+      </div>
+      <ul class="pwd-rules" id="pwd-rules" aria-live="polite" style="margin:8px 0 0"></ul>
       <div class="fsub" id="pwd-hint">Laissez vide pour ne pas modifier</div>
     </div>
     <div class="fg form-field">
@@ -151,6 +156,7 @@
 <script src="../shared/barriere.js"></script>
 <script src="../shared/html.js"></script>
 <script src="../shared/supabase.js"></script>
+<script src="../shared/mot_de_passe.js"></script>
 <script src="../shared/auth.js"></script>
 <script src="comptes.js"></script>
 <script>AUTH.guard({ loginUrl: '../login.html', role: 'admin' });</script>

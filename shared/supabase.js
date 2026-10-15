@@ -196,8 +196,11 @@ const SB = {
     if (error) throw error;
   },
 
-  async updatePassword(password) {
-    const { error } = await _sb.auth.updateUser({ password });
+  // currentPassword : exigé par le projet (Authentication > Email > « Require current password when updating »), sauf
+  // après un lien de réinitialisation où l'on ne le connaît plus (voir login.html)
+  async updatePassword(password, currentPassword) {
+    const attrs = currentPassword ? { password, current_password: currentPassword } : { password };
+    const { error } = await _sb.auth.updateUser(attrs);
     if (error) throw error;
   },
 

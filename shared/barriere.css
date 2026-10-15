@@ -194,6 +194,16 @@ body.light .app {
 .auth-pwd-msg.err { color: var(--red, #e74c3c); }
 .auth-pwd-msg.ok  { color: #6da; }
 
+/* Règles du mot de passe : la liste se coche pendant la saisie (fenêtre de changement, connexion, Gestion des comptes) */
+.pwd-rules {
+  list-style: none; margin: -6px 0 14px; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 3px 12px;
+  font-size: 11px; font-family: var(--f-ui); color: var(--text-muted);
+}
+.pwd-rules li::before { content: '○ '; }
+.pwd-rules li.ok { color: #6da; }
+.pwd-rules li.ok::before { content: '✓ '; }
+
 @media print { #auth-fallback, #auth-overlay, #auth-pwd-overlay { display: none !important; } }
 
 /* ── Header ── */
