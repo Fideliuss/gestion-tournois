@@ -38,6 +38,9 @@ async function _loadRolePanels() {
 
 const AUTH = {
 
+  /** Longueur minimale d'un mot de passe (la même règle est appliquée côté serveur par manage-users) */
+  PASSWORD_MIN: 12,
+
   /**
    * À appeler sur chaque page protégée.
    * @param {object} opts
@@ -213,8 +216,8 @@ const AUTH = {
 
     msg.textContent = ''; msg.className = 'auth-pwd-msg';
 
-    if (pwd.length < 8) {
-      msg.textContent = 'Le mot de passe doit faire au moins 8 caractères.';
+    if (pwd.length < AUTH.PASSWORD_MIN) {
+      msg.textContent = 'Le mot de passe doit faire au moins ' + AUTH.PASSWORD_MIN + ' caractères.';
       msg.className = 'auth-pwd-msg err'; return;
     }
     if (pwd !== confirm) {

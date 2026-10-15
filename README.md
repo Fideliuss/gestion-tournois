@@ -219,7 +219,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │
 └── supabase/
     ├── functions/
-    │   └── manage-users/index.ts  - Edge Function : CRUD comptes (admin only, vérifié côté serveur)
+    │   └── manage-users/          - Edge Function : CRUD comptes (admin only, vérifié côté serveur) : index.ts, handler.ts, regles.ts + handler.test.ts
     └── migrations/
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)

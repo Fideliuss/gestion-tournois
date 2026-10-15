@@ -121,7 +121,7 @@ training/
     roulette_tables.html / .js      Tables de multiplication (flashcard ×35/×17/×11/×8/×5)
 
 supabase/
-  functions/manage-users/index.ts   Edge Function Deno - CRUD comptes, vérif admin via app_metadata côté serveur
+  functions/manage-users/           Edge Function Deno - CRUD comptes. index.ts (point d'entrée) + handler.ts (logique, dépendances injectées) + regles.ts (règles pures) ; tests : `node --experimental-strip-types supabase/functions/manage-users/handler.test.ts` (faux clients, sans réseau, à relancer après toute modification)
   migrations/
     training_tables.sql              training_config, training_sessions, training_results (+ RLS)
     fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
@@ -159,10 +159,10 @@ supabase/
   - `login.html` : page de connexion (email + password, redirect par rôle après authentification)
   - `shared/auth.js` : `AUTH.guard({ loginUrl, role, panel })` - overlay spinner, vérif session, vérif rôle (`role`), vérif panneau (`panel`, via table `app_roles`), montage de la barre de navigation
   - Rôles : entièrement personnalisables via **Gestion Comptes** (table `app_roles`) - `admin`, `mcd`, `floor` sont les seeds par défaut, mais tout rôle custom (slug, label, couleur, panels) peut être créé/édité/supprimé
-  - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable) - `raw_user_meta_data.role` conservé en fallback pendant la période de migration
+  - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable). `raw_user_meta_data.role` n'a plus aucun effet : ni la fonction, ni les pages, ni la RLS ne le lisent ; il est seulement encore écrit (compatibilité avec la version déjà en production) et sera retiré après la release
   - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent) → `training-suivi` (enfant : voir les résultats de toute l'équipe, utilisé par la RLS via `can_view_training_stats()`). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé - **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
   - Gestion des comptes : `admin/comptes.html` - CRUD comptes (email+password+role) + CRUD rôles (label, couleur) + matrice des accès rôles × pages
-  - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin côté serveur avant d'utiliser `auth.admin.*`
+  - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin (`app_metadata` seul, sans repli) côté serveur avant d'utiliser `auth.admin.*`. Règles : le rôle demandé doit exister dans `app_roles`, e-mail valide, mot de passe de 12 caractères au moins (72 au plus), un admin ne change pas son propre rôle ni ne supprime son compte (il reste donc toujours un administrateur). **Un changement de la fonction se déploie à part** (`supabase functions deploy manage-users`) : le déploiement n'est pas automatique avec le site
   - Changement de mot de passe : modal ouverte depuis le menu utilisateur de la barre (`AUTH._openChangePwd()`)
   - Persistance session : JWT 7 jours (604800s) via localStorage (géré par supabase-js)
 - localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_*`, `courriers_tpl`)

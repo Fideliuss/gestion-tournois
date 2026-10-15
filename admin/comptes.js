@@ -506,8 +506,8 @@ async function saveForm() {
   formErr('');
   if (!_editId && (!first || !last))   { formErr('Le prénom et le nom sont requis.'); return; }
   if (!_editId && !email)              { formErr("L'e-mail est requis."); return; }
-  if (!_editId && password.length < 8) { formErr('Mot de passe trop court (8 car. min).'); return; }
-  if (_editId && password && password.length < 8) { formErr('Mot de passe trop court (8 car. min).'); return; }
+  if (!_editId && password.length < AUTH.PASSWORD_MIN) { formErr('Mot de passe trop court (' + AUTH.PASSWORD_MIN + ' car. min).'); return; }
+  if (_editId && password && password.length < AUTH.PASSWORD_MIN) { formErr('Mot de passe trop court (' + AUTH.PASSWORD_MIN + ' car. min).'); return; }
   btn.disabled = true;
   try {
     if (!_editId) { await SB.createUser(email, password, role, { firstName: first, lastName: last }); closeForm(); showOk('Compte créé.'); }
