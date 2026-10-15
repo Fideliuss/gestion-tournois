@@ -442,6 +442,20 @@ const SB = {
     if (error) throw error;
   },
 
+  // ── Paramètres partagés entre les postes (table parametres, voir supabase/migrations/parametres.sql) ──
+  // Renvoie la valeur JSON de la clé, ou null si elle n'existe pas encore
+  async getParametre(cle) {
+    const { data, error } = await _sb.from('parametres').select('valeur').eq('cle', cle).maybeSingle();
+    if (error) throw error;
+    return data ? data.valeur : null;
+  },
+
+  async saveParametre(cle, valeur) {
+    const { error } = await _sb.from('parametres')
+      .upsert({ cle, valeur, updated_at: new Date().toISOString() }, { onConflict: 'cle' });
+    if (error) throw error;
+  },
+
   // ── Règlement TDA (lecture seule) ───────────────────
   // L'édition active seulement (RLS), réservée au panel 'tda'. Le contenu est importé par l'administrateur technique (voir CONTEXT.md).
   // Édition active + tous ses blocs (≈ 170 lignes, < 1000 : pas de pagination), ou null si aucune édition n'est active

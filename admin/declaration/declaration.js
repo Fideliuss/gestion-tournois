@@ -17,11 +17,6 @@ const CFG_DEFAULT = {
   6: { actif: false, heure: '21:00', cave: 0,   joueurs: 150, rachats: false, bounty: 0,  annexe: '' },
 };
 
-const STAFF_DEFAULT = {
-  directeurs: ['Olivier SANCHEZ','Christophe CONDOURE','Brayan CUVELIER','Stéphane DUBOIS','Aurelien GROSDEMOUGE'],
-  arbitres:   ['Pierre BERGEROO','Thomas CHAVERLANGE','David LOPES','Jeremy PELTIER','Marceau CASSIN','Olivier DOBIEZYNSKI','Isabelle GABA','Teddy GAULIER','Antonyn GRANIER','Jean-Baptiste LAGORCE','Dylan SALDOT','Guillaume SITBON'],
-};
-
 const DIST_STD = [33, 20, 13, 9, 7, 5, 4, 3, 3, 3];
 
 const ANNEXES_DEFAULT = [
@@ -34,15 +29,18 @@ const ANNEXES_DEFAULT = [
 
 /* ── État ── */
 let cfg     = loadCfg();
-let staff   = loadStaff();
 let annexes = loadAnnexes();
+
+/* Encadrement (directeurs et arbitres) : enregistré en base (table parametres, clé declaration_encadrement), donc partagé entre
+   les postes. Les noms ne sont PAS dans le code (dépôt public). Listes vides tant que la base n'a pas répondu. */
+const STAFF_CLE = 'declaration_encadrement';
+let staff       = { directeurs: [], arbitres: [] };
+let staffEtat   = 'chargement';   // chargement | ok | erreur : on n'enregistre que si 'ok' (sinon on écraserait la base avec des listes vides)
 
 function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
 function loadCfg()     { try { const s = localStorage.getItem('decl_cfg');     return s ? JSON.parse(s) : deepClone(CFG_DEFAULT);     } catch { return deepClone(CFG_DEFAULT); } }
-function loadStaff()   { try { const s = localStorage.getItem('decl_staff');   return s ? JSON.parse(s) : deepClone(STAFF_DEFAULT);   } catch { return deepClone(STAFF_DEFAULT); } }
 function loadAnnexes() { try { const s = localStorage.getItem('decl_annexes'); return s ? JSON.parse(s) : deepClone(ANNEXES_DEFAULT); } catch { return deepClone(ANNEXES_DEFAULT); } }
 function saveCfg()     { localStorage.setItem('decl_cfg',     JSON.stringify(cfg));     }
-function saveStaff()   { localStorage.setItem('decl_staff',   JSON.stringify(staff));   }
 function saveAnnexes() { localStorage.setItem('decl_annexes', JSON.stringify(annexes)); }
 
 /* ── Ad-hoc ── */
@@ -60,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS);   // mois suivant par défaut
 
   SB.getExtras().then(list => { extras = list; renderExtrasDeclaration(); }).catch(() => {});
+  chargerEncadrement();
   syncViews();
   renderCfgTable();
   renderStaffEditor();
@@ -180,7 +179,53 @@ function resetConfig() { if (!confirm('Réinitialiser la configuration ?')) retu
 function saveAndRender() { saveCfg(); renderAll(); flash('Réglages des tournois enregistrés'); }
 
 /* ── Staff ── */
+function normaliserStaff(v) {
+  const liste = x => (Array.isArray(x) ? x : []).map(n => String(n).trim()).filter(Boolean);
+  return { directeurs: liste(v && v.directeurs), arbitres: liste(v && v.arbitres) };
+}
+
+/* Lecture en base. Si la base n'a encore rien, on reprend UNE fois l'ancienne version enregistrée dans ce navigateur
+   (avant que l'encadrement soit en base) pour ne rien perdre, puis on la retire du navigateur. */
+async function chargerEncadrement() {
+  try {
+    const v = await SB.getParametre(STAFF_CLE);
+    if (v) {
+      staff = normaliserStaff(v);
+    } else {
+      let local = null;
+      try { local = JSON.parse(localStorage.getItem('decl_staff') || 'null'); } catch { local = null; }
+      if (local) {
+        staff = normaliserStaff(local);
+        await SB.saveParametre(STAFF_CLE, staff);
+        localStorage.removeItem('decl_staff');
+        flash('Encadrement de ce poste repris et enregistré en base');
+      }
+    }
+    staffEtat = 'ok';
+  } catch (e) {
+    console.warn('Encadrement : lecture impossible', e);
+    staffEtat = 'erreur';
+  }
+  renderStaffEditor();
+  renderAll();
+}
+
+/* Enregistre en base ; renvoie true si c'est fait. Refuse tant que la lecture n'a pas réussi (écraserait la base avec du vide). */
+async function saveStaff() {
+  if (staffEtat !== 'ok') { flash('Encadrement non enregistré : il n\'a pas pu être chargé. Rechargez la page.'); return false; }
+  staff = normaliserStaff(staff);
+  try { await SB.saveParametre(STAFF_CLE, staff); return true; }
+  catch (e) { console.warn('Encadrement : enregistrement impossible', e); flash('Enregistrement impossible : ' + (e.message || 'réessayez')); return false; }
+}
+
 function renderStaffEditor() {
+  const msg = document.getElementById('staff-msg');
+  if (msg) {
+    msg.style.display = staffEtat === 'ok' && (staff.directeurs.length + staff.arbitres.length) > 0 ? 'none' : 'flex';
+    msg.textContent = staffEtat === 'erreur' ? 'L\'encadrement n\'a pas pu être chargé : rechargez la page. Rien ne sera enregistré tant qu\'il n\'est pas chargé.'
+      : staffEtat === 'chargement' ? 'Chargement de l\'encadrement…'
+      : 'Aucun nom enregistré : ajoutez les directeurs et les arbitres, puis enregistrez.';
+  }
   document.getElementById('staff-grid').innerHTML = `
     <div>
       <div class="staff-section-title">Directeurs de tournois</div>
@@ -195,9 +240,12 @@ function renderStaffEditor() {
 }
 function staffRow(type, i, n) { return `<div class="staff-item"><input type="text" value="${escapeHtml(n)}" onchange="updateStaff('${type}',${i},this.value)"/><button class="btn-red" onclick="removeStaff('${type}',${i})">×</button></div>`; }
 function updateStaff(type, i, v) { staff[type][i] = v; }
-function addStaff(type)          { staff[type].push(''); saveStaff(); renderStaffEditor(); }
-function removeStaff(type, i)    { staff[type].splice(i,1); saveStaff(); renderStaffEditor(); }
-function saveStaffAndRender()    { saveStaff(); renderAll(); flash('Encadrement enregistré'); }
+function addStaff(type)          { staff[type].push(''); renderStaffEditor(); }   // la ligne vide n'est enregistrée qu'une fois remplie (bouton Enregistrer)
+async function removeStaff(type, i) { staff[type].splice(i,1); await saveStaff(); renderStaffEditor(); renderAll(); }
+async function saveStaffAndRender() {
+  if (!(await saveStaff())) return;
+  renderStaffEditor(); renderAll(); flash('Encadrement enregistré');
+}
 
 /* ── Éditeur annexes ── */
 function renderAnnexesEditor() {
