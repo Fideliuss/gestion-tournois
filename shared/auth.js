@@ -22,6 +22,17 @@ function _loadNav() {
   });
 }
 
+// Charge un script du dossier shared/ à la demande ; résout false si le chargement échoue
+function _loadScript(fichier) {
+  return new Promise(function (resolve) {
+    const js = document.createElement('script');
+    js.src = _AUTH_BASE + fichier;
+    js.onload = function () { resolve(true); };
+    js.onerror = function () { resolve(false); };
+    document.head.appendChild(js);
+  });
+}
+
 async function _loadRolePanels() {
   if (_rolePanelsCache) return _rolePanelsCache;
   try {
@@ -37,9 +48,6 @@ async function _loadRolePanels() {
 }
 
 const AUTH = {
-
-  /** Longueur minimale d'un mot de passe (la même règle est appliquée côté serveur par manage-users) */
-  PASSWORD_MIN: 12,
 
   /**
    * À appeler sur chaque page protégée.
@@ -157,8 +165,14 @@ const AUTH = {
 
   // ── Modal changement de mot de passe ──────────────────
 
-  _openChangePwd() {
+  async _openChangePwd() {
     if (document.getElementById('auth-pwd-overlay')) return; // déjà ouvert
+    // Règles et messages de mot de passe : chargés à la demande (shared/mot_de_passe.js)
+    if (typeof MOT_DE_PASSE === 'undefined' && !(await _loadScript('mot_de_passe.js'))) {
+      alert('Le formulaire n\'a pas pu se charger. Rechargez la page et réessayez.');
+      return;
+    }
+    if (document.getElementById('auth-pwd-overlay')) return; // ouvert entre-temps (double clic)
 
     const overlay = document.createElement('div');
     overlay.id = 'auth-pwd-overlay';
@@ -166,10 +180,17 @@ const AUTH = {
       <div id="auth-pwd-modal" role="dialog" aria-modal="true" aria-labelledby="auth-pwd-title">
         <div class="auth-pwd-title" id="auth-pwd-title">Changer le mot de passe</div>
 
+        <label class="auth-pwd-label" for="auth-pwd-current">Mot de passe actuel</label>
+        <input type="password" id="auth-pwd-current" class="auth-pwd-input"
+          placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') document.getElementById('auth-pwd-new').focus()" />
+
         <label class="auth-pwd-label" for="auth-pwd-new">Nouveau mot de passe</label>
         <input type="password" id="auth-pwd-new" class="auth-pwd-input"
           placeholder="••••••••" autocomplete="new-password"
+          oninput="AUTH._majRegles()"
           onkeydown="if(event.key==='Enter') document.getElementById('auth-pwd-confirm').focus()" />
+        <ul class="pwd-rules" id="auth-pwd-rules" aria-live="polite"></ul>
 
         <label class="auth-pwd-label" for="auth-pwd-confirm">Confirmer le mot de passe</label>
         <input type="password" id="auth-pwd-confirm" class="auth-pwd-input"
@@ -194,7 +215,17 @@ const AUTH = {
     document.addEventListener('keydown', overlay._keyHandler);
 
     document.body.appendChild(overlay);
-    setTimeout(() => document.getElementById('auth-pwd-new').focus(), 50);
+    AUTH._majRegles();
+    setTimeout(() => document.getElementById('auth-pwd-current').focus(), 50);
+  },
+
+  /** Coche, pendant la saisie, les règles que le nouveau mot de passe respecte déjà */
+  _majRegles() {
+    const ul = document.getElementById('auth-pwd-rules'), champ = document.getElementById('auth-pwd-new');
+    if (!ul || !champ) return;
+    ul.innerHTML = MOT_DE_PASSE.liste(champ.value).map(function (r) {
+      return '<li class="' + (r.ok ? 'ok' : '') + '">' + r.texte + '</li>';   // textes constants du module, aucune donnée saisie
+    }).join('');
   },
 
   _closeChangePwd() {
@@ -209,31 +240,30 @@ const AUTH = {
   },
 
   async _saveNewPwd() {
-    const pwd     = (document.getElementById('auth-pwd-new').value     || '').trim();
-    const confirm = (document.getElementById('auth-pwd-confirm').value || '').trim();
+    // Pas de trim() : un mot de passe est pris tel quel, sinon celui qu'on enregistre n'est plus celui qu'on a tapé
+    const actuel  = document.getElementById('auth-pwd-current').value || '';
+    const pwd     = document.getElementById('auth-pwd-new').value     || '';
+    const confirm = document.getElementById('auth-pwd-confirm').value || '';
     const msg     = document.getElementById('auth-pwd-msg');
     const btn     = document.getElementById('auth-pwd-save-btn');
+    const echec   = function (texte) { msg.textContent = texte; msg.className = 'auth-pwd-msg err'; };
 
     msg.textContent = ''; msg.className = 'auth-pwd-msg';
 
-    if (pwd.length < AUTH.PASSWORD_MIN) {
-      msg.textContent = 'Le mot de passe doit faire au moins ' + AUTH.PASSWORD_MIN + ' caractères.';
-      msg.className = 'auth-pwd-msg err'; return;
-    }
-    if (pwd !== confirm) {
-      msg.textContent = 'Les deux mots de passe ne correspondent pas.';
-      msg.className = 'auth-pwd-msg err'; return;
-    }
+    if (!actuel) return echec('Saisissez votre mot de passe actuel.');
+    const regle = MOT_DE_PASSE.erreur(pwd);
+    if (regle) return echec(regle);
+    if (pwd === actuel) return echec('Le nouveau mot de passe doit être différent de l\'actuel.');
+    if (pwd !== confirm) return echec('Les deux mots de passe ne correspondent pas.');
 
     btn.disabled = true; btn.textContent = 'Enregistrement…';
     try {
-      await SB.updatePassword(pwd);
+      await SB.updatePassword(pwd, actuel);
       msg.textContent = 'Mot de passe mis à jour ✓';
       msg.className = 'auth-pwd-msg ok';
       setTimeout(() => AUTH._closeChangePwd(), 1200);
     } catch(ex) {
-      msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
-      msg.className = 'auth-pwd-msg err';
+      echec(MOT_DE_PASSE.messageErreur(ex));
       btn.disabled = false; btn.textContent = 'Enregistrer →';
     }
   }

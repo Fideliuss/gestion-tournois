@@ -464,7 +464,7 @@ function openForm() {
   _editId = null; _emailTouched = false;
   $('form-sec').textContent = 'Nouveau compte';
   $('inp-first').value = ''; $('inp-last').value = '';
-  $('inp-email').value = ''; $('inp-password').value = '';
+  $('inp-email').value = ''; $('inp-password').value = ''; $('inp-password').type = 'password'; majReglesMotDePasse();
   $('inp-email').disabled = false;
   $('email-hint').style.display = '';
   $('pwd-hint').style.display = 'none';
@@ -479,7 +479,7 @@ function editAccount(u) {
   _editId = u.id; _emailTouched = true;
   $('form-sec').textContent = 'Modifier le compte';
   $('inp-first').value = u.firstName || ''; $('inp-last').value = u.lastName || '';
-  $('inp-email').value = u.email; $('inp-password').value = '';
+  $('inp-email').value = u.email; $('inp-password').value = ''; $('inp-password').type = 'password'; majReglesMotDePasse();
   $('inp-email').disabled = true;
   $('email-hint').style.display = 'none';
   $('pwd-hint').style.display = '';
@@ -506,8 +506,7 @@ async function saveForm() {
   formErr('');
   if (!_editId && (!first || !last))   { formErr('Le prénom et le nom sont requis.'); return; }
   if (!_editId && !email)              { formErr("L'e-mail est requis."); return; }
-  if (!_editId && password.length < AUTH.PASSWORD_MIN) { formErr('Mot de passe trop court (' + AUTH.PASSWORD_MIN + ' car. min).'); return; }
-  if (_editId && password && password.length < AUTH.PASSWORD_MIN) { formErr('Mot de passe trop court (' + AUTH.PASSWORD_MIN + ' car. min).'); return; }
+  if (!_editId || password) { const regle = MOT_DE_PASSE.erreur(password); if (regle) { formErr(regle); return; } }
   btn.disabled = true;
   try {
     if (!_editId) { await SB.createUser(email, password, role, { firstName: first, lastName: last }); closeForm(); showOk('Compte créé.'); }
@@ -516,6 +515,18 @@ async function saveForm() {
   } catch (e) { formErr('Erreur : ' + e.message); }
   finally { btn.disabled = false; }
 }
+
+// Règles du mot de passe : la liste se coche pendant la saisie ; « Générer » propose un mot de passe conforme, affiché pour être transmis
+function majReglesMotDePasse() {
+  $('pwd-rules').innerHTML = MOT_DE_PASSE.liste($('inp-password').value)
+    .map(r => '<li class="' + (r.ok ? 'ok' : '') + '">' + r.texte + '</li>').join('');   // textes constants du module
+}
+function genererMotDePasse() {
+  $('inp-password').type = 'text';
+  $('inp-password').value = MOT_DE_PASSE.generer();
+  majReglesMotDePasse();
+}
+
 
 // ── Suppression d'un compte ──────────────────────────
 async function deleteAccount(id, email) {

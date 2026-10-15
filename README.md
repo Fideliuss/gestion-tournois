@@ -108,7 +108,7 @@ L'application est sécurisée par **e-mail + mot de passe** (Supabase Auth). Les
 1. Ouvrir https://fideliuss.github.io/gestion-tournois/
 2. Saisir son adresse e-mail et son mot de passe
 3. Redirection automatique selon le rôle - session valable **7 jours**
-4. Changement de mot de passe disponible depuis le menu utilisateur de la barre de navigation
+4. Changement de mot de passe disponible depuis le menu utilisateur de la barre de navigation (mot de passe actuel demandé ; 12 caractères au moins, avec minuscules, majuscules, chiffres et symboles)
 
 ### Gestion des comptes et permissions
 Accessible depuis le menu **Gestion** de la barre (réservé aux admins) :
@@ -137,6 +137,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── shared/
 │   ├── barriere.css               - Styles partagés (thème, composants, styles auth)
 │   ├── barriere.js                - Scripts partagés (thème, favicon)
+│   ├── mot_de_passe.js            - Règles de mot de passe, messages et générateur (tests : `node shared/mot_de_passe.test.js`)
 │   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine

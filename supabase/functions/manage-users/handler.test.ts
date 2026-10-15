@@ -1,6 +1,8 @@
 // Tests de la fonction manage-users, avec de faux clients Supabase (aucun réseau, aucune base).
 // Lancer : node --experimental-strip-types supabase/functions/manage-users/handler.test.ts
 import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
 import { traiter } from './handler.ts';
 import { emailValide, erreurMotDePasse, roleDe, nettoyerNom } from './regles.ts';
 
@@ -60,10 +62,27 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
     assert.ok(emailValide('jean.dupont@groupebarriere.com'));
     assert.ok(!emailValide('pas un mail') && !emailValide('a@b') && !emailValide(undefined));
     assert.ok(erreurMotDePasse('court') !== null);
-    assert.ok(erreurMotDePasse('a'.repeat(11)) !== null);
-    assert.strictEqual(erreurMotDePasse('a'.repeat(12)), null);
-    assert.ok(erreurMotDePasse('a'.repeat(73)) !== null);
+    assert.ok(erreurMotDePasse('Aa1!'.repeat(2) + 'Aa1') !== null);
+    assert.strictEqual(erreurMotDePasse('Aa1!'.repeat(3)), null);
+    assert.ok(erreurMotDePasse('Aa1!' + 'x'.repeat(70)) !== null);   // 74 caractères
     assert.ok(erreurMotDePasse(undefined) !== null);
+  });
+  await test('chaque sorte de caractère manquante est refusée', () => {
+    assert.ok(erreurMotDePasse('abcdefghij1!')!.includes('majuscule'));
+    assert.ok(erreurMotDePasse('ABCDEFGHIJ1!')!.includes('minuscule'));
+    assert.ok(erreurMotDePasse('Abcdefghijk!')!.includes('chiffre'));
+    assert.ok(erreurMotDePasse('Abcdefghijk1')!.includes('symbole'));
+  });
+  await test('les règles du serveur donnent le même verdict que celles du navigateur (shared/mot_de_passe.js)', () => {
+    const ctx: any = { module: { exports: {} }, crypto: globalThis.crypto };
+    vm.runInNewContext(readFileSync(new URL('../../../shared/mot_de_passe.js', import.meta.url), 'utf8').replace(/^const MOT_DE_PASSE/m, 'var MOT_DE_PASSE'), ctx);
+    const navigateur = ctx.MOT_DE_PASSE;
+    const echantillons = ['', 'a', 'court', 'Aa1!', 'Abcdefghij1!', 'abcdefghij1!', 'ABCDEFGHIJ1!', 'Abcdefghijk!', 'Abcdefghijk1', 'Abcdefghij1é',
+      'Abcdefghij1 ', 'Aa1! Aa1! Aa1!', 'Aa1!'.repeat(18), 'Aa1!'.repeat(18) + 'x', 'MotDePasse2026', 'MotDePasse2026!', ...[...navigateur.SYMBOLES].map((s: string) => 'Abcdefghij1' + s)];
+    for (const e of echantillons) {
+      assert.strictEqual(erreurMotDePasse(e) === null, navigateur.erreur(e) === null, 'divergence sur « ' + e + ' »');
+    }
+    for (let i = 0; i < 200; i++) assert.strictEqual(erreurMotDePasse(navigateur.generer()), null);   // le générateur respecte aussi la règle du serveur
   });
   await test('nettoyage des noms', () => {
     assert.strictEqual(nettoyerNom('  Jean   Marc '), 'Jean Marc');
@@ -94,7 +113,7 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
   });
 
   console.log('\nCréation');
-  const bon = { email: 'Jean.Dupont@GroupeBarriere.com ', password: 'a'.repeat(12), role: 'croupier', firstName: 'Jean', lastName: 'Dupont' };
+  const bon = { email: 'Jean.Dupont@GroupeBarriere.com ', password: 'Aa1!'.repeat(3), role: 'croupier', firstName: 'Jean', lastName: 'Dupont' };
   await test('création valide : 201, rôle dans app_metadata, e-mail en minuscules', async () => {
     const r = await appel('POST', 'adm', bon);
     assert.strictEqual(r.status, 201, JSON.stringify(r.json));
@@ -106,7 +125,7 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
   await test('champs manquants : 400', async () => assert.strictEqual((await appel('POST', 'adm', { email: 'a@b.fr' })).status, 400));
   await test('e-mail invalide : 400', async () => assert.strictEqual((await appel('POST', 'adm', { ...bon, email: 'nimporte' })).status, 400));
   await test('mot de passe de 11 caractères : 400, et rien n\'est créé', async () => {
-    const r = await appel('POST', 'adm', { ...bon, password: 'a'.repeat(11) });
+    const r = await appel('POST', 'adm', { ...bon, password: 'Aa1!'.repeat(2) + 'Aa1' });
     assert.strictEqual(r.status, 400);
     assert.ok(!r.journal.some(j => j[0] === 'createUser'));
   });
@@ -143,9 +162,9 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
   });
   await test('mot de passe trop court : 400', async () => assert.strictEqual((await appel('PATCH', 'adm', { id: 'u-floor', password: 'court' })).status, 400));
   await test('mot de passe valide : transmis tel quel', async () => {
-    const r = await appel('PATCH', 'adm', { id: 'u-floor', password: 'b'.repeat(14) });
+    const r = await appel('PATCH', 'adm', { id: 'u-floor', password: 'Bb2@'.repeat(4) });
     assert.strictEqual(r.status, 200);
-    assert.strictEqual(r.journal.find(j => j[0] === 'updateUserById')[2].password, 'b'.repeat(14));
+    assert.strictEqual(r.journal.find(j => j[0] === 'updateUserById')[2].password, 'Bb2@'.repeat(4));
   });
   await test('compte introuvable : 404', async () => assert.strictEqual((await appel('PATCH', 'adm', { id: 'u-fantome', firstName: 'X' })).status, 404));
   await test('id manquant : 400', async () => assert.strictEqual((await appel('PATCH', 'adm', { role: 'floor' })).status, 400));

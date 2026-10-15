@@ -170,7 +170,9 @@
     <input type="password" id="new-password" class="login-input"
       placeholder="••••••••"
       autocomplete="new-password"
+      oninput="majReglesMotDePasse()"
       onkeydown="if(event.key==='Enter') saveNewPassword()" />
+    <ul class="pwd-rules" id="new-password-rules" aria-live="polite"></ul>
     <label class="login-label" for="new-password-confirm">Confirmer le mot de passe</label>
     <input type="password" id="new-password-confirm" class="login-input"
       placeholder="••••••••"
@@ -203,6 +205,7 @@
 <script src="shared/barriere.js"></script>
 <script src="shared/html.js"></script>
 <script src="shared/supabase.js"></script>
+<script src="shared/mot_de_passe.js"></script>
 <script>
 if (window.CHANGELOG?.[0]) {
   document.getElementById('login-version').textContent = CHANGELOG[0].version;
@@ -256,7 +259,14 @@ function showReset() {
 function showNewPassword() {
   _setTitle('Nouveau mot de passe', 'Choisis un nouveau mot de passe pour ton compte.');
   _showState('state-new-password');
+  majReglesMotDePasse();
   document.getElementById('new-password').focus();
+}
+
+// Coche, pendant la saisie, les règles que le nouveau mot de passe respecte déjà
+function majReglesMotDePasse() {
+  document.getElementById('new-password-rules').innerHTML = MOT_DE_PASSE.liste(document.getElementById('new-password').value)
+    .map(r => '<li class="' + (r.ok ? 'ok' : '') + '">' + r.texte + '</li>').join('');   // textes constants du module
 }
 
 // ── Actions ──
@@ -314,8 +324,9 @@ async function saveNewPassword() {
   const btn     = document.getElementById('new-password-btn');
 
   msg.textContent = ''; msg.className = 'login-msg';
-  if (pwd.length < 12) {
-    msg.textContent = 'Le mot de passe doit faire au moins 12 caractères.';
+  const regle = MOT_DE_PASSE.erreur(pwd);
+  if (regle) {
+    msg.textContent = regle;
     msg.className = 'login-msg err'; return;
   }
   if (pwd !== confirm) {
@@ -331,7 +342,11 @@ async function saveNewPassword() {
     const session = await SB.getSession();
     setTimeout(() => _redirect(session), 1200);
   } catch(ex) {
-    msg.textContent = 'Erreur : ' + (ex.message || 'Réessaie dans quelques instants.');
+    const m = MOT_DE_PASSE.messageErreur(ex);
+    // Si le serveur réclame l'ancien mot de passe même après un lien de réinitialisation, on ne l'a plus : voie de secours
+    msg.textContent = /actuel/.test(m)
+      ? 'Le changement a été refusé. Connectez-vous avec votre ancien mot de passe puis changez-le depuis le menu de votre compte, ou demandez à un administrateur de le réinitialiser.'
+      : m;
     msg.className = 'login-msg err';
     btn.disabled = false; btn.textContent = 'Enregistrer le mot de passe →';
   }
