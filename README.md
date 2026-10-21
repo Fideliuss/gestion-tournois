@@ -140,6 +140,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── vendor/                    - Bibliothèques tierces hébergées (supabase-js, SheetJS), versions fixées : voir LISEZMOI.md
 │   ├── mot_de_passe.js            - Règles de mot de passe, messages et générateur (tests : `node shared/mot_de_passe.test.js`)
 │   ├── inactivite.js              - Déconnexion automatique après inactivité (30 min admin et mcd, 2 h les autres)
+│   ├── reglages.js                - Réglages partagés entre les postes (table parametres), reprise de l'ancienne copie locale (tests : `node shared/reglages.test.js`)
 │   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
@@ -228,7 +229,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     ├── tests/
     │   ├── acces_donnees.test.sql  - tests RLS des tables extras, results, sessions, tournaments (transaction annulée)
     │   ├── securite_fonctions.test.sql - tests des droits d'exécution et du search_path des fonctions
-    │   └── journal_audit.test.sql  - tests du journal d'audit (écriture par déclencheurs, lecture admin, purge)
+    │   ├── journal_audit.test.sql  - tests du journal d'audit (écriture par déclencheurs, lecture admin, purge)
+    │   └── parametres.test.sql     - tests des droits sur la table parametres (réglages, émargement des extras)
     └── migrations/
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)

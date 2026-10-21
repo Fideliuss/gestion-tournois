@@ -12,16 +12,25 @@ const DAY_HDR    = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
    DONNÉES - via Supabase (shared/supabase.js)
 ══════════════════════════════════════════════════════ */
 
-/* ── Persistance config + émargement (localStorage) ── */
-function loadCfg()        { try { return Object.assign({weekdayTime:'20:55',sundayTime:'16:55'}, JSON.parse(localStorage.getItem('extras_cfg') || '{}')); } catch { return {weekdayTime:'20:55',sundayTime:'16:55'}; } }
-function saveCfgData(c)   { localStorage.setItem('extras_cfg', JSON.stringify(c)); }
-function emargKey(y, w)   { return `extras_emarg_${y}_${String(w).padStart(2, '0')}`; }
-function loadEmarg(y, w)  { try { return JSON.parse(localStorage.getItem(emargKey(y, w)) || '{}'); } catch { return {}; } }
-function saveEmarg(y,w,d) { localStorage.setItem(emargKey(y, w), JSON.stringify(d)); }
+/* ── Persistance config + émargement : table parametres (shared/reglages.js), partagée entre les postes ──
+   Clés : extras_reglages, extras_emargement_AAAA_SS (une par semaine). L'émargement est une donnée personnelle (présence de
+   personnes nommées) : il n'est plus laissé dans le navigateur. Les copies locales d'avant (extras_cfg, extras_emarg_*) sont
+   reprises une fois dans la base si elle n'a pas la clé ; elles ne sont pas supprimées ici. */
+const EXTRAS_PREFIXE  = 'extras_';
+const EXTRAS_ADOPTION = [
+  { locale: 'extras_cfg', cle: 'extras_reglages' },
+  { locale: /^extras_emarg_(\d{4})_(\d{2})$/, cle: m => `extras_emargement_${m[1]}_${m[2]}` },
+];
+const CFG_DEFAUT = { weekdayTime: '20:55', sundayTime: '16:55' };
+function loadCfg()        { return Object.assign({}, CFG_DEFAUT, REGLAGES.lire('extras_reglages', {})); }
+function saveCfgData(c)   { REGLAGES.ecrire('extras_reglages', c); }
+function emargKey(y, w)   { return `extras_emargement_${y}_${String(w).padStart(2, '0')}`; }
+function loadEmarg(y, w)  { return REGLAGES.lire(emargKey(y, w), {}); }
+function saveEmarg(y,w,d) { REGLAGES.ecrire(emargKey(y, w), d); }
 
 /* ── État ── */
 let extras    = [];
-let cfg       = loadCfg();
+let cfg       = Object.assign({}, CFG_DEFAUT);   // remplacé par loadCfg() une fois les réglages chargés
 let editingId = null;
 
 /* ── Helpers ── */
@@ -58,6 +67,9 @@ function getWeekDays(week, year) {
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', async () => {
   const now = new Date();
+
+  await REGLAGES.charger(EXTRAS_PREFIXE, EXTRAS_ADOPTION);   // sans réponse de la base : bandeau, et rien ne s'enregistre
+  cfg = loadCfg();
 
   document.getElementById('emarg-week-input').value = `${now.getFullYear()}-W${String(getISOWeek(now)).padStart(2,'0')}`;
   document.getElementById('cfg-weekday-time').value = cfg.weekdayTime;

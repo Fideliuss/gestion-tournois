@@ -462,6 +462,14 @@ const SB = {
     return data ? data.valeur : null;
   },
 
+  // Toutes les clés qui commencent par un préfixe : [{ cle, valeur }] (voir shared/reglages.js). Le _ est un joker en LIKE : échappé
+  async getParametres(prefixe) {
+    const motif = String(prefixe).replace(/[\\_%]/g, '\\$&') + '%';
+    const { data, error } = await _sb.from('parametres').select('cle, valeur').like('cle', motif).order('cle');
+    if (error) throw error;
+    return data || [];
+  },
+
   async saveParametre(cle, valeur) {
     const { error } = await _sb.from('parametres')
       .upsert({ cle, valeur, updated_at: new Date().toISOString() }, { onConflict: 'cle' });
