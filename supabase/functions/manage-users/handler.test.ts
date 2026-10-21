@@ -120,6 +120,7 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
     const [, a] = r.journal.find(j => j[0] === 'createUser');
     assert.strictEqual(a.email, 'jean.dupont@groupebarriere.com');
     assert.deepStrictEqual(a.app_metadata, { role: 'croupier' });
+    assert.deepStrictEqual(a.user_metadata, { first_name: 'Jean', last_name: 'Dupont' });   // jamais le rôle dans user_metadata
     assert.strictEqual(a.email_confirm, true);
   });
   await test('champs manquants : 400', async () => assert.strictEqual((await appel('POST', 'adm', { email: 'a@b.fr' })).status, 400));
@@ -147,8 +148,16 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
     const [, id, a] = r.journal.find(j => j[0] === 'updateUserById');
     assert.strictEqual(id, 'u-floor');
     assert.deepStrictEqual(a.app_metadata, { role: 'croupier' });
-    assert.strictEqual(a.user_metadata.role, 'croupier');          // compatibilité avec la version en production
-    assert.strictEqual(a.user_metadata.first_name, 'Fl');          // le reste est conservé
+    assert.strictEqual(a.user_metadata, undefined);                // changer le rôle ne touche pas user_metadata
+  });
+  await test('changer le prénom : le nom est conservé, l\'ancien rôle de user_metadata est nettoyé, app_metadata intact', async () => {
+    const r = await appel('PATCH', 'adm', { id: 'u-floor', firstName: 'Nouveau' });
+    assert.strictEqual(r.status, 200);
+    const [, , a] = r.journal.find(j => j[0] === 'updateUserById');
+    assert.strictEqual(a.user_metadata.first_name, 'Nouveau');
+    assert.ok(a.user_metadata.last_name !== undefined);
+    assert.strictEqual('role' in a.user_metadata, false);
+    assert.strictEqual(a.app_metadata, undefined);
   });
   await test('rôle inexistant : 400', async () => assert.strictEqual((await appel('PATCH', 'adm', { id: 'u-floor', role: 'dieu' })).status, 400));
   await test('un admin ne peut pas changer son propre rôle', async () => {
