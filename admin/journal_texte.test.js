@@ -55,7 +55,7 @@ test('objet inconnu : phrase de repli sans planter', () => {
 });
 test('aucun tiret cadratique dans les phrases ni dans les libellés', () => {
   const tout = JSON.stringify(J.OBJETS) + ['compte_cree', 'compte_modifie', 'INSERT'].map(a => d({ action: a, objet: 'results', detail: { champs: ['role'] } })).join('');
-  assert.ok(!tout.includes('—'));
+  assert.ok(!tout.includes(String.fromCharCode(0x2014)));
 });
 test('chaque domaine filtrable a un libellé', () => {
   assert.strictEqual(J.libelleObjet('compte'), 'Comptes');
