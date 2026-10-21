@@ -223,7 +223,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     ├── functions/
     │   └── manage-users/          - Edge Function : CRUD comptes (admin only, vérifié côté serveur) : index.ts, handler.ts, regles.ts + handler.test.ts
     ├── tests/
-    │   └── acces_donnees.test.sql  - tests RLS des tables extras, results, sessions, tournaments (transaction annulée)
+    │   ├── acces_donnees.test.sql  - tests RLS des tables extras, results, sessions, tournaments (transaction annulée)
+    │   └── securite_fonctions.test.sql - tests des droits d'exécution et du search_path des fonctions
     └── migrations/
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
@@ -231,6 +232,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
         ├── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
         ├── acces_donnees.sql                - accès aux données par panel : extras, results, sessions, tournaments
+        ├── securite_fonctions.sql           - fonctions SQL : plus appelables sans connexion, search_path fixé
         ├── parametres.sql                   - paramètres partagés entre les postes (clé / valeur JSON), accès par le panel admin-tournois
         └── tda.sql                          - règlement TDA : éditions et blocs de texte (lecture par panel tda)
 ```
