@@ -196,8 +196,11 @@ const SB = {
     if (error) throw error;
   },
 
-  async updatePassword(password) {
-    const { error } = await _sb.auth.updateUser({ password });
+  // currentPassword : exigé par le projet (Authentication > Email > « Require current password when updating »), sauf
+  // après un lien de réinitialisation où l'on ne le connaît plus (voir login.html)
+  async updatePassword(password, currentPassword) {
+    const attrs = currentPassword ? { password, current_password: currentPassword } : { password };
+    const { error } = await _sb.auth.updateUser(attrs);
     if (error) throw error;
   },
 
@@ -436,6 +439,20 @@ const SB = {
   async saveBreakListConfig(value) {
     const { error } = await _sb.from('breaklist_config')
       .upsert({ key: 'config', value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    if (error) throw error;
+  },
+
+  // ── Paramètres partagés entre les postes (table parametres, voir supabase/migrations/parametres.sql) ──
+  // Renvoie la valeur JSON de la clé, ou null si elle n'existe pas encore
+  async getParametre(cle) {
+    const { data, error } = await _sb.from('parametres').select('valeur').eq('cle', cle).maybeSingle();
+    if (error) throw error;
+    return data ? data.valeur : null;
+  },
+
+  async saveParametre(cle, valeur) {
+    const { error } = await _sb.from('parametres')
+      .upsert({ cle, valeur, updated_at: new Date().toISOString() }, { onConflict: 'cle' });
     if (error) throw error;
   },
 

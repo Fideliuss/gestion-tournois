@@ -11,7 +11,7 @@ Application web interne pour le Barrière Casino Bordeaux, organisée en espaces
 
 Conçue pour être **extensible au-delà des tournois** - architecture de panneaux/rôles pensée pour accueillir de futurs modules (Jeux de Tables au sens large).
 
-**Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (privé)
+**Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (**public** : GitHub Pages gratuit l'exige ; ne jamais y mettre de donnée personnelle, de secret ni de texte sous droits)
 **Développeur :** B. Cuvelier (Fideliuss)
 **Convention de nommage :** underscore `_` pour tous les fichiers et dossiers (`prize_pool`, `admin_tournois`, `roulette_paiement`), jamais de tiret.
 
@@ -32,7 +32,7 @@ Conçue pour être **extensible au-delà des tournois** - architecture de pannea
 - **Noms des espaces** (octobre 2026) - **livré** dans `v3.2.0` (voir ci-dessous) : « Outils Tournois » devient « Tournois » et « Training Croupier » devient « Training » (page `tournois.html`, tuiles, barre, matrice des accès, connexion, manifeste). Les identifiants internes (`tournois`, `training`, droits des rôles en base) ne changent pas.
 - **Espace Break list** (octobre 2026) - **livré** : `v3.1.0` en prod le 2026-10-07 (PR de release #125, tag sur le commit de fusion 453819e ; PR #122 et #123); `v3.1.1` en prod le 2026-10-09 (types d'absence, PR #127 ; PR de release #129, tag sur le commit de fusion ae1cbe3) : remplace le Google Sheet et le script Apps Script de la break list et des départs du soir (présents automatiques depuis le planning mensuel CSV, extraction Octime collée, répartition, break list imprimable recto / verso, tout configurable). Migration `break_list.sql` appliquée en production le 2026-10-07 (le panel « Break list » se donne aux rôles dans Gestion des comptes, les admins y ont accès d'office).
 - **Page Aide et espaces renommés** (octobre 2026) - **livré** : `v3.2.0` en prod le 2026-10-13 (PR de release #138, tag sur le commit de fusion ed17722 ; PR #131 Paramètres, #132 renommage, #133 Aide, #134, #135 et #136 guides) : page Aide de 25 guides avec captures (Tournois 10, Training 9, Break list 6), propre à chaque espace, bouton « ? » contextuel ; espaces renommés ; page Paramètres de la Break list refaite. Voir « Page Aide » dans les fonctionnalités.
-- **Règlement TDA interactif** (octobre 2026) - **PR de release en cours** : `v3.3.0` (consultation, recherche et guides d'aide, PR #140, #141, #143, #144, #145, #147). La jurisprudence et une version anglaise 1.1 ont été envisagées puis abandonnées (voir la section TDA).
+- **Règlement TDA interactif** (octobre 2026) - **livré** : `v3.3.0` en prod le 2026-10-14 (PR de release #149, tag sur le commit de fusion 1d3b0a0 ; PR #140, #141, #143, #144, #145, #147 et #148 pour le changelog) : consultation, recherche et guides d'aide. La jurisprudence et une version anglaise 1.1 ont été envisagées puis abandonnées (voir la section TDA).
 
 **Stratégie de release** : itérative depuis Phase 2 (chaque phase peut donner lieu à sa propre release taguée), et non plus "tout accumulé sur develop jusqu'à la fin de la roadmap" comme prévu initialement.
 
@@ -48,13 +48,16 @@ login.html                    Page de connexion (e-mail + mot de passe, charte g
 shared/
   barriere.css      Styles partagés (thème, composants communs, styles auth : #auth-overlay, #auth-fallback, fenêtre de changement de mot de passe)
   barriere.js       Scripts partagés (toggle jour/nuit, favicon, transitions de page)
+  mot_de_passe.js   MOT_DE_PASSE : règles, liste qui se coche, messages d'erreur en français, générateur (testé : `node shared/mot_de_passe.test.js`) ; chargé par login.html et comptes.html, et à la demande par auth.js
+  html.js           escapeHtml() - échappement HTML de toute donnée venant de la base ou de l'utilisateur (testé : `node shared/html.test.js`) ; chargé par toutes les pages, juste après barriere.js
   tournaments.js    TOURNAMENT_DEFAULTS (fallback) + TournamentsStore (lecture/écriture Supabase, source de vérité)
   semainier.js      buildSemainier() - widget sélecteur de tournoi par jour, utilisé par prize_pool + leaderboard
   supabase.js       Client Supabase : mappers camelCase↔snake_case + objet SB (CRUD résultats/sessions/tournois/extras/app_roles/training + auth + Edge Function manage-users)
   nav.js / nav.css  Barre de navigation commune - injectée par AUTH.guard ; voir section « Navigation »
-  auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), AUTH._navFallback(), AUTH.clearRolesCache() - chargé après supabase.js
+  auth.js           AUTH.guard({loginUrl, role, panel}), AUTH.roleOf(user), AUTH.signOut(), AUTH._navFallback(), AUTH.clearRolesCache() - chargé après supabase.js
   changelog.js      Mis à jour manuellement avant chaque PR de release (var CHANGELOG[])
-  fonts/            Jost auto-hébergée (variable, normal + italique) - @font-face déclaré dans barriere.css
+  fonts/            Polices auto-hébergées : Jost (variable, normal + italique), IBM Plex Mono, Bebas Neue, Barlow Condensed (WOFF2, sous-ensemble latin) - @font-face dans barriere.css et leaderboard.css ; licences : LICENCES.txt. **Aucune police ni bibliothèque ne se charge depuis un site tiers** (l'adresse IP des utilisateurs ne doit partir chez personne) : ne pas ajouter de @import vers Google Fonts ni de balise script vers un CDN
+  vendor/           Bibliothèques tierces copiées dans le dépôt, versions fixées : supabase-js 2.117.3 (toutes les pages), SheetJS 0.20.3 (import Excel de la Break list) ; provenance, licences et empreintes : LISEZMOI.md
   icons/            Pictogrammes vectoriels de la charte, extraits en PNG à masque alpha (recolorables via CSS mask)
   logos/            Logos blanc (écran) / noir (impression) / PNG (courriers)
   favicon/          Favicon et icônes PWA
@@ -120,7 +123,7 @@ training/
     roulette_tables.html / .js      Tables de multiplication (flashcard ×35/×17/×11/×8/×5)
 
 supabase/
-  functions/manage-users/index.ts   Edge Function Deno - CRUD comptes, vérif admin via app_metadata côté serveur
+  functions/manage-users/           Edge Function Deno - CRUD comptes. index.ts (point d'entrée) + handler.ts (logique, dépendances injectées) + regles.ts (règles pures) ; tests : `node --experimental-strip-types supabase/functions/manage-users/handler.test.ts` (faux clients, sans réseau, à relancer après toute modification)
   migrations/
     training_tables.sql              training_config, training_sessions, training_results (+ RLS)
     fix_rls_app_metadata.sql         Migration policies user_metadata → app_metadata (rôle non falsifiable client-side)
@@ -128,6 +131,9 @@ supabase/
     phase3_suivi_meta_et_acces_manager.sql  Phase 3 : training_sessions.meta (jsonb) + user_label, fonction can_view_training_stats(), policies de lecture manager (appliquée sur la base le 2026-10-04)
     phase4_uth_config_initiale.sql          Phase 4 : ligne `training_config` clé `uth` = `{"gains":{"max_bet":50}}` (appliquée sur la base le 2026-10-04)
     phase4_suivi_uth.sql                    Phase 4 : training_weak_points étendue aux 3 modules UTH (appliquée sur la base le 2026-10-04)
+    acces_donnees.sql                       Politiques RLS de extras, results, sessions, tournaments par panel (fonction has_panel_access) ; tests : supabase/tests/acces_donnees.test.sql
+    securite_fonctions.sql                  EXECUTE retiré à anon sur can_use_break_list / can_use_tda / can_view_training_stats, search_path fixé sur saison_de et tda_est_admin ; tests : supabase/tests/securite_fonctions.test.sql
+    parametres.sql                          Table parametres (clé / valeur JSON) pour les réglages partagés entre les postes, accès par le panel admin-tournois ; ne contient AUCUNE donnée (à exécuter dans le SQL Editor ou : supabase db query --linked -f supabase/migrations/parametres.sql ; **appliquée sur la base le 2026-10-15**, clé `declaration_encadrement` inscrite hors dépôt)
     phase3_suivi_fonctions_manager.sql      Phase 3 : fonctions d'agrégat de la vue manager (training_ranking, training_tables_best, training_weak_points, training_activity, training_activity_weekly) - appliquée le 2026-10-04
 ```
 
@@ -150,21 +156,23 @@ supabase/
 - **Supabase** (PostgreSQL cloud) pour la persistance (tournois, leaderboard, extras, training) ET l'authentification
   - URL : `https://grpzgidhawyhinzrqiqm.supabase.co`
   - Clé : publishable key (frontend-safe, RLS activé)
-  - Client JS via CDN : `@supabase/supabase-js@2`
+  - Client JS : `@supabase/supabase-js` 2.117.3, **hébergé dans `shared/vendor/supabase_js.js`** (plus de CDN)
   - `shared/supabase.js` : objet `SB` - CRUD complet (résultats, sessions, tournois, extras, app_roles, training_config/sessions/results) + méthodes auth (`getSession`, `signOut`, `updatePassword`) + appel Edge Function (`listUsers`, `createUser`, `updateUser`, `deleteUser`) + mappers camelCase↔snake_case
   - Tables : `results`, `sessions`, `tournaments`, `extras`, `app_roles` (slug PK, label, panels jsonb, color), `training_config`, `training_sessions`, `training_results`
-  - **RLS** : politique `authenticated` sur toutes les tables. Écriture admin (`app_roles`, `training_config`) vérifiée via `(auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'` - **`app_metadata` et non `user_metadata`**, car ce dernier est modifiable côté client
+  - **RLS** : `extras` (panel `admin-tournois`), `results` et `sessions` (panel `leaderboard`), `tournaments` (lecture `leaderboard` / `prize-pool` / `admin-tournois`, écriture `prize-pool` / `admin-tournois`) passent par `has_panel_access('...')` (`supabase/migrations/acces_donnees.sql`) : un compte connecté sans le panel ne peut ni lire ni écrire ces tables par l'API. Tests : `supabase db query --linked -f supabase/tests/acces_donnees.test.sql` (transaction annulée). Écriture admin (`app_roles`, `training_config`) vérifiée via `(auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'` - **`app_metadata` et non `user_metadata`**, car ce dernier est modifiable côté client
 - **Auth e-mail + mot de passe** (Supabase Auth) :
   - `login.html` : page de connexion (email + password, redirect par rôle après authentification)
   - `shared/auth.js` : `AUTH.guard({ loginUrl, role, panel })` - overlay spinner, vérif session, vérif rôle (`role`), vérif panneau (`panel`, via table `app_roles`), montage de la barre de navigation
   - Rôles : entièrement personnalisables via **Gestion Comptes** (table `app_roles`) - `admin`, `mcd`, `floor` sont les seeds par défaut, mais tout rôle custom (slug, label, couleur, panels) peut être créé/édité/supprimé
-  - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable) - `raw_user_meta_data.role` conservé en fallback pendant la période de migration
+  - Rôle stocké dans `auth.users.raw_app_meta_data.role` (source de vérité, non falsifiable). `raw_user_meta_data.role` n'a plus aucun effet : ni la fonction, ni les pages, ni la RLS ne le lisent ; il est seulement encore écrit (compatibilité avec la version déjà en production) et sera retiré après la release
   - **Permissions par panneau** : `app_roles.panels` (jsonb) liste les panneaux autorisés pour ce rôle. Panneaux hiérarchiques : `tournois` (parent) → `prize-pool`, `leaderboard`, `admin-tournois` (enfants) ; `training` (parent) → `training-suivi` (enfant : voir les résultats de toute l'équipe, utilisé par la RLS via `can_view_training_stats()`). `AUTH.guard({ panel: 'x' })` redirige vers `index.html` si non autorisé - **les admins passent toujours**. Cache `_rolePanelsCache` (module-level dans auth.js) évite les requêtes répétées ; `AUTH.clearRolesCache()` invalide après modification d'un rôle
   - Gestion des comptes : `admin/comptes.html` - CRUD comptes (email+password+role) + CRUD rôles (label, couleur) + matrice des accès rôles × pages
-  - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin côté serveur avant d'utiliser `auth.admin.*`
-  - Changement de mot de passe : modal ouverte depuis le menu utilisateur de la barre (`AUTH._openChangePwd()`)
+  - **CRUD comptes via Edge Function** (`supabase/functions/manage-users/index.ts`) : le service_role key ne doit jamais être exposée côté client, donc toute création/édition/suppression de compte passe par cette fonction Deno qui vérifie le JWT appelant et son rôle admin (`app_metadata` seul, sans repli) côté serveur avant d'utiliser `auth.admin.*`. Règles : le rôle demandé doit exister dans `app_roles`, e-mail valide, mot de passe de 12 caractères au moins (72 au plus), un admin ne change pas son propre rôle ni ne supprime son compte (il reste donc toujours un administrateur). **Un changement de la fonction se déploie à part** (`supabase functions deploy manage-users`) : le déploiement n'est pas automatique avec le site
+  - Changement de mot de passe : modal ouverte depuis le menu utilisateur de la barre (`AUTH._openChangePwd()`) ; elle demande le **mot de passe actuel** (`SB.updatePassword(nouveau, actuel)` → `current_password`, exigé par le projet) et coche les règles pendant la saisie
+  - **Règles de mot de passe** (réglages du projet Supabase, Authentication > Sign In / Providers > Email, appliqués le 2026-10-15) : 12 caractères au moins, minuscules + majuscules + chiffres + symboles, **"Require current password when updating"** activé, **"Prevent use of leaked passwords"** activé (offre Pro). Elles sont reproduites dans `shared/mot_de_passe.js` (navigateur : messages, liste qui se coche, générateur, traduction des erreurs Supabase) et dans `supabase/functions/manage-users/regles.ts` (serveur) ; `handler.test.ts` vérifie que les deux donnent le même verdict. **Si un réglage change dans Supabase, changer les deux fichiers.** Les mots de passe déjà en place ne sont pas contrôlés : la règle joue à la création et au changement. Après un lien de réinitialisation, le mot de passe actuel n'est pas demandé par l'application ; si le serveur le réclamait quand même, `login.html` affiche une voie de secours (se connecter avec l'ancien puis changer depuis le menu, ou demander à un admin). Gestion des comptes : bouton **Générer** (16 caractères conformes, affichés pour être transmis)
   - Persistance session : JWT 7 jours (604800s) via localStorage (géré par supabase-js)
-- localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_*`, `courriers_tpl`)
+- localStorage pour la persistance des configs déclaration/courriers/émargements hebdo (`extras_cfg`, `extras_emarg_YYYY_WW`, `decl_cfg`, `decl_annexes`, `decl_adhoc_*`, `decl_exc_*`, `courriers_tpl`) : propre à un navigateur, à migrer peu à peu vers la table `parametres`
+- **Encadrement des déclarations (directeurs de tournois et arbitres)** : dans la table `parametres` (clé `declaration_encadrement`, lue et enregistrée par `SB.getParametre` / `SB.saveParametre`), partagé entre les postes, modifiable dans Déclarations > Réglages > Encadrement. **Les noms ne sont plus dans le code** (dépôt public) : ne jamais remettre de noms de personnes dans le dépôt, ni dans une migration SQL. Si la base est injoignable, la page l'indique et refuse d'enregistrer (pour ne pas écraser la base avec des listes vides). À la première ouverture après la mise en place, une version enregistrée dans le navigateur (`decl_staff`) est reprise une fois en base si la base est vide
 
 ---
 
@@ -224,6 +232,8 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 | 15 | prize_pool.js | Suggestion : le montant du 1er gardait un résidu de calcul (ex. 2789.2000000000007) - arrondi au centime (`cent()`) |
 | 16 | leaderboard.css | Document ranking à l'écran : le logo (SVG très large) dépassait du cadre blanc - largeur limitée à celle du document |
 | 17 | config_training.html | Le titre « BJ Paiement - chronomètre par niveau » concernait en réalité BJ Score (c'est lui qui lit ce réglage) - titre corrigé |
+| 18 | leaderboard.js, extras.js, declaration.js, semainier.js, config_tournois.html | Durcissement : les données venant de la base (noms de joueurs, extras, noms de tournois) passent par `escapeHtml()` avant d'être insérées dans le HTML ; les `onclick` lisent un `data-*` au lieu d'embarquer la donnée |
+| 19 | auth.js, index.html, tournois.html, aide.js, leaderboard.js | Le rôle est lu à un seul endroit, `AUTH.roleOf()` (`app_metadata`, comme la RLS) |
 
 ---
 
@@ -324,7 +334,7 @@ Le règlement du Poker TDA (bible des règles du tournoi de poker, mise à jour 
 - **Pas de favoris** : essayés puis retirés le 2026-10-14 (onglet Favoris jugé peu pratique, puis barre de pastilles jugée peu pertinente). La table `tda_favoris` a été supprimée de la base (elle était vide) et son fichier de migration du dépôt. Piste si le besoin revient : accès rapide aux règles récemment consultées plutôt que des favoris à gérer à la main.
 - **Jurisprudence : abandonnée le 2026-10-14** (cas proposés par les floors et validés par les MCD). Tout avait été construit puis retiré (PR #146 fermée, branche supprimée, tables `tda_cas` et `tda_sanctions` supprimées de la base, panel `tda-validation` retiré) : le besoin doit d'abord être précisé avec le responsable tournoi. Si elle revient, repartir de zéro avec une saisie minimale (faits, règles, sanction ; décision facultative).
 - **Version anglaise 1.1** (Poker TDA 1.1 du 21 septembre 2026, PDF avec redlines) : envisagée comme référence puis **abandonnée** (trop compliqué pour le gain, l'outil existant suffit). L'application reste sur la traduction française 1.0. La licence du TDA autorise l'usage « en tout ou partie » à condition d'afficher la mention avec un lien actif sur la même page (c'est le cas).
-- **Aide (étape 5)** : guides « Consulter le règlement TDA » et « Rechercher dans le règlement » (espace Tournois, droit `tda`, bouton « ? » de `tda/tda.html`), entrées de dépannage. **Captures avec une édition fictive** (`tda()` dans `aide/outils/donnees_fictives.js`) : jamais de texte du vrai règlement dans le dépôt public, même en image. Reste : changelog et release (une consultation hors connexion reste une option, non faite).
+- **Aide (étape 5)** : guides « Consulter le règlement TDA » et « Rechercher dans le règlement » (espace Tournois, droit `tda`, bouton « ? » de `tda/tda.html`), entrées de dépannage. **Captures avec une édition fictive** (`tda()` dans `aide/outils/donnees_fictives.js`) : jamais de texte du vrai règlement dans le dépôt public, même en image. Changelog et release faits (`v3.3.0`). Une consultation hors connexion reste une option, non faite.
 
 ### Page Aide (`aide/`)
 Tutoriel de l'application pour les collègues moins à l'aise avec l'outil (demande du chef : former les MCD et lui-même). **Espaces documentés : Tournois, Training et Break list.** Vouvoiement.
@@ -396,7 +406,9 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - Noms de fonctions : camelCase, verbe + sujet (`renderClassement`, `validateTournament`)
 - IDs HTML : kebab-case (`hist-body`, `rp-chip-overlay`)
 - Classes CSS : kebab-case, préfixe par composant (`rt-chip`, `rp-badge-*`, `sem-day`)
-- Apostrophes dans les onclick : toujours passer par `esc(s)` → `s.replace(/'/g,"\\x27")`
+- **Données dans du HTML construit en chaîne** (`innerHTML`, gabarits) : toute donnée venant de la base ou de l'utilisateur (noms de joueurs, extras, tournois, libellés...) passe par `escapeHtml()` (`shared/html.js`), dans le texte comme dans les attributs (`value="${escapeHtml(x)}"`)
+- **Jamais de donnée dans un `onclick="f('${x}')"`** : le navigateur décode les entités avant d'exécuter le JavaScript, l'échappement HTML n'y protège pas. Mettre la donnée dans un attribut `data-*` (échappé) et lire `this.dataset.xxx` (`onclick="f(this.dataset.id)"`) ou écouter l'événement sur le conteneur (voir le clic sur un joueur dans `leaderboard.js`). L'ancien `esc()` « apostrophe » est supprimé
+- **Rôle de l'utilisateur** : toujours `AUTH.roleOf(user)` (lit `app_metadata`, comme la RLS). Jamais `user_metadata.role`, que chacun peut modifier lui-même ; `user_metadata` ne sert qu'aux prénom et nom affichés
 - IDs d'entrées leaderboard/tournois : générés côté serveur ou `slug + Date.now()` - ne pas passer `id` dans les inserts quand la DB le génère
 - Noms de joueurs : stockés et comparés en MAJUSCULES, affichés via `cap()`
 - Pas de bundler, pas de npm - zéro dépendance locale
@@ -423,7 +435,7 @@ Sessions et résultats persistés dans `training_sessions` / `training_results` 
 - Les semaines utilisent la numérotation ISO (lun=1er jour, `getMondayOfISOWeek`)
 - Le schéma Supabase doit être créé manuellement via le SQL Editor de Supabase avant le premier usage d'une nouvelle table (migrations dans `supabase/migrations/` = documentation/historique, pas d'auto-apply)
 - **Supabase RLS** : toute modification du RLS doit utiliser un bloc `DO $$ ... $$` pour dropper les policies existantes par nom dynamique (les noms varient), ou `DROP POLICY IF EXISTS "nom" ON table` si le nom est connu
-- **Auth guard pattern** : chaque page protégée charge `shared/supabase.js` + `shared/auth.js` via CDN supabase-js, puis appelle `AUTH.guard({ loginUrl, role, panel })` - l'overlay est injecté de façon synchrone pour éviter le flash de contenu
+- **Auth guard pattern** : chaque page protégée charge `shared/vendor/supabase_js.js` (supabase-js hébergé), `shared/supabase.js` et `shared/auth.js`, puis appelle `AUTH.guard({ loginUrl, role, panel })` - l'overlay est injecté de façon synchrone pour éviter le flash de contenu
 - Pour définir le rôle d'un utilisateur : passer par **Gestion Comptes** (jamais directement en base) - modifie `app_metadata` ET `user_metadata` via l'Edge Function
 - `_tournamentsCache` (var privée dans `leaderboard.js`) mis à `null` après chaque upsert/delete de tournoi pour forcer un rechargement depuis Supabase
 - Le modal joueur utilise `_closeModal()` (retire `modal-open` du body) et `body.modal-open { overflow: hidden }` pour bloquer le scroll de fond

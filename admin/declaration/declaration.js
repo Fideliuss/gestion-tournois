@@ -17,11 +17,6 @@ const CFG_DEFAULT = {
   6: { actif: false, heure: '21:00', cave: 0,   joueurs: 150, rachats: false, bounty: 0,  annexe: '' },
 };
 
-const STAFF_DEFAULT = {
-  directeurs: ['Olivier SANCHEZ','Christophe CONDOURE','Brayan CUVELIER','Stéphane DUBOIS','Aurelien GROSDEMOUGE'],
-  arbitres:   ['Pierre BERGEROO','Thomas CHAVERLANGE','David LOPES','Jeremy PELTIER','Marceau CASSIN','Olivier DOBIEZYNSKI','Isabelle GABA','Teddy GAULIER','Antonyn GRANIER','Jean-Baptiste LAGORCE','Dylan SALDOT','Guillaume SITBON'],
-};
-
 const DIST_STD = [33, 20, 13, 9, 7, 5, 4, 3, 3, 3];
 
 const ANNEXES_DEFAULT = [
@@ -34,15 +29,18 @@ const ANNEXES_DEFAULT = [
 
 /* ── État ── */
 let cfg     = loadCfg();
-let staff   = loadStaff();
 let annexes = loadAnnexes();
+
+/* Encadrement (directeurs et arbitres) : enregistré en base (table parametres, clé declaration_encadrement), donc partagé entre
+   les postes. Les noms ne sont PAS dans le code (dépôt public). Listes vides tant que la base n'a pas répondu. */
+const STAFF_CLE = 'declaration_encadrement';
+let staff       = { directeurs: [], arbitres: [] };
+let staffEtat   = 'chargement';   // chargement | ok | erreur : on n'enregistre que si 'ok' (sinon on écraserait la base avec des listes vides)
 
 function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
 function loadCfg()     { try { const s = localStorage.getItem('decl_cfg');     return s ? JSON.parse(s) : deepClone(CFG_DEFAULT);     } catch { return deepClone(CFG_DEFAULT); } }
-function loadStaff()   { try { const s = localStorage.getItem('decl_staff');   return s ? JSON.parse(s) : deepClone(STAFF_DEFAULT);   } catch { return deepClone(STAFF_DEFAULT); } }
 function loadAnnexes() { try { const s = localStorage.getItem('decl_annexes'); return s ? JSON.parse(s) : deepClone(ANNEXES_DEFAULT); } catch { return deepClone(ANNEXES_DEFAULT); } }
 function saveCfg()     { localStorage.setItem('decl_cfg',     JSON.stringify(cfg));     }
-function saveStaff()   { localStorage.setItem('decl_staff',   JSON.stringify(staff));   }
 function saveAnnexes() { localStorage.setItem('decl_annexes', JSON.stringify(annexes)); }
 
 /* ── Ad-hoc ── */
@@ -60,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS);   // mois suivant par défaut
 
   SB.getExtras().then(list => { extras = list; renderExtrasDeclaration(); }).catch(() => {});
+  chargerEncadrement();
   syncViews();
   renderCfgTable();
   renderStaffEditor();
@@ -180,7 +179,53 @@ function resetConfig() { if (!confirm('Réinitialiser la configuration ?')) retu
 function saveAndRender() { saveCfg(); renderAll(); flash('Réglages des tournois enregistrés'); }
 
 /* ── Staff ── */
+function normaliserStaff(v) {
+  const liste = x => (Array.isArray(x) ? x : []).map(n => String(n).trim()).filter(Boolean);
+  return { directeurs: liste(v && v.directeurs), arbitres: liste(v && v.arbitres) };
+}
+
+/* Lecture en base. Si la base n'a encore rien, on reprend UNE fois l'ancienne version enregistrée dans ce navigateur
+   (avant que l'encadrement soit en base) pour ne rien perdre, puis on la retire du navigateur. */
+async function chargerEncadrement() {
+  try {
+    const v = await SB.getParametre(STAFF_CLE);
+    if (v) {
+      staff = normaliserStaff(v);
+    } else {
+      let local = null;
+      try { local = JSON.parse(localStorage.getItem('decl_staff') || 'null'); } catch { local = null; }
+      if (local) {
+        staff = normaliserStaff(local);
+        await SB.saveParametre(STAFF_CLE, staff);
+        localStorage.removeItem('decl_staff');
+        flash('Encadrement de ce poste repris et enregistré en base');
+      }
+    }
+    staffEtat = 'ok';
+  } catch (e) {
+    console.warn('Encadrement : lecture impossible', e);
+    staffEtat = 'erreur';
+  }
+  renderStaffEditor();
+  renderAll();
+}
+
+/* Enregistre en base ; renvoie true si c'est fait. Refuse tant que la lecture n'a pas réussi (écraserait la base avec du vide). */
+async function saveStaff() {
+  if (staffEtat !== 'ok') { flash('Encadrement non enregistré : il n\'a pas pu être chargé. Rechargez la page.'); return false; }
+  staff = normaliserStaff(staff);
+  try { await SB.saveParametre(STAFF_CLE, staff); return true; }
+  catch (e) { console.warn('Encadrement : enregistrement impossible', e); flash('Enregistrement impossible : ' + (e.message || 'réessayez')); return false; }
+}
+
 function renderStaffEditor() {
+  const msg = document.getElementById('staff-msg');
+  if (msg) {
+    msg.style.display = staffEtat === 'ok' && (staff.directeurs.length + staff.arbitres.length) > 0 ? 'none' : 'flex';
+    msg.textContent = staffEtat === 'erreur' ? 'L\'encadrement n\'a pas pu être chargé : rechargez la page. Rien ne sera enregistré tant qu\'il n\'est pas chargé.'
+      : staffEtat === 'chargement' ? 'Chargement de l\'encadrement…'
+      : 'Aucun nom enregistré : ajoutez les directeurs et les arbitres, puis enregistrez.';
+  }
   document.getElementById('staff-grid').innerHTML = `
     <div>
       <div class="staff-section-title">Directeurs de tournois</div>
@@ -193,11 +238,14 @@ function renderStaffEditor() {
       <button class="btn-ghost" onclick="addStaff('arbitres')" style="margin-top:8px">+ Ajouter</button>
     </div>`;
 }
-function staffRow(type, i, n) { return `<div class="staff-item"><input type="text" value="${n}" onchange="updateStaff('${type}',${i},this.value)"/><button class="btn-red" onclick="removeStaff('${type}',${i})">×</button></div>`; }
+function staffRow(type, i, n) { return `<div class="staff-item"><input type="text" value="${escapeHtml(n)}" onchange="updateStaff('${type}',${i},this.value)"/><button class="btn-red" onclick="removeStaff('${type}',${i})">×</button></div>`; }
 function updateStaff(type, i, v) { staff[type][i] = v; }
-function addStaff(type)          { staff[type].push(''); saveStaff(); renderStaffEditor(); }
-function removeStaff(type, i)    { staff[type].splice(i,1); saveStaff(); renderStaffEditor(); }
-function saveStaffAndRender()    { saveStaff(); renderAll(); flash('Encadrement enregistré'); }
+function addStaff(type)          { staff[type].push(''); renderStaffEditor(); }   // la ligne vide n'est enregistrée qu'une fois remplie (bouton Enregistrer)
+async function removeStaff(type, i) { staff[type].splice(i,1); await saveStaff(); renderStaffEditor(); renderAll(); }
+async function saveStaffAndRender() {
+  if (!(await saveStaff())) return;
+  renderStaffEditor(); renderAll(); flash('Encadrement enregistré');
+}
 
 /* ── Éditeur annexes ── */
 function renderAnnexesEditor() {
@@ -282,8 +330,8 @@ function renderAdhocList() {
   el.innerHTML = [...list].sort((a,b) => a.d-b.d).map(t => `
     <div class="adhoc-item">
       <div class="adhoc-info">
-        <span class="adhoc-titre">${t.titre}</span>
-        <span class="adhoc-meta">${t.cave}€ · ${t.joueurs} jrs${t.bounty ? ` · Bounty ${t.bounty}€` : ''}${t.annexe ? ` · ${t.annexe}` : ''}</span>
+        <span class="adhoc-titre">${escapeHtml(t.titre)}</span>
+        <span class="adhoc-meta">${escapeHtml(t.cave)}€ · ${escapeHtml(t.joueurs)} jrs${t.bounty ? ` · Bounty ${escapeHtml(t.bounty)}€` : ''}${t.annexe ? ` · ${escapeHtml(t.annexe)}` : ''}</span>
       </div>
       <button class="btn-red" onclick="removeAdhoc(${t.id})">Supprimer</button>
     </div>`).join('');
@@ -359,7 +407,7 @@ function renderExcList() {
     const dateStr = `${JOURS[dow]} ${d} ${MOIS[month-1]} ${year}`;
     const detail  = e.type === 'cancelled'
       ? '<span style="color:#e07a68;font-weight:500">Annulé</span>'
-      : `<span style="color:var(--gold);font-weight:500">Modifié</span> - ${e.cave}€ · ${e.heure}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+e.annexe : ''}`;
+      : `<span style="color:var(--gold);font-weight:500">Modifié</span> - ${escapeHtml(e.cave)}€ · ${escapeHtml(e.heure)}${e.rachats ? ' RE ENTRY' : ''}${e.annexe ? ' · '+escapeHtml(e.annexe) : ''}`;
     return `<div class="adhoc-item">
       <div class="adhoc-info">
         <span class="adhoc-titre">${dateStr}</span>
@@ -425,13 +473,13 @@ function renderExtrasDeclaration() {
       </thead>
       <tbody>${list.map(e => `
         <tr>
-          <td class="det-nom">${e.nom}</td>
-          <td class="det-prenom">${e.prenom.toUpperCase()}</td>
-          <td class="det-italic">${e.dateNaissance || ''}</td>
-          <td class="det-lieu">${e.lieuNaissance || ''}</td>
-          <td>${e.adresse || ''}</td>
-          <td>${e.codePostal || ''}</td>
-          <td class="det-ville">${e.ville || ''}</td>
+          <td class="det-nom">${escapeHtml(e.nom)}</td>
+          <td class="det-prenom">${escapeHtml(e.prenom.toUpperCase())}</td>
+          <td class="det-italic">${escapeHtml(e.dateNaissance || '')}</td>
+          <td class="det-lieu">${escapeHtml(e.lieuNaissance || '')}</td>
+          <td>${escapeHtml(e.adresse || '')}</td>
+          <td>${escapeHtml(e.codePostal || '')}</td>
+          <td class="det-ville">${escapeHtml(e.ville || '')}</td>
         </tr>`).join('')}
       </tbody>
     </table>`;
@@ -445,17 +493,17 @@ function renderDeclaration() {
 
   const staffHtml = `
     <div class="enc-hdr">Directeurs de tournois</div>
-    ${staff.directeurs.map(n => `<div>${n}</div>`).join('')}
+    ${staff.directeurs.map(n => `<div>${escapeHtml(n)}</div>`).join('')}
     <div class="enc-hdr" style="margin-top:5px">Arbitres</div>
-    ${staff.arbitres.map(n => `<div>${n}</div>`).join('')}`;
+    ${staff.arbitres.map(n => `<div>${escapeHtml(n)}</div>`).join('')}`;
 
   const dataHtml = rows.length
     ? rows.map((r,i) => `
         <tr class="drow">
-          <td class="titre-cell">${r.titre}</td>
+          <td class="titre-cell">${escapeHtml(r.titre)}</td>
           <td>${r.cave} €</td><td>${r.joueurs}</td><td>ESPÈCES</td><td>MULTI-TABLES</td><td>1</td>
           <td>${r.rachats ? 'OUI' : 'NON'}</td><td>Level 8</td>
-          <td>${r.bounty > 0 ? r.bounty+' €' : '-'}</td><td>${r.annexe || '-'}</td>
+          <td>${r.bounty > 0 ? escapeHtml(r.bounty)+' €' : '-'}</td><td>${escapeHtml(r.annexe || '-')}</td>
           ${i===0 ? `<td class="staff-col" rowspan="${rows.length}">${staffHtml}</td>` : ''}
         </tr>`).join('')
     : `<tr><td colspan="11" class="empty">Aucun tournoi actif ce mois.</td></tr>`;
@@ -508,7 +556,7 @@ function renderAnnexes() {
     const warn = distSum !== 100 ? `<div class="alert-warn" style="margin-top:8px">⚠ Total répartition : ${distSum} % (doit être 100 %)</div>` : '';
 
     return `<div class="annexe-card">
-      <div class="annexe-title">${a.nom}</div>
+      <div class="annexe-title">${escapeHtml(a.nom)}</div>
       <div class="annexe-subtitle">Tournoi Cash - Répartition des lots</div>
       <div class="annexe-calc">
         <div class="ac-row"><span>Joueurs</span><span class="ac-val">${a.joueurs}</span></div>

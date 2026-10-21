@@ -108,7 +108,7 @@ L'application est sécurisée par **e-mail + mot de passe** (Supabase Auth). Les
 1. Ouvrir https://fideliuss.github.io/gestion-tournois/
 2. Saisir son adresse e-mail et son mot de passe
 3. Redirection automatique selon le rôle - session valable **7 jours**
-4. Changement de mot de passe disponible depuis le menu utilisateur de la barre de navigation
+4. Changement de mot de passe disponible depuis le menu utilisateur de la barre de navigation (mot de passe actuel demandé ; 12 caractères au moins, avec minuscules, majuscules, chiffres et symboles)
 
 ### Gestion des comptes et permissions
 Accessible depuis le menu **Gestion** de la barre (réservé aux admins) :
@@ -137,11 +137,14 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── shared/
 │   ├── barriere.css               - Styles partagés (thème, composants, styles auth)
 │   ├── barriere.js                - Scripts partagés (thème, favicon)
+│   ├── vendor/                    - Bibliothèques tierces hébergées (supabase-js, SheetJS), versions fixées : voir LISEZMOI.md
+│   ├── mot_de_passe.js            - Règles de mot de passe, messages et générateur (tests : `node shared/mot_de_passe.test.js`)
+│   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
 │   ├── supabase.js                - Client Supabase + objet SB (CRUD complet + auth + app_roles + training + mappers)
 │   ├── nav.js / nav.css           - Barre de navigation commune (lanceur d'espaces, pages, menu Gestion, menu mobile), adaptée aux droits
-│   ├── auth.js                    - AUTH.guard({loginUrl, role, panel}), AUTH.signOut(), bandeau de secours, cache panels
+│   ├── auth.js                    - AUTH.guard({loginUrl, role, panel}), AUTH.roleOf(user), AUTH.signOut(), bandeau de secours, cache panels
 │   ├── changelog.js                - Mis à jour manuellement avant chaque PR de release
 │   ├── logos/                     - Logos (écran + impression)
 │   └── favicon/                   - Favicon et icônes PWA
@@ -218,13 +221,19 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │
 └── supabase/
     ├── functions/
-    │   └── manage-users/index.ts  - Edge Function : CRUD comptes (admin only, vérifié côté serveur)
+    │   └── manage-users/          - Edge Function : CRUD comptes (admin only, vérifié côté serveur) : index.ts, handler.ts, regles.ts + handler.test.ts
+    ├── tests/
+    │   ├── acces_donnees.test.sql  - tests RLS des tables extras, results, sessions, tournaments (transaction annulée)
+    │   └── securite_fonctions.test.sql - tests des droits d'exécution et du search_path des fonctions
     └── migrations/
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
         ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
         ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
         ├── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
+        ├── acces_donnees.sql                - accès aux données par panel : extras, results, sessions, tournaments
+        ├── securite_fonctions.sql           - fonctions SQL : plus appelables sans connexion, search_path fixé
+        ├── parametres.sql                   - paramètres partagés entre les postes (clé / valeur JSON), accès par le panel admin-tournois
         └── tda.sql                          - règlement TDA : éditions et blocs de texte (lecture par panel tda)
 ```
 
@@ -238,7 +247,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 | React 18 (CDN) | Interface Prize Pool Builder |
 | Supabase (PostgreSQL cloud) | Persistance (tournois, leaderboard, extras, training) + **authentification** |
 | Supabase Edge Functions (Deno) | `manage-users` - CRUD comptes avec vérification admin côté serveur |
-| supabase-js v2 (CDN) | Client Supabase côté navigateur |
+| supabase-js 2.117.3 (hébergé dans `shared/vendor/`) | Client Supabase côté navigateur |
 | Supabase Auth (e-mail + mot de passe) | Connexion sécurisée, rôles configurables, session 7 jours |
 | `localStorage` | Configs déclaration / courriers / émargements hebdo |
 | GitHub Pages | Hébergement statique (branche `main`, auto-deploy) |

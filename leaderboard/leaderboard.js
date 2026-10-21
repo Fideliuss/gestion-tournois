@@ -69,7 +69,7 @@ async function init() {
 }
 
 function setLbUser(user) {
-  const role = (user.app_metadata && user.app_metadata.role) || (user.user_metadata && user.user_metadata.role);
+  const role = AUTH.roleOf(user);
   _isAdmin = role === 'admin';
   renderSeasonBar();
 }
@@ -131,7 +131,7 @@ async function openCloseSeason() {
   const end = `${_season + 1}-10-31`;
   const early = _todayStr() <= end;
   const podium = sum.ranking.slice(0, 3).map((p, i) =>
-    `<div style="display:flex;gap:10px;padding:5px 0;font-size:14px"><span>${['🥇','🥈','🥉'][i]}</span><span style="flex:1">${cap(p.player)}</span><span class="pts-badge">${p.points} pts</span></div>`).join('');
+    `<div style="display:flex;gap:10px;padding:5px 0;font-size:14px"><span>${['🥇','🥈','🥉'][i]}</span><span style="flex:1">${capH(p.player)}</span><span class="pts-badge">${p.points} pts</span></div>`).join('');
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-name">Clôturer la saison ${_seasonLabel(_season)}</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 18px">
@@ -247,7 +247,7 @@ async function checkDuplicate() {
   const sessions=await getAllSessions();
   const dup=sessions.find(s=>s.date===date&&s.tournamentId===tid);
   if (dup) {
-    el.innerHTML=`⚠️ <strong>Doublon détecté</strong> - ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats, ${dup.entries} entrées).`;
+    el.innerHTML=`⚠️ <strong>Doublon détecté</strong> - ${escapeHtml(await getTName(tid))} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats, ${dup.entries} entrées).`;
     el.style.display='block';
   } else { el.style.display='none'; }
 }
@@ -290,7 +290,7 @@ function updateCagnotte() {
 async function refreshPlayersDl() {
   const results=await getAllResults();
   const names=[...new Set(results.map(r=>r.player))].sort();
-  document.getElementById('players-dl').innerHTML=names.map(n=>`<option value="${n}">`).join('');
+  document.getElementById('players-dl').innerHTML=names.map(n=>`<option value="${escapeHtml(n)}">`).join('');
 }
 
 let currentPlaceCount = 0;
@@ -367,7 +367,7 @@ async function validateTournament() {
   const allSessions=await getAllSessions();
   const dup=allSessions.find(s=>s.date===date&&s.tournamentId===tid);
   if (dup) {
-    warnEl.innerHTML=`⛔ <strong>Doublon bloqué</strong> - ${await getTName(tid)} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats). Supprime la session existante dans l'Historique avant de re-saisir.`;
+    warnEl.innerHTML=`⛔ <strong>Doublon bloqué</strong> - ${escapeHtml(await getTName(tid))} du ${fmtDate(date)} a déjà été saisi (${dup.nbResults} résultats). Supprime la session existante dans l'Historique avant de re-saisir.`;
     warnEl.style.display='flex';
     return;
   }
@@ -441,12 +441,11 @@ async function renderClassement() {
   const today=_asOfDate().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
   const isFiltered=!!search;
 
-  const esc=s=>s.replace(/'/g,"\\x27");
-  const entryMid=(p,rank)=>`<div class="rank-entry" onclick="openPlayerModal('${esc(p.player)}')">
-    <span class="re-rank">${rank}</span><span class="re-name">${cap(p.player)}</span><span class="re-pts">${p.points}</span>
+  const entryMid=(p,rank)=>`<div class="rank-entry" data-player="${escapeHtml(p.player)}">
+    <span class="re-rank">${rank}</span><span class="re-name">${capH(p.player)}</span><span class="re-pts">${p.points}</span>
   </div>`;
-  const entrySm=(p,rank)=>`<div class="rank-entry-sm" onclick="openPlayerModal('${esc(p.player)}')">
-    <span class="re-rank">${rank}</span><span class="re-name">${cap(p.player)}</span><span class="re-pts">${p.points}</span>
+  const entrySm=(p,rank)=>`<div class="rank-entry-sm" data-player="${escapeHtml(p.player)}">
+    <span class="re-rank">${rank}</span><span class="re-name">${capH(p.player)}</span><span class="re-pts">${p.points}</span>
   </div>`;
 
   function threeColsOf(players,startRank,entryFn,colClass) {
@@ -466,17 +465,17 @@ async function renderClassement() {
     if (sorted.length>=1) {
       const p1=sorted[0];
       html+=`<div class="class-section-title">Podium</div><div class="podium">
-        <div class="podium-first" onclick="openPlayerModal('${esc(p1.player)}')">
+        <div class="podium-first" data-player="${escapeHtml(p1.player)}">
           <div class="p-rank">🥇 1<sup>er</sup></div>
-          <div class="p-name">${cap(p1.player)}</div>
+          <div class="p-name">${capH(p1.player)}</div>
           <div class="p-pts">${p1.points} <small>pts</small></div>
         </div><div class="podium-sub">`;
       [1,2].forEach(i=>{
         if (sorted[i]) {
           const p=sorted[i],medal=i===1?'🥈':'🥉',ord=i===1?'2<sup>ème</sup>':'3<sup>ème</sup>';
-          html+=`<div class="podium-card" onclick="openPlayerModal('${esc(p.player)}')">
+          html+=`<div class="podium-card" data-player="${escapeHtml(p.player)}">
             <div class="p-rank-num">${medal}</div>
-            <div class="p-info"><div class="p-name">${cap(p.player)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:.1em">${ord}</div></div>
+            <div class="p-info"><div class="p-name">${capH(p.player)}</div><div style="font-size:9px;color:var(--text-muted);letter-spacing:.1em">${ord}</div></div>
             <div class="p-pts">${p.points} <small>pts</small></div>
           </div>`;
         }
@@ -612,7 +611,7 @@ function _renderCalendarMonth(yearMonth, sessions, resIndex, search) {
           : `<span class="cal-chip-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>`;
         return `<div class="${cls}"
           onclick="event.stopPropagation();toggleCalSession(${s.id})" id="chip-${s.id}">
-          <span class="cal-chip-name">${short}</span>
+          <span class="cal-chip-name">${escapeHtml(short)}</span>
           ${cagHtml}
         </div>`;
       }).join('');
@@ -660,7 +659,7 @@ function _renderCalDetail(s, results, search = '') {
     <div class="cal-detail-hdr">
       <div class="cal-detail-info">
         <span class="sess-date">${label}</span>
-        <span class="tournament-badge">${tname}</span>
+        <span class="tournament-badge">${escapeHtml(tname)}</span>
         <span class="sess-meta" id="sess-meta-${s.id}">${s.entries || 0} entrées · ${results.length} résultats</span>
         <span class="session-cag">+${(s.cagnotte || 0).toLocaleString('fr-FR')} €</span>
       </div>
@@ -681,7 +680,7 @@ function _renderCalDetail(s, results, search = '') {
 function _renderResultRow(r, search = '') {
   const pc      = r.place === 1 ? 'p1' : r.place <= 3 ? 'p3' : '';
   const extra   = r.extra ? '<span class="extra-badge">extra</span>' : '';
-  const name    = cap(r.player);
+  const name    = capH(r.player);
   const hilite  = search && r.player.toLowerCase().includes(search) ? ' style="background:rgba(195,120,20,.09)"' : '';
   return `<div class="res-row" id="res-${r.id}"${hilite}>
     <span class="place-badge-sm ${pc}">${r.place}</span>
@@ -710,7 +709,7 @@ function editResult(id) {
   row.dataset.editing = '1';
   row.innerHTML = `
     <input type="number" class="edit-place" id="ep-${id}" value="${r.place}" min="1" max="99" />
-    <input type="text"   class="edit-name"  id="en-${id}" value="${cap(r.player)}" />
+    <input type="text"   class="edit-name"  id="en-${id}" value="${capH(r.player)}" />
     <input type="number" class="edit-pts"   id="ept-${id}" value="${r.points}" min="0" />
     <span class="res-acts">
       <button class="btn-icon" title="Enregistrer" aria-label="Enregistrer" onclick="saveResultEdit(${id})"><i class="ico ico-check"></i></button>
@@ -863,7 +862,7 @@ async function printClassement() {
     return `<div class="cp-pod cp-p${i+1}">
       <div class="cp-pod-medal">${medals[i]}</div>
       <div class="cp-pod-ord">${ords[i]}</div>
-      <div class="cp-pod-name">${cap(p.player)}</div>
+      <div class="cp-pod-name">${capH(p.player)}</div>
       <div class="cp-pod-pts">${p.points} <span class="cp-pod-ptslbl">pts</span></div>
     </div>`;
   }).join('');
@@ -872,7 +871,7 @@ async function printClassement() {
   const gridHtml = (players, startRank) => players.map((p,i) =>
     `<div class="cp-entry">
       <span class="cp-rank">${startRank+i}</span>
-      <span class="cp-name">${cap(p.player)}</span>
+      <span class="cp-name">${capH(p.player)}</span>
       <span class="cp-pts">${p.points}</span>
     </div>`
   ).join('');
@@ -922,13 +921,13 @@ async function openPlayerModal(playerName) {
     const extraTag=r.extra?'<span style="font-size:9px;color:var(--text-muted);margin-left:4px">extra</span>':'';
     return `<tr style="border-top:1px solid rgba(195,120,20,.05)">
       <td style="padding:8px;font-size:12px;color:var(--text-dim)">${fmtDate(r.date)}</td>
-      <td style="padding:8px"><span class="tournament-badge">${getTNameSync(r.tournamentId)}</span></td>
+      <td style="padding:8px"><span class="tournament-badge">${escapeHtml(getTNameSync(r.tournamentId))}</span></td>
       <td style="padding:8px"><span class="place-badge-sm ${pc}">${r.place}</span>${extraTag}</td>
       <td style="padding:8px"><span class="pts-badge">+${r.points}</span></td>
     </tr>`;
   }).join('');
   document.getElementById('modal-content').innerHTML=`
-    <div class="modal-name">${cap(playerName)}</div>
+    <div class="modal-name">${capH(playerName)}</div>
     <div class="modal-pts">${total} <small>pts</small></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
       <div class="stat-item"><div class="stat-v">${results.length}</div><div class="stat-k">Tournois</div></div>
@@ -968,7 +967,15 @@ async function refreshTournamentsCache() {
 
 function fmtDate(str) { if(!str)return''; const[y,m,d]=str.split('-'); return`${d}/${m}/${y}`; }
 function cap(str)     { return str.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' '); }
+/* Nom prêt à insérer dans du HTML (texte ou attribut) : toujours utiliser capH, jamais cap, dans un gabarit */
+function capH(str)    { return escapeHtml(cap(str)); }
 function fmtEur(n)    { const f=n.toFixed(2);const[i,d]=f.split('.');return parseInt(i).toLocaleString('fr-FR')+(d==='00'?' €':','+d+' €'); }
+
+/* Clic sur un joueur (classement, podium) : le nom est lu dans data-player, jamais écrit dans un onclick */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-player]');
+  if (el) openPlayerModal(el.dataset.player);
+});
 
 // ══════════════════════════════════════════════════════
 init().then(refreshTournamentsCache).then(autoSuggestByDate);

@@ -222,8 +222,9 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/vendor/supabase_js.js"></script>
 <script src="../shared/barriere.js"></script>
+<script src="../shared/html.js"></script>
 <script src="../shared/supabase.js"></script>
 <script src="../shared/tournaments.js"></script>
 <script src="../shared/auth.js"></script>
@@ -316,17 +317,17 @@ function tmCardHtml(t) {
     ? `${t.points.length} place${t.points.length > 1 ? 's' : ''} · ${t.points.slice(0,4).join(', ')}${t.points.length > 4 ? '…' : ''}`
     : '- aucun barème';
   return `<div class="tm-card">
-    <div class="tm-card-name">${t.name}</div>
-    <div class="tm-card-buyin">${t.buyin} €</div>
+    <div class="tm-card-name">${escapeHtml(t.name)}</div>
+    <div class="tm-card-buyin">${escapeHtml(t.buyin)} €</div>
     <div class="tm-card-meta">
-      ${t.pp    != null ? `<span class="tm-card-meta-chip">PP ${t.pp}€</span>` : ''}
-      ${t.frais != null ? `<span class="tm-card-meta-chip">Frais ${t.frais}€</span>` : ''}
+      ${t.pp    != null ? `<span class="tm-card-meta-chip">PP ${escapeHtml(t.pp)}€</span>` : ''}
+      ${t.frais != null ? `<span class="tm-card-meta-chip">Frais ${escapeHtml(t.frais)}€</span>` : ''}
     </div>
     <div class="tm-card-pts">${ptsTxt}</div>
     <div class="tm-card-actions">
-      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editTournament('${t.id}')"><i class="ico ico-edit"></i> Modifier</button>
-      <button class="btn-icon danger" title="Supprimer" aria-label="Supprimer ce tournoi"
-        onclick="deleteTournament('${t.id}')"><i class="ico ico-del"></i></button>
+      <button class="btn btn-ghost btn-sm" style="flex:1" data-id="${escapeHtml(t.id)}" onclick="editTournament(this.dataset.id)"><i class="ico ico-edit"></i> Modifier</button>
+      <button class="btn-icon danger" title="Supprimer" aria-label="Supprimer ce tournoi" data-id="${escapeHtml(t.id)}"
+        onclick="deleteTournament(this.dataset.id)"><i class="ico ico-del"></i></button>
     </div>
   </div>`;
 }

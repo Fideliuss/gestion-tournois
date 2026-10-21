@@ -1,0 +1,4 @@
+# Bibliotheques tierces et polices : aucune conversion de fin de ligne, pour que les empreintes de shared/vendor/LISEZMOI.md restent valables
+shared/vendor/* -text
+*.woff2 binary
+*.ttf binary
