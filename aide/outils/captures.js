@@ -39,14 +39,18 @@ getBreakListPlanning:async function(k){return k==='2026-10'?JSON.parse(JSON.stri
 saveBreakListPlanning:async function(){},deleteBreakListPlanning:async function(){},getBreakListConfig:async function(){return null},saveBreakListConfig:async function(){}};})();</script>`;
 
 // Base simulée de l'espace Tournois : administrateur, tournois, saison complète, extras ; rien n'est écrit
-const BASE_TN = `<script>(function(){var R=${JSON.stringify(SAISON.results)},S=${JSON.stringify(SAISON.sessions)},T=${JSON.stringify(TOURNOIS)},X=${JSON.stringify(EXTRAS)},ST=${JSON.stringify(STAFF)};
+const BASE_TN = `<script>(function(){var R=${JSON.stringify(SAISON.results)},S=${JSON.stringify(SAISON.sessions)},T=${JSON.stringify(TOURNOIS)},X=${JSON.stringify(EXTRAS)},ST=${JSON.stringify(STAFF)},PM=${JSON.stringify(REGLAGES_FICTIFS)};
 var cp=function(o){return JSON.parse(JSON.stringify(o))},nop=async function(){};
 window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
 getResults:async function(){return cp(R)},getResultsByMonth:async function(m){return cp(R.filter(function(r){return r.date.slice(0,7)===m}))},getSessions:async function(){return cp(S)},getSeasonClosures:async function(){return[]},
 insertResults:async function(a){return a},insertSession:nop,updateResult:nop,deleteResult:nop,deleteResultsBySession:nop,updateSession:nop,deleteSession:nop,closeSeason:nop,reopenSeason:nop,
-getTournaments:async function(){return cp(T)},upsertTournament:nop,deleteTournament:nop,getExtras:async function(){return cp(X)},insertExtra:nop,updateExtra:nop,deleteExtra:nop,getParametre:async function(k){return k==='declaration_encadrement'?cp(ST):null},saveParametre:nop};})();</script>`;
-// Réglages enregistrés dans le navigateur : les courriers par défaut de l'application contiennent de vrais noms, on les remplace (l'encadrement fictif passe par la base simulée : getParametre)
-const SEED_TN = `<script>try{localStorage.setItem('courriers_tpl',${JSON.stringify(JSON.stringify(TPL))});localStorage.setItem('extras_emarg_2026_42',${JSON.stringify(JSON.stringify({ x1: { lun: true, mer: true, ven: true }, x2: { lun: true, mar: true, jeu: true }, x3: { mer: true, ven: true, sam: true, dim: true, _hours: { dim: '17:30' } }, x4: { mar: true, mer: true }, x5: { ven: true, sam: true, dim: true }, x6: { lun: true, jeu: true, ven: true }, x7: { mer: true, jeu: true }, _dayHours: { sam: '21:30' } }))});}catch(e){}</script>`;
+getTournaments:async function(){return cp(T)},upsertTournament:nop,deleteTournament:nop,getExtras:async function(){return cp(X)},insertExtra:nop,updateExtra:nop,deleteExtra:nop,getParametre:async function(k){return k==='declaration_encadrement'?cp(ST):null},saveParametre:nop,
+getParametres:async function(p){return Object.keys(PM).filter(function(k){return k.indexOf(p)===0}).map(function(k){return{cle:k,valeur:cp(PM[k])}})}};})();</script>`;
+// Réglages enregistrés en base (table parametres, voir shared/reglages.js) : les courriers par défaut de l'application n'ont plus de nom de signataire, on met un modèle fictif ; émargement fictif des extras
+const REGLAGES_FICTIFS = {
+  courriers_modeles: TPL,
+  extras_emargement_2026_42: { x1: { lun: true, mer: true, ven: true }, x2: { lun: true, mar: true, jeu: true }, x3: { mer: true, ven: true, sam: true, dim: true, _hours: { dim: '17:30' } }, x4: { mar: true, mer: true }, x5: { ven: true, sam: true, dim: true }, x6: { lun: true, jeu: true, ven: true }, x7: { mer: true, jeu: true }, _dayHours: { sam: '21:30' } },
+};
 
 // Espace Training : croupiers fictifs et leurs sessions ; les fonctions de suivi de la base sont recalculées ici à partir des sessions
 const TR = data.entrainement();
@@ -213,7 +217,7 @@ function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
   h = h.replace(/<script src="(?:\.\.\/)*shared\/vendor\/supabase_js\.js"><\/script>\s*/, '')
     .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : BASE_TN; })
-    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 || isTda(c) ? '' : isTr(c) ? SEED(c.seed || 7) : SEED_TN))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
+    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 || isTda(c) ? '' : isTr(c) ? SEED(c.seed || 7) : ''))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')
     .replace('</body>', '<script>window.addEventListener("load",function(){setTimeout(function(){' + c.actions + '},900)});</script></body>');
   const file = path.join(path.dirname(path.join(ROOT, c.page)), '_qa_aide_' + c.nom + '.html');

@@ -139,6 +139,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── barriere.js                - Scripts partagés (thème, favicon)
 │   ├── vendor/                    - Bibliothèques tierces hébergées (supabase-js, SheetJS), versions fixées : voir LISEZMOI.md
 │   ├── mot_de_passe.js            - Règles de mot de passe, messages et générateur (tests : `node shared/mot_de_passe.test.js`)
+│   ├── inactivite.js              - Déconnexion automatique après inactivité (30 min admin et mcd, 2 h les autres)
+│   ├── reglages.js                - Réglages partagés entre les postes (table parametres), reprise de l'ancienne copie locale (tests : `node shared/reglages.test.js`)
 │   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
@@ -162,10 +164,13 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── admin/
 │   ├── config_tournois.html       - CRUD tournois + semainier + barème de points
 │   ├── comptes.html / .css / .js  - Gestion des comptes : liste filtrable + matrice des accès par rôle
+│   ├── journal.html / .css / .js  - Journal d'audit : qui a fait quoi, filtres, recherche, export CSV (lecture seule, admin)
+│   ├── journal_texte.js / .test.js - Texte lisible de chaque ligne du journal (testé sous Node)
 │   ├── config_training.html / .js / .css - Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
 │   │   ├── declaration.html       - Déclarations mensuelles (Tournois + Extras)
 │   │   ├── declaration.css / .js
+│   │   ├── donnees.js             - Valeurs par défaut, clés des réglages en base et lectures, communes à Déclarations et Courriers
 │   │   ├── courriers.html         - Générateur de courrier (menu Administration tournois)
 │   │   └── courriers.css / .js
 │   └── extras/
@@ -224,7 +229,10 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     │   └── manage-users/          - Edge Function : CRUD comptes (admin only, vérifié côté serveur) : index.ts, handler.ts, regles.ts + handler.test.ts
     ├── tests/
     │   ├── acces_donnees.test.sql  - tests RLS des tables extras, results, sessions, tournaments (transaction annulée)
-    │   └── securite_fonctions.test.sql - tests des droits d'exécution et du search_path des fonctions
+    │   ├── securite_fonctions.test.sql - tests des droits d'exécution et du search_path des fonctions
+    │   ├── journal_audit.test.sql  - tests du journal d'audit (écriture par déclencheurs, lecture admin, purge)
+    │   ├── parametres.test.sql     - tests des droits sur la table parametres (réglages, émargement des extras)
+    │   └── purge_emargement.test.sql - tests de la purge de l'émargement des extras (12 mois)
     └── migrations/
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
@@ -233,6 +241,9 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
         ├── acces_donnees.sql                - accès aux données par panel : extras, results, sessions, tournaments
         ├── securite_fonctions.sql           - fonctions SQL : plus appelables sans connexion, search_path fixé
+        ├── journal_audit.sql                - journal d'audit en ajout seul (qui a modifié quoi), sans donnée personnelle
+        ├── journal_audit_cron.sql           - purge planifiée du journal (12 mois), à appliquer après journal_audit.sql
+        ├── purge_emargement.sql             - purge planifiée de l'émargement des extras (12 mois), à appliquer après journal_audit_cron.sql
         ├── parametres.sql                   - paramètres partagés entre les postes (clé / valeur JSON), accès par le panel admin-tournois
         └── tda.sql                          - règlement TDA : éditions et blocs de texte (lecture par panel tda)
 ```

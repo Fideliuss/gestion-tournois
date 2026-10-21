@@ -87,7 +87,7 @@ var AIDE_GUIDES = [
       {
         title: "Imprimer",
         text: "<p>Le bouton <b>Imprimer</b> n'est actif que lorsque tout le pool est distribué. Il ouvre l'aperçu d'impression avec le nombre de joueurs, le buy-in, le nombre de places payées, la date et le tableau des gains.</p>"
-          + "<p>Vos montants sont conservés dans ce navigateur : vous les retrouvez en revenant sur la page. Choisir un autre tournoi les efface.</p>",
+          + "<p>Vos montants sont conservés dans ce navigateur jusqu'à votre déconnexion : vous les retrouvez en revenant sur la page. Choisir un autre tournoi les efface.</p>",
         imgs: [],
       },
     ],
@@ -287,7 +287,7 @@ var AIDE_GUIDES = [
         title: "Régler les tournois de chaque jour",
         text: "<p>Le bouton <b>Réglages</b> ouvre trois onglets. <b>Tournois</b> donne, pour chaque jour de la semaine : si un tournoi a lieu (case <b>Actif</b>), son heure, la cave, le nombre de joueurs maximum, les rachats, le bounty et le numéro d'annexe.</p>"
           + "<p><b>Enregistrer</b> applique les changements ; <b>Réinitialiser</b> revient aux valeurs d'origine. <b>Retour à la déclaration</b> ferme les réglages.</p>"
-          + "<p>Les réglages sont enregistrés dans le navigateur de l'ordinateur utilisé : sur un autre poste, il faut les saisir de nouveau.</p>",
+          + "<p>Les réglages sont enregistrés dans l'application et communs à tous les postes : ce que vous réglez ici se retrouve sur n'importe quel ordinateur.</p>",
         imgs: [{ src: 'captures/ad_decl_reglages.png', alt: 'Les réglages des tournois de chaque jour' }],
       },
       {
@@ -342,7 +342,7 @@ var AIDE_GUIDES = [
       {
         title: "Modifier les destinataires et les signatures",
         text: "<p>Le bouton <b>Réglages</b> remplace le courrier par l'éditeur des destinataires. Pour chacun des trois courriers : le destinataire (une ligne par entrée), l'appel, la formule de politesse, le nom du signataire et la liste des autres destinataires mis en copie.</p>"
-          + "<p><b>Enregistrer</b> garde vos changements ; <b>Réinitialiser</b> revient aux valeurs d'origine ; <b>Retour au courrier</b> ferme l'éditeur. Ces réglages sont enregistrés dans le navigateur de l'ordinateur utilisé.</p>",
+          + "<p><b>Enregistrer</b> garde vos changements ; <b>Réinitialiser</b> revient aux valeurs d'origine ; <b>Retour au courrier</b> ferme l'éditeur. Ces réglages sont enregistrés dans l'application et communs à tous les postes. Le nom du signataire se saisit ici, une seule fois.</p>",
         imgs: [{ src: 'captures/ad_courrier_reglages.png', alt: "L'éditeur des destinataires et signatures" }],
       },
       {
@@ -379,7 +379,7 @@ var AIDE_GUIDES = [
       {
         title: "Imprimer la feuille",
         text: "<p><b>Imprimer / PDF</b> sort la feuille d'émargement en A4 paysage : une fiche par extra, 16 fiches par page. Au-delà, la feuille continue sur une page suivante, avec « Page n/N » en en-tête.</p>"
-          + "<p>Les présences et les heures de la semaine sont enregistrées dans le navigateur de l'ordinateur utilisé ; la liste des extras, elle, est commune à tous.</p>",
+          + "<p>Les présences et les heures de la semaine sont enregistrées dans l'application, comme la liste des extras : elles sont communes à tous les postes.</p>",
         imgs: [],
       },
     ],
@@ -451,8 +451,8 @@ var AIDE_GUIDES = [
         imgs: [],
       },
       {
-        title: "Les réglages ont disparu sur un autre ordinateur",
-        text: "<p>Les réglages de la déclaration, des courriers et de l'émargement sont enregistrés dans le navigateur de l'ordinateur où ils ont été saisis. Sur un autre poste, ou après un effacement des données du navigateur, il faut les saisir de nouveau.</p>",
+        title: "Un message dit que les réglages ne s'enregistrent pas",
+        text: "<p>Les réglages de la déclaration, des courriers et de l'émargement sont enregistrés dans l'application. Si un bandeau rouge indique qu'ils n'ont pas pu être chargés ou enregistrés, la connexion avec l'application a été interrompue : rechargez la page. Tant que le bandeau est affiché, vos modifications ne sont pas enregistrées.</p>",
         imgs: [],
       },
       {
