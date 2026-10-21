@@ -162,6 +162,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── admin/
 │   ├── config_tournois.html       - CRUD tournois + semainier + barème de points
 │   ├── comptes.html / .css / .js  - Gestion des comptes : liste filtrable + matrice des accès par rôle
+│   ├── journal.html / .css / .js  - Journal d'audit : qui a fait quoi, filtres, recherche, export CSV (lecture seule, admin)
+│   ├── journal_texte.js / .test.js - Texte lisible de chaque ligne du journal (testé sous Node)
 │   ├── config_training.html / .js / .css - Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
 │   ├── declaration/
 │   │   ├── declaration.html       - Déclarations mensuelles (Tournois + Extras)

@@ -293,6 +293,18 @@ const SB = {
     return this._callUsers('DELETE', { id });
   },
 
+  // ── Journal d'audit (lecture réservée aux admins par la RLS ; aucune écriture possible depuis le navigateur) ──
+  // Les plus récentes d'abord. since : date ISO minimale ; objet : domaine ('compte', 'extras'...) ; avant : id de la dernière ligne reçue
+  async getJournal({ since, objet, avant, limite = 100 } = {}) {
+    let q = _sb.from('journal_audit').select('*').order('id', { ascending: false }).limit(limite);
+    if (since) q = q.gte('at', since);
+    if (objet) q = q.eq('objet', objet);
+    if (avant) q = q.lt('id', avant);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data || [];
+  },
+
   // ── Training ───────────────────────────────────────
   async getTrainingConfig(game) {
     const { data, error } = await _sb.from('training_config')
