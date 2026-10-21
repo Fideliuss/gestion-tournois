@@ -101,9 +101,9 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
       const { data, error } = await admin.auth.admin.createUser({
         email,
         password,
-        // user_metadata.role n'a aucun effet de sécurité (seul app_metadata compte) ; il est encore écrit pour les pages de
-        // la version déjà en production, qui le lisent. À retirer une fois la version qui lit app_metadata publiée.
-        user_metadata: { role, first_name: firstName, last_name: lastName },
+        // Le rôle n'est écrit que dans app_metadata (seul lu par les pages, la RLS et cette fonction). user_metadata est
+        // modifiable par l'utilisateur lui-même : on n'y met que le prénom et le nom.
+        user_metadata: { first_name: firstName, last_name: lastName },
         app_metadata:  { role },
         email_confirm: true,
       });
@@ -134,12 +134,12 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
       const lastName  = nettoyerNom(body.lastName);
 
       const updates: Record<string, unknown> = {};
-      if (role !== undefined || firstName !== undefined || lastName !== undefined) {
+      if (firstName !== undefined || lastName !== undefined) {
         // On repart des métadonnées actuelles : modifier le prénom ne doit pas effacer les autres champs
         const { data: current, error: curErr } = await admin.auth.admin.getUserById(id);
         if (curErr || !current?.user) return json({ error: 'Compte introuvable' }, 404);
         const meta: Record<string, unknown> = { ...(current.user.user_metadata || {}) };
-        if (role !== undefined)      meta.role = role;   // compatibilité avec la version en production (voir POST)
+        delete meta.role;   // ancien doublon du rôle, sans effet : nettoyé au passage
         if (firstName !== undefined) meta.first_name = firstName;
         if (lastName !== undefined)  meta.last_name  = lastName;
         updates.user_metadata = meta;
