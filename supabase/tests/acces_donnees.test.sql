@@ -121,8 +121,8 @@ END $$;
 -- ── La fonction n'est pas appelable sans connexion (clé publique seule) ──
 DO $$
 BEGIN
-  ASSERT NOT has_function_privilege('anon', 'public.a_le_panel(text)', 'EXECUTE'), 'anon ne devait pas pouvoir appeler a_le_panel';
-  ASSERT has_function_privilege('authenticated', 'public.a_le_panel(text)', 'EXECUTE'), 'authenticated devait pouvoir appeler a_le_panel';
+  ASSERT NOT has_function_privilege('anon', 'public.can_use_panel(text)', 'EXECUTE'), 'anon ne devait pas pouvoir appeler can_use_panel';
+  ASSERT has_function_privilege('authenticated', 'public.can_use_panel(text)', 'EXECUTE'), 'authenticated devait pouvoir appeler can_use_panel';
 END $$;
 
 ROLLBACK;
