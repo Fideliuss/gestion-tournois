@@ -227,6 +227,11 @@ SB.onAuthStateChange((event, session) => {
   if (session) _redirect(session);
 })();
 
+// Retour d'une déconnexion automatique (shared/inactivite.js)
+if (new URLSearchParams(location.search).get('expire') === '1') {
+  document.getElementById('login-msg').textContent = "Vous avez été déconnecté après une période d'inactivité. Reconnectez-vous pour continuer.";
+}
+
 function _redirect(session) {
   window.location.replace('index.html');
 }

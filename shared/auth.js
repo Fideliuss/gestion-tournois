@@ -111,6 +111,10 @@ const AUTH = {
     } catch (e) { navOk = false; }
     overlay.remove();
     if (!navOk) AUTH._navFallback(root, loginUrl);
+    // Déconnexion automatique après inactivité (30 min admin et mcd, 2 h les autres) : chargée sans retarder la page
+    _loadScript('inactivite.js').then(function (ok) {
+      if (ok) INACTIVITE.demarrer({ role: userRole, onExpire: function () { AUTH.signOut(loginUrl + '?expire=1'); } });
+    });
     return session.user;
   },
 
@@ -148,7 +152,11 @@ const AUTH = {
   },
 
   async signOut(loginUrl = 'login.html') {
-    await SB.signOut();
+    // Même si le serveur ne répond pas (réseau coupé), on efface ce qui est local et on quitte la page
+    try { await SB.signOut(); } catch (e) { /* session locale quand même fermée par supabase-js */ }
+    if (typeof INACTIVITE === 'undefined') await _loadScript('inactivite.js');
+    if (typeof INACTIVITE !== 'undefined') INACTIVITE.nettoyer(window.sessionStorage, window.localStorage);
+    else { try { window.sessionStorage.clear(); } catch (e) { /* stockage indisponible */ } }
     window.location.replace(loginUrl);
   },
 

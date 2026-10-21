@@ -139,6 +139,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── barriere.js                - Scripts partagés (thème, favicon)
 │   ├── vendor/                    - Bibliothèques tierces hébergées (supabase-js, SheetJS), versions fixées : voir LISEZMOI.md
 │   ├── mot_de_passe.js            - Règles de mot de passe, messages et générateur (tests : `node shared/mot_de_passe.test.js`)
+│   ├── inactivite.js              - Déconnexion automatique après inactivité (30 min admin et mcd, 2 h les autres)
 │   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
