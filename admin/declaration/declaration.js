@@ -7,29 +7,9 @@ const JOURS   = ['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMED
 const MOIS    = ['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
 const ORDINAL = ['1er','2ème','3ème','4ème','5ème','6ème','7ème','8ème','9ème','10ème'];
 
-const CFG_DEFAULT = {
-  0: { actif: true,  heure: '17:00', cave: 78,  joueurs: 150, rachats: true,  bounty: 0,  annexe: 'ANNEXE 4' },
-  1: { actif: true,  heure: '21:00', cave: 60,  joueurs: 150, rachats: true,  bounty: 0,  annexe: 'ANNEXE 5' },
-  2: { actif: true,  heure: '21:00', cave: 78,  joueurs: 150, rachats: true,  bounty: 25, annexe: 'ANNEXE 4' },
-  3: { actif: true,  heure: '21:00', cave: 56,  joueurs: 150, rachats: true,  bounty: 0,  annexe: 'ANNEXE 1' },
-  4: { actif: true,  heure: '21:00', cave: 45,  joueurs: 150, rachats: true,  bounty: 0,  annexe: 'ANNEXE 2' },
-  5: { actif: true,  heure: '21:00', cave: 125, joueurs: 150, rachats: true,  bounty: 0,  annexe: 'ANNEXE 3' },
-  6: { actif: false, heure: '21:00', cave: 0,   joueurs: 150, rachats: false, bounty: 0,  annexe: '' },
-};
-
-const DIST_STD = [33, 20, 13, 9, 7, 5, 4, 3, 3, 3];
-
-const ANNEXES_DEFAULT = [
-  { id: 'a1', nom: 'ANNEXE 1', joueurs: 150, cave: 56,  dist: [...DIST_STD] },
-  { id: 'a2', nom: 'ANNEXE 2', joueurs: 150, cave: 45,  dist: [...DIST_STD] },
-  { id: 'a3', nom: 'ANNEXE 3', joueurs: 150, cave: 125, dist: [...DIST_STD] },
-  { id: 'a4', nom: 'ANNEXE 4', joueurs: 150, cave: 78,  dist: [...DIST_STD] },
-  { id: 'a5', nom: 'ANNEXE 5', joueurs: 150, cave: 60,  dist: [...DIST_STD] },
-];
-
 /* ── État ── */
-let cfg     = loadCfg();
-let annexes = loadAnnexes();
+let cfg     = deepClone(CFG_DEFAULT);       // remplacés par les réglages de la base au démarrage (voir DOMContentLoaded)
+let annexes = deepClone(ANNEXES_DEFAULT);
 
 /* Encadrement (directeurs et arbitres) : enregistré en base (table parametres, clé declaration_encadrement), donc partagé entre
    les postes. Les noms ne sont PAS dans le code (dépôt public). Listes vides tant que la base n'a pas répondu. */
@@ -37,24 +17,18 @@ const STAFF_CLE = 'declaration_encadrement';
 let staff       = { directeurs: [], arbitres: [] };
 let staffEtat   = 'chargement';   // chargement | ok | erreur : on n'enregistre que si 'ok' (sinon on écraserait la base avec des listes vides)
 
-function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
-function loadCfg()     { try { const s = localStorage.getItem('decl_cfg');     return s ? JSON.parse(s) : deepClone(CFG_DEFAULT);     } catch { return deepClone(CFG_DEFAULT); } }
-function loadAnnexes() { try { const s = localStorage.getItem('decl_annexes'); return s ? JSON.parse(s) : deepClone(ANNEXES_DEFAULT); } catch { return deepClone(ANNEXES_DEFAULT); } }
-function saveCfg()     { localStorage.setItem('decl_cfg',     JSON.stringify(cfg));     }
-function saveAnnexes() { localStorage.setItem('decl_annexes', JSON.stringify(annexes)); }
-
-/* ── Ad-hoc ── */
-function adhocKey(m, y)       { return `decl_adhoc_${y}_${m}`; }
-function loadAdhoc(m, y)      { try { const s = localStorage.getItem(adhocKey(m, y)); return s ? JSON.parse(s) : []; } catch { return []; } }
-function saveAdhoc(m, y, lst) { localStorage.setItem(adhocKey(m, y), JSON.stringify(lst)); }
-
-/* ── Exceptions ponctuelles ── */
-function excKey(m, y)       { return `decl_exc_${y}_${m}`; }
-function loadExc(m, y)      { try { const s = localStorage.getItem(excKey(m, y)); return s ? JSON.parse(s) : {}; } catch { return {}; } }
-function saveExc(m, y, data) { localStorage.setItem(excKey(m, y), JSON.stringify(data)); }
+/* Écritures des réglages : table parametres (shared/reglages.js). Lectures et clés : donnees.js */
+function saveCfg()     { REGLAGES.ecrire('declaration_config',  cfg);     }
+function saveAnnexes() { REGLAGES.ecrire('declaration_annexes', annexes); }
+function saveAdhoc(m, y, lst)  { REGLAGES.ecrire(adhocKey(m, y), lst);  }
+function saveExc(m, y, data)   { REGLAGES.ecrire(excKey(m, y), data);   }
 
 /* ── Init ── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await REGLAGES.charger(DECL_PREFIXE, DECL_ADOPTIONS);   // sans réponse de la base : bandeau, et rien ne s'enregistre
+  cfg     = loadCfg();
+  annexes = loadAnnexes();
+
   initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS);   // mois suivant par défaut
 
   SB.getExtras().then(list => { extras = list; renderExtrasDeclaration(); }).catch(() => {});

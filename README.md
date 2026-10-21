@@ -170,6 +170,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── declaration/
 │   │   ├── declaration.html       - Déclarations mensuelles (Tournois + Extras)
 │   │   ├── declaration.css / .js
+│   │   ├── donnees.js             - Valeurs par défaut, clés des réglages en base et lectures, communes à Déclarations et Courriers
 │   │   ├── courriers.html         - Générateur de courrier (menu Administration tournois)
 │   │   └── courriers.css / .js
 │   └── extras/
