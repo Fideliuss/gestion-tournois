@@ -92,6 +92,13 @@
       <div class="fl">Rôle</div>
       <select id="inp-role"></select>
     </div>
+    <div class="fg form-field" id="fg-status" style="display:none">
+      <div class="fl">Statut</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <span id="status-text"></span>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-toggle" onclick="toggleDisabled()"></button>
+      </div>
+    </div>
 
     <div class="form-actions">
       <button class="btn btn-gold"  id="btn-save" onclick="saveForm()">Créer le compte →</button>

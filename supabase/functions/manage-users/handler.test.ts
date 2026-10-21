@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { traiter } from './handler.ts';
-import { emailValide, erreurMotDePasse, roleDe, nettoyerNom } from './regles.ts';
+import { emailValide, erreurMotDePasse, estDesactive, roleDe, nettoyerNom } from './regles.ts';
 
 let ok = 0;
 async function test(nom: string, f: () => Promise<void> | void) {
@@ -17,12 +17,14 @@ const AUTRE   = { id: 'u-autre',  email: 'autre@x.fr',  app_metadata: { role: 'a
 const FLOOR   = { id: 'u-floor',  email: 'floor@x.fr',  app_metadata: { role: 'floor' },  user_metadata: { role: 'floor', first_name: 'Fl', last_name: 'Oor' } };
 // Cas d'attaque : l'utilisateur a modifié lui-même son user_metadata
 const PIRATE  = { id: 'u-pirate', email: 'pirate@x.fr', app_metadata: { role: 'floor' },  user_metadata: { role: 'admin' } };
-const SANS    = { id: 'u-sans',   email: 'sans@x.fr',   app_metadata: {},                 user_metadata: { role: 'admin' } };
+const SANS    = { id: 'u-sans',   email: 'sans@x.fr',   app_metadata: {},                 user_metadata: { role: 'admin' }, banned_until: '2999-01-01T00:00:00Z' };
+// Blocage échu : le compte est de nouveau actif
+const ECHU    = { id: 'u-echu',   email: 'echu@x.fr',   app_metadata: { role: 'floor' },  user_metadata: {}, banned_until: '2000-01-01T00:00:00Z' };
 const JETONS: Record<string, any> = { adm: ADMIN, flo: FLOOR, pir: PIRATE, san: SANS };
 
 function monde(echecAudit = false) {
   const journal: any[] = [];
-  const comptes: any[] = [ADMIN, AUTRE, FLOOR, PIRATE, SANS].map(u => ({ ...u }));
+  const comptes: any[] = [ADMIN, AUTRE, FLOOR, PIRATE, SANS, ECHU].map(u => ({ ...u }));
   const roles = ['admin', 'floor', 'croupier'];
   const creerClient = (_url: string, cle: string, opts?: any) => {
     if (cle === 'anon') {
@@ -60,6 +62,11 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
     assert.strictEqual(roleDe(PIRATE), 'floor');
     assert.strictEqual(roleDe(SANS), '');
     assert.strictEqual(roleDe(null), '');
+  });
+  await test('compte désactivé : banned_until dans le futur seulement', () => {
+    assert.ok(estDesactive({ banned_until: '2999-01-01T00:00:00Z' }));
+    assert.ok(!estDesactive({ banned_until: '2000-01-01T00:00:00Z' }));
+    assert.ok(!estDesactive({ banned_until: null }) && !estDesactive({}) && !estDesactive(null));
   });
   await test('adresse e-mail et mot de passe', () => {
     assert.ok(emailValide('jean.dupont@groupebarriere.com'));
@@ -113,6 +120,11 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
     assert.strictEqual(parId['u-pirate'], 'floor');   // son user_metadata dit admin : ignoré
     assert.strictEqual(parId['u-sans'], 'floor');
     assert.strictEqual(parId['u-admin'], 'admin');
+  });
+  await test('la liste indique les comptes désactivés (blocage en cours seulement)', async () => {
+    const r = await appel('GET', 'adm');
+    const off = Object.fromEntries(r.json.users.map((u: any) => [u.id, u.disabled]));
+    assert.deepStrictEqual([off['u-sans'], off['u-echu'], off['u-floor']], [true, false, false]);
   });
 
   console.log('\nCréation');
@@ -189,6 +201,38 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
   });
   await test('supprimer son propre compte : 400', async () => assert.strictEqual((await appel('DELETE', 'adm', { id: 'u-admin' })).status, 400));
   await test('id manquant : 400', async () => assert.strictEqual((await appel('DELETE', 'adm', {})).status, 400));
+  console.log('\nDésactivation');
+  await test('désactiver un compte : blocage de 10 ans, journalisé', async () => {
+    const r = await appel('PATCH', 'adm', { id: 'u-floor', disabled: true });
+    assert.strictEqual(r.status, 200);
+    const [, , a] = r.journal.find(j => j[0] === 'updateUserById');
+    assert.deepStrictEqual(a, { ban_duration: '87600h' });
+    const [l] = r.journal.filter(j => j[0] === 'audit').map(j => j[2]);
+    assert.deepStrictEqual({ action: l.action, ligne: l.ligne, detail: l.detail }, { action: 'compte_desactive', ligne: 'u-floor', detail: { email: 'floor@x.fr' } });
+  });
+  await test('réactiver un compte désactivé : blocage levé, journalisé', async () => {
+    const r = await appel('PATCH', 'adm', { id: 'u-sans', disabled: false });
+    assert.strictEqual(r.status, 200);
+    assert.deepStrictEqual(r.journal.find(j => j[0] === 'updateUserById')[2], { ban_duration: 'none' });
+    assert.strictEqual(r.journal.find(j => j[0] === 'audit')[2].action, 'compte_reactive');
+  });
+  await test('déjà dans l\'état demandé : appliqué mais rien dans le journal', async () => {
+    const r = await appel('PATCH', 'adm', { id: 'u-floor', disabled: false });
+    assert.strictEqual(r.status, 200);
+    assert.strictEqual(r.journal.filter(j => j[0] === 'audit').length, 0);
+  });
+  await test('on ne peut pas désactiver son propre compte (mais on peut le « réactiver »)', async () => {
+    const r = await appel('PATCH', 'adm', { id: 'u-admin', disabled: true });
+    assert.strictEqual(r.status, 400);
+    assert.ok(!r.journal.some(j => j[0] === 'updateUserById'));
+    assert.strictEqual((await appel('PATCH', 'adm', { id: 'u-admin', disabled: false })).status, 200);
+  });
+  await test('valeur non booléenne : 400 ; compte introuvable : 404 ; non admin : 403', async () => {
+    assert.strictEqual((await appel('PATCH', 'adm', { id: 'u-floor', disabled: 'oui' })).status, 400);
+    assert.strictEqual((await appel('PATCH', 'adm', { id: 'u-fantome', disabled: true })).status, 404);
+    assert.strictEqual((await appel('PATCH', 'flo', { id: 'u-autre', disabled: true })).status, 403);
+  });
+
   console.log('\nJournal d\'audit');
   const audits = (r: { journal: any[] }) => r.journal.filter(j => j[0] === 'audit').map(j => j[2]);
   await test('création : compte_cree avec l\'acteur, l\'e-mail et le rôle, sans mot de passe', async () => {

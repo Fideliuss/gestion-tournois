@@ -2,7 +2,10 @@
 // (index.ts fournit Deno.env et createClient ; handler.test.ts fournit des faux clients).
 // Requiert : secret SERVICE_ROLE_KEY (supabase secrets set). Appelée uniquement par les admins.
 
-import { emailValide, erreurMotDePasse, estAdmin, nettoyerNom, roleDe } from './regles.ts';
+import { emailValide, erreurMotDePasse, estAdmin, estDesactive, nettoyerNom, roleDe } from './regles.ts';
+
+// Un compte désactivé est bloqué (ban_duration) : plus de connexion ni de renouvellement de session. Ses données sont conservées.
+const DUREE_DESACTIVATION = '87600h';   // 10 ans, « jusqu'à réactivation »
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -91,6 +94,7 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
         lastName:   u.user_metadata?.last_name  || '',
         createdAt:  u.created_at,
         lastSignIn: u.last_sign_in_at,
+        disabled:   estDesactive(u),
       }));
       return json({ users });
     }
@@ -129,8 +133,10 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
     if (req.method === 'PATCH') {
       const body = await lireCorps(req);
       if (!body) return json({ error: 'Corps de requête invalide' }, 400);
-      const { id, role, password } = body;
+      const { id, role, password, disabled } = body;
       if (!id || typeof id !== 'string') return json({ error: 'id est requis' }, 400);
+      if (disabled !== undefined && typeof disabled !== 'boolean') return json({ error: 'disabled doit être vrai ou faux' }, 400);
+      if (disabled === true && id === user.id) return json({ error: 'Vous ne pouvez pas désactiver votre propre compte' }, 400);
 
       if (role !== undefined) {
         if (!(await roleExiste(admin, role))) return json({ error: 'Rôle inconnu' }, 400);
@@ -149,7 +155,7 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
 
       const updates: Record<string, unknown> = {};
       let actuel: any = null;
-      if (role !== undefined || firstName !== undefined || lastName !== undefined) {
+      if (role !== undefined || firstName !== undefined || lastName !== undefined || disabled !== undefined) {
         const { data: current, error: curErr } = await admin.auth.admin.getUserById(id);
         if (curErr || !current?.user) return json({ error: 'Compte introuvable' }, 404);
         actuel = current.user;
@@ -165,6 +171,7 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
       }
       if (role !== undefined) updates.app_metadata = { role };
       if (password) updates.password = password;
+      if (disabled !== undefined) updates.ban_duration = disabled ? DUREE_DESACTIVATION : 'none';
 
       const { error } = await admin.auth.admin.updateUserById(id, updates);
       if (error) throw error;
@@ -175,6 +182,9 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
       if (firstName !== undefined || lastName !== undefined) champs.push('nom');
       if (password) champs.push('mot_de_passe');
       if (champs.length) await journaliser(admin, user, 'compte_modifie', id, { champs, ...detail });
+      if (disabled !== undefined && disabled !== estDesactive(actuel)) {
+        await journaliser(admin, user, disabled ? 'compte_desactive' : 'compte_reactive', id, { email: actuel.email });
+      }
       return json({ ok: true });
     }
 

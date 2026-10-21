@@ -20,6 +20,12 @@ export function estAdmin(utilisateur: { app_metadata?: { role?: unknown } } | nu
   return roleDe(utilisateur) === 'admin';
 }
 
+// Compte désactivé : bloqué par Supabase jusqu'à une date (banned_until) encore dans le futur
+export function estDesactive(utilisateur: { banned_until?: string | null } | null | undefined, maintenant: number = Date.now()): boolean {
+  const jusqua = utilisateur && utilisateur.banned_until;
+  return !!jusqua && Date.parse(jusqua) > maintenant;
+}
+
 export function emailValide(v: unknown): v is string {
   return typeof v === 'string' && v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 }

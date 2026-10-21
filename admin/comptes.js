@@ -13,7 +13,7 @@ let _tab          = 'comptes';
 let _draft        = {};        // accès en cours d'édition dans la matrice : { slug: [id de page…] } (rien n'est envoyé avant « Enregistrer »)
 
 const INACTIVE_DAYS = 60;       // « inactif » : jamais connecté, ou aucune connexion depuis plus de 60 jours
-const f = { q: '', role: null, inactive: false, noname: false, group: false, sort: { key: 'email', dir: 1 } };
+const f = { q: '', role: null, inactive: false, noname: false, disabled: false, group: false, sort: { key: 'email', dir: 1 } };
 const EMAIL_DOMAIN = '@groupebarriere.com';      // adresses : initiale du prénom + nom (ex. jdupont@groupebarriere.com pour Jean Dupont)
 let _emailTouched = false;                          // l'adresse proposée n'est plus recalculée dès qu'on la modifie à la main
 
@@ -115,7 +115,8 @@ function slugify(str) {
 
 // ── Comptes : état d'un compte ───────────────────────
 function daysSince(iso) { return Math.floor((Date.now() - new Date(iso).getTime()) / 864e5); }
-function isInactive(u) { return !u.lastSignIn || daysSince(u.lastSignIn) > INACTIVE_DAYS; }
+// Un compte déjà désactivé n'est plus à examiner : il n'apparaît pas dans « Inactifs »
+function isInactive(u) { return !u.disabled && (!u.lastSignIn || daysSince(u.lastSignIn) > INACTIVE_DAYS); }
 const isNoName = u => !u.firstName || !u.lastName;
 const fullName = u => [u.firstName, u.lastName].filter(Boolean).join(' ');
 const sortName = u => ((u.lastName || u.email) + ' ' + (u.firstName || '')).toLowerCase();
@@ -143,20 +144,24 @@ function renderChips() {
   if (f.role && !counts[f.role]) f.role = null;
   const noName = _users.filter(isNoName).length;
   if (f.noname && !noName) f.noname = false;
+  const nbOff = _users.filter(u => u.disabled).length;
+  if (f.disabled && !nbOff) f.disabled = false;
   const chip = (key, label, n, on, dot, title) =>
     '<button class="fchip' + (on ? ' on' : '') + '" data-chip="' + esc(key) + '" aria-pressed="' + on + '"' + (title ? ' title="' + esc(title) + '"' : '') + '>'
     + (dot ? '<i class="fchip-dot" style="background:' + dot + '"></i>' : '') + esc(label) + ' <span class="fchip-n">' + n + '</span></button>';
   $('chips').innerHTML =
-    chip('all', 'Tous', _users.length, !f.role && !f.inactive && !f.noname)
+    chip('all', 'Tous', _users.length, !f.role && !f.inactive && !f.noname && !f.disabled)
     + sortedRoles().filter(r => counts[r.slug]).map(r => chip('role:' + r.slug, r.label, counts[r.slug], f.role === r.slug, roleColor(r.slug))).join('')
     + '<span class="fchip-sep"></span>'
     + chip('inactive', 'Inactifs', _users.filter(isInactive).length, f.inactive, null, 'Jamais connectés ou sans connexion depuis plus de ' + INACTIVE_DAYS + ' jours')
+    + (nbOff ? chip('disabled', 'Désactivés', nbOff, f.disabled, null, 'Comptes bloqués : ils ne peuvent plus se connecter, leurs données sont conservées') : '')
     + (noName ? chip('noname', 'Sans nom', noName, f.noname, null, 'Comptes dont le prénom ou le nom n\'est pas renseigné') : '');
 }
 
 function onChipClick(key) {
-  if (key === 'all') { f.role = null; f.inactive = false; f.noname = false; }
+  if (key === 'all') { f.role = null; f.inactive = false; f.noname = false; f.disabled = false; }
   else if (key === 'inactive') f.inactive = !f.inactive;
+  else if (key === 'disabled') f.disabled = !f.disabled;
   else if (key === 'noname') f.noname = !f.noname;
   else { const slug = key.slice(5); f.role = f.role === slug ? null : slug; }
   renderChips(); renderAccounts();
@@ -175,7 +180,7 @@ function setSort(key) {
 }
 
 function resetFilters() {
-  f.role = null; f.inactive = false; f.noname = false; $('search').value = '';
+  f.role = null; f.inactive = false; f.noname = false; f.disabled = false; $('search').value = '';
   renderChips(); renderAccounts();
 }
 
@@ -191,10 +196,11 @@ function compareUsers(a, b) {
 // ── Comptes : liste ──────────────────────────────────
 function rowHtml(u) {
   const c = roleColor(u.role), last = lastInfo(u);
-  return '<div class="cp-row" data-id="' + esc(u.id) + '">'
+  return '<div class="cp-row' + (u.disabled ? ' off' : '') + '" data-id="' + esc(u.id) + '">'
     + '<div class="cp-who"><div class="cp-avatar" style="background:' + c + '22;color:' + c + '">' + esc(initials(u)) + '</div>'
     + '<div class="cp-ident" title="' + esc(u.email) + '">'
     + (fullName(u) ? '<div class="cp-email">' + esc(fullName(u)) + '</div><div class="cp-sub">' + esc(u.email) + '</div>' : '<div class="cp-email">' + esc(u.email) + '</div>')
+    + (u.disabled ? '<div class="cp-off" title="Ce compte ne peut plus se connecter">Désactivé</div>' : '')
     + '</div></div>'
     + '<div class="cp-rolecol"><span class="cp-role" style="background:' + c + '1f;color:' + c + '"><i class="fchip-dot" style="background:' + c + '"></i>' + esc(roleLabel(u.role)) + '</span></div>'
     + '<div class="cp-last ' + last.cls + '" title="' + esc(last.title) + '">' + esc(last.text) + '</div>'
@@ -220,6 +226,7 @@ function renderAccounts() {
     (!f.role || u.role === f.role)
     && (!f.inactive || isInactive(u))
     && (!f.noname || isNoName(u))
+    && (!f.disabled || u.disabled)
     && (!f.q || (u.email + ' ' + fullName(u) + ' ' + roleLabel(u.role)).toLowerCase().indexOf(f.q) >= 0)
   ).sort(compareUsers);
 
@@ -469,6 +476,7 @@ function openForm() {
   $('email-hint').style.display = '';
   $('pwd-hint').style.display = 'none';
   $('btn-save').textContent = 'Créer le compte →';
+  $('fg-status').style.display = 'none';
   formErr('');
   populateRoleSelect(f.role || 'floor');           // le filtre de rôle en cours sert de valeur par défaut
   $('modal-form').classList.add('open');
@@ -484,6 +492,9 @@ function editAccount(u) {
   $('email-hint').style.display = 'none';
   $('pwd-hint').style.display = '';
   $('btn-save').textContent = 'Enregistrer →';
+  $('fg-status').style.display = '';
+  $('status-text').textContent = u.disabled ? 'Désactivé : ce compte ne peut plus se connecter.' : 'Actif.';
+  $('btn-toggle').textContent = u.disabled ? 'Réactiver le compte' : 'Désactiver le compte';
   formErr('');
   populateRoleSelect(u.role);
   $('modal-form').classList.add('open');
@@ -527,6 +538,25 @@ function genererMotDePasse() {
   majReglesMotDePasse();
 }
 
+
+// ── Désactivation / réactivation d'un compte ─────────
+// Réversible, contrairement à la suppression : le compte et son historique sont conservés. Une session déjà ouverte
+// peut rester valable jusqu'à une heure (durée de vie du jeton), puis plus aucune connexion n'est possible.
+async function toggleDisabled() {
+  const u = _users.find(x => x.id === _editId);
+  if (!u) return;
+  const nom = fullName(u) || u.email, desactiver = !u.disabled;
+  if (desactiver && !confirm('Désactiver « ' + nom + ' » ?\n\nCette personne ne pourra plus se connecter (au plus tard dans l\'heure si une session est déjà ouverte). Son historique est conservé et vous pourrez réactiver le compte à tout moment.')) return;
+  const btn = $('btn-toggle');
+  btn.disabled = true; formErr('');
+  try {
+    await SB.updateUser(u.id, { disabled: desactiver });
+    closeForm();
+    showOk(desactiver ? 'Compte désactivé.' : 'Compte réactivé.');
+    await loadAndRender();
+  } catch (e) { formErr('Erreur : ' + e.message); }
+  finally { btn.disabled = false; }
+}
 
 // ── Suppression d'un compte ──────────────────────────
 async function deleteAccount(id, email) {
