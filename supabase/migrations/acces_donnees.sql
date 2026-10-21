@@ -16,8 +16,8 @@
 --  Tests : supabase/tests/acces_donnees.test.sql
 -- ══════════════════════════════════════════════════════
 
--- Vrai si l'utilisateur connecté est admin ou si son rôle (app_metadata) a le panel demandé
-CREATE OR REPLACE FUNCTION public.can_use_panel(panel text)
+-- Vrai si le rôle de l'utilisateur connecté (app_metadata) a ce panel dans app_roles.panels, ou si ce rôle est admin (admin passe sans case cochée)
+CREATE OR REPLACE FUNCTION public.has_panel_access(panel text)
 RETURNS boolean
 LANGUAGE sql STABLE
 SET search_path = public
@@ -31,32 +31,32 @@ AS $$
 $$;
 
 -- Supabase accorde EXECUTE à anon sur toute nouvelle fonction du schéma public : le retirer explicitement
-REVOKE ALL ON FUNCTION public.can_use_panel(text) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.can_use_panel(text) TO authenticated;
+REVOKE ALL ON FUNCTION public.has_panel_access(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_panel_access(text) TO authenticated;
 
 -- extras
 DROP POLICY IF EXISTS "allow authenticated all" ON public.extras;
 DROP POLICY IF EXISTS "extras_admin_tournois" ON public.extras;
 CREATE POLICY "extras_admin_tournois" ON public.extras
   FOR ALL TO authenticated
-  USING (public.can_use_panel('admin-tournois'))
-  WITH CHECK (public.can_use_panel('admin-tournois'));
+  USING (public.has_panel_access('admin-tournois'))
+  WITH CHECK (public.has_panel_access('admin-tournois'));
 
 -- results
 DROP POLICY IF EXISTS "allow authenticated all" ON public.results;
 DROP POLICY IF EXISTS "results_leaderboard" ON public.results;
 CREATE POLICY "results_leaderboard" ON public.results
   FOR ALL TO authenticated
-  USING (public.can_use_panel('leaderboard'))
-  WITH CHECK (public.can_use_panel('leaderboard'));
+  USING (public.has_panel_access('leaderboard'))
+  WITH CHECK (public.has_panel_access('leaderboard'));
 
 -- sessions
 DROP POLICY IF EXISTS "allow authenticated all" ON public.sessions;
 DROP POLICY IF EXISTS "sessions_leaderboard" ON public.sessions;
 CREATE POLICY "sessions_leaderboard" ON public.sessions
   FOR ALL TO authenticated
-  USING (public.can_use_panel('leaderboard'))
-  WITH CHECK (public.can_use_panel('leaderboard'));
+  USING (public.has_panel_access('leaderboard'))
+  WITH CHECK (public.has_panel_access('leaderboard'));
 
 -- tournaments : lecture large (trois espaces s'en servent), écriture limitée
 DROP POLICY IF EXISTS "allow authenticated all" ON public.tournaments;
@@ -64,8 +64,8 @@ DROP POLICY IF EXISTS "tournaments_lecture" ON public.tournaments;
 DROP POLICY IF EXISTS "tournaments_ecriture" ON public.tournaments;
 CREATE POLICY "tournaments_lecture" ON public.tournaments
   FOR SELECT TO authenticated
-  USING (public.can_use_panel('leaderboard') OR public.can_use_panel('prize-pool') OR public.can_use_panel('admin-tournois'));
+  USING (public.has_panel_access('leaderboard') OR public.has_panel_access('prize-pool') OR public.has_panel_access('admin-tournois'));
 CREATE POLICY "tournaments_ecriture" ON public.tournaments
   FOR ALL TO authenticated
-  USING (public.can_use_panel('prize-pool') OR public.can_use_panel('admin-tournois'))
-  WITH CHECK (public.can_use_panel('prize-pool') OR public.can_use_panel('admin-tournois'));
+  USING (public.has_panel_access('prize-pool') OR public.has_panel_access('admin-tournois'))
+  WITH CHECK (public.has_panel_access('prize-pool') OR public.has_panel_access('admin-tournois'));
