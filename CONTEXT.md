@@ -76,6 +76,7 @@ admin/
   config_tournois.html  CRUD tournois - semainier par jour, barème de points, guard panel:'admin-tournois'
   config_training.html/.js/.css  Configuration des modules (admin) - réglages de tous les modules de training, un onglet par jeu
   comptes.html/.css/.js  Gestion des comptes - onglets Comptes (liste filtrable) et Rôles & accès (matrice des accès), guard role:'admin' (intentionnellement admin-only, pas de panel)
+  journal.html/.css/.js  Journal d'audit (admin, lecture seule) : filtres période et domaine, recherche, « Afficher plus » (100 par 100), export CSV ; `journal_texte.js` met chaque ligne en phrase (testé : `node admin/journal_texte.test.js`) ; entrée « Journal d'audit » du menu Gestion
   declaration/
     declaration.html  Déclarations mensuelles (Tournois + Extras) et réglages des tournois, guard panel:'admin-tournois'
     declaration.css / declaration.js

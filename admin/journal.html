@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Journal d'audit - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="journal.css" />
+</head>
+<body>
+
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Journal <em>d'audit</em></div>
+  </div>
+
+  <div id="alert-err" class="alert-warn" style="display:none"></div>
+
+  <div class="jr-tools">
+    <input type="search" id="search" placeholder="Rechercher une personne ou une action…" autocomplete="off" oninput="rendre()" aria-label="Rechercher dans le journal" />
+    <select id="sel-objet" onchange="recharger()" aria-label="Domaine"></select>
+    <button class="btn btn-ghost btn-sm" id="btn-csv" onclick="exporterCsv()" title="Exporte les lignes affichées">Exporter (CSV)</button>
+  </div>
+  <div class="fchips" id="chips-periode" role="group" aria-label="Période"></div>
+
+  <div class="jr-count" id="count"></div>
+  <div id="liste" class="jr-list">Chargement…</div>
+  <div class="jr-more"><button class="btn btn-ghost" id="btn-plus" onclick="chargerPlus()" style="display:none">Afficher plus</button></div>
+</div>
+
+<script src="../shared/vendor/supabase_js.js"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/html.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="journal_texte.js"></script>
+<script src="journal.js"></script>
+<script>AUTH.guard({ loginUrl: '../login.html', role: 'admin' });</script>
+</body>
+</html>

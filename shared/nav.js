@@ -60,7 +60,10 @@ const NAV = (function () {
   // Menu « Gestion », à droite de la barre : une partie par domaine (Comptes, Training), chaque entrée selon les droits
   // (`role: 'admin'` = admins seulement ; `panel` = droit de l'espace, comme dans les gardes de page)
   const GESTION = { label: 'Gestion', groups: [
-    { title: 'Comptes',  items: [ { label: 'Gestion des comptes',       href: 'admin/comptes.html',            role: 'admin' } ] },
+    { title: 'Comptes',  items: [
+      { label: 'Gestion des comptes',       href: 'admin/comptes.html',            role: 'admin' },
+      { label: 'Journal d\'audit',          href: 'admin/journal.html',            role: 'admin' },
+    ] },
     { title: 'Training', items: [
       { label: 'Suivi équipe',              href: T + 'suivi/suivi_manager.html', panel: 'training-suivi' },
       { label: 'Configuration des modules', href: 'admin/config_training.html',   role: 'admin' },
