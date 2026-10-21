@@ -49,6 +49,9 @@ function creerReglages(deps) {
     return suite;
   }
 
+  // Valeur sans contenu (null, [], {}) : l'état par défaut de la page la remplace
+  const vide = function (v) { return v === null || v === undefined || (Array.isArray(v) ? v.length === 0 : (typeof v === 'object' && Object.keys(v).length === 0)); };
+
   // adoptions : [{ locale: 'nom_de_la_cle_locale' | /motif/, cle: 'cle_en_base' | function (resultatDuMotif) -> cle }]
   async function adopter(adoptions) {
     let n = 0;
@@ -61,7 +64,7 @@ function creerReglages(deps) {
         if (!cle || cache[cle] !== undefined) continue;                      // la base fait foi
         let valeur;
         try { valeur = JSON.parse(deps.local.getItem(k)); } catch (e) { continue; }
-        if (valeur === null || valeur === undefined) continue;
+        if (vide(valeur)) continue;                                          // rien à reprendre : l'état par défaut suffit
         if (await ecrire(cle, valeur)) n++;
       }
     }

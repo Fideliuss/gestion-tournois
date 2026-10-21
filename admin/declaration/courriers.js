@@ -12,21 +12,7 @@ function deMois(month) {
   return /^[aeiouyàâéèêëîïôöùûü]/i.test(MOIS_LETTRE[month - 1]) ? 'd\'' : 'de ';
 }
 
-const CFG_DEFAULT = {
-  0: { actif: true,  heure: '17:00', cave: 78,  joueurs: 150, rachats: true,  bounty: 0, annexe: 'ANNEXE 4' },
-  1: { actif: true,  heure: '21:00', cave: 60,  joueurs: 150, rachats: true,  bounty: 0, annexe: 'ANNEXE 5' },
-  2: { actif: true,  heure: '21:00', cave: 78,  joueurs: 150, rachats: true,  bounty: 25, annexe: 'ANNEXE 4' },
-  3: { actif: true,  heure: '21:00', cave: 56,  joueurs: 150, rachats: true,  bounty: 0, annexe: 'ANNEXE 1' },
-  4: { actif: true,  heure: '21:00', cave: 45,  joueurs: 150, rachats: true,  bounty: 0, annexe: 'ANNEXE 2' },
-  5: { actif: true,  heure: '21:00', cave: 125, joueurs: 150, rachats: true,  bounty: 0, annexe: 'ANNEXE 3' },
-  6: { actif: false, heure: '21:00', cave: 0,   joueurs: 150, rachats: false, bounty: 0, annexe: '' },
-};
-
-/* ── Chargement localStorage (miroir de declaration.js) ── */
-function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
-function loadCfg()         { try { const s = localStorage.getItem('decl_cfg');              return s ? JSON.parse(s) : deepClone(CFG_DEFAULT); } catch { return deepClone(CFG_DEFAULT); } }
-function loadAdhoc(m, y)   { try { const s = localStorage.getItem(`decl_adhoc_${y}_${m}`); return s ? JSON.parse(s) : []; } catch { return []; } }
-function loadExc(m, y)     { try { const s = localStorage.getItem(`decl_exc_${y}_${m}`);   return s ? JSON.parse(s) : {}; } catch { return {}; } }
+/* Valeurs par défaut, clés et lectures des réglages (loadCfg, loadAdhoc, loadExc) : donnees.js */
 
 /* ── Calendrier (même logique que declaration.js) ── */
 function buildRows(month, year) {
@@ -91,7 +77,7 @@ const TEMPLATES_DEFAULT = {
     salutation: 'Monsieur le Ministre,',
     closingParagraph: 'À cet effet, vous trouverez ci-joints les conditions d\'organisation, conformément à l\'Article 57-5 et suivants de l\'Arrêté du 14 mai 2007, tenant compte des modifications introduites par l\'Arrêté rectificatif du 24 décembre 2008, ainsi que du décret n°2009-937 du 29 juillet 2009, ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Ministre, à l\'assurance de ma haute considération.',
-    sigName:          'Stéphane GARCIA',
+    sigName:          '',                 // nom du signataire : enregistré en base depuis Réglages, jamais dans le code (dépôt public)
     autresItems: [
       'SIPJ 33 / Section des Courses & Jeux',
       'Préfecture de la Gironde',
@@ -114,7 +100,7 @@ const TEMPLATES_DEFAULT = {
     salutation: null,
     closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Commissaire Divisionnaire, à l\'assurance de ma haute considération.',
-    sigName:          'Stéphane GARCIA',
+    sigName:          '',                 // nom du signataire : enregistré en base depuis Réglages, jamais dans le code (dépôt public)
     autresItems: [
       'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
       'Préfecture de la Gironde',
@@ -134,7 +120,7 @@ const TEMPLATES_DEFAULT = {
     salutation: null,
     closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Madame, à l\'assurance de ma haute considération.',
-    sigName:          'Stéphane GARCIA',
+    sigName:          '',                 // nom du signataire : enregistré en base depuis Réglages, jamais dans le code (dépôt public)
     autresItems: [
       'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
       'SIPJ 33 / Section des Courses & Jeux',
@@ -152,16 +138,11 @@ let annulDates = [];
 
 /* ── Persistance des templates ── */
 function loadTemplates() {
-  try {
-    const s = localStorage.getItem('courriers_tpl');
-    const overrides = s ? JSON.parse(s) : {};
-    templates = deepClone(TEMPLATES_DEFAULT);
-    ['ministre', 'sipj', 'prefecture'].forEach(id => {
-      if (overrides[id]) Object.assign(templates[id], overrides[id]);
-    });
-  } catch {
-    templates = deepClone(TEMPLATES_DEFAULT);
-  }
+  const overrides = REGLAGES.lire('courriers_modeles', {});
+  templates = deepClone(TEMPLATES_DEFAULT);
+  ['ministre', 'sipj', 'prefecture'].forEach(id => {
+    if (overrides[id]) Object.assign(templates[id], overrides[id]);
+  });
 }
 
 function saveTemplates() {
@@ -176,7 +157,7 @@ function saveTemplates() {
       autresItems:    t.autresItems,
     };
   });
-  localStorage.setItem('courriers_tpl', JSON.stringify(data));
+  REGLAGES.ecrire('courriers_modeles', data);
 }
 
 /* ── Éditeur de templates ── */
@@ -207,7 +188,7 @@ function renderTplEditor(tplId) {
         </div>
         <div class="fg">
           <label class="fl">Nom du signataire</label>
-          <input type="text" id="tpl-signame" value="${esc(t.sigName)}"/>
+          <input type="text" id="tpl-signame" value="${esc(t.sigName)}" placeholder="Nom du signataire"/>
         </div>
         <div class="fg">
           <label class="fl">Autres destinataires (1 par ligne)</label>
@@ -247,8 +228,10 @@ function toggleTplPanel() {
 }
 
 function resetTemplates() {
-  if (!confirm('Réinitialiser les destinataires par défaut ?')) return;
-  localStorage.removeItem('courriers_tpl');
+  if (!confirm('Réinitialiser les destinataires par défaut ? Le nom du signataire est conservé.')) return;
+  const signataires = {};
+  ['ministre', 'sipj', 'prefecture'].forEach(id => { signataires[id] = { sigName: templates[id].sigName }; });
+  REGLAGES.ecrire('courriers_modeles', signataires);
   loadTemplates();
   renderTplEditor(currentTplTab);
   renderAll();
@@ -293,7 +276,9 @@ function esc(str) {
 }
 
 /* ── Initialisation ── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Réglages de la base : sans réponse, bandeau et rien ne s'enregistre
+  await Promise.all([REGLAGES.charger(DECL_PREFIXE, DECL_ADOPTIONS), REGLAGES.charger(COURRIERS_PREFIXE, COURRIERS_ADOPTIONS)]);
   const now      = new Date();
   initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS_LETTRE);   // mois suivant par défaut
 

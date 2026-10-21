@@ -125,13 +125,13 @@ function faux(opts) {
     assert.strictEqual(n, true);
     assert.deepStrictEqual(f.base.extras_emargement_2026_43, { deja: 1 });
     assert.deepStrictEqual(f.base.extras_emargement_2026_44, { e1: { lundi: true } });
-    assert.deepStrictEqual(f.base.extras_emargement_2025_52, {});
-    assert.strictEqual(Object.keys(f.base).length, 3);
+    assert.strictEqual(f.base.extras_emargement_2025_52, undefined);   // vide : rien à reprendre
+    assert.strictEqual(Object.keys(f.base).length, 2);
   });
 
-  await test('reprise : une copie locale illisible ou vide est ignorée', async () => {
-    const f = faux({ local: { extras_cfg: 'pas du json', extras_vide: 'null' } });
-    await f.R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }, { locale: 'extras_vide', cle: 'extras_vide2' }, { locale: 'absente', cle: 'extras_z' }]);
+  await test('reprise : une copie locale illisible ou vide (null, [], {}) est ignorée', async () => {
+    const f = faux({ local: { extras_cfg: 'pas du json', extras_vide: 'null', extras_liste: '[]', extras_objet: '{}' } });
+    await f.R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }, { locale: 'extras_vide', cle: 'extras_vide2' }, { locale: 'absente', cle: 'extras_z' }, { locale: 'extras_liste', cle: 'extras_l' }, { locale: 'extras_objet', cle: 'extras_o' }]);
     assert.deepStrictEqual(f.base, {});
   });
 
