@@ -30,6 +30,19 @@ async function roleExiste(admin: any, slug: unknown): Promise<boolean> {
   return !!data;
 }
 
+// Journal d'audit (table journal_audit, voir supabase/migrations/journal_audit.sql). Jamais de mot de passe ni de donnée
+// inutile. Un échec d'écriture ne bloque pas l'opération déjà faite : il est tracé dans les journaux de la fonction.
+async function journaliser(admin: any, acteur: any, action: string, ligne: string, detail: Record<string, unknown>): Promise<void> {
+  try {
+    const { error } = await admin.from('journal_audit').insert({
+      acteur: acteur.id, role_acteur: roleDe(acteur) || 'système', action, objet: 'compte', ligne, detail,
+    });
+    if (error) console.error('journal_audit : ' + error.message);
+  } catch (e) {
+    console.error('journal_audit : ' + (e instanceof Error ? e.message : String(e)));
+  }
+}
+
 async function lireCorps(req: Request): Promise<Record<string, unknown> | null> {
   try {
     const corps = await req.json();
@@ -108,6 +121,7 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
         email_confirm: true,
       });
       if (error) throw error;
+      await journaliser(admin, user, 'compte_cree', data.user.id, { email: data.user.email, role });
       return json({ user: { id: data.user.id, email: data.user.email, role, firstName, lastName } }, 201);
     }
 
@@ -134,10 +148,15 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
       const lastName  = nettoyerNom(body.lastName);
 
       const updates: Record<string, unknown> = {};
-      if (firstName !== undefined || lastName !== undefined) {
-        // On repart des métadonnées actuelles : modifier le prénom ne doit pas effacer les autres champs
+      let actuel: any = null;
+      if (role !== undefined || firstName !== undefined || lastName !== undefined) {
         const { data: current, error: curErr } = await admin.auth.admin.getUserById(id);
         if (curErr || !current?.user) return json({ error: 'Compte introuvable' }, 404);
+        actuel = current.user;
+      }
+      if (firstName !== undefined || lastName !== undefined) {
+        // On repart des métadonnées actuelles : modifier le prénom ne doit pas effacer les autres champs
+        const current = { user: actuel };
         const meta: Record<string, unknown> = { ...(current.user.user_metadata || {}) };
         delete meta.role;   // ancien doublon du rôle, sans effet : nettoyé au passage
         if (firstName !== undefined) meta.first_name = firstName;
@@ -149,6 +168,13 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
 
       const { error } = await admin.auth.admin.updateUserById(id, updates);
       if (error) throw error;
+
+      const champs: string[] = [];
+      const detail: Record<string, unknown> = {};
+      if (role !== undefined && role !== roleDe(actuel)) { champs.push('role'); detail.role_avant = roleDe(actuel); detail.role_apres = role; }
+      if (firstName !== undefined || lastName !== undefined) champs.push('nom');
+      if (password) champs.push('mot_de_passe');
+      if (champs.length) await journaliser(admin, user, 'compte_modifie', id, { champs, ...detail });
       return json({ ok: true });
     }
 
@@ -159,8 +185,11 @@ export async function traiter(req: Request, deps: Dependances): Promise<Response
       if (!id || typeof id !== 'string') return json({ error: 'id est requis' }, 400);
       if (id === user.id) return json({ error: 'Impossible de supprimer votre propre compte' }, 400);
 
+      // Pour garder une trace de qui a été supprimé (le compte n'existera plus ensuite)
+      const { data: cible } = await admin.auth.admin.getUserById(id);
       const { error } = await admin.auth.admin.deleteUser(id);
       if (error) throw error;
+      await journaliser(admin, user, 'compte_supprime', id, { email: cible?.user?.email ?? null, role: cible?.user ? roleDe(cible.user) : null });
       return json({ ok: true });
     }
 
