@@ -20,7 +20,7 @@ const PIRATE  = { id: 'u-pirate', email: 'pirate@x.fr', app_metadata: { role: 'f
 const SANS    = { id: 'u-sans',   email: 'sans@x.fr',   app_metadata: {},                 user_metadata: { role: 'admin' } };
 const JETONS: Record<string, any> = { adm: ADMIN, flo: FLOOR, pir: PIRATE, san: SANS };
 
-function monde() {
+function monde(echecAudit = false) {
   const journal: any[] = [];
   const comptes: any[] = [ADMIN, AUTRE, FLOOR, PIRATE, SANS].map(u => ({ ...u }));
   const roles = ['admin', 'floor', 'croupier'];
@@ -30,7 +30,10 @@ function monde() {
       return { auth: { getUser: async () => JETONS[jeton] ? { data: { user: JETONS[jeton] }, error: null } : { data: { user: null }, error: { message: 'jeton invalide' } } } };
     }
     return {
-      from: (table: string) => ({ select: () => ({ eq: (_c: string, v: string) => ({ maybeSingle: async () => ({ data: table === 'app_roles' && roles.includes(v) ? { slug: v } : null, error: null }) }) }) }),
+      from: (table: string) => ({
+        select: () => ({ eq: (_c: string, v: string) => ({ maybeSingle: async () => ({ data: table === 'app_roles' && roles.includes(v) ? { slug: v } : null, error: null }) }) }),
+        insert: async (ligne: any) => { journal.push(['audit', table, ligne]); return { error: echecAudit ? { message: 'refusé' } : null }; },
+      }),
       auth: { admin: {
         listUsers: async () => ({ data: { users: comptes }, error: null }),
         getUserById: async (id: string) => { const u = comptes.find(c => c.id === id); return u ? { data: { user: u }, error: null } : { data: { user: null }, error: { message: 'introuvable' } }; },
@@ -186,6 +189,46 @@ async function appel(methode: string, jeton: string | null, corps?: unknown, m =
   });
   await test('supprimer son propre compte : 400', async () => assert.strictEqual((await appel('DELETE', 'adm', { id: 'u-admin' })).status, 400));
   await test('id manquant : 400', async () => assert.strictEqual((await appel('DELETE', 'adm', {})).status, 400));
+  console.log('\nJournal d\'audit');
+  const audits = (r: { journal: any[] }) => r.journal.filter(j => j[0] === 'audit').map(j => j[2]);
+  await test('création : compte_cree avec l\'acteur, l\'e-mail et le rôle, sans mot de passe', async () => {
+    const r = await appel('POST', 'adm', bon);
+    const [a] = audits(r);
+    assert.strictEqual(audits(r).length, 1);
+    assert.strictEqual(r.journal.find(j => j[0] === 'audit')[1], 'journal_audit');
+    assert.deepStrictEqual({ ...a, detail: undefined }, { acteur: 'u-admin', role_acteur: 'admin', action: 'compte_cree', objet: 'compte', ligne: 'nouveau', detail: undefined });
+    assert.deepStrictEqual(a.detail, { email: 'jean.dupont@groupebarriere.com', role: 'croupier' });
+    assert.ok(!JSON.stringify(a).includes(bon.password));
+  });
+  await test('changement de rôle : compte_modifie avec l\'ancien et le nouveau rôle', async () => {
+    const [a] = audits(await appel('PATCH', 'adm', { id: 'u-floor', role: 'croupier' }));
+    assert.strictEqual(a.action, 'compte_modifie');
+    assert.strictEqual(a.ligne, 'u-floor');
+    assert.deepStrictEqual(a.detail, { champs: ['role'], role_avant: 'floor', role_apres: 'croupier' });
+  });
+  await test('rôle renvoyé inchangé : rien dans le journal', async () => assert.strictEqual(audits(await appel('PATCH', 'adm', { id: 'u-admin', role: 'admin' })).length, 0));
+  await test('mot de passe et nom : champs journalisés, jamais le mot de passe ni le nom saisi', async () => {
+    const mdp = 'Bb2@'.repeat(4);
+    const r = await appel('PATCH', 'adm', { id: 'u-floor', password: mdp, firstName: 'Prenomsecret' });
+    const [a] = audits(r);
+    assert.deepStrictEqual(a.detail.champs, ['nom', 'mot_de_passe']);
+    assert.ok(!JSON.stringify(a).includes(mdp) && !JSON.stringify(a).includes('Prenomsecret'));
+  });
+  await test('suppression : compte_supprime avec l\'e-mail du compte supprimé', async () => {
+    const [a] = audits(await appel('DELETE', 'adm', { id: 'u-floor' }));
+    assert.strictEqual(a.action, 'compte_supprime');
+    assert.deepStrictEqual(a.detail, { email: 'floor@x.fr', role: 'floor' });
+  });
+  await test('demande refusée ou invalide : rien dans le journal', async () => {
+    assert.strictEqual(audits(await appel('POST', 'pir', bon)).length, 0);
+    assert.strictEqual(audits(await appel('POST', 'adm', { ...bon, role: 'dieu' })).length, 0);
+    assert.strictEqual(audits(await appel('DELETE', 'adm', { id: 'u-admin' })).length, 0);
+  });
+  await test('si le journal échoue, l\'opération reste réussie', async () => {
+    const r = await appel('POST', 'adm', bon, monde(true));
+    assert.strictEqual(r.status, 201);
+  });
+
   await test('méthode inconnue : 405', async () => assert.strictEqual((await appel('PUT', 'adm', {})).status, 405));
 
   console.log('\n' + ok + ' contrôles réussis' + (process.exitCode ? ', avec des échecs' : '') + '.');
