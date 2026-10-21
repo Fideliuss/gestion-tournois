@@ -25,11 +25,16 @@ const INACTIVITE = (function () {
   function reste(derniere, maintenant, delai) { return derniere + delai - maintenant; }
   function etat(restant) { return restant <= 0 ? 'expire' : restant <= PREAVIS_MS ? 'avertir' : 'actif'; }
 
-  // Efface ce qui ne doit pas survivre à une session : mémoire de l'onglet et horodatage d'activité.
-  // (La configuration enregistrée dans localStorage, propre au poste, n'est pas touchée ici : voir CONTEXT.md.)
+  // Efface ce qui ne doit pas survivre à une session : mémoire de l'onglet, horodatage d'activité, et l'état du calculateur de
+  // prize pool (pp_cfg : effectif et montants du tournoi en cours, sans donnée personnelle, mais propre au poste).
+  // Les réglages partagés sont en base (shared/reglages.js) ; leurs anciennes copies locales sont supprimées par ce module dès
+  // que la base les a reprises. Les préférences d'affichage (thème, regroupement des comptes) restent.
+  const CLES_LOCALES = [CLE, 'pp_cfg'];
   function nettoyer(session, local) {
     try { if (session) session.clear(); } catch (e) { /* stockage indisponible : rien à effacer */ }
-    try { if (local) local.removeItem(CLE); } catch (e) { /* idem */ }
+    CLES_LOCALES.forEach(function (k) {
+      try { if (local) local.removeItem(k); } catch (e) { /* idem */ }
+    });
   }
 
   // ── Horodatage partagé ──
