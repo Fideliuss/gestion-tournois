@@ -131,6 +131,7 @@ supabase/
     phase3_suivi_meta_et_acces_manager.sql  Phase 3 : training_sessions.meta (jsonb) + user_label, fonction can_view_training_stats(), policies de lecture manager (appliquée sur la base le 2026-10-04)
     phase4_uth_config_initiale.sql          Phase 4 : ligne `training_config` clé `uth` = `{"gains":{"max_bet":50}}` (appliquée sur la base le 2026-10-04)
     phase4_suivi_uth.sql                    Phase 4 : training_weak_points étendue aux 3 modules UTH (appliquée sur la base le 2026-10-04)
+    acces_donnees.sql                       Politiques RLS de extras, results, sessions, tournaments par panel (fonction has_panel_access) ; tests : supabase/tests/acces_donnees.test.sql
     parametres.sql                          Table parametres (clé / valeur JSON) pour les réglages partagés entre les postes, accès par le panel admin-tournois ; ne contient AUCUNE donnée (à exécuter dans le SQL Editor ou : supabase db query --linked -f supabase/migrations/parametres.sql ; **appliquée sur la base le 2026-10-15**, clé `declaration_encadrement` inscrite hors dépôt)
     phase3_suivi_fonctions_manager.sql      Phase 3 : fonctions d'agrégat de la vue manager (training_ranking, training_tables_best, training_weak_points, training_activity, training_activity_weekly) - appliquée le 2026-10-04
 ```
@@ -157,7 +158,7 @@ supabase/
   - Client JS : `@supabase/supabase-js` 2.117.3, **hébergé dans `shared/vendor/supabase_js.js`** (plus de CDN)
   - `shared/supabase.js` : objet `SB` - CRUD complet (résultats, sessions, tournois, extras, app_roles, training_config/sessions/results) + méthodes auth (`getSession`, `signOut`, `updatePassword`) + appel Edge Function (`listUsers`, `createUser`, `updateUser`, `deleteUser`) + mappers camelCase↔snake_case
   - Tables : `results`, `sessions`, `tournaments`, `extras`, `app_roles` (slug PK, label, panels jsonb, color), `training_config`, `training_sessions`, `training_results`
-  - **RLS** : politique `authenticated` sur toutes les tables. Écriture admin (`app_roles`, `training_config`) vérifiée via `(auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'` - **`app_metadata` et non `user_metadata`**, car ce dernier est modifiable côté client
+  - **RLS** : `extras` (panel `admin-tournois`), `results` et `sessions` (panel `leaderboard`), `tournaments` (lecture `leaderboard` / `prize-pool` / `admin-tournois`, écriture `prize-pool` / `admin-tournois`) passent par `has_panel_access('...')` (`supabase/migrations/acces_donnees.sql`) : un compte connecté sans le panel ne peut ni lire ni écrire ces tables par l'API. Tests : `supabase db query --linked -f supabase/tests/acces_donnees.test.sql` (transaction annulée). Écriture admin (`app_roles`, `training_config`) vérifiée via `(auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'` - **`app_metadata` et non `user_metadata`**, car ce dernier est modifiable côté client
 - **Auth e-mail + mot de passe** (Supabase Auth) :
   - `login.html` : page de connexion (email + password, redirect par rôle après authentification)
   - `shared/auth.js` : `AUTH.guard({ loginUrl, role, panel })` - overlay spinner, vérif session, vérif rôle (`role`), vérif panneau (`panel`, via table `app_roles`), montage de la barre de navigation
