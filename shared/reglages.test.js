@@ -12,7 +12,7 @@ function faux(opts) {
   const base = Object.assign({}, opts.base || {});
   const local = Object.assign({}, opts.local || {});
   const journal = [], messages = [];
-  const stockage = { get length() { return Object.keys(local).length; }, key: i => Object.keys(local)[i] || null, getItem: k => (k in local ? local[k] : null) };
+  const stockage = { get length() { return Object.keys(local).length; }, key: i => Object.keys(local)[i] || null, getItem: k => (k in local ? local[k] : null), removeItem: k => { delete local[k]; } };
   const deps = {
     lire: async p => { if (opts.lectureEchoue) throw new Error('réseau coupé'); return Object.keys(base).filter(c => c.indexOf(p) === 0).map(c => ({ cle: c, valeur: base[c] })); },
     ecrire: async (c, v) => { journal.push(['ecrire', c, JSON.stringify(v)]); if (opts.ecritureEchoue) throw new Error('refusé'); await new Promise(r => setTimeout(r, opts.delai ? opts.delai(c, journal.length) : 0)); base[c] = v; },
@@ -101,12 +101,13 @@ function faux(opts) {
     assert.strictEqual(await f.R.ecrire('extras_x', 1), true);
   });
 
-  await test('reprise : une clé locale est envoyée à la base si la base ne l\'a pas, la copie locale reste', async () => {
+  await test('reprise : une clé locale est envoyée à la base si la base ne l\'a pas, puis la copie locale est supprimée', async () => {
     const f = faux({ local: { extras_cfg: '{"weekdayTime":"21:00"}', autre: '1' } });
     await f.R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }]);
     assert.deepStrictEqual(f.base.extras_reglages, { weekdayTime: '21:00' });
     assert.deepStrictEqual(f.R.lire('extras_reglages'), { weekdayTime: '21:00' });
-    assert.strictEqual(f.local.extras_cfg, '{"weekdayTime":"21:00"}');   // jamais supprimée ici
+    assert.strictEqual(f.local.extras_cfg, undefined);   // la base a accusé réception : plus rien à garder sur le poste
+    assert.strictEqual(f.local.autre, '1');              // une clé hors reprise n'est jamais touchée
   });
 
   await test('reprise : la base fait foi, la copie locale d\'un autre poste n\'écrase rien', async () => {
@@ -114,6 +115,7 @@ function faux(opts) {
     await f.R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }]);
     assert.deepStrictEqual(f.base.extras_reglages, { weekdayTime: '19:00' });
     assert.deepStrictEqual(f.journal, []);
+    assert.strictEqual(f.local.extras_cfg, undefined);   // la base fait foi : la copie d'un autre poste est supprimée
   });
 
   await test('reprise par motif : une clé de base par clé locale, seulement celles qui manquent', async () => {
@@ -127,19 +129,50 @@ function faux(opts) {
     assert.deepStrictEqual(f.base.extras_emargement_2026_44, { e1: { lundi: true } });
     assert.strictEqual(f.base.extras_emargement_2025_52, undefined);   // vide : rien à reprendre
     assert.strictEqual(Object.keys(f.base).length, 2);
+    // copies locales : celles qui correspondent à une clé de reprise partent (reprises, déjà en base ou vides), le reste reste
+    assert.deepStrictEqual(Object.keys(f.local).sort(), ['extras_cfg', 'hors_sujet']);
   });
 
   await test('reprise : une copie locale illisible ou vide (null, [], {}) est ignorée', async () => {
     const f = faux({ local: { extras_cfg: 'pas du json', extras_vide: 'null', extras_liste: '[]', extras_objet: '{}' } });
     await f.R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }, { locale: 'extras_vide', cle: 'extras_vide2' }, { locale: 'absente', cle: 'extras_z' }, { locale: 'extras_liste', cle: 'extras_l' }, { locale: 'extras_objet', cle: 'extras_o' }]);
     assert.deepStrictEqual(f.base, {});
+    assert.deepStrictEqual(Object.keys(f.local), ['extras_cfg']);   // vides supprimées ; l'illisible est conservée (on ne sait pas ce que c'est)
   });
 
   await test('reprise : un échec d\'envoi est signalé, la copie locale reste, pas de plantage', async () => {
     const f = faux({ ecritureEchoue: true, local: { extras_cfg: '{"a":1}' } });
     await f.R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }]);
     assert.ok(/Enregistrement impossible/.test(f.messages.at(-1)));
-    assert.strictEqual(f.local.extras_cfg, '{"a":1}');
+    assert.strictEqual(f.local.extras_cfg, '{"a":1}');   // pas d'accusé de la base : la copie locale est la seule, elle reste
+  });
+
+  await test('nettoyage : jamais avant l\'accusé de réception de la base, même si la mémoire a déjà la valeur', async () => {
+    let echouer;
+    const local = { extras_cfg: '{"a":1}' };
+    const R = creerReglages({
+      lire: async () => [],
+      ecrire: () => new Promise((_, rejet) => { echouer = rejet; }),
+      local: { get length() { return Object.keys(local).length; }, key: i => Object.keys(local)[i], getItem: k => (k in local ? local[k] : null), removeItem: k => { delete local[k]; } },
+      signaler: () => {},
+    });
+    const attente = R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }]);
+    await new Promise(r => setTimeout(r, 20));
+    assert.strictEqual(local.extras_cfg, '{"a":1}');   // envoi en cours : la copie locale est encore là
+    echouer(new Error('coupure'));                      // l'envoi échoue
+    await attente;
+    assert.strictEqual(local.extras_cfg, '{"a":1}');
+  });
+
+  await test('chargement impossible : aucune copie locale n\'est supprimée', async () => {
+    const f = faux({ lectureEchoue: true, local: { extras_cfg: '{"a":1}', extras_emarg_2026_01: '{"e1":{"lundi":true}}' } });
+    await f.R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }, { locale: /^extras_emarg_(\d{4})_(\d{2})$/, cle: m => 'extras_emargement_' + m[1] + '_' + m[2] }]);
+    assert.strictEqual(Object.keys(f.local).length, 2);
+  });
+
+  await test('nettoyage : un stockage qui refuse la suppression ne fait pas échouer le chargement', async () => {
+    const R = creerReglages({ lire: async () => [], ecrire: async () => {}, local: { length: 1, key: () => 'extras_cfg', getItem: () => '{"a":1}', removeItem: () => { throw new Error('refusé'); } }, signaler: () => {} });
+    assert.strictEqual(await R.charger('extras_', [{ locale: 'extras_cfg', cle: 'extras_reglages' }]), true);
   });
 
   console.log('\n' + ok + ' contrôles réussis' + (process.exitCode ? ', avec des échecs' : '') + '.');

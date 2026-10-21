@@ -87,7 +87,7 @@ var AIDE_GUIDES = [
       {
         title: "Imprimer",
         text: "<p>Le bouton <b>Imprimer</b> n'est actif que lorsque tout le pool est distribué. Il ouvre l'aperçu d'impression avec le nombre de joueurs, le buy-in, le nombre de places payées, la date et le tableau des gains.</p>"
-          + "<p>Vos montants sont conservés dans ce navigateur : vous les retrouvez en revenant sur la page. Choisir un autre tournoi les efface.</p>",
+          + "<p>Vos montants sont conservés dans ce navigateur jusqu'à votre déconnexion : vous les retrouvez en revenant sur la page. Choisir un autre tournoi les efface.</p>",
         imgs: [],
       },
     ],

@@ -30,12 +30,12 @@ test('une session restée inactive toute une nuit est expirée à l\'ouverture',
   assert.strictEqual(I.etat(I.reste(dernier, matin, I.delaiPour('croupier'))), 'expire');
   assert.strictEqual(I.etat(I.reste(dernier, matin, I.delaiPour('admin'))), 'expire');
 });
-test('nettoyage : vide la mémoire de l\'onglet et l\'horodatage, sans toucher aux autres clés', () => {
+test('nettoyage : vide la mémoire de l\'onglet, l\'horodatage et l\'état du prize pool, sans toucher aux autres clés', () => {
   const journal = [];
   const session = { clear: () => journal.push('session.clear') };
   const local = { removeItem: k => journal.push('local.remove:' + k) };
   I.nettoyer(session, local);
-  assert.deepStrictEqual(journal, ['session.clear', 'local.remove:pm_activite']);
+  assert.deepStrictEqual(journal, ['session.clear', 'local.remove:pm_activite', 'local.remove:pp_cfg']);   // ni le thème ni les préférences
 });
 test('nettoyage : un stockage indisponible ne fait pas échouer la déconnexion', () => {
   const casse = { clear() { throw new Error('refusé'); }, removeItem() { throw new Error('refusé'); } };
