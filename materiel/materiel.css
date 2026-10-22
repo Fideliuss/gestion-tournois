@@ -9,6 +9,9 @@
 .mt-carte { padding: 8px 6px; }
 .mt-etat { margin: 18px; text-align: center; color: var(--text-dim); font-size: 13px; }
 
+/* Un élément masqué (attribut hidden) le reste, même quand sa classe lui donne un display */
+.alert-warn[hidden], .mt-selbar[hidden], .mt-nouvelle[hidden] { display: none; }
+
 /* Statuts */
 .mt-st { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; border: 1px solid currentColor; background: color-mix(in srgb, currentColor 10%, transparent); }
 .st-integrer { color: #9aa3b5; }
