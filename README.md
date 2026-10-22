@@ -154,7 +154,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── prize_pool/
 │   ├── prize_pool.html            - Prize Pool Builder
 │   ├── prize_pool.css
-│   └── prize_pool.js              - Logique React
+│   └── prize_pool.js              - Logique du Prize Pool Builder
 │
 ├── leaderboard/
 │   ├── leaderboard.html           - Challenge Saisonnier
@@ -238,6 +238,10 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
         ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
         ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
+        ├── phase3_suivi_fonctions_manager.sql - Suivi équipe : fonctions SQL de classement, activité et points faibles
+        ├── phase3_suivi_meta_et_acces_manager.sql - Suivi : colonnes meta et user_label des sessions, lecture par le panel training-suivi
+        ├── phase4_suivi_uth.sql             - Suivi des modules Ultimate Texas Hold'em (points faibles)
+        ├── phase4_uth_config_initiale.sql   - réglages initiaux de l'Ultimate Texas Hold'em
         ├── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
         ├── acces_donnees.sql                - accès aux données par panel : extras, results, sessions, tournaments
         ├── securite_fonctions.sql           - fonctions SQL : plus appelables sans connexion, search_path fixé
@@ -255,12 +259,11 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 | Outil | Usage |
 |-------|-------|
 | HTML / CSS / JS vanilla | Base de l'application |
-| React 18 (CDN) | Interface Prize Pool Builder |
 | Supabase (PostgreSQL cloud) | Persistance (tournois, leaderboard, extras, training) + **authentification** |
 | Supabase Edge Functions (Deno) | `manage-users` - CRUD comptes avec vérification admin côté serveur |
 | supabase-js 2.117.3 (hébergé dans `shared/vendor/`) | Client Supabase côté navigateur |
 | Supabase Auth (e-mail + mot de passe) | Connexion sécurisée, rôles configurables, session 7 jours |
-| `localStorage` | Configs déclaration / courriers / émargements hebdo |
+| `localStorage` | Préférences d'affichage seulement (thème, regroupement des comptes) ; les réglages partagés sont en base (table `parametres`) |
 | GitHub Pages | Hébergement statique (branche `main`, auto-deploy) |
 
 Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
