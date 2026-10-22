@@ -55,6 +55,9 @@ const NAV = (function () {
       { label: 'Planning',     href: BL + 'planning.html' },
       { label: 'Paramètres',   href: BL + 'parametres.html' },
     ] },
+    { id: 'materiel', label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'materiel/materiel.html', panel: 'materiel', items: [
+      { label: 'Sixains', href: 'materiel/materiel.html' },
+    ] },
   ];
 
   // Menu « Gestion », à droite de la barre : une partie par domaine (Comptes, Training), chaque entrée selon les droits

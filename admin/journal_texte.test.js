@@ -60,7 +60,17 @@ test('aucun tiret cadratique dans les phrases ni dans les libellés', () => {
 test('chaque domaine filtrable a un libellé', () => {
   assert.strictEqual(J.libelleObjet('compte'), 'Comptes');
   assert.strictEqual(J.libelleObjet('inconnu'), 'inconnu');
-  assert.strictEqual(J.OBJETS.length, 11);
+  assert.strictEqual(J.OBJETS.length, 15);
+});
+test('matériel : fiches (champs en français, sans date de modification), sessions, marques, billes', () => {
+  assert.strictEqual(d({ action: 'INSERT', objet: 'materiel_pieces', ligne: 'p1' }), 'a ajouté une fiche de matériel');
+  assert.strictEqual(d({ action: 'UPDATE', objet: 'materiel_pieces', ligne: 'p1', detail: { champs: ['modifie_le', 'session_destruction_id', 'statut'] } }),
+    'a modifié une fiche de matériel (session de destruction, statut)');
+  assert.strictEqual(d({ action: 'UPDATE', objet: 'materiel_pieces', ligne: 'p1', detail: { champs: ['modifie_le'] } }), 'a modifié une fiche de matériel');
+  assert.strictEqual(d({ action: 'DELETE', objet: 'materiel_pieces', ligne: 'p1' }), 'a supprimé une fiche de matériel');
+  assert.strictEqual(d({ action: 'INSERT', objet: 'materiel_destructions', detail: { valeurs: { date_destruction: '2026-11-05' } } }), 'a ajouté une session de destruction du 05/11/2026');
+  assert.strictEqual(d({ action: 'INSERT', objet: 'materiel_marques', detail: { valeurs: { nom: 'Marque X' } } }), 'a ajouté la marque Marque X');
+  assert.strictEqual(d({ action: 'INSERT', objet: 'materiel_billes_mouvements' }), 'a enregistré un mouvement de billes');
 });
 
 console.log('\n' + ok + ' contrôles réussis' + (process.exitCode ? ', avec des échecs' : '') + '.');

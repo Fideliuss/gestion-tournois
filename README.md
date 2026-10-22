@@ -216,6 +216,10 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── *.test.js                  - Tests Node (`node tda/tda_recherche.test.js`)
 │   └── outils/                    - extraire_tda.js : extraction d'une édition du PDF (le texte n'est jamais commité)
 │
+├── materiel/
+│   ├── materiel.html / .css / .js - Sixains : liste, filtres, avance de statut, fiche et historique, ajout en lot (panel materiel)
+│   └── materiel_core.js           - Calcul pur : tri, filtres, saisie de numéros, passages de statut (tests : `node materiel/materiel_core.test.js`)
+│
 ├── break_list/
 │   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
 │   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
