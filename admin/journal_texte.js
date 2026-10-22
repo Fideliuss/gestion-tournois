@@ -11,6 +11,8 @@ const JOURNAL_TEXTE = (function () {
     ['compte', 'Comptes'], ['app_roles', 'Rôles et accès'], ['extras', 'Extras'], ['results', 'Résultats'], ['sessions', 'Sessions'],
     ['tournaments', 'Tournois'], ['saisons_cloturees', 'Saisons'], ['parametres', 'Paramètres'],
     ['breaklist_plannings', 'Plannings break list'], ['breaklist_config', 'Réglages break list'], ['tda_editions', 'Règlement TDA'],
+    ['materiel_pieces', 'Fiches de matériel'], ['materiel_destructions', 'Sessions de destruction'], ['materiel_marques', 'Marques de matériel'],
+    ['materiel_billes_mouvements', 'Billes'],
   ];
   const LIBELLE_OBJET = Object.fromEntries(OBJETS);
 
@@ -20,6 +22,7 @@ const JOURNAL_TEXTE = (function () {
     name: 'nom', day: 'jour', buyin: 'cave', pp: 'prize pool', frais: 'frais', points: 'barème',
     label: 'libellé', color: 'couleur', panels: 'accès',
     active: 'activation', libelle: 'libellé', valeur: 'valeur', value: 'valeur', data: 'contenu',
+    statut: 'statut', marque_id: 'marque', session_destruction_id: 'session de destruction', note: 'note',
   };
   const VERBE = { INSERT: 'a ajouté', UPDATE: 'a modifié', DELETE: 'a supprimé' };
 
@@ -95,6 +98,13 @@ const JOURNAL_TEXTE = (function () {
       case 'breaklist_plannings': return verbe + ' le planning de ' + e.ligne;
       case 'breaklist_config': return verbe + ' les réglages de la break list';
       case 'tda_editions': return verbe + ' l\'édition ' + e.ligne + ' du règlement TDA' + champs;
+      case 'materiel_pieces': {
+        const modifs = (d.champs || []).filter(function (x) { return x !== 'modifie_le'; });
+        return verbe + ' une fiche de matériel' + (e.action === 'UPDATE' && modifs.length ? ' (' + liste(modifs) + ')' : '');
+      }
+      case 'materiel_destructions': return verbe + ' une session de destruction' + (d.valeurs && d.valeurs.date_destruction ? ' du ' + frDate(d.valeurs.date_destruction) : '');
+      case 'materiel_marques': return verbe + ' la marque ' + ((d.valeurs && d.valeurs.nom) || '');
+      case 'materiel_billes_mouvements': return 'a enregistré un mouvement de billes';
       default: return verbe + ' ' + (LIBELLE_OBJET[e.objet] || e.objet) + (e.ligne ? ' ' + e.ligne : '');
     }
   }
