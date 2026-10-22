@@ -104,3 +104,56 @@ body.light .st-detruit { color: #666; }
   .mt-modal-box { padding: 24px 18px 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .mt-toast { transition: none; } }
+
+/* ── Onglets, tableau de bord, destruction ── */
+.mt-onglets { margin-bottom: 18px; }
+.mt-bloc { margin-bottom: 16px; }
+.mt-defile { overflow-x: auto; }
+.mt-matrice { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mt-matrice th { padding: 8px 10px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--gold-bd); text-align: left; white-space: nowrap; }
+.mt-matrice td { padding: 8px 10px; border-bottom: 1px solid rgba(195,120,20,.1); }
+.mt-matrice .mt-nbc { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-num); }
+.mt-matrice th.mt-nbc { text-align: right; }
+.mt-matrice tr.mt-jeu td:first-child { font-weight: 600; color: var(--cream); }
+.mt-matrice tr.mt-sous td { color: var(--text-dim); font-size: 12px; }
+.mt-matrice tr.mt-sous td:first-child { padding-left: 26px; }
+.mt-matrice tr.mt-total td { border-top: 1px solid var(--gold); border-bottom: 0; font-weight: 600; color: var(--cream); }
+.mt-matrice .mt-tot { font-weight: 600; color: var(--cream); }
+.mt-matrice .mt-st { font-size: 10px; padding: 2px 8px; }
+.mt-nb { color: var(--gold); font-weight: 600; text-decoration: none; padding: 2px 6px; border-radius: 8px; }
+.mt-nb:hover { background: var(--gold-bg); text-decoration: underline; }
+.mt-nb:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.mt-zero { color: var(--text-muted); }
+
+.mt-groupe { margin-bottom: 16px; }
+.mt-groupe-t { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--cream); cursor: pointer; margin-bottom: 8px; }
+.mt-groupe-t input, .mt-pastille input { width: 18px; height: 18px; padding: 0; accent-color: var(--gold-solid); cursor: pointer; }
+.mt-compte { font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--gold); padding: 1px 8px; border: 1px solid var(--gold-bd); border-radius: 999px; }
+.mt-pastilles { display: flex; flex-wrap: wrap; gap: 8px; }
+.mt-pastille { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; min-height: 36px; border: 1px solid var(--gold-bd); border-radius: 999px; font-family: var(--f-num); font-size: 13px; cursor: pointer; }
+.mt-pastille:has(input:checked) { border-color: var(--gold); background: var(--gold-bg); color: var(--cream); }
+.mt-form { display: grid; grid-template-columns: 180px 1fr 1fr; gap: 0 14px; margin-top: 6px; }
+.mt-form .fg { min-width: 0; }
+.mt-form input { width: 100%; box-sizing: border-box; }
+
+.mt-session { border-bottom: 1px solid rgba(195,120,20,.12); }
+.mt-session:last-child { border-bottom: 0; }
+.mt-session summary { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 4px; cursor: pointer; font-size: 13px; list-style: none; }
+.mt-session summary::-webkit-details-marker { display: none; }
+.mt-session summary::before { content: '\25B8'; color: var(--gold); transition: transform .15s; }
+.mt-session[open] summary::before { transform: rotate(90deg); }
+.mt-sdate { font-weight: 600; color: var(--cream); font-variant-numeric: tabular-nums; }
+.mt-sref { color: var(--text-dim); }
+.mt-sbody { padding: 0 4px 14px 22px; }
+.mt-liste-texte { margin: 6px 0 12px; padding: 12px 14px; max-width: 100%; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-family: var(--f-num); font-size: 12px; line-height: 1.6; color: var(--text); background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: 12px; }
+
+@media (max-width: 760px) {
+  .mt-form { grid-template-columns: 1fr; }
+  .mt-pastille { min-height: 44px; }
+  .mt-matrice th, .mt-matrice td { padding: 8px 8px; }
+}
+.mt-matrice .mt-fin { margin-left: 8px; font-size: 11px; font-weight: 400; color: var(--text-dim); }
+
+/* Les cartes ne s'élargissent pas avec leur contenu : un tableau trop large défile à l'intérieur (.mt-defile) au lieu d'élargir la page */
+#vue-liste, #vue-tableau, #vue-destruction, .mt-bloc, .mt-carte { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.mt-defile { max-width: 100%; }

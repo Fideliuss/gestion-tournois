@@ -1,5 +1,6 @@
 // ══════════════════════════════════════════════════════
-//  MATÉRIEL - page Sixains (chargée après materiel_core.js, shared/html.js, shared/supabase.js et shared/auth.js)
+//  MATÉRIEL - page Sixains, trois onglets : Liste (ce fichier), Tableau de bord (materiel_tableau.js), Destruction (materiel_destruction.js)
+//  Chargée après materiel_core.js, shared/html.js, shared/supabase.js et shared/auth.js. Adresses : #liste (avec ?jeu=...&vue=...&finition=...), #tableau, #destruction
 //  Suivi quotidien : ouvrir un sixain (Neuf, En service), le mettre hors d'usage, préparer les destructions. Les règles (séquence des
 //  statuts, retour avec motif, numéro unique, jeu fixé) sont imposées par la base (supabase/migrations/materiel.sql) ;
 //  l'écran propose les bons boutons et traduit les refus.
@@ -15,6 +16,7 @@ let FILTRE = { vue: 'cours', jeu: '', finition: '', marque: '', q: '' };
 let SEL = [];                                 // identifiants des fiches cochées
 let OCCUPE = false;                           // une écriture est en cours : on ignore les doubles clics
 let FOCUS_AVANT = null;
+let ONGLET = 'liste';
 
 const $ = function (id) { return document.getElementById(id); };
 const esc = escapeHtml;
@@ -30,6 +32,8 @@ async function initMateriel() {
     $('mt-liste').innerHTML = '';
     return;
   }
+  $('mt-onglets').addEventListener('click', function (e) { const b = e.target.closest('[data-onglet]'); if (b) location.hash = '#' + b.dataset.onglet; });
+  window.addEventListener('hashchange', route);
   $('mt-statuts').addEventListener('click', function (e) { const b = e.target.closest('[data-vue]'); if (b) { FILTRE.vue = b.dataset.vue; SEL = []; rendre(); } });
   $('mt-jeux').addEventListener('click', function (e) { const b = e.target.closest('[data-jeu]'); if (b) { FILTRE.jeu = b.dataset.jeu; SEL = []; rendre(); } });
   $('mt-finition').addEventListener('change', function () { FILTRE.finition = this.value; SEL = []; rendre(); });
@@ -41,7 +45,8 @@ async function initMateriel() {
   $('mt-selbar').addEventListener('click', clicSelection);
   $('mt-modal').addEventListener('mousedown', function (e) { if (e.target === this) fermerModal(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('mt-modal').classList.contains('open')) fermerModal(); });
-  rendre();
+  initDestruction();
+  route();
 }
 
 // ── Filtres et affichage ─────────────────────────────
@@ -54,7 +59,32 @@ function filtreCourant() { return { statuts: statutsVue(), jeu: FILTRE.jeu, fini
 function visibles() { return MATERIEL.trier(MATERIEL.filtrer(PIECES, filtreCourant())); }
 function marqueNom(id) { const m = REF.marques.find(function (x) { return x.id === id; }); return m ? m.nom : ''; }
 
+// L'adresse choisit l'onglet : #liste?jeu=Blackjack&vue=Neuf&finition=Cartonné (les filtres viennent du tableau de bord), #tableau, #destruction
+function route() {
+  const brut = decodeURIComponent(location.hash.replace(/^#/, ''));
+  const i = brut.indexOf('?');
+  const nom = i >= 0 ? brut.slice(0, i) : brut;
+  const q = new URLSearchParams(i >= 0 ? brut.slice(i + 1) : '');
+  ONGLET = ['liste', 'tableau', 'destruction'].indexOf(nom) >= 0 ? nom : 'liste';
+  if (ONGLET === 'liste' && i >= 0) {
+    const sts = MATERIEL.statuts(REF, FAMILLE).map(function (x) { return x.statut; });
+    FILTRE = { vue: (q.get('vue') === 'tous' || sts.indexOf(q.get('vue')) >= 0) ? q.get('vue') : 'cours', jeu: MATERIEL.jeuxPourSelect(REF).indexOf(q.get('jeu')) >= 0 ? q.get('jeu') : '',
+      finition: ['Plastifié', 'Cartonné'].indexOf(q.get('finition')) >= 0 ? q.get('finition') : '', marque: '', q: '' };
+    $('mt-finition').value = FILTRE.finition; $('mt-q').value = '';
+    SEL = [];
+  }
+  document.querySelectorAll('#mt-onglets .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.onglet === ONGLET)); });
+  ['liste', 'tableau', 'destruction'].forEach(function (o) { $('vue-' + o).hidden = o !== ONGLET; });
+  window.scrollTo(0, 0);
+  rendre();
+}
+
+// Redessine l'onglet affiché (appelé après chaque écriture) et le compteur de l'onglet Destruction
 function rendre() {
+  const n = PIECES.filter(function (p) { return p.statut === 'A détruire'; }).length;
+  $('mt-nb-detruire').hidden = !n; $('mt-nb-detruire').textContent = n;
+  if (ONGLET === 'tableau') return rendreTableau();
+  if (ONGLET === 'destruction') return rendreDestruction();
   rendreStatuts(); rendreJeux(); rendreMarques(); rendreListe(); rendreSelection();
 }
 
@@ -97,7 +127,7 @@ function rendreListe() {
   }
   const lignes = liste.map(function (p) {
     const pas = MATERIEL.passages(REF, FAMILLE, p.statut);
-    const peutAvancer = pas.avance && pas.avance.vers !== 'Détruit';          // détruire se fait depuis l'onglet Destruction
+    const peutAvancer = pas.avance && pas.avance.vers !== 'Détruit';          // détruire se fait depuis l'onglet Destruction (il exige une session)
     const coche = SEL.indexOf(p.id) >= 0;
     return '<tr' + (coche ? ' class="sel"' : '') + ' data-id="' + esc(p.id) + '">' +
       '<td class="mt-c"><input type="checkbox" data-sel aria-label="Choisir ' + esc(p.identifiant) + '"' + (coche ? ' checked' : '') + ' /></td>' +
@@ -409,4 +439,3 @@ function ouvrirAjout() {
   });
 }
 
-// L'écran n'a pas de bouton de destruction : « A détruire » devient « Détruit » avec une session (onglet Destruction, étape suivante)
