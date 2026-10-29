@@ -186,6 +186,8 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - Date courrier auto-calculée à J-21 du début du mois déclaré
 - Triangle des destinataires : chaque courrier liste les 2 autres destinataires
 - Accessible uniquement par le menu « Administration tournois » de la barre
+- **Trois types de document** (barre `doc-type-bar`) : Courriers mensuels, Annulation de tournoi, **Courrier libre** (octobre 2026). En-tête, signature et pied de page sont communs aux trois (`letterHeaderHtml`, `letterSignatureHtml`, `letterFooterHtml` dans `courriers.js`), ainsi que le bloc « Autres destinataires » (`lettreAutresHtml`, masqué s'il est vide).
+- **Courrier libre** : pour une situation hors cadre. Destinataire au choix (les 3 modèles, ou « Autre destinataire »), qui pré-remplit adresse, appel et formule de politesse, tous modifiables ; objet, texte (une ligne vide sépare deux paragraphes), copies facultatives, date. Le signataire vient du modèle choisi (Réglages). **Rien n'est enregistré** (ni en base, ni en local) : le courrier n'existe que le temps de la page. Une alerte s'affiche si le texte dépasse la page A4 (même mise en page figée, 1 page). Titre du PDF : « Courrier - <destinataire> - <date> ».
 
 **Gestion des Extras**
 - Liste des croupiers extras avec infos personnelles CRUD (nom, prénom, date/lieu naissance, adresse)
