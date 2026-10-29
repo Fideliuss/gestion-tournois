@@ -50,6 +50,7 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 - Triangle des destinataires respecté (chaque courrier mentionne les 2 autres en copie)
 - Date auto-calculée à J-21 du début du mois déclaré, destinataires/signatures éditables
 - Export PDF natif via l'impression navigateur (A4 portrait, style administratif français)
+- Courrier d'annulation de tournoi, et **courrier libre** (destinataire, objet et texte à saisir, mêmes en-tête, signature et pied de page)
 
 **Gestion des Extras** - gestion des croupiers extras.
 - CRUD complet de la liste des extras (nom, prénom, date/lieu de naissance, adresse)

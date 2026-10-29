@@ -22,6 +22,7 @@
   <div class="doc-type-bar seg">
     <button class="doc-type-btn seg-btn active" id="dtype-mensuel" onclick="selectDocType('mensuel')">Courriers mensuels</button>
     <button class="doc-type-btn seg-btn" id="dtype-annulation" onclick="selectDocType('annulation')">Annulation de tournoi</button>
+    <button class="doc-type-btn seg-btn" id="dtype-libre" onclick="selectDocType('libre')">Courrier libre</button>
   </div>
 
   <!-- ══════════════════════════════
@@ -147,6 +148,77 @@
     </div>
 
   </div><!-- /#section-annulation -->
+
+  <!-- ══════════════════════════════
+       SECTION - COURRIER LIBRE
+  ══════════════════════════════ -->
+  <div id="section-libre" style="display:none">
+
+    <div class="card" style="max-width:1000px;width:100%">
+      <div class="sec">Destinataire</div>
+      <div class="libre-row">
+        <div class="fg">
+          <label class="fl">Destinataire</label>
+          <select id="libre-dest" onchange="onLibreDestChange()"></select>
+        </div>
+        <div class="fg">
+          <label class="fl">Adresse (1 ligne par entrée)</label>
+          <textarea id="libre-adresse" rows="6" oninput="renderLibre()"></textarea>
+        </div>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sec">Contenu</div>
+      <div class="fg">
+        <label class="fl">Objet</label>
+        <input type="text" id="libre-objet" oninput="renderLibre()"/>
+      </div>
+      <div class="fg" style="margin-top:12px">
+        <label class="fl">Appel</label>
+        <input type="text" id="libre-appel" oninput="renderLibre()"/>
+      </div>
+      <div class="fg" style="margin-top:12px">
+        <label class="fl">Texte du courrier (une ligne vide sépare deux paragraphes)</label>
+        <textarea id="libre-corps" rows="12" oninput="renderLibre()"></textarea>
+      </div>
+      <div class="fg" style="margin-top:12px">
+        <label class="fl">Formule de politesse</label>
+        <textarea id="libre-formule" rows="2" oninput="renderLibre()"></textarea>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sec">Autres destinataires <span class="sec-opt">(facultatif)</span></div>
+      <div class="fg">
+        <label class="fl">Mis en copie (1 par ligne)</label>
+        <textarea id="libre-autres" rows="3" oninput="renderLibre()"></textarea>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sec">Date du courrier</div>
+      <div class="period-row">
+        <div class="fg fg-date">
+          <label class="fl">Date</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="libre-date-d" min="1" max="31" style="width:60px;flex-shrink:0" onchange="renderLibre()"/>
+            <select id="libre-date-m" onchange="renderLibre()" style="flex:1"></select>
+            <input type="number" id="libre-date-y" min="2020" max="2099" style="width:88px;flex-shrink:0" onchange="renderLibre()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width:1000px;width:100%;margin-top:12px">
+      <div class="alert-warn" id="libre-overflow" role="alert" hidden>Le courrier dépasse une page A4 : raccourcissez le texte, la fin ne serait pas imprimée.</div>
+      <div class="print-bar">
+        <button class="btn btn-gold" onclick="printCurrent()"><i class="ico ico-print"></i> Imprimer / Exporter PDF</button>
+        <span class="print-hint">Dans la boîte de dialogue, choisissez « Enregistrer en PDF » et vérifiez que les marges sont sur « Aucune ».</span>
+      </div>
+    </div>
+
+  </div><!-- /#section-libre -->
 
 </div><!-- /.app.no-print -->
 

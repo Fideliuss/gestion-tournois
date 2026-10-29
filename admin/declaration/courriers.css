@@ -316,5 +316,11 @@
 }
 
 /* Largeur fixe des blocs : les encadrés gardent la même largeur quelle que soit la vue (courrier ou réglages) */
-#section-mensuel, #section-annulation { width: 100%; max-width: 860px; }
-#section-mensuel > *, #section-annulation > * { max-width: 100% !important; }
+#section-mensuel, #section-annulation, #section-libre { width: 100%; max-width: 860px; }
+#section-mensuel > *, #section-annulation > *, #section-libre > * { max-width: 100% !important; }
+
+/* ── Courrier libre ── */
+.libre-row { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+.libre-row textarea, #section-libre textarea { width: 100%; resize: vertical; font-size: 12px; line-height: 1.6; font-family: var(--f-ui); }
+.alert-warn[hidden] { display: none; }
+@media (max-width: 680px) { .libre-row { grid-template-columns: 1fr; } }

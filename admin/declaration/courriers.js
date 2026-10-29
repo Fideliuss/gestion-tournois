@@ -282,23 +282,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const now      = new Date();
   initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS_LETTRE);   // mois suivant par défaut
 
-  // Peuple le select mois de la date courrier
-  const selDateM = document.getElementById('inp-date-m');
-  MOIS_LETTRE.forEach((m, i) => {
-    const o = document.createElement('option');
-    o.value = i + 1;
-    o.textContent = m;
-    selDateM.appendChild(o);
-  });
-
-  // Peuple le select mois de la date du courrier annulation
-  const annulDateM = document.getElementById('annul-date-m');
-  MOIS_LETTRE.forEach((m, i) => {
-    const o = document.createElement('option');
-    o.value = i + 1;
-    o.textContent = m;
-    annulDateM.appendChild(o);
-  });
+  // Peuple les selects mois des dates de courrier (mensuels, annulation)
+  fillMonthSelect(document.getElementById('inp-date-m'));
+  fillMonthSelect(document.getElementById('annul-date-m'));
   document.getElementById('annul-date-d').value = now.getDate();
   document.getElementById('annul-date-m').value = now.getMonth() + 1;
   document.getElementById('annul-date-y').value = now.getFullYear();
@@ -306,8 +292,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadTemplates();
   renderTplEditor('ministre');
   renderAnnulDateList();
+  initLibre(now);
   onPeriodChange(); // auto-remplit date courrier + hint + renderAll
 });
+
+function fillMonthSelect(select) {
+  MOIS_LETTRE.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1;
+    o.textContent = m;
+    select.appendChild(o);
+  });
+}
 
 /* ── Gestion des onglets ── */
 function selectTab(tabId) {
@@ -320,11 +316,50 @@ function selectTab(tabId) {
 /* ── Rendu principal ── */
 function renderAll() {
   if (docType === 'annulation') { renderAnnulation(); return; }
+  if (docType === 'libre')      { renderLibre();      return; }
   const month = getMonth();
   const year  = getYear();
   const rows  = buildRows(month, year);
   document.getElementById('letter-output').innerHTML =
     generateLetterHtml(templates[currentTab], rows, month, year);
+}
+
+/* ── Blocs communs à tous les courriers : en-tête, signature, pied de page ── */
+function letterHeaderHtml(recipientLines, dateStr) {
+  return `
+  <div class="letter-header">
+    <div class="letter-header-left">
+      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Barrière Casino Bordeaux">
+    </div>
+    <div class="letter-header-right">
+      <div class="letter-recipient">${recipientLines.map(esc).join('<br>')}</div>
+      <div class="letter-date">Bordeaux, le ${esc(dateStr)}</div>
+    </div>
+  </div>`;
+}
+
+function letterSignatureHtml(sigName) {
+  return `
+  <!-- Espace signature manuscrite + nom -->
+  <div class="letter-signature-space"></div>
+  <div class="letter-signature">
+    <div class="letter-signature-inner">
+      ${esc(sigName)}<br>
+      Directeur Responsable
+    </div>
+  </div>`;
+}
+
+function letterFooterHtml() {
+  return `
+  <div class="letter-spacer"></div>
+
+  <!-- Pied de page -->
+  <div class="letter-footer">
+    Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
+    Barrière Casino Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
+    Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
+  </div>`;
 }
 
 /* ── Génération HTML de la lettre ── */
@@ -341,21 +376,11 @@ function generateLetterHtml(tpl, rows, month, year) {
     ? `<div class="letter-salut">${esc(tpl.salutation)}</div>`
     : '';
 
-  const recipientHtml = tpl.recipient.map(esc).join('<br>');
-
   return `
 <div class="letter">
 
   <!-- En-tête -->
-  <div class="letter-header">
-    <div class="letter-header-left">
-      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Barrière Casino Bordeaux">
-    </div>
-    <div class="letter-header-right">
-      <div class="letter-recipient">${recipientHtml}</div>
-      <div class="letter-date">Bordeaux, le ${esc(dateStr)}</div>
-    </div>
-  </div>
+  ${letterHeaderHtml(tpl.recipient, dateStr)}
 
   <!-- Objet -->
   <div class="letter-objet">
@@ -375,38 +400,34 @@ function generateLetterHtml(tpl, rows, month, year) {
     <p>${esc(tpl.closingFormula)}</p>
   </div>
 
-  <!-- Espace signature manuscrite + nom -->
-  <div class="letter-signature-space"></div>
-  <div class="letter-signature">
-    <div class="letter-signature-inner">
-      ${esc(tpl.sigName)}<br>
-      Directeur Responsable
-    </div>
-  </div>
+  ${letterSignatureHtml(tpl.sigName)}
 
+  ${lettreAutresHtml(tpl.autresItems)}
+
+  ${letterFooterHtml()}
+
+</div>`;
+}
+
+/* Bloc « Autres destinataires » (mensuels et courrier libre) */
+function lettreAutresHtml(items) {
+  if (!items.length) return '';
+  return `
   <!-- Autres destinataires -->
   <div class="letter-autres">
     <div class="letter-autres-title">Autres Destinataires&nbsp;:</div>
-    <ul>${tpl.autresItems.map(item => `<li>${esc(item)}</li>`).join('')}</ul>
-  </div>
-
-  <div class="letter-spacer"></div>
-
-  <!-- Pied de page -->
-  <div class="letter-footer">
-    Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
-    Barrière Casino Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
-    Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
-  </div>
-
-</div>`;
+    <ul>${items.map(item => `<li>${esc(item)}</li>`).join('')}</ul>
+  </div>`;
 }
 
 /* ── Impression ── */
 const DEST_COURT = { ministre: 'Ministre de l\'Intérieur', sipj: 'SIPJ 33', prefecture: 'Préfecture de la Gironde' };
 function printCurrent() {
   const dest = DEST_COURT[currentTab] || '';
-  if (docType === 'annulation') {
+  if (docType === 'libre') {
+    const destLibre = DEST_COURT[libreEl('dest').value] || lignes(libreEl('adresse').value)[0] || '';
+    printWithTitle(`Courrier - ${destLibre} - ${formatLibreDate()}`.replace(/[\\/:*?"<>|]/g, ' '));
+  } else if (docType === 'annulation') {
     // titre = destinataire + date du courrier d'annulation
     printWithTitle(`Annulation de tournoi - ${dest} - ${formatAnnulLetterDate()}`);
   } else {
@@ -422,10 +443,10 @@ function formatAnnulLetterDate() {
 function selectDocType(type) {
   if (!document.getElementById('tpl-panel').hidden) toggleTplPanel();   // les réglages ne concernent que les courriers mensuels
   docType = type;
-  document.getElementById('section-mensuel').style.display    = type === 'mensuel'    ? '' : 'none';
-  document.getElementById('section-annulation').style.display = type === 'annulation' ? '' : 'none';
-  document.getElementById('dtype-mensuel').classList.toggle('active',    type === 'mensuel');
-  document.getElementById('dtype-annulation').classList.toggle('active', type === 'annulation');
+  ['mensuel', 'annulation', 'libre'].forEach(t => {
+    document.getElementById(`section-${t}`).style.display = t === type ? '' : 'none';
+    document.getElementById(`dtype-${t}`).classList.toggle('active', t === type);
+  });
   renderAll();
 }
 
@@ -545,7 +566,6 @@ function renderAnnulation() {
 }
 
 function generateAnnulationHtml(tpl, dates, motif, dateStr) {
-  const recipientHtml = tpl.recipient.map(esc).join('<br>');
   const plural        = dates.length > 1;
   const objetStr      = formatAnnulObjet(dates);
   const bodyDatesStr  = formatAnnulDatesBody(dates) || '-';
@@ -559,15 +579,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
   return `
 <div class="letter">
 
-  <div class="letter-header">
-    <div class="letter-header-left">
-      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Barrière Casino Bordeaux">
-    </div>
-    <div class="letter-header-right">
-      <div class="letter-recipient">${recipientHtml}</div>
-      <div class="letter-date">Bordeaux, le ${esc(dateStr)}</div>
-    </div>
-  </div>
+  ${letterHeaderHtml(tpl.recipient, dateStr)}
 
   <div class="letter-objet">
     <span class="letter-objet-lbl">Objet&nbsp;:</span> ${esc(objetStr)}
@@ -582,21 +594,115 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
     <p>${esc(closingFormula)}</p>
   </div>
 
-  <div class="letter-signature-space"></div>
-  <div class="letter-signature">
-    <div class="letter-signature-inner">
-      ${esc(tpl.sigName)}<br>
-      Directeur Responsable
-    </div>
+  ${letterSignatureHtml(tpl.sigName)}
+
+  ${letterFooterHtml()}
+
+</div>`;
+}
+
+/* ═══════════════════════════════════════
+   COURRIER LIBRE
+   En-tête, signature et pied de page des autres courriers ; destinataire, objet et texte saisis à la main.
+   Rien n'est enregistré : le courrier n'existe que le temps de la page.
+═══════════════════════════════════════ */
+const LIBRE_AUTRE = 'autre';
+
+/* Titre de politesse de chaque destinataire connu (appel et formule) */
+const LIBRE_TITRES = {
+  ministre:   'Monsieur le Ministre',
+  sipj:       'Monsieur le Commissaire Divisionnaire',
+  prefecture: 'Madame',
+  [LIBRE_AUTRE]: 'Madame, Monsieur',
+};
+
+function libreEl(id) { return document.getElementById(`libre-${id}`); }
+
+function libreFormule(destId) {
+  return destId === LIBRE_AUTRE
+    ? 'Je vous prie d\'agréer, Madame, Monsieur, l\'expression de mes salutations distinguées.'
+    : `Je vous prie d'agréer, ${LIBRE_TITRES[destId]}, l'expression de ma haute considération.`;
+}
+
+/* Choisir un destinataire pré-remplit adresse, appel et formule (modifiables ensuite) */
+function onLibreDestChange() {
+  const destId = libreEl('dest').value;
+  libreEl('adresse').value = destId === LIBRE_AUTRE ? '' : templates[destId].recipient.join('\n');
+  libreEl('appel').value   = LIBRE_TITRES[destId] + ',';
+  libreEl('formule').value = libreFormule(destId);
+  renderLibre();
+}
+
+function initLibre(now) {
+  const select = libreEl('dest');
+  select.innerHTML = ['ministre', 'sipj', 'prefecture'].map(id => `<option value="${id}">${esc(templates[id].label)}</option>`).join('')
+    + `<option value="${LIBRE_AUTRE}">Autre destinataire</option>`;
+  fillMonthSelect(libreEl('date-m'));
+  libreEl('date-d').value = now.getDate();
+  libreEl('date-m').value = now.getMonth() + 1;
+  libreEl('date-y').value = now.getFullYear();
+  onLibreDestChange();
+}
+
+function formatLibreDate() {
+  const d = +libreEl('date-d').value, m = +libreEl('date-m').value, y = +libreEl('date-y').value;
+  return d && m && y ? `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}` : '';
+}
+
+/* Texte libre → paragraphes (ligne vide) et retours à la ligne */
+function paragraphesHtml(text) {
+  return text.split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`)
+    .join('\n    ');
+}
+
+function lignes(text) { return text.split('\n').map(l => l.trim()).filter(Boolean); }
+
+function renderLibre() {
+  const destId = libreEl('dest').value;
+  const sigName = (templates[destId] || templates.sipj).sigName;   // les trois modèles ont le même signataire
+  document.getElementById('letter-output').innerHTML = generateLibreHtml({
+    adresse: lignes(libreEl('adresse').value),
+    dateStr: formatLibreDate(),
+    objet:   libreEl('objet').value.trim(),
+    appel:   libreEl('appel').value.trim(),
+    corps:   libreEl('corps').value,
+    formule: libreEl('formule').value.trim(),
+    autres:  lignes(libreEl('autres').value),
+    sigName,
+  });
+  const letter = document.querySelector('#letter-output .letter');
+  document.getElementById('libre-overflow').hidden = !(letter && letter.scrollHeight > letter.clientHeight + 1);
+}
+
+function generateLibreHtml(c) {
+  const objetHtml = c.objet
+    ? `<div class="letter-objet"><span class="letter-objet-lbl">Objet&nbsp;:</span> ${esc(c.objet)}</div>`
+    : '';
+  const salutHtml = c.appel ? `<div class="letter-salut">${esc(c.appel)}</div>` : '';
+  const formuleHtml = c.formule ? `<p>${esc(c.formule)}</p>` : '';
+
+  return `
+<div class="letter">
+
+  ${letterHeaderHtml(c.adresse, c.dateStr)}
+
+  ${objetHtml}
+
+  ${salutHtml}
+
+  <div class="letter-body">
+    ${paragraphesHtml(c.corps)}
+    ${formuleHtml}
   </div>
 
-  <div class="letter-spacer"></div>
+  ${letterSignatureHtml(c.sigName)}
 
-  <div class="letter-footer">
-    Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
-    Barrière Casino Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
-    Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
-  </div>
+  ${lettreAutresHtml(c.autres)}
+
+  ${letterFooterHtml()}
 
 </div>`;
 }

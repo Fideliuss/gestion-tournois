@@ -324,7 +324,7 @@ var AIDE_GUIDES = [
   {
     id: 'tournois-courriers', space: 'tournois', panel: 'admin-tournois',
     title: 'Générer les courriers',
-    intro: "Le Générateur de courrier prépare les courriers mensuels de déclaration et, quand un tournoi est annulé, le courrier d'annulation. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
+    intro: "Le Générateur de courrier prépare les courriers mensuels de déclaration, le courrier d'annulation quand un tournoi est annulé, et un courrier libre pour les autres situations. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
     steps: [
       {
         title: "Les courriers mensuels",
@@ -350,6 +350,13 @@ var AIDE_GUIDES = [
         text: "<p>L'onglet <b>Annulation de tournoi</b> prépare le courrier d'annulation. Ajoutez la ou les <b>dates annulées</b> : l'objet du courrier est écrit automatiquement. Un <b>motif</b> facultatif complète la phrase d'explication ; laissez-le vide si vous n'en donnez pas.</p>"
           + "<p>Réglez la date du courrier, puis imprimez comme pour les courriers mensuels.</p>",
         imgs: [{ src: 'captures/ad_courrier_annul.png', alt: "La préparation d'un courrier d'annulation" }],
+      },
+      {
+        title: "Écrire un courrier libre",
+        text: "<p>Pour une situation qui n'a pas de courrier prévu, l'onglet <b>Courrier libre</b> produit un courrier avec les mêmes en-têtes, la même signature et le même pied de page.</p>"
+          + "<p>Choisissez le <b>destinataire</b> : l'adresse, l'appel et la formule de politesse se remplissent, et vous pouvez les modifier. <b>Autre destinataire</b> part d'une adresse vide. Saisissez ensuite l'<b>objet</b> et le <b>texte</b> (une ligne vide sépare deux paragraphes), puis les <b>autres destinataires</b> si le courrier est en copie.</p>"
+          + "<p>Le courrier tient sur une seule page A4 : si le texte est trop long, une alerte le signale. Il n'est pas enregistré : imprimez-le ou enregistrez-le en PDF avant de quitter la page.</p>",
+        imgs: [],
       },
     ],
   },
