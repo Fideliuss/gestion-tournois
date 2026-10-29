@@ -30,6 +30,7 @@ Le détail de chaque version est dans `shared/changelog.js` (affiché dans l'app
 - `v3.3.0` (2026-10-14) règlement TDA interactif
 - `v3.4.0` (2026-10-21) sécurité des comptes et des données : mots de passe, échappement HTML, accès aux données par droit en base
 - `v3.5.0` (2026-10-22) journal d'audit, comptes désactivables, déconnexion automatique, réglages partagés en base
+- `v3.6.0` (2026-10-29) courrier libre ; début de l'espace Matériel (page Sixains, droit `materiel`)
 
 **Stratégie de release** : itérative, une release taguée par ensemble livré (pas de « tout accumulé sur develop »). Une release n'est lancée que sur demande.
 
