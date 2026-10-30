@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sixains - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../shared/barriere.css" />
+  <link rel="stylesheet" href="materiel.css" />
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Sixains</div>
+  </div>
+
+  <div class="alert-warn" id="mt-erreur" role="alert" hidden></div>
+
+  <div class="mt-barre">
+    <div class="fchips" id="mt-statuts" aria-label="Statut"></div>
+    <button type="button" class="btn btn-gold" id="mt-ajouter"><i class="ico ico-plus"></i> Ajouter des sixains</button>
+  </div>
+
+  <div class="mt-filtres">
+    <div class="fchips" id="mt-jeux" aria-label="Jeu"></div>
+    <div class="mt-champs">
+      <select id="mt-finition" aria-label="Finition"><option value="">Toutes les finitions</option><option>Plastifié</option><option>Cartonné</option></select>
+      <select id="mt-marque" aria-label="Marque"></select>
+      <input type="search" id="mt-q" placeholder="Rechercher un numéro" aria-label="Rechercher un numéro" autocomplete="off" />
+    </div>
+  </div>
+
+  <div class="mt-selbar" id="mt-selbar" hidden></div>
+
+  <div class="card mt-carte">
+    <div id="mt-liste"><p class="mt-etat" role="status">Chargement...</p></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mt-modal" aria-hidden="true">
+  <div class="modal-box modal-wide mt-modal-box" id="mt-modal-box" role="dialog" aria-modal="true"></div>
+</div>
+<div class="mt-toast" id="mt-toast" role="status" aria-live="polite"></div>
+
+<script src="../shared/vendor/supabase_js.js"></script>
+<script src="../shared/barriere.js"></script>
+<script src="../shared/html.js"></script>
+<script src="../shared/supabase.js"></script>
+<script src="../shared/auth.js"></script>
+<script src="materiel_core.js"></script>
+<script src="materiel.js"></script>
+<script>
+AUTH.guard({ loginUrl: '../login.html', panel: 'materiel' }).then(function (user) {
+  if (!user) return;
+  initMateriel();
+});
+</script>
+</body>
+</html>

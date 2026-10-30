@@ -489,6 +489,83 @@ const SB = {
     return { edition: ed, blocs: blocs || [] };
   },
 
+  // ── Matériel de jeu (voir supabase/migrations/materiel.sql) ────────────────────
+  // Les règles (séquence des statuts, retours avec motif, unicité, jeu fixé) sont imposées par la base : ces méthodes lisent et écrivent,
+  // une action interdite revient en erreur avec un message déjà rédigé en français.
+
+  // Référentiels : jeux, statuts, transitions, marques, sessions de destruction
+  async getMaterielRef() {
+    const lire = async (table, tri) => {
+      const { data, error } = await _sb.from(table).select('*').order(tri);
+      if (error) throw error;
+      return data || [];
+    };
+    const [jeux, statuts, transitions, marques, destructions] = await Promise.all([
+      lire('materiel_jeux', 'ordre'), lire('materiel_statuts', 'ordre'), lire('materiel_transitions', 'famille'), lire('materiel_marques', 'nom'),
+      lire('materiel_destructions', 'cree_le'),
+    ]);
+    return { jeux, statuts, transitions, marques, destructions };
+  },
+
+  // Toutes les fiches d'une famille (par pages : la limite de 1000 lignes de Supabase)
+  async listMaterielPieces(famille) {
+    const rows = [];
+    const PAGE = 1000;
+    let from = 0;
+    while (true) {
+      const { data, error } = await _sb.from('materiel_pieces').select('*').eq('famille', famille).order('id').range(from, from + PAGE - 1);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < PAGE) break;
+      from += PAGE;
+    }
+    return rows;
+  },
+
+  async getMaterielHistorique(pieceId) {
+    const { data, error } = await _sb.from('materiel_historique').select('*').eq('piece_id', pieceId).order('id', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Ajoute plusieurs fiches d'un coup (tout ou rien) : [{ famille, identifiant, jeu, finition, statut, marque_id? }]
+  async createMaterielPieces(fiches) {
+    const { data, error } = await _sb.from('materiel_pieces').insert(fiches).select('*');
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Fait passer des fiches à un statut (tout ou rien) ; `motif` obligatoire pour un retour en arrière, `sessionId` pour « Détruit »
+  async changerMaterielStatut(ids, vers, options) {
+    const o = options || {};
+    const champs = { statut: vers };
+    if (o.motif) champs.motif_changement = o.motif;
+    if (o.sessionId) champs.session_destruction_id = o.sessionId;
+    const { data, error } = await _sb.from('materiel_pieces').update(champs).in('id', ids).select('*');
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Marque et note : les seuls champs d'une fiche qui se modifient
+  async updateMaterielPieces(ids, patch) {
+    const champs = {};
+    ['marque_id', 'note'].forEach(function (k) { if (patch[k] !== undefined) champs[k] = patch[k]; });
+    const { data, error } = await _sb.from('materiel_pieces').update(champs).in('id', ids).select('*');
+    if (error) throw error;
+    return data || [];
+  },
+
+  async deleteMaterielPiece(id) {
+    const { error } = await _sb.from('materiel_pieces').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async createMaterielMarque(nom) {
+    const { data, error } = await _sb.from('materiel_marques').insert({ nom }).select('*').single();
+    if (error) throw error;
+    return data;
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);

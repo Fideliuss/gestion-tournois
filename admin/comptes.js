@@ -29,6 +29,7 @@ const PANELS = [
     { id: 'training-suivi', label: 'Suivi équipe', short: 'Suivi équipe' },
   ]},
   { id: 'break-list', label: 'Break list', children: [] },
+  { id: 'materiel', label: 'Matériel', children: [] },
 ];
 
 const ROLE_COLORS = [

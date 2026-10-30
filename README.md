@@ -50,6 +50,7 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 - Triangle des destinataires respecté (chaque courrier mentionne les 2 autres en copie)
 - Date auto-calculée à J-21 du début du mois déclaré, destinataires/signatures éditables
 - Export PDF natif via l'impression navigateur (A4 portrait, style administratif français)
+- Courrier d'annulation de tournoi, et **courrier libre** (destinataire, objet et texte à saisir, mêmes en-tête, signature et pied de page)
 
 **Gestion des Extras** - gestion des croupiers extras.
 - CRUD complet de la liste des extras (nom, prénom, date/lieu de naissance, adresse)
@@ -154,7 +155,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── prize_pool/
 │   ├── prize_pool.html            - Prize Pool Builder
 │   ├── prize_pool.css
-│   └── prize_pool.js              - Logique React
+│   └── prize_pool.js              - Logique du Prize Pool Builder
 │
 ├── leaderboard/
 │   ├── leaderboard.html           - Challenge Saisonnier
@@ -216,6 +217,10 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── *.test.js                  - Tests Node (`node tda/tda_recherche.test.js`)
 │   └── outils/                    - extraire_tda.js : extraction d'une édition du PDF (le texte n'est jamais commité)
 │
+├── materiel/
+│   ├── materiel.html / .css / .js - Sixains : liste, filtres, avance de statut, fiche et historique, ajout en lot (panel materiel)
+│   └── materiel_core.js           - Calcul pur : tri, filtres, saisie de numéros, passages de statut (tests : `node materiel/materiel_core.test.js`)
+│
 ├── break_list/
 │   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
 │   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
@@ -232,12 +237,17 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     │   ├── securite_fonctions.test.sql - tests des droits d'exécution et du search_path des fonctions
     │   ├── journal_audit.test.sql  - tests du journal d'audit (écriture par déclencheurs, lecture admin, purge)
     │   ├── parametres.test.sql     - tests des droits sur la table parametres (réglages, émargement des extras)
-    │   └── purge_emargement.test.sql - tests de la purge de l'émargement des extras (12 mois)
+    │   ├── purge_emargement.test.sql - tests de la purge de l'émargement des extras (12 mois)
+    │   └── materiel.test.sql       - tests du matériel de jeu (accès, séquence des statuts, retours avec motif, sessions de destruction, billes)
     └── migrations/
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
         ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
         ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
+        ├── phase3_suivi_fonctions_manager.sql - Suivi équipe : fonctions SQL de classement, activité et points faibles
+        ├── phase3_suivi_meta_et_acces_manager.sql - Suivi : colonnes meta et user_label des sessions, lecture par le panel training-suivi
+        ├── phase4_suivi_uth.sql             - Suivi des modules Ultimate Texas Hold'em (points faibles)
+        ├── phase4_uth_config_initiale.sql   - réglages initiaux de l'Ultimate Texas Hold'em
         ├── break_list.sql                   - espace Break list : plannings mensuels et réglages (accès par panel)
         ├── acces_donnees.sql                - accès aux données par panel : extras, results, sessions, tournaments
         ├── securite_fonctions.sql           - fonctions SQL : plus appelables sans connexion, search_path fixé
@@ -245,6 +255,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── journal_audit_cron.sql           - purge planifiée du journal (12 mois), à appliquer après journal_audit.sql
         ├── purge_emargement.sql             - purge planifiée de l'émargement des extras (12 mois), à appliquer après journal_audit_cron.sql
         ├── parametres.sql                   - paramètres partagés entre les postes (clé / valeur JSON), accès par le panel admin-tournois
+        ├── materiel.sql                     - matériel de jeu : sixains, billes, historique, sessions de destruction (accès par panel materiel)
         └── tda.sql                          - règlement TDA : éditions et blocs de texte (lecture par panel tda)
 ```
 
@@ -255,12 +266,11 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 | Outil | Usage |
 |-------|-------|
 | HTML / CSS / JS vanilla | Base de l'application |
-| React 18 (CDN) | Interface Prize Pool Builder |
 | Supabase (PostgreSQL cloud) | Persistance (tournois, leaderboard, extras, training) + **authentification** |
 | Supabase Edge Functions (Deno) | `manage-users` - CRUD comptes avec vérification admin côté serveur |
 | supabase-js 2.117.3 (hébergé dans `shared/vendor/`) | Client Supabase côté navigateur |
 | Supabase Auth (e-mail + mot de passe) | Connexion sécurisée, rôles configurables, session 7 jours |
-| `localStorage` | Configs déclaration / courriers / émargements hebdo |
+| `localStorage` | Préférences d'affichage seulement (thème, regroupement des comptes) ; les réglages partagés sont en base (table `parametres`) |
 | GitHub Pages | Hébergement statique (branche `main`, auto-deploy) |
 
 Aucun bundler, aucune dépendance npm, aucun serveur local. Zéro friction.
