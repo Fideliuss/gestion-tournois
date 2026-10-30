@@ -30,6 +30,7 @@ Le détail de chaque version est dans `shared/changelog.js` (affiché dans l'app
 - `v3.3.0` (2026-10-14) règlement TDA interactif
 - `v3.4.0` (2026-10-21) sécurité des comptes et des données : mots de passe, échappement HTML, accès aux données par droit en base
 - `v3.5.0` (2026-10-22) journal d'audit, comptes désactivables, déconnexion automatique, réglages partagés en base
+- `v3.6.0` (2026-10-29) courrier libre ; début de l'espace Matériel (page Sixains, droit `materiel`)
 
 **Stratégie de release** : itérative, une release taguée par ensemble livré (pas de « tout accumulé sur develop »). Une release n'est lancée que sur demande.
 
@@ -39,7 +40,7 @@ Le détail de chaque version est dans `shared/changelog.js` (affiché dans l'app
 
 ```
 main       Branche stable - ce qui tourne au casino. Ne jamais push directement.
-develop    Branche de travail active. Point de départ pour toute nouvelle feature.
+develop    Branche de travail active. Point de départ pour toute nouvelle feature. Protégée : ne jamais push directement, tout passe par une PR.
 feature/x  Une branche par fonctionnalité, créée depuis develop.
 ```
 
@@ -54,9 +55,9 @@ feature/x  Une branche par fonctionnalité, créée depuis develop.
 8. Ajuster si nécessaire, puis merger une fois le user satisfait
 
 **Flux release (develop → main) :**
-1. Mettre à jour `shared/changelog.js` : ajouter l'entrée `{ version, date, message }` en tête du tableau
+1. Sur une branche `chore/release_vX_Y_Z` créée depuis `develop` (`develop` est protégé : **aucun push direct, tout passe par une PR**), mettre à jour `shared/changelog.js` : ajouter l'entrée `{ version, date, message }` en tête du tableau
 2. Vérifier que `CONTEXT.md` et `README.md` sont à jour
-3. Push `develop`, ouvrir une PR `develop → main` sur GitHub
+3. Pousser la branche, ouvrir une PR `chore/release_vX_Y_Z → develop`, la merger après validation, puis ouvrir la PR `develop → main` sur GitHub
 4. Attendre validation du user, puis merger la PR **sans `--subject`** (le message "Merge pull request #XX from Fideliuss/develop" doit rester intact)
 5. Taguer le merge commit (tag léger - hérite du "Verified" GitHub) :
    ```
