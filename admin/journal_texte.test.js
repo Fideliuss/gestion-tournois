@@ -45,6 +45,8 @@ test('rôles : accès ajoutés et retirés', () => {
 test('saisons, paramètres, plannings, règlement TDA', () => {
   assert.strictEqual(d({ action: 'INSERT', objet: 'saisons_cloturees', ligne: '2025' }), 'a clôturé la saison 2025 / 2026');
   assert.strictEqual(d({ action: 'DELETE', objet: 'saisons_cloturees', ligne: '2025' }), 'a rouvert la saison 2025 / 2026');
+  assert.strictEqual(d({ action: 'INSERT', objet: 'saisons_fins', ligne: '2025', detail: { valeurs: { saison: 2025, fin: '2026-10-29' } } }), 'a fixé la fin de la saison 2025 / 2026 au 29/10/2026');
+  assert.strictEqual(d({ action: 'UPDATE', objet: 'saisons_fins', ligne: '2025', detail: { champs: ['fin'], avant: { fin: '2026-10-29' }, apres: { fin: '2026-10-28' } } }), 'a fixé la fin de la saison 2025 / 2026 au 28/10/2026');
   assert.strictEqual(d({ action: 'UPDATE', objet: 'parametres', ligne: 'declaration_encadrement' }), 'a modifié le paramètre declaration_encadrement');
   assert.strictEqual(d({ action: 'UPDATE', objet: 'breaklist_plannings', ligne: '2026-10' }), 'a modifié le planning de 2026-10');
   assert.strictEqual(d({ action: 'UPDATE', objet: 'tda_editions', ligne: '2026-v1', detail: { champs: ['active'] } }), 'a modifié l\'édition 2026-v1 du règlement TDA (activation)');
@@ -60,7 +62,7 @@ test('aucun tiret cadratique dans les phrases ni dans les libellés', () => {
 test('chaque domaine filtrable a un libellé', () => {
   assert.strictEqual(J.libelleObjet('compte'), 'Comptes');
   assert.strictEqual(J.libelleObjet('inconnu'), 'inconnu');
-  assert.strictEqual(J.OBJETS.length, 15);
+  assert.strictEqual(J.OBJETS.length, 16);
 });
 test('matériel : fiches (champs en français, sans date de modification), sessions, marques, billes', () => {
   assert.strictEqual(d({ action: 'INSERT', objet: 'materiel_pieces', ligne: 'p1' }), 'a ajouté une fiche de matériel');

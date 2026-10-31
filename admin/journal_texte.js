@@ -9,7 +9,7 @@ const JOURNAL_TEXTE = (function () {
   // Domaines filtrables dans la page, dans l'ordre d'affichage
   const OBJETS = [
     ['compte', 'Comptes'], ['app_roles', 'Rôles et accès'], ['extras', 'Extras'], ['results', 'Résultats'], ['sessions', 'Sessions'],
-    ['tournaments', 'Tournois'], ['saisons_cloturees', 'Saisons'], ['parametres', 'Paramètres'],
+    ['tournaments', 'Tournois'], ['saisons_cloturees', 'Saisons'], ['saisons_fins', 'Fins de saison'], ['parametres', 'Paramètres'],
     ['breaklist_plannings', 'Plannings break list'], ['breaklist_config', 'Réglages break list'], ['tda_editions', 'Règlement TDA'],
     ['materiel_pieces', 'Fiches de matériel'], ['materiel_destructions', 'Sessions de destruction'], ['materiel_marques', 'Marques de matériel'],
     ['materiel_billes_mouvements', 'Billes'],
@@ -94,6 +94,12 @@ const JOURNAL_TEXTE = (function () {
         const s = Number(e.ligne);
         const saison = s ? s + ' / ' + (s + 1) : e.ligne;
         return e.action === 'DELETE' ? 'a rouvert la saison ' + saison : 'a clôturé la saison ' + saison;
+      }
+      case 'saisons_fins': {
+        const s = Number(e.ligne);
+        const saison = s ? s + ' / ' + (s + 1) : e.ligne;
+        const fin = d.valeurs && d.valeurs.fin ? ' au ' + frDate(d.valeurs.fin) : (d.apres && d.apres.fin ? ' au ' + frDate(d.apres.fin) : '');
+        return e.action === 'DELETE' ? 'a retiré la fin de la saison ' + saison : 'a fixé la fin de la saison ' + saison + fin;
       }
       case 'breaklist_plannings': return verbe + ' le planning de ' + e.ligne;
       case 'breaklist_config': return verbe + ' les réglages de la break list';

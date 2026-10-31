@@ -28,7 +28,7 @@ Calcule automatiquement la répartition des gains selon le nombre de joueurs et 
 - Impression directe du tableau
 
 ### Challenge Saisonnier
-Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et historique des résultats. La saison se déduit de la date : à partir du 1er novembre, la nouvelle saison démarre à zéro et les saisons précédentes restent consultables (sélecteur de saison). Un administrateur peut **clôturer** une saison : elle est alors verrouillée (plus aucune saisie, modification ni suppression), et peut être rouverte.
+Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et historique des résultats. La saison se déduit de la date : à partir du 1er novembre, la nouvelle saison démarre à zéro et les saisons précédentes restent consultables (sélecteur de saison). Un administrateur peut **clôturer** une saison en indiquant son dernier jour (le 31 octobre par défaut, ou la date décidée par la direction) : elle est alors verrouillée (plus aucune saisie, modification ni suppression), les tournois datés après ce jour comptent pour la saison suivante, et elle peut être rouverte.
 
 - Classement en temps réel avec podium visuel
 - Saisie des résultats par tournoi (semainier, places standards + places supplémentaires)
@@ -142,6 +142,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── mot_de_passe.js            - Règles de mot de passe, messages et générateur (tests : `node shared/mot_de_passe.test.js`)
 │   ├── inactivite.js              - Déconnexion automatique après inactivité (30 min admin et mcd, 2 h les autres)
 │   ├── reglages.js                - Réglages partagés entre les postes (table parametres), reprise de l'ancienne copie locale (tests : `node shared/reglages.test.js`)
+│   ├── saisons.js                 - Saison d'une date et dernier jour d'une saison (tests : `node shared/saisons.test.js`)
 │   ├── html.js                    - escapeHtml() : échappement de toute donnée insérée dans du HTML (tests : `node shared/html.test.js`)
 │   ├── tournaments.js             - TOURNAMENT_DEFAULTS + TournamentsStore (Supabase + fallback)
 │   ├── semainier.js               - Widget partagé : sélecteur de tournoi par jour de semaine
@@ -238,12 +239,14 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     │   ├── journal_audit.test.sql  - tests du journal d'audit (écriture par déclencheurs, lecture admin, purge)
     │   ├── parametres.test.sql     - tests des droits sur la table parametres (réglages, émargement des extras)
     │   ├── purge_emargement.test.sql - tests de la purge de l'émargement des extras (12 mois)
+    │   ├── saisons_fin_variable.test.sql - tests de la fin de saison variable (calendrier, fin anticipée ou tardive, verrou, réouverture, clôture)
     │   └── materiel.test.sql       - tests du matériel de jeu (accès, séquence des statuts, retours avec motif, sessions de destruction, billes)
     └── migrations/
         ├── training_tables.sql              - training_config, training_sessions, training_results
         ├── fix_rls_app_metadata.sql         - migration des policies vers app_metadata (rôle non modifiable client-side)
         ├── add_blackjack_cards_config.sql   - config nb cartes/niveau BJ Score
         ├── saisons_cloturees.sql            - clôture des saisons du challenge (table + verrouillage par triggers)
+        ├── saisons_fin_variable.sql         - dernier jour de chaque saison fixé à la clôture (table saisons_fins, saison_de, cloturer_saison)
         ├── phase3_suivi_fonctions_manager.sql - Suivi équipe : fonctions SQL de classement, activité et points faibles
         ├── phase3_suivi_meta_et_acces_manager.sql - Suivi : colonnes meta et user_label des sessions, lecture par le panel training-suivi
         ├── phase4_suivi_uth.sql             - Suivi des modules Ultimate Texas Hold'em (points faibles)
