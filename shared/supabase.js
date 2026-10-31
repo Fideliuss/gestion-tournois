@@ -574,6 +574,19 @@ const SB = {
     return data;
   },
 
+  // Session de destruction : { date_destruction: 'AAAA-MM-JJ', reference?, note? } ; les fiches la rejoignent en passant à « Détruit »
+  async createMaterielDestruction(s) {
+    const { data, error } = await _sb.from('materiel_destructions').insert({ date_destruction: s.date_destruction, reference: s.reference || null, note: s.note || null }).select('*').single();
+    if (error) throw error;
+    return data;
+  },
+
+  // Refusée par la base si des fiches y sont rattachées (sert à défaire une session créée pour rien)
+  async deleteMaterielDestruction(id) {
+    const { error } = await _sb.from('materiel_destructions').delete().eq('id', id);
+    if (error) throw error;
+  },
+
   // ── Import (outil de migration) ────────────────────
   async clearAll() {
     await _sb.from('results').delete().neq('id', 0);

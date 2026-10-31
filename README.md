@@ -219,7 +219,9 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   └── outils/                    - extraire_tda.js : extraction d'une édition du PDF (le texte n'est jamais commité)
 │
 ├── materiel/
-│   ├── materiel.html / .css / .js - Sixains : liste, filtres, avance de statut, fiche et historique, ajout en lot (panel materiel)
+│   ├── materiel.html / .css / .js - Sixains : onglets Liste (filtres, avance de statut, fiche et historique, ajout en lot), Tableau de bord, Destruction (panel materiel)
+│   ├── materiel_tableau.js        - Onglet Tableau de bord : sixains par jeu et par statut
+│   ├── materiel_destruction.js    - Onglet Destruction : bilan par jeu, choix des sixains à détruire, sessions
 │   └── materiel_core.js           - Calcul pur : tri, filtres, saisie de numéros, passages de statut (tests : `node materiel/materiel_core.test.js`)
 │
 ├── break_list/
