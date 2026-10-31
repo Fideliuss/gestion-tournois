@@ -9,12 +9,13 @@ let _cacheSessions     = null;   // toutes les sessions, toutes saisons confondu
 let _cacheByMonth      = {};     // { 'YYYY-MM': [...results] } - pour l'historique
 let _histCurrentMonth  = null;   // mois affiché dans l'historique
 
-// ── Saison : du 1er novembre au 31 octobre, déduite de la date (clé = année de début : 2025 → 2025 / 2026) ──
-const _seasonOf    = d => { const [y, m] = d.split('-').map(Number); return m >= 11 ? y : y - 1; };
+// ── Saison : du 1er novembre au 31 octobre sauf fin fixée à la clôture, déduite de la date (clé = année de début : 2025 → 2025 / 2026) ──
+let _fins          = {};                                  // { saison: dernier jour ISO } - fins fixées (voir shared/saisons.js)
+const _seasonOf    = d => saisonDe(d, _fins);
 const _seasonLabel = s => `${s} / ${s + 1}`;
 const _todayStr    = () => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`; };
 let _season   = _seasonOf(_todayStr());   // saison affichée
-let _closures = {};                       // { saison: date ISO de clôture } - saisons verrouillées
+let _closures = {};                       // { saison: true } - saisons verrouillées
 let _isAdmin  = false;
 let _tab      = 'classement';
 
@@ -62,7 +63,8 @@ async function getTournaments() {
 // ══════════════════════════════════════════════════════
 async function init() {
   document.getElementById('inp-date').value = _todayStr();
-  await loadClosures();
+  await loadSeasons();
+  _season = _seasonOf(_todayStr());   // les fins fixées peuvent décaler la saison du jour
   await populateTournoiSelects();
   await renderSeasonBar();
   await renderClassement();
@@ -76,13 +78,17 @@ function setLbUser(user) {
 
 // ══════════════════════════════════════════════════════
 //  SAISONS - sélecteur, clôture, verrouillage
-//  Table saisons_cloturees absente / illisible : aucune saison n'est verrouillée (le challenge reste utilisable)
+//  Tables saisons_cloturees / saisons_fins absentes ou illisibles : aucune saison n'est verrouillée ni décalée (le challenge reste utilisable)
 // ══════════════════════════════════════════════════════
-async function loadClosures() {
+async function loadSeasons() {
   try {
     _closures = {};
-    (await SB.getSeasonClosures()).forEach(c => { _closures[c.season] = String(c.closedAt).substring(0, 10); });
+    (await SB.getSeasonClosures()).forEach(c => { _closures[c.season] = true; });
   } catch (e) { _closures = {}; }
+  try {
+    _fins = {};
+    (await SB.getSeasonEnds()).forEach(e => { _fins[e.season] = e.end; });
+  } catch (e) { _fins = {}; }
 }
 const isClosed = season => Object.prototype.hasOwnProperty.call(_closures, season);
 
@@ -128,8 +134,6 @@ async function seasonSummary() {
 
 async function openCloseSeason() {
   const sum = await seasonSummary();
-  const end = `${_season + 1}-10-31`;
-  const early = _todayStr() <= end;
   const podium = sum.ranking.slice(0, 3).map((p, i) =>
     `<div style="display:flex;gap:10px;padding:5px 0;font-size:14px"><span>${['🥇','🥈','🥉'][i]}</span><span style="flex:1">${capH(p.player)}</span><span class="pts-badge">${p.points} pts</span></div>`).join('');
   document.getElementById('modal-content').innerHTML = `
@@ -141,7 +145,11 @@ async function openCloseSeason() {
     </div>
     ${podium ? `<div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Podium</div>${podium}` : ''}
     <div class="alert-warn" style="display:flex;margin:18px 0 6px">⚠ Après la clôture, plus aucun résultat ni tournoi ne peut être ajouté, modifié ou supprimé pour cette saison. Seul un administrateur peut la rouvrir.</div>
-    ${early ? `<div class="alert-warn" style="display:flex;margin:6px 0">La saison ne se termine que le ${fmtDate(end)}.</div>` : ''}
+    <div class="fg" style="max-width:220px;margin-top:18px">
+      <div class="fl">Dernier jour de la saison</div>
+      <input type="date" id="inp-fin-saison" value="${finDeSaison(_season, _fins)}" min="${_finMin()}" max="${_finMax()}" oninput="majFinSaison()" />
+    </div>
+    <div id="fin-note" style="font-size:12px;color:var(--text-muted);margin-top:8px"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
       <button class="btn btn-ghost" onclick="_closeModal();printClassement()"><i class="ico ico-print"></i> Imprimer le classement final</button>
       <button class="btn btn-gold" id="btn-close-season" onclick="confirmCloseSeason()">Clôturer la saison</button>
@@ -151,20 +159,45 @@ async function openCloseSeason() {
   overlay.scrollTop = 0;
   overlay.style.display = 'flex';
   document.body.classList.add('modal-open');
+  await majFinSaison();
+}
+
+/* Dernier jour d'une saison : au plus tôt le 1er octobre, au plus tard le 30 novembre (même règle que la base) */
+const _finMin = () => `${_season + 1}-10-01`;
+const _finMax = () => `${_season + 1}-11-30`;
+
+/* Ce que change le dernier jour choisi : saison des prochains tournois, tournois déjà saisis qui changeraient de saison */
+async function majFinSaison() {
+  const fin = document.getElementById('inp-fin-saison').value;
+  const note = document.getElementById('fin-note');
+  if (!fin || fin < _finMin() || fin > _finMax()) {
+    note.textContent = `Choisis une date entre le ${fmtDate(_finMin())} et le ${fmtDate(_finMax())}.`;
+    return;
+  }
+  const apres = { ..._fins, [_season]: fin };
+  const deplaces = (await getAllSessions()).filter(s => saisonDe(s.date, apres) !== _seasonOf(s.date)).length;
+  note.innerHTML = `Les tournois datés après le ${fmtDate(fin)} compteront pour la saison ${_seasonLabel(_season + 1)}.`
+    + (_todayStr() <= fin ? `<br>La journée du ${fmtDate(fin)} n'est pas terminée.` : '')
+    + (deplaces ? `<br><strong>${deplaces} tournoi${deplaces > 1 ? 's' : ''} déjà saisi${deplaces > 1 ? 's' : ''} change${deplaces > 1 ? 'nt' : ''} de saison.</strong>` : '');
 }
 
 async function confirmCloseSeason() {
-  if (!confirm(`Clôturer définitivement la saison ${_seasonLabel(_season)} ?`)) return;
+  const fin = document.getElementById('inp-fin-saison').value;
+  if (!fin || fin < _finMin() || fin > _finMax()) {
+    document.getElementById('close-err').textContent = `Choisis un dernier jour entre le ${fmtDate(_finMin())} et le ${fmtDate(_finMax())}.`;
+    return;
+  }
+  if (!confirm(`Clôturer définitivement la saison ${_seasonLabel(_season)}, dernier jour le ${fmtDate(fin)} ?`)) return;
   const btn = document.getElementById('btn-close-season');
   btn.disabled = true;
   try {
-    await SB.closeSeason(_season);
+    await SB.closeSeason(_season, fin);
   } catch (e) {
     btn.disabled = false;
     document.getElementById('close-err').textContent = 'Impossible de clôturer : ' + (e.message || 'réessaie dans quelques instants');
     return;
   }
-  await loadClosures();
+  await loadSeasons();
   _closeModal();
   await renderSeasonBar();
   await showTab(_tab);
@@ -173,13 +206,13 @@ async function confirmCloseSeason() {
 async function reopenSeason() {
   if (!confirm(`Rouvrir la saison ${_seasonLabel(_season)} ? Les saisies et modifications seront de nouveau possibles.`)) return;
   try { await SB.reopenSeason(_season); } catch (e) { alert('Impossible de rouvrir la saison : ' + (e.message || '')); return; }
-  await loadClosures();
+  await loadSeasons();
   await renderSeasonBar();
   await showTab(_tab);
 }
 
-/* Date de référence des documents : clôture pour une saison clôturée, sinon aujourd'hui */
-function _asOfDate() { return isClosed(_season) ? new Date(_closures[_season] + 'T12:00:00') : new Date(); }
+/* Date de référence des documents : dernier jour pour une saison clôturée, sinon aujourd'hui */
+function _asOfDate() { return isClosed(_season) ? new Date(finDeSaison(_season, _fins) + 'T12:00:00') : new Date(); }
 
 async function populateTournoiSelects() {
   const tournaments = await getTournaments();
@@ -507,7 +540,8 @@ async function renderHistorique() {
   const sessionMonths = [...new Set(allSessions.map(s => s.date.substring(0, 7)))].sort();
   const minMonth  = sessionMonths[0] || new Date().toISOString().substring(0, 7);
   const nowMonth  = _todayStr().substring(0, 7);
-  const maxMonth  = nowMonth < `${_season + 1}-10` ? nowMonth : `${_season + 1}-10`;   // pas au-delà de la fin de saison
+  const finMonth  = finDeSaison(_season, _fins).substring(0, 7);
+  const maxMonth  = nowMonth < finMonth ? nowMonth : finMonth;   // pas au-delà de la fin de saison
 
   /* Initialisation au mois le plus récent avec des sessions */
   if (!_histCurrentMonth) {

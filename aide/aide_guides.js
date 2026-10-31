@@ -255,18 +255,18 @@ var AIDE_GUIDES = [
       {
         title: "Préparer la clôture",
         text: "<p>Sous le sélecteur de saison, le bouton <b>Clôturer la saison</b> n'est visible que pour les administrateurs. Il ouvre un récapitulatif : nombre de joueurs, nombre de tournois, montant du ranking et podium.</p>"
-          + "<p>Si la saison n'est pas finie (avant le 31 octobre), l'application le signale. Avant de clôturer, vous pouvez <b>imprimer le classement final</b> depuis cette fenêtre.</p>",
+          + "<p>Le champ <b>Dernier jour de la saison</b> est prérempli au 31 octobre. Si la direction arrête la saison plus tôt ou plus tard, changez la date : les tournois datés après ce jour compteront pour la saison suivante, et l'application indique ceux déjà saisis qui changent de saison. Avant de clôturer, vous pouvez <b>imprimer le classement final</b> depuis cette fenêtre.</p>",
         imgs: [{ src: 'captures/lb_saison.png', alt: 'Le récapitulatif de clôture de saison' }],
       },
       {
         title: "Clôturer",
-        text: "<p>Cliquez sur <b>Clôturer la saison</b>, puis confirmez. Le libellé passe à « Clôturée », les boutons de modification disparaissent de l'historique, la saisie est refusée pour les dates de la saison, et le classement affiche « Classement final au » suivi de la date de clôture.</p>"
+        text: "<p>Cliquez sur <b>Clôturer la saison</b>, puis confirmez. Le libellé passe à « Clôturée », les boutons de modification disparaissent de l'historique, la saisie est refusée pour les dates de la saison, et le classement affiche « Classement final au » suivi du dernier jour de la saison.</p>"
           + "<p>Le verrouillage est aussi appliqué par la base de données : il tient même en dehors de l'application.</p>",
         imgs: [],
       },
       {
         title: "Rouvrir en cas d'erreur",
-        text: "<p>Un administrateur peut <b>rouvrir la saison</b> (bouton à la place de « Clôturer ») : les saisies et modifications redeviennent possibles.</p>",
+        text: "<p>Un administrateur peut <b>rouvrir la saison</b> (bouton à la place de « Clôturer ») : les saisies et modifications redeviennent possibles. Le dernier jour de la saison est conservé : les tournois déjà saisis dans la saison suivante n'y reviennent pas.</p>",
         imgs: [],
       },
     ],
