@@ -154,8 +154,16 @@ const SB = {
     return (data || []).map(r => ({ season: r.saison, closedAt: r.cloturee_le }));
   },
 
-  async closeSeason(season) {
-    const { error } = await _sb.from('saisons_cloturees').insert({ saison: season });
+  // Dernier jour de chaque saison dont la fin a été fixée (les autres finissent le 31 octobre) : voir shared/saisons.js
+  async getSeasonEnds() {
+    const { data, error } = await _sb.from('saisons_fins').select('*');
+    if (error) throw error;
+    return (data || []).map(r => ({ season: r.saison, end: r.fin }));
+  },
+
+  // Fixe le dernier jour de la saison (AAAA-MM-JJ) et la verrouille, en une seule opération
+  async closeSeason(season, end) {
+    const { error } = await _sb.rpc('cloturer_saison', { p_saison: season, p_fin: end });
     if (error) throw error;
   },
 

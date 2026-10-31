@@ -54,12 +54,9 @@ BEGIN
   END LOOP;
 END $$;
 
--- ── Calcul de saison inchangé (nov. à oct.) ──
+-- ── Calcul de saison : entrée invalide (le calcul des saisons est testé dans saisons_fin_variable.test.sql) ──
 DO $$
 BEGIN
-  ASSERT public.saison_de('2026-11-01') = 2026, 'saison_de 2026-11-01';
-  ASSERT public.saison_de('2026-10-31') = 2025, 'saison_de 2026-10-31';
-  ASSERT public.saison_de('2027-02-15') = 2026, 'saison_de 2027-02-15';
   ASSERT public.saison_de('pas une date') IS NULL, 'saison_de entrée invalide';
 END $$;
 
