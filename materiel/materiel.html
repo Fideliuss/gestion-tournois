@@ -14,27 +14,42 @@
     <div class="hdr-title">Sixains</div>
   </div>
 
-  <div class="alert-warn" id="mt-erreur" role="alert" hidden></div>
-
-  <div class="mt-barre">
-    <div class="fchips" id="mt-statuts" aria-label="Statut"></div>
-    <button type="button" class="btn btn-gold" id="mt-ajouter"><i class="ico ico-plus"></i> Ajouter des sixains</button>
+  <div class="seg mt-onglets" id="mt-onglets" role="tablist" aria-label="Parties de la page">
+    <button type="button" class="seg-btn" role="tab" data-onglet="liste">Liste</button>
+    <button type="button" class="seg-btn" role="tab" data-onglet="tableau">Tableau de bord</button>
+    <button type="button" class="seg-btn" role="tab" data-onglet="destruction">Destruction <span class="seg-n" id="mt-nb-detruire" hidden></span></button>
   </div>
 
-  <div class="mt-filtres">
-    <div class="fchips" id="mt-jeux" aria-label="Jeu"></div>
-    <div class="mt-champs">
-      <select id="mt-finition" aria-label="Finition"><option value="">Toutes les finitions</option><option>Plastifié</option><option>Cartonné</option></select>
-      <select id="mt-marque" aria-label="Marque"></select>
-      <input type="search" id="mt-q" placeholder="Rechercher un numéro" aria-label="Rechercher un numéro" autocomplete="off" />
+  <div class="alert-warn" id="mt-erreur" role="alert" hidden></div>
+
+  <!-- Liste -->
+  <div id="vue-liste">
+    <div class="mt-barre">
+      <div class="fchips" id="mt-statuts" aria-label="Statut"></div>
+      <button type="button" class="btn btn-gold" id="mt-ajouter"><i class="ico ico-plus"></i> Ajouter des sixains</button>
+    </div>
+
+    <div class="mt-filtres">
+      <div class="fchips" id="mt-jeux" aria-label="Jeu"></div>
+      <div class="mt-champs">
+        <select id="mt-finition" aria-label="Finition"><option value="">Toutes les finitions</option><option>Plastifié</option><option>Cartonné</option></select>
+        <select id="mt-marque" aria-label="Marque"></select>
+        <input type="search" id="mt-q" placeholder="Rechercher un numéro" aria-label="Rechercher un numéro" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="mt-selbar" id="mt-selbar" hidden></div>
+
+    <div class="card mt-carte">
+      <div id="mt-liste"><p class="mt-etat" role="status">Chargement...</p></div>
     </div>
   </div>
 
-  <div class="mt-selbar" id="mt-selbar" hidden></div>
+  <!-- Tableau de bord -->
+  <div id="vue-tableau" hidden></div>
 
-  <div class="card mt-carte">
-    <div id="mt-liste"><p class="mt-etat" role="status">Chargement...</p></div>
-  </div>
+  <!-- Destruction -->
+  <div id="vue-destruction" hidden></div>
 </div>
 
 <div class="modal-overlay" id="mt-modal" aria-hidden="true">
@@ -49,6 +64,8 @@
 <script src="../shared/auth.js"></script>
 <script src="materiel_core.js"></script>
 <script src="materiel.js"></script>
+<script src="materiel_tableau.js"></script>
+<script src="materiel_destruction.js"></script>
 <script>
 AUTH.guard({ loginUrl: '../login.html', panel: 'materiel' }).then(function (user) {
   if (!user) return;

@@ -91,6 +91,50 @@ test('doublon, droit manquant, message déjà lisible de la base', () => {
   assert.strictEqual(M.traduireErreur(null), 'Erreur inconnue.');
 });
 
+console.log('Bilan, tableau de bord et destruction');
+const STOCK = [P('1', 'Blackjack', 'Neuf'), P('2', 'Blackjack', 'En service'), P('3', 'Blackjack', "Hors d'usage"), P('4', 'Blackjack', 'A détruire'), P('5', 'Blackjack', 'A intégrer'),
+  P('6', 'Blackjack', 'Détruit', { session_destruction_id: 's1' }), P('7', 'Ultimate', 'Neuf', { finition: 'Cartonné' }), P('8', 'Ultimate', 'A détruire'), P('9', 'Ultimate', 'A détruire', { finition: 'Cartonné' })];
+test('bilan : stock + entrées - sorties = en dépôt après, par jeu et au total', () => {
+  const b = M.bilanJeux(STOCK, ['Blackjack', 'Ultimate', 'Cash Game']);
+  assert.deepStrictEqual(b.lignes[0], { jeu: 'Blackjack', stock: 4, entrees: 1, sorties: 1, apres: 4 });
+  assert.deepStrictEqual(b.lignes[1], { jeu: 'Ultimate', stock: 3, entrees: 0, sorties: 2, apres: 1 });
+  assert.deepStrictEqual(b.lignes[2], { jeu: 'Cash Game', stock: 0, entrees: 0, sorties: 0, apres: 0 });
+  assert.deepStrictEqual(b.total, { jeu: 'Total', stock: 7, entrees: 1, sorties: 3, apres: 5 });
+});
+test('bilan : un jeu inconnu du référentiel apparaît quand même', () => {
+  assert.strictEqual(M.bilanJeux([P('1', 'Poker', 'Neuf')], ['Blackjack']).lignes.map(l => l.jeu).join(), 'Blackjack,Poker');
+});
+test('tableau : une ligne par jeu, le détail par finition seulement quand un jeu en a plusieurs, totaux', () => {
+  const m = M.matrice(STOCK, ENCHAINEMENT, ['Blackjack', 'Ultimate']);
+  assert.deepStrictEqual(m.lignes.map(l => l.jeu + (l.finition ? '/' + l.finition : '')), ['Blackjack', 'Ultimate', 'Ultimate/Plastifié', 'Ultimate/Cartonné']);
+  assert.strictEqual(m.lignes[0].total, 6);
+  assert.strictEqual(m.lignes[0].parStatut['A détruire'], 1);
+  assert.deepStrictEqual(m.lignes[0].finitions, ['Plastifié']);
+  assert.strictEqual(m.lignes[3].parStatut['A détruire'], 1);
+  assert.strictEqual(m.total.total, 9);
+  assert.strictEqual(m.total.parStatut['A détruire'], 3);
+});
+test('à détruire : groupé par jeu, trié par numéro', () => {
+  const g = M.aDetruireParJeu(STOCK);
+  assert.deepStrictEqual(Object.keys(g), ['Blackjack', 'Ultimate']);
+  assert.deepStrictEqual(g['Ultimate'].map(p => p.identifiant), ['8', '9']);
+});
+test('sessions : la plus récente d\'abord, sans date en dernier, contenu par jeu', () => {
+  const sessions = [{ id: 's0', date_destruction: null, reference: 'Avant l\'outil' }, { id: 's1', date_destruction: '2026-11-05', reference: 'R1', cree_le: '2026-11-05T10:00:00Z' },
+    { id: 's2', date_destruction: '2026-12-01', cree_le: '2026-12-01T09:00:00Z' }, { id: 's3', date_destruction: '2026-12-01', cree_le: '2026-12-01T11:00:00Z' }];
+  const r = M.sessionsResume(STOCK.concat([P('10', 'Ultimate', 'Détruit', { session_destruction_id: 's2' }), P('11', 'Ultimate', 'Détruit', { session_destruction_id: 's2' })]), sessions);
+  assert.deepStrictEqual(r.map(s => s.id), ['s3', 's2', 's1', 's0']);
+  assert.strictEqual(r.find(s => s.id === 's1').total, 1);
+  assert.deepStrictEqual(r.find(s => s.id === 's2').parJeu, { Ultimate: ['10', '11'] });
+  assert.strictEqual(r.find(s => s.id === 's3').total, 0);
+});
+test('liste à copier et dates', () => {
+  assert.strictEqual(M.texteListe({ Blackjack: ['1', '2'], Ultimate: [P('9', 'Ultimate', 'A détruire')] }), 'Blackjack (2) : 1, 2\nUltimate (1) : 9');
+  assert.strictEqual(M.dateFr('2026-11-05'), '05/11/2026');
+  assert.strictEqual(M.dateFr(null), '');
+  assert.strictEqual(M.aujourdhui(new Date(2026, 10, 5)), '2026-11-05');
+});
+
 console.log('Divers');
 test('jeux dans l\'ordre, date lisible', () => {
   assert.deepStrictEqual(M.jeuxPourSelect(REF), ['Blackjack', 'Tournois']);

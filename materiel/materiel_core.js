@@ -124,7 +124,88 @@ const MATERIEL = (function () {
     return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' à ' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
 
-  const API = { actionVers: actionVers, classe: classe, passages: passages, statuts: statuts, cleNaturelle: cleNaturelle, trier: trier, filtrer: filtrer,
+  // ── Tableau de bord et destruction (reprennent les feuilles « Etat général » et « Destruction » du Google Sheet d'origine) ──
+  // Stock suivi : ce qui est entré dans le registre officiel et n'en est pas encore sorti (hors « A intégrer » et « Détruit »)
+  const EN_STOCK = ['Neuf', 'En service', "Hors d'usage", 'A détruire'];
+
+  function vide(statuts) { const o = {}; statuts.forEach(function (s) { o[s] = 0; }); return o; }
+
+  // Bilan par jeu : stock actuel + entrées (A intégrer) - sorties (A détruire) = sixains en dépôt après la prochaine destruction
+  function bilanJeux(pieces, jeux) {
+    const noms = jeux.slice();
+    pieces.forEach(function (p) { if (p.jeu && noms.indexOf(p.jeu) < 0) noms.push(p.jeu); });
+    const lignes = noms.map(function (jeu) {
+      const mine = pieces.filter(function (p) { return p.jeu === jeu; });
+      const nb = function (liste) { return mine.filter(function (p) { return liste.indexOf(p.statut) >= 0; }).length; };
+      const stock = nb(EN_STOCK), entrees = nb(['A intégrer']), sorties = nb(['A détruire']);
+      return { jeu: jeu, stock: stock, entrees: entrees, sorties: sorties, apres: stock + entrees - sorties };
+    });
+    const total = lignes.reduce(function (t, l) { return { jeu: 'Total', stock: t.stock + l.stock, entrees: t.entrees + l.entrees, sorties: t.sorties + l.sorties, apres: t.apres + l.apres }; },
+      { jeu: 'Total', stock: 0, entrees: 0, sorties: 0, apres: 0 });
+    return { lignes: lignes, total: total };
+  }
+
+  // Tableau jeu x statut ; le détail par finition n'apparaît sous un jeu que s'il en a plusieurs (sinon la finition est donnée avec le jeu)
+  function matrice(pieces, statuts, jeux) {
+    const noms = jeux.slice();
+    pieces.forEach(function (p) { if (p.jeu && noms.indexOf(p.jeu) < 0) noms.push(p.jeu); });
+    const compte = function (liste) {
+      const o = vide(statuts); let t = 0;
+      liste.forEach(function (p) { if (o[p.statut] !== undefined) { o[p.statut]++; t++; } });
+      return { parStatut: o, total: t };
+    };
+    const lignes = [];
+    noms.forEach(function (jeu) {
+      const mine = pieces.filter(function (p) { return p.jeu === jeu; });
+      const finitions = ['Plastifié', 'Cartonné'].filter(function (f) { return mine.some(function (p) { return p.finition === f; }); });
+      lignes.push(Object.assign({ jeu: jeu, finition: null, finitions: finitions }, compte(mine)));
+      if (finitions.length > 1) {                          // le détail n'apparaît que s'il apporte quelque chose
+        finitions.forEach(function (f) {
+          lignes.push(Object.assign({ jeu: jeu, finition: f }, compte(mine.filter(function (p) { return p.finition === f; }))));
+        });
+      }
+    });
+    return { statuts: statuts, lignes: lignes, total: compte(pieces) };
+  }
+
+  // Les fiches « A détruire », groupées par jeu et triées : { jeu: [fiches] }
+  function aDetruireParJeu(pieces) {
+    const out = {};
+    trier(pieces.filter(function (p) { return p.statut === 'A détruire'; })).forEach(function (p) { (out[p.jeu] = out[p.jeu] || []).push(p); });
+    return out;
+  }
+
+  // Sessions de destruction avec leur contenu, la plus récente d'abord ; sans date (avant l'outil) en dernier
+  function sessionsResume(pieces, destructions) {
+    const res = destructions.map(function (s) {
+      const parJeu = {};
+      trier(pieces.filter(function (p) { return p.session_destruction_id === s.id; })).forEach(function (p) { (parJeu[p.jeu] = parJeu[p.jeu] || []).push(p.identifiant); });
+      const total = Object.keys(parJeu).reduce(function (n, j) { return n + parJeu[j].length; }, 0);
+      return { id: s.id, date: s.date_destruction || null, reference: s.reference || '', note: s.note || '', cree_le: s.cree_le || '', total: total, parJeu: parJeu };
+    });
+    return res.sort(function (a, b) {
+      if (!!a.date !== !!b.date) return a.date ? -1 : 1;
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return a.cree_le < b.cree_le ? 1 : a.cree_le > b.cree_le ? -1 : 0;
+    });
+  }
+
+  // Liste à copier : une ligne par jeu, « Blackjack (3) : 100001, 100002, 100003 »
+  function texteListe(parJeu) {
+    return Object.keys(parJeu).map(function (j) {
+      const ids = parJeu[j].map(function (x) { return typeof x === 'string' ? x : x.identifiant; });
+      return j + ' (' + ids.length + ') : ' + ids.join(', ');
+    }).join('\n');
+  }
+
+  function dateFr(iso) { return /^\d{4}-\d{2}-\d{2}/.test(iso || '') ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : ''; }
+  function aujourdhui(d) {
+    const x = d || new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return x.getFullYear() + '-' + p(x.getMonth() + 1) + '-' + p(x.getDate());
+  }
+
+  const API = { EN_STOCK: EN_STOCK, bilanJeux: bilanJeux, matrice: matrice, aDetruireParJeu: aDetruireParJeu, sessionsResume: sessionsResume, texteListe: texteListe, dateFr: dateFr, aujourdhui: aujourdhui,
+    actionVers: actionVers, classe: classe, passages: passages, statuts: statuts, cleNaturelle: cleNaturelle, trier: trier, filtrer: filtrer,
     compter: compter, analyserSaisie: analyserSaisie, selectionCommune: selectionCommune, traduireErreur: traduireErreur, jeuxPourSelect: jeuxPourSelect, dateHeure: dateHeure };
   return API;
 })();
