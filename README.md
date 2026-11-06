@@ -8,14 +8,14 @@ L'application est organisée en espaces (Tournois, Training, Break list), chacun
 
 | Espace | Description |
 |---------|-------------|
-| 🎯 **Tournois** | Prize Pool, Challenge Saisonnier, Règlement TDA (consultation et recherche), Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes - dans le menu de la barre) |
-| 🎓 **Training** | Modules d'entraînement Blackjack et Roulette Anglaise |
-| 📋 **Break list** | Présents de la séance depuis le planning mensuel, extraction Octime, répartition et départs, break list et feuille des départs à imprimer |
-| 👤 **Gestion des comptes** | Comptes (liste filtrable), rôles personnalisables et accès par page *(admin uniquement)* |
+| **Tournois** | Prize Pool, Challenge Saisonnier, Règlement TDA (consultation et recherche), Administration tournois (déclaration DTPJ, générateur de courrier, gestion des extras, calendrier & barèmes - dans le menu de la barre) |
+| **Training** | Modules d'entraînement Blackjack et Roulette Anglaise |
+| **Break list** | Présents de la séance depuis le planning mensuel, extraction Octime, répartition et départs, break list et feuille des départs à imprimer |
+| **Gestion des comptes** | Comptes (liste filtrable), rôles personnalisables et accès par page *(admin uniquement)* |
 
 ---
 
-## 🎯 Tournois
+## Tournois
 
 ### Prize Pool Builder
 Calcule automatiquement la répartition des gains selon le nombre de joueurs et la structure du buy-in.
@@ -61,7 +61,7 @@ Classement général de la saison (du 1er novembre au 31 octobre) avec saisie et
 
 ---
 
-## 🎓 Training
+## Training
 
 Modules d'entraînement pour les croupiers, avec sessions chronométrées, score, niveaux de difficulté (Facile / Médium / Expert) et configuration admin par jeu.
 
@@ -81,7 +81,7 @@ Modules d'entraînement pour les croupiers, avec sessions chronométrées, score
 
 - **Meilleure main** - pas de niveaux : comme à la table, le croupier voit 7 cartes (les 2 du joueur et le board, présentés comme dans « Qui gagne ? ») et identifie la meilleure combinaison. Donnes au hasard, avec environ une sur trois qui est un piège (quinte à la roue, deux brelans, trois paires, couleur et quinte…) expliqué après la réponse. Pas de chronomètre ; la meilleure main est surlignée après chaque réponse
 - **Qui gagne ?** - pas de niveaux : des donnes au hasard, de tous types (cas nets, départages au kicker, banque non qualifiée, égalités). La table est affichée en trois encadrés : le joueur (cartes en quinconce), le board (flop · turn · river) et la banque (deux cartes). Le croupier annonce d'abord si la banque est qualifiée, puis qui gagne. Après chaque donne : les deux meilleures mains et l'explication de ce qui décide
-- **Calcul des gains** - pas de niveaux : à chaque donne, un vrai tapis (de haut en bas : banque, board, Bonus en losange et voyant du Prog, ronds Blind = Ante, rond Play, cartes du joueur, avec leurs jetons) ; le croupier clique sur chaque mise (Play, Blind, Ante, Bonus, Prog) et répond dans une fenêtre à côté des jetons : « Je paie » (avec le montant du gain), « Je laisse » (mise rendue) ou « Je ramasse » (mise perdue). Situations au hasard : banque non qualifiée, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents. Mises par multiples de 5 € jusqu'à 50 € (maximum modifiable par un admin via « ⚙ Config UTH »). Le jackpot JP1 est seulement indiqué, sans calcul
+- **Calcul des gains** - pas de niveaux : à chaque donne, un vrai tapis (de haut en bas : banque, board, Bonus en losange et voyant du Prog, ronds Blind = Ante, rond Play, cartes du joueur, avec leurs jetons) ; le croupier clique sur chaque mise (Play, Blind, Ante, Bonus, Prog) et répond dans une fenêtre à côté des jetons : « Je paie » (avec le montant du gain), « Je laisse » (mise rendue) ou « Je ramasse » (mise perdue). Situations au hasard : banque non qualifiée, égalité, joueur couché, Blind qui paie ou rendu, Trips et JP1 parfois absents. Mises par multiples de 5 € jusqu'à 50 € (maximum modifiable par un admin dans Configuration des modules, onglet Ultimate Texas Hold'em). Le jackpot JP1 est seulement indiqué, sans calcul
 
 ### Suivi des résultats
 
@@ -92,7 +92,7 @@ Toutes les sessions et résultats de training sont enregistrés dans **Supabase*
 
 ---
 
-## 👤 Gestion des comptes *(admin uniquement)*
+## Gestion des comptes *(admin uniquement)*
 
 - **Comptes** : création / édition / suppression (e-mail + mot de passe) via une Edge Function Supabase sécurisée (vérification admin côté serveur, jamais côté client). La liste se filtre par recherche, par rôle ou par « inactifs », se trie par colonne et peut se regrouper par rôle
 - **Rôles personnalisables** : au-delà des rôles par défaut (Admin, MCD, Floor), création de rôles sur mesure avec libellé et couleur
