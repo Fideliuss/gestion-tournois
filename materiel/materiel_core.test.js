@@ -74,6 +74,40 @@ test('un numéro trop long est refusé, un numéro de 40 caractères passe', () 
 });
 test('la comparaison avec l\'existant ignore la casse', () => assert.deepStrictEqual(M.analyserSaisie('d25820', ['D25820']).existe, ['d25820']));
 
+console.log('Série bornée');
+test('une série : du premier au dernier numéro, bornes comprises', () => {
+  const r = M.analyserSerie('136012', '136016', []);
+  assert.deepStrictEqual(r.ids, ['136012', '136013', '136014', '136015', '136016']);
+  assert.strictEqual(r.total, 5);
+  assert.strictEqual(r.erreur, '');
+});
+test('un préfixe de lettres est conservé, la casse du premier numéro aussi', () => {
+  assert.deepStrictEqual(M.analyserSerie('D25820', 'D25822', []).ids, ['D25820', 'D25821', 'D25822']);
+  assert.deepStrictEqual(M.analyserSerie('d9', 'D11', []).ids, ['d9', 'd10', 'd11']);
+});
+test('dernier numéro vide : un seul sixain ; premier vide : rien et pas d\'erreur', () => {
+  assert.deepStrictEqual(M.analyserSerie('136012', '', []).ids, ['136012']);
+  assert.deepStrictEqual(M.analyserSerie('', '', []), { ids: [], existe: [], total: 0, erreur: '' });
+});
+test('les zéros de tête sont conservés', () => assert.deepStrictEqual(M.analyserSerie('0098', '0101', []).ids, ['0098', '0099', '0100', '0101']));
+test('numéros déjà enregistrés dans la série : ignorés et signalés, casse ignorée', () => {
+  const r = M.analyserSerie('D1', 'D4', ['d2', 'D4']);
+  assert.deepStrictEqual(r.ids, ['D1', 'D3']);
+  assert.deepStrictEqual(r.existe, ['D2', 'D4']);
+  assert.strictEqual(r.total, 4);
+});
+test('refus : préfixes différents, ordre inversé, pas de chiffres à la fin, série trop longue, numéro trop long', () => {
+  assert.ok(/commencer pareil/.test(M.analyserSerie('D100', 'E105', []).erreur));
+  assert.ok(/commencer pareil/.test(M.analyserSerie('100', 'D105', []).erreur));
+  assert.ok(/après le premier/.test(M.analyserSerie('105', '100', []).erreur));
+  assert.ok(/finir par des chiffres/.test(M.analyserSerie('ABC', '', []).erreur));
+  assert.ok(/finir par des chiffres/.test(M.analyserSerie('100', 'XYZ', []).erreur));
+  assert.ok(/maximum/.test(M.analyserSerie('1', '1001', []).erreur));
+  assert.strictEqual(M.analyserSerie('1', '1000', []).ids.length, 1000);
+  assert.ok(/trop long/.test(M.analyserSerie('1234567890123456', '', []).erreur));
+  assert.strictEqual(M.analyserSerie('100', 'XYZ', []).ids.length, 0);
+});
+
 console.log('Sélection groupée');
 test('même statut : passages proposés ; statuts mélangés : refus avec raison', () => {
   const a = M.selectionCommune(PIECES, ['u118510', 'uD25820'], REF);
@@ -89,6 +123,40 @@ test('doublon, droit manquant, message déjà lisible de la base', () => {
   assert.ok(/pas le droit/.test(M.traduireErreur({ code: '42501', message: 'new row violates row-level security policy' })));
   assert.strictEqual(M.traduireErreur({ code: '23514', message: 'Un retour en arrière demande un motif' }), 'Un retour en arrière demande un motif');
   assert.strictEqual(M.traduireErreur(null), 'Erreur inconnue.');
+});
+
+console.log('Bilan et destruction');
+const STOCK = [P('1', 'Blackjack', 'Neuf'), P('2', 'Blackjack', 'En service'), P('3', 'Blackjack', "Hors d'usage"), P('4', 'Blackjack', 'A détruire'), P('5', 'Blackjack', 'A intégrer'),
+  P('6', 'Blackjack', 'Détruit', { session_destruction_id: 's1' }), P('7', 'Ultimate', 'Neuf', { finition: 'Cartonné' }), P('8', 'Ultimate', 'A détruire'), P('9', 'Ultimate', 'A détruire', { finition: 'Cartonné' })];
+test("bilan : stock initial + entrées - sorties = en dépôt, avec la répartition Neuf / En service / Hors d'usage", () => {
+  const b = M.bilanJeux(STOCK, ['Blackjack', 'Ultimate', 'Cash Game']);
+  assert.deepStrictEqual(b.lignes[0], { jeu: 'Blackjack', stock: 4, entrees: 1, sorties: 1, depot: 4, neuf: 1, enService: 1, horsUsage: 1, total: 3 });
+  assert.deepStrictEqual(b.lignes[1], { jeu: 'Ultimate', stock: 3, entrees: 0, sorties: 2, depot: 1, neuf: 1, enService: 0, horsUsage: 0, total: 1 });
+  assert.deepStrictEqual(b.lignes[2], { jeu: 'Cash Game', stock: 0, entrees: 0, sorties: 0, depot: 0, neuf: 0, enService: 0, horsUsage: 0, total: 0 });
+  assert.deepStrictEqual(b.total, { jeu: 'Total', stock: 7, entrees: 1, sorties: 3, depot: 5, neuf: 2, enService: 1, horsUsage: 1, total: 4 });
+});
+test('bilan : un jeu inconnu du référentiel apparaît quand même', () => {
+  assert.strictEqual(M.bilanJeux([P('1', 'Poker', 'Neuf')], ['Blackjack']).lignes.map(l => l.jeu).join(), 'Blackjack,Poker');
+});
+test('à détruire : groupé par jeu, trié par numéro', () => {
+  const g = M.aDetruireParJeu(STOCK);
+  assert.deepStrictEqual(Object.keys(g), ['Blackjack', 'Ultimate']);
+  assert.deepStrictEqual(g['Ultimate'].map(p => p.identifiant), ['8', '9']);
+});
+test('sessions : la plus récente d\'abord, sans date en dernier, contenu par jeu', () => {
+  const sessions = [{ id: 's0', date_destruction: null, reference: 'Avant l\'outil' }, { id: 's1', date_destruction: '2026-11-05', reference: 'R1', cree_le: '2026-11-05T10:00:00Z' },
+    { id: 's2', date_destruction: '2026-12-01', cree_le: '2026-12-01T09:00:00Z' }, { id: 's3', date_destruction: '2026-12-01', cree_le: '2026-12-01T11:00:00Z' }];
+  const r = M.sessionsResume(STOCK.concat([P('10', 'Ultimate', 'Détruit', { session_destruction_id: 's2' }), P('11', 'Ultimate', 'Détruit', { session_destruction_id: 's2' })]), sessions);
+  assert.deepStrictEqual(r.map(s => s.id), ['s3', 's2', 's1', 's0']);
+  assert.strictEqual(r.find(s => s.id === 's1').total, 1);
+  assert.deepStrictEqual(r.find(s => s.id === 's2').parJeu, { Ultimate: ['10', '11'] });
+  assert.strictEqual(r.find(s => s.id === 's3').total, 0);
+});
+test('liste à copier et dates', () => {
+  assert.strictEqual(M.texteListe({ Blackjack: ['1', '2'], Ultimate: [P('9', 'Ultimate', 'A détruire')] }), 'Blackjack (2) : 1, 2\nUltimate (1) : 9');
+  assert.strictEqual(M.dateFr('2026-11-05'), '05/11/2026');
+  assert.strictEqual(M.dateFr(null), '');
+  assert.strictEqual(M.aujourdhui(new Date(2026, 10, 5)), '2026-11-05');
 });
 
 console.log('Divers');
