@@ -1,6 +1,6 @@
 // ══════════════════════════════════════════════════════
-//  MATÉRIEL - page Sixains, trois onglets : Liste (ce fichier), Tableau de bord (materiel_tableau.js), Destruction (materiel_destruction.js)
-//  Chargée après materiel_core.js, shared/html.js, shared/supabase.js et shared/auth.js. Adresses : #liste (avec ?jeu=...&vue=...&finition=...), #tableau, #destruction
+//  MATÉRIEL - page Sixains, deux onglets : Liste (ce fichier), Destruction (materiel_destruction.js)
+//  Chargée après materiel_core.js, shared/html.js, shared/supabase.js et shared/auth.js. Adresses : #liste (avec ?jeu=...&vue=...), #destruction
 //  Suivi quotidien : ouvrir un sixain (Neuf, En service), le mettre hors d'usage, préparer les destructions. Les règles (séquence des
 //  statuts, retour avec motif, numéro unique, jeu fixé) sont imposées par la base (supabase/migrations/materiel.sql) ;
 //  l'écran propose les bons boutons et traduit les refus.
@@ -59,13 +59,13 @@ function filtreCourant() { return { statuts: statutsVue(), jeu: FILTRE.jeu, fini
 function visibles() { return MATERIEL.trier(MATERIEL.filtrer(PIECES, filtreCourant())); }
 function marqueNom(id) { const m = REF.marques.find(function (x) { return x.id === id; }); return m ? m.nom : ''; }
 
-// L'adresse choisit l'onglet : #liste?jeu=Blackjack&vue=Neuf&finition=Cartonné (les filtres viennent du tableau de bord), #tableau, #destruction
+// L'adresse choisit l'onglet : #liste?jeu=Blackjack&vue=Neuf (les filtres viennent des nombres du bilan de la Destruction), #destruction
 function route() {
   const brut = decodeURIComponent(location.hash.replace(/^#/, ''));
   const i = brut.indexOf('?');
   const nom = i >= 0 ? brut.slice(0, i) : brut;
   const q = new URLSearchParams(i >= 0 ? brut.slice(i + 1) : '');
-  ONGLET = ['liste', 'tableau', 'destruction'].indexOf(nom) >= 0 ? nom : 'liste';
+  ONGLET = nom === 'destruction' ? 'destruction' : 'liste';
   if (ONGLET === 'liste' && i >= 0) {
     const sts = MATERIEL.statuts(REF, FAMILLE).map(function (x) { return x.statut; });
     FILTRE = { vue: (q.get('vue') === 'tous' || sts.indexOf(q.get('vue')) >= 0) ? q.get('vue') : 'cours', jeu: MATERIEL.jeuxPourSelect(REF).indexOf(q.get('jeu')) >= 0 ? q.get('jeu') : '',
@@ -74,7 +74,7 @@ function route() {
     SEL = [];
   }
   document.querySelectorAll('#mt-onglets .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.onglet === ONGLET)); });
-  ['liste', 'tableau', 'destruction'].forEach(function (o) { $('vue-' + o).hidden = o !== ONGLET; });
+  ['liste', 'destruction'].forEach(function (o) { $('vue-' + o).hidden = o !== ONGLET; });
   window.scrollTo(0, 0);
   rendre();
 }
@@ -83,7 +83,6 @@ function route() {
 function rendre() {
   const n = PIECES.filter(function (p) { return p.statut === 'A détruire'; }).length;
   $('mt-nb-detruire').hidden = !n; $('mt-nb-detruire').textContent = n;
-  if (ONGLET === 'tableau') return rendreTableau();
   if (ONGLET === 'destruction') return rendreDestruction();
   rendreStatuts(); rendreJeux(); rendreMarques(); rendreListe(); rendreSelection();
 }

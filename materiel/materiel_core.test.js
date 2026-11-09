@@ -91,28 +91,18 @@ test('doublon, droit manquant, message déjà lisible de la base', () => {
   assert.strictEqual(M.traduireErreur(null), 'Erreur inconnue.');
 });
 
-console.log('Bilan, tableau de bord et destruction');
+console.log('Bilan et destruction');
 const STOCK = [P('1', 'Blackjack', 'Neuf'), P('2', 'Blackjack', 'En service'), P('3', 'Blackjack', "Hors d'usage"), P('4', 'Blackjack', 'A détruire'), P('5', 'Blackjack', 'A intégrer'),
   P('6', 'Blackjack', 'Détruit', { session_destruction_id: 's1' }), P('7', 'Ultimate', 'Neuf', { finition: 'Cartonné' }), P('8', 'Ultimate', 'A détruire'), P('9', 'Ultimate', 'A détruire', { finition: 'Cartonné' })];
-test('bilan : stock + entrées - sorties = en dépôt après, par jeu et au total', () => {
+test("bilan : stock initial + entrées - sorties = en dépôt, avec la répartition Neuf / En service / Hors d'usage", () => {
   const b = M.bilanJeux(STOCK, ['Blackjack', 'Ultimate', 'Cash Game']);
-  assert.deepStrictEqual(b.lignes[0], { jeu: 'Blackjack', stock: 4, entrees: 1, sorties: 1, apres: 4 });
-  assert.deepStrictEqual(b.lignes[1], { jeu: 'Ultimate', stock: 3, entrees: 0, sorties: 2, apres: 1 });
-  assert.deepStrictEqual(b.lignes[2], { jeu: 'Cash Game', stock: 0, entrees: 0, sorties: 0, apres: 0 });
-  assert.deepStrictEqual(b.total, { jeu: 'Total', stock: 7, entrees: 1, sorties: 3, apres: 5 });
+  assert.deepStrictEqual(b.lignes[0], { jeu: 'Blackjack', stock: 4, entrees: 1, sorties: 1, depot: 4, neuf: 1, enService: 1, horsUsage: 1, total: 3 });
+  assert.deepStrictEqual(b.lignes[1], { jeu: 'Ultimate', stock: 3, entrees: 0, sorties: 2, depot: 1, neuf: 1, enService: 0, horsUsage: 0, total: 1 });
+  assert.deepStrictEqual(b.lignes[2], { jeu: 'Cash Game', stock: 0, entrees: 0, sorties: 0, depot: 0, neuf: 0, enService: 0, horsUsage: 0, total: 0 });
+  assert.deepStrictEqual(b.total, { jeu: 'Total', stock: 7, entrees: 1, sorties: 3, depot: 5, neuf: 2, enService: 1, horsUsage: 1, total: 4 });
 });
 test('bilan : un jeu inconnu du référentiel apparaît quand même', () => {
   assert.strictEqual(M.bilanJeux([P('1', 'Poker', 'Neuf')], ['Blackjack']).lignes.map(l => l.jeu).join(), 'Blackjack,Poker');
-});
-test('tableau : une ligne par jeu, le détail par finition seulement quand un jeu en a plusieurs, totaux', () => {
-  const m = M.matrice(STOCK, ENCHAINEMENT, ['Blackjack', 'Ultimate']);
-  assert.deepStrictEqual(m.lignes.map(l => l.jeu + (l.finition ? '/' + l.finition : '')), ['Blackjack', 'Ultimate', 'Ultimate/Plastifié', 'Ultimate/Cartonné']);
-  assert.strictEqual(m.lignes[0].total, 6);
-  assert.strictEqual(m.lignes[0].parStatut['A détruire'], 1);
-  assert.deepStrictEqual(m.lignes[0].finitions, ['Plastifié']);
-  assert.strictEqual(m.lignes[3].parStatut['A détruire'], 1);
-  assert.strictEqual(m.total.total, 9);
-  assert.strictEqual(m.total.parStatut['A détruire'], 3);
 });
 test('à détruire : groupé par jeu, trié par numéro', () => {
   const g = M.aDetruireParJeu(STOCK);

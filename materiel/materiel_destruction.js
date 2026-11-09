@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════════════
 //  MATÉRIEL - onglet Destruction (chargé après materiel.js, dont il utilise PIECES, REF, FAMILLE, OCCUPE, MAX_LOT, esc, $, toast, fusionner,
 //  ouvrirModal, fermerModal, erreurModal)
-//  Reprend la feuille « Destruction » du Google Sheet d'origine : par jeu, stock actuel + entrées (A intégrer) - sorties (A détruire) = sixains
-//  en dépôt après la destruction. On choisit les sixains « A détruire » (en général une douzaine), on valide une SESSION (date, référence) :
+//  Reprend la feuille « Destruction » du Google Sheet d'origine : par jeu, stock initial + entrées (A intégrer) - sorties (A détruire) = sixains
+//  en dépôt, puis la répartition Neuf / En service / Hors d'usage. On choisit les sixains « A détruire » (en général une douzaine), on valide une SESSION (date, référence) :
 //  les fiches passent à « Détruit » avec cette session, ce qui permet de retrouver ce qui est sorti au registre officiel.
 // ══════════════════════════════════════════════════════
 
@@ -28,13 +28,17 @@ function rendreDestruction() {
   SEL_D = SEL_D.filter(function (id) { return PIECES.some(function (p) { return p.id === id && p.statut === 'A détruire'; }); });
   const nb = function (n, jeu, statut) { return n ? '<a class="mt-nb" href="#liste?' + esc(new URLSearchParams({ jeu: jeu, vue: statut }).toString()) + '">' + n + '</a>' : '<span class="mt-zero">0</span>'; };
 
+  // Mêmes colonnes que la feuille d'origine ; un nombre ouvre la liste filtrée (le total n'est pas cliquable)
   const ligneBilan = function (l, total) {
-    return '<tr' + (total ? ' class="mt-total"' : '') + '><td>' + esc(l.jeu) + '</td><td class="mt-nbc">' + l.stock + '</td><td class="mt-nbc">' + (total ? l.entrees : nb(l.entrees, l.jeu, 'A intégrer')) + '</td>' +
-      '<td class="mt-nbc">' + (total ? l.sorties : nb(l.sorties, l.jeu, 'A détruire')) + '</td><td class="mt-nbc mt-tot">' + l.apres + '</td></tr>';
+    const c = function (n, statut) { return '<td class="mt-nbc">' + (total ? n : nb(n, l.jeu, statut)) + '</td>'; };
+    return '<tr' + (total ? ' class="mt-total"' : '') + '><td>' + esc(l.jeu) + '</td><td class="mt-nbc">' + l.stock + '</td>' + c(l.entrees, 'A intégrer') + c(l.sorties, 'A détruire') +
+      '<td class="mt-nbc mt-tot">' + l.depot + '</td><td class="mt-sep"></td>' + c(l.neuf, 'Neuf') + c(l.enService, 'En service') + c(l.horsUsage, "Hors d'usage") +
+      '<td class="mt-nbc mt-tot">' + l.total + '</td></tr>';
   };
-  const carteBilan = '<div class="card mt-bloc"><div class="sec">Bilan par jeu</div><div class="mt-defile"><table class="mt-matrice mt-bilan"><thead><tr><th>Jeu</th>' +
-    '<th class="mt-nbc" title="Neuf + En service + Hors d\'usage + A détruire">Stock actuel</th><th class="mt-nbc" title="Sixains « A intégrer »">Entrées</th>' +
-    '<th class="mt-nbc" title="Sixains « A détruire »">Sorties</th><th class="mt-nbc" title="Stock actuel + entrées - sorties">En dépôt après</th></tr></thead><tbody>' +
+  const carteBilan = '<div class="card mt-bloc"><div class="sec">Destruction des sixains</div><div class="mt-defile"><table class="mt-matrice mt-bilan"><thead><tr><th>Jeux</th>' +
+    '<th class="mt-nbc" title="Neuf + En service + Hors d\'usage + A détruire">Stock initial</th><th class="mt-nbc" title="Sixains « A intégrer »">Entrées</th>' +
+    '<th class="mt-nbc" title="Sixains « A détruire »">Sorties</th><th class="mt-nbc" title="Stock initial + entrées - sorties">En dépôt</th><th class="mt-sep"></th>' +
+    '<th class="mt-nbc">Neuf</th><th class="mt-nbc">En service</th><th class="mt-nbc">Hors d\'usage</th><th class="mt-nbc">Total</th></tr></thead><tbody>' +
     bilan.lignes.map(function (l) { return ligneBilan(l, false); }).join('') + ligneBilan(bilan.total, true) + '</tbody></table></div></div>';
 
   let carteChoix;

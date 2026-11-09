@@ -124,13 +124,12 @@ const MATERIEL = (function () {
     return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' à ' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
 
-  // ── Tableau de bord et destruction (reprennent les feuilles « Etat général » et « Destruction » du Google Sheet d'origine) ──
+  // ── Destruction (reprend la feuille « Destruction » du Google Sheet d'origine) ──
   // Stock suivi : ce qui est entré dans le registre officiel et n'en est pas encore sorti (hors « A intégrer » et « Détruit »)
   const EN_STOCK = ['Neuf', 'En service', "Hors d'usage", 'A détruire'];
 
-  function vide(statuts) { const o = {}; statuts.forEach(function (s) { o[s] = 0; }); return o; }
-
-  // Bilan par jeu : stock actuel + entrées (A intégrer) - sorties (A détruire) = sixains en dépôt après la prochaine destruction
+  // Bilan par jeu, mêmes colonnes que la feuille : stock initial (EN_STOCK), entrées (A intégrer), sorties (A détruire),
+  // en dépôt = stock initial + entrées - sorties, puis la répartition de ce qui reste : Neuf, En service, Hors d'usage et leur total
   function bilanJeux(pieces, jeux) {
     const noms = jeux.slice();
     pieces.forEach(function (p) { if (p.jeu && noms.indexOf(p.jeu) < 0) noms.push(p.jeu); });
@@ -138,34 +137,13 @@ const MATERIEL = (function () {
       const mine = pieces.filter(function (p) { return p.jeu === jeu; });
       const nb = function (liste) { return mine.filter(function (p) { return liste.indexOf(p.statut) >= 0; }).length; };
       const stock = nb(EN_STOCK), entrees = nb(['A intégrer']), sorties = nb(['A détruire']);
-      return { jeu: jeu, stock: stock, entrees: entrees, sorties: sorties, apres: stock + entrees - sorties };
+      const neuf = nb(['Neuf']), enService = nb(['En service']), horsUsage = nb(["Hors d'usage"]);
+      return { jeu: jeu, stock: stock, entrees: entrees, sorties: sorties, depot: stock + entrees - sorties, neuf: neuf, enService: enService, horsUsage: horsUsage, total: neuf + enService + horsUsage };
     });
-    const total = lignes.reduce(function (t, l) { return { jeu: 'Total', stock: t.stock + l.stock, entrees: t.entrees + l.entrees, sorties: t.sorties + l.sorties, apres: t.apres + l.apres }; },
-      { jeu: 'Total', stock: 0, entrees: 0, sorties: 0, apres: 0 });
+    const cles = ['stock', 'entrees', 'sorties', 'depot', 'neuf', 'enService', 'horsUsage', 'total'];
+    const total = lignes.reduce(function (t, l) { cles.forEach(function (k) { t[k] += l[k]; }); return t; },
+      { jeu: 'Total', stock: 0, entrees: 0, sorties: 0, depot: 0, neuf: 0, enService: 0, horsUsage: 0, total: 0 });
     return { lignes: lignes, total: total };
-  }
-
-  // Tableau jeu x statut ; le détail par finition n'apparaît sous un jeu que s'il en a plusieurs (sinon la finition est donnée avec le jeu)
-  function matrice(pieces, statuts, jeux) {
-    const noms = jeux.slice();
-    pieces.forEach(function (p) { if (p.jeu && noms.indexOf(p.jeu) < 0) noms.push(p.jeu); });
-    const compte = function (liste) {
-      const o = vide(statuts); let t = 0;
-      liste.forEach(function (p) { if (o[p.statut] !== undefined) { o[p.statut]++; t++; } });
-      return { parStatut: o, total: t };
-    };
-    const lignes = [];
-    noms.forEach(function (jeu) {
-      const mine = pieces.filter(function (p) { return p.jeu === jeu; });
-      const finitions = ['Plastifié', 'Cartonné'].filter(function (f) { return mine.some(function (p) { return p.finition === f; }); });
-      lignes.push(Object.assign({ jeu: jeu, finition: null, finitions: finitions }, compte(mine)));
-      if (finitions.length > 1) {                          // le détail n'apparaît que s'il apporte quelque chose
-        finitions.forEach(function (f) {
-          lignes.push(Object.assign({ jeu: jeu, finition: f }, compte(mine.filter(function (p) { return p.finition === f; }))));
-        });
-      }
-    });
-    return { statuts: statuts, lignes: lignes, total: compte(pieces) };
   }
 
   // Les fiches « A détruire », groupées par jeu et triées : { jeu: [fiches] }
@@ -204,7 +182,7 @@ const MATERIEL = (function () {
     return x.getFullYear() + '-' + p(x.getMonth() + 1) + '-' + p(x.getDate());
   }
 
-  const API = { EN_STOCK: EN_STOCK, bilanJeux: bilanJeux, matrice: matrice, aDetruireParJeu: aDetruireParJeu, sessionsResume: sessionsResume, texteListe: texteListe, dateFr: dateFr, aujourdhui: aujourdhui,
+  const API = { EN_STOCK: EN_STOCK, bilanJeux: bilanJeux, aDetruireParJeu: aDetruireParJeu, sessionsResume: sessionsResume, texteListe: texteListe, dateFr: dateFr, aujourdhui: aujourdhui,
     actionVers: actionVers, classe: classe, passages: passages, statuts: statuts, cleNaturelle: cleNaturelle, trier: trier, filtrer: filtrer,
     compter: compter, analyserSaisie: analyserSaisie, selectionCommune: selectionCommune, traduireErreur: traduireErreur, jeuxPourSelect: jeuxPourSelect, dateHeure: dateHeure };
   return API;
