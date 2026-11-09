@@ -74,6 +74,40 @@ test('un numéro trop long est refusé, un numéro de 40 caractères passe', () 
 });
 test('la comparaison avec l\'existant ignore la casse', () => assert.deepStrictEqual(M.analyserSaisie('d25820', ['D25820']).existe, ['d25820']));
 
+console.log('Série bornée');
+test('une série : du premier au dernier numéro, bornes comprises', () => {
+  const r = M.analyserSerie('136012', '136016', []);
+  assert.deepStrictEqual(r.ids, ['136012', '136013', '136014', '136015', '136016']);
+  assert.strictEqual(r.total, 5);
+  assert.strictEqual(r.erreur, '');
+});
+test('un préfixe de lettres est conservé, la casse du premier numéro aussi', () => {
+  assert.deepStrictEqual(M.analyserSerie('D25820', 'D25822', []).ids, ['D25820', 'D25821', 'D25822']);
+  assert.deepStrictEqual(M.analyserSerie('d9', 'D11', []).ids, ['d9', 'd10', 'd11']);
+});
+test('dernier numéro vide : un seul sixain ; premier vide : rien et pas d\'erreur', () => {
+  assert.deepStrictEqual(M.analyserSerie('136012', '', []).ids, ['136012']);
+  assert.deepStrictEqual(M.analyserSerie('', '', []), { ids: [], existe: [], total: 0, erreur: '' });
+});
+test('les zéros de tête sont conservés', () => assert.deepStrictEqual(M.analyserSerie('0098', '0101', []).ids, ['0098', '0099', '0100', '0101']));
+test('numéros déjà enregistrés dans la série : ignorés et signalés, casse ignorée', () => {
+  const r = M.analyserSerie('D1', 'D4', ['d2', 'D4']);
+  assert.deepStrictEqual(r.ids, ['D1', 'D3']);
+  assert.deepStrictEqual(r.existe, ['D2', 'D4']);
+  assert.strictEqual(r.total, 4);
+});
+test('refus : préfixes différents, ordre inversé, pas de chiffres à la fin, série trop longue, numéro trop long', () => {
+  assert.ok(/commencer pareil/.test(M.analyserSerie('D100', 'E105', []).erreur));
+  assert.ok(/commencer pareil/.test(M.analyserSerie('100', 'D105', []).erreur));
+  assert.ok(/après le premier/.test(M.analyserSerie('105', '100', []).erreur));
+  assert.ok(/finir par des chiffres/.test(M.analyserSerie('ABC', '', []).erreur));
+  assert.ok(/finir par des chiffres/.test(M.analyserSerie('100', 'XYZ', []).erreur));
+  assert.ok(/maximum/.test(M.analyserSerie('1', '1001', []).erreur));
+  assert.strictEqual(M.analyserSerie('1', '1000', []).ids.length, 1000);
+  assert.ok(/trop long/.test(M.analyserSerie('1234567890123456', '', []).erreur));
+  assert.strictEqual(M.analyserSerie('100', 'XYZ', []).ids.length, 0);
+});
+
 console.log('Sélection groupée');
 test('même statut : passages proposés ; statuts mélangés : refus avec raison', () => {
   const a = M.selectionCommune(PIECES, ['u118510', 'uD25820'], REF);
