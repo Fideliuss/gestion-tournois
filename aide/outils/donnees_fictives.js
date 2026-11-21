@@ -224,4 +224,40 @@ function tda() {
   };
 }
 
-module.exports = { tda: tda, planning: planning, octimeTsv: octimeTsv, entrainement: entrainement, joueurs: joueurs, saison: saison, extras: extras, encadrement: encadrement, courriersGabarits: courriersGabarits };
+// ── Matériel : sixains fictifs (numéros inventés, jamais ceux du vrai dépôt) ──
+function materiel() {
+  const STATUTS = ['A intégrer', 'Neuf', 'En service', "Hors d'usage", 'A détruire', 'Détruit'];
+  const pieces = [];
+  // jeu, finition, premier numéro, préfixe, statuts dans l'ordre des numéros
+  const lots = [
+    ['Blackjack', 'Plastifié', 100001, '', ['Neuf', 'Neuf', 'Neuf', 'Neuf', 'En service', "Hors d'usage", 'En service', 'En service', 'Neuf', 'Neuf', "Hors d'usage", "Hors d'usage", 'A détruire', 'A détruire', 'A détruire', 'En service', 'Neuf', 'Détruit', 'Détruit', 'Détruit']],
+    ['Ultimate', 'Plastifié', 100101, '', ['Neuf', 'Neuf', 'En service', "Hors d'usage", 'A détruire', 'En service', 'Neuf', 'Détruit']],
+    ['Cash Game', 'Cartonné', 25001, 'D', ['A intégrer', 'A intégrer', 'Neuf', 'Neuf', 'Neuf', 'En service', 'En service', "Hors d'usage"]],
+    ['Tournois', 'Plastifié', 100201, '', ['Neuf', 'Neuf', 'En service', 'En service', "Hors d'usage", 'Détruit']],
+  ];
+  lots.forEach(function (l) {
+    l[4].forEach(function (st, i) {
+      const num = l[3] + (l[2] + i);
+      pieces.push({ id: 'p' + num, famille: 'sixain', identifiant: num, jeu: l[0], finition: l[1], marque_id: l[0] === 'Blackjack' && i < 8 ? 1 : (l[0] === 'Cash Game' ? 2 : null),
+        statut: st, session_destruction_id: st === 'Détruit' ? (i % 2 ? 's2' : 's1') : null, note: null, cree_le: '2026-09-01T09:00:00Z' });
+    });
+  });
+  const hist = {};
+  hist['p100005'] = [
+    { id: 2, piece_id: 'p100005', at: '2026-10-05T17:30:00Z', de_statut: 'Neuf', vers_statut: 'En service', retour: false, motif: null, par_nom: 'Démo Fictif' },
+    { id: 1, piece_id: 'p100005', at: '2026-09-01T09:00:00Z', de_statut: null, vers_statut: 'Neuf', retour: false, motif: 'Création', par_nom: 'Démo Fictif' }];
+  hist['p100006'] = [
+    { id: 13, piece_id: 'p100006', at: '2026-10-12T18:10:00Z', de_statut: 'En service', vers_statut: "Hors d'usage", retour: false, motif: null, par_nom: 'Démo Fictif' },
+    { id: 12, piece_id: 'p100006', at: '2026-10-09T20:05:00Z', de_statut: "Hors d'usage", vers_statut: 'En service', retour: true, motif: "Mise hors d'usage faite par erreur", par_nom: 'Démo Fictif' },
+    { id: 11, piece_id: 'p100006', at: '2026-10-08T19:40:00Z', de_statut: 'En service', vers_statut: "Hors d'usage", retour: false, motif: null, par_nom: 'Démo Fictif' },
+    { id: 10, piece_id: 'p100006', at: '2026-09-20T19:00:00Z', de_statut: 'Neuf', vers_statut: 'En service', retour: false, motif: null, par_nom: 'Démo Fictif' },
+    { id: 9, piece_id: 'p100006', at: '2026-09-01T09:00:00Z', de_statut: null, vers_statut: 'Neuf', retour: false, motif: 'Création', par_nom: 'Démo Fictif' }];
+  return {
+    pieces: pieces, historique: hist, statuts: STATUTS, jeux: ['Blackjack', 'Ultimate', 'Cash Game', 'Tournois'],
+    marques: [{ id: 1, nom: 'Marque A' }, { id: 2, nom: 'Marque B' }],
+    destructions: [{ id: 's1', date_destruction: null, reference: "Avant l'outil", note: null, cree_le: '2026-09-01T09:00:00Z' },
+      { id: 's2', date_destruction: '2026-09-30', reference: 'Exemple', note: null, cree_le: '2026-09-30T15:00:00Z' }],
+  };
+}
+
+module.exports = { materiel: materiel, tda: tda, planning: planning, octimeTsv: octimeTsv, entrainement: entrainement, joueurs: joueurs, saison: saison, extras: extras, encadrement: encadrement, courriersGabarits: courriersGabarits };
