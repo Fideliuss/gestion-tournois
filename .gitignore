@@ -3,7 +3,7 @@ extras_data.json
 .claude/
 
 # Texte du règlement TDA extrait du PDF : ne JAMAIS commiter (dépôt public, droits du TDA)
-tda/outils/sortie/
+espaces/tournois/tda/outils/sortie/
 
 # Fichiers locaux de la CLI Supabase (référence du projet, adresses) : ne pas versionner
 supabase/.temp/

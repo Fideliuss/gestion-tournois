@@ -18,17 +18,17 @@
 const NAV = (function () {
 
   // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
-  const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'break_list/';
+  const T = 'espaces/training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'espaces/break_list/';
   const SPACES = [
-    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, règlement TDA, administration', href: 'tournois.html', panel: 'tournois', items: [
-      { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
-      { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
-      { label: 'Règlement TDA', href: 'tda/tda.html', panel: 'tda' },
+    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, règlement TDA, administration', href: 'espaces/tournois/tournois.html', panel: 'tournois', items: [
+      { label: 'Prize Pool',  href: 'espaces/tournois/prize_pool/prize_pool.html',   panel: 'prize-pool' },
+      { label: 'Leaderboard', href: 'espaces/tournois/leaderboard/leaderboard.html', panel: 'leaderboard' },
+      { label: 'Règlement TDA', href: 'espaces/tournois/tda/tda.html', panel: 'tda' },
       { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
-        { label: 'Déclarations',          href: 'admin/declaration/declaration.html' },
-        { label: 'Générateur de courrier', href: 'admin/declaration/courriers.html' },
-        { label: 'Gestion des Extras',    href: 'admin/extras/extras.html' },
-        { label: 'Calendrier & barèmes',  href: 'admin/config_tournois.html' },
+        { label: 'Déclarations',          href: 'espaces/tournois/declaration/declaration.html' },
+        { label: 'Générateur de courrier', href: 'outils/courrier/courriers.html' },
+        { label: 'Gestion des Extras',    href: 'espaces/tournois/extras/extras.html' },
+        { label: 'Calendrier & barèmes',  href: 'espaces/tournois/calendrier/calendrier.html' },
       ] },
     ] },
     { id: 'training', label: 'Training', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
@@ -55,8 +55,8 @@ const NAV = (function () {
       { label: 'Planning',     href: BL + 'planning.html' },
       { label: 'Paramètres',   href: BL + 'parametres.html' },
     ] },
-    { id: 'materiel', label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'materiel/materiel.html', panel: 'materiel', items: [
-      { label: 'Sixains', href: 'materiel/materiel.html' },
+    { id: 'materiel', label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'espaces/materiel/materiel.html', panel: 'materiel', items: [
+      { label: 'Sixains', href: 'espaces/materiel/materiel.html' },
     ] },
   ];
 
@@ -108,30 +108,30 @@ const NAV = (function () {
   // Guide ouvert par le bouton « Aide » (id d'un guide de aide/aide_guides.js) : celui de la page si elle en a un, sinon celui de l'espace courant ; sans entrée : la page Aide
   const HELP = {
     'tournois': 'tournois-pour-commencer',
-    'prize_pool/prize_pool.html': 'tournois-prize-pool',
-    'leaderboard/leaderboard.html': 'tournois-classement',
-    'tda/tda.html': 'tournois-tda',
-    'admin/declaration/declaration.html': 'tournois-declaration',
-    'admin/declaration/courriers.html': 'tournois-courriers',
-    'admin/extras/extras.html': 'tournois-extras',
-    'admin/config_tournois.html': 'tournois-calendrier',
+    'espaces/tournois/prize_pool/prize_pool.html': 'tournois-prize-pool',
+    'espaces/tournois/leaderboard/leaderboard.html': 'tournois-classement',
+    'espaces/tournois/tda/tda.html': 'tournois-tda',
+    'espaces/tournois/declaration/declaration.html': 'tournois-declaration',
+    'outils/courrier/courriers.html': 'tournois-courriers',
+    'espaces/tournois/extras/extras.html': 'tournois-extras',
+    'espaces/tournois/calendrier/calendrier.html': 'tournois-calendrier',
     'training': 'training-pour-commencer',
-    'training/blackjack/blackjack.html': 'training-blackjack',
-    'training/blackjack/blackjack_score.html': 'training-blackjack',
-    'training/roulette/roulette_paiement.html': 'training-roulette-calculs',
-    'training/roulette/roulette_conversion.html': 'training-roulette-calculs',
-    'training/roulette/roulette_tables.html': 'training-roulette-calculs',
-    'training/roulette/roulette_pointage.html': 'training-roulette-tapis',
-    'training/roulette/roulette_couleur.html': 'training-roulette-tapis',
-    'training/uth/uth_main.html': 'training-uth',
-    'training/uth/uth_gagnant.html': 'training-uth',
-    'training/uth/uth_gains.html': 'training-uth',
-    'training/suivi/suivi_croupier.html': 'training-mes-resultats',
-    'training/suivi/suivi_manager.html': 'training-suivi-equipe',
+    'espaces/training/blackjack/blackjack.html': 'training-blackjack',
+    'espaces/training/blackjack/blackjack_score.html': 'training-blackjack',
+    'espaces/training/roulette/roulette_paiement.html': 'training-roulette-calculs',
+    'espaces/training/roulette/roulette_conversion.html': 'training-roulette-calculs',
+    'espaces/training/roulette/roulette_tables.html': 'training-roulette-calculs',
+    'espaces/training/roulette/roulette_pointage.html': 'training-roulette-tapis',
+    'espaces/training/roulette/roulette_couleur.html': 'training-roulette-tapis',
+    'espaces/training/uth/uth_main.html': 'training-uth',
+    'espaces/training/uth/uth_gagnant.html': 'training-uth',
+    'espaces/training/uth/uth_gains.html': 'training-uth',
+    'espaces/training/suivi/suivi_croupier.html': 'training-mes-resultats',
+    'espaces/training/suivi/suivi_manager.html': 'training-suivi-equipe',
     'admin/config_training.html': 'training-configuration',
     'break-list': 'break-list-pour-commencer',
-    'break_list/planning.html': 'break-list-planning',
-    'break_list/parametres.html': 'break-list-parametres',
+    'espaces/break_list/planning.html': 'break-list-planning',
+    'espaces/break_list/parametres.html': 'break-list-parametres',
     'materiel': 'materiel-pour-commencer',
   };
 
