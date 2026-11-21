@@ -221,6 +221,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── materiel/
 │   ├── materiel.html / .css / .js - Sixains : onglets Liste (filtres, avance de statut, fiche et historique, ajout par série de numéros), Destruction (panel materiel)
 │   ├── materiel_destruction.js    - Onglet Destruction : bilan par jeu (stock, entrées, sorties, répartition), choix des sixains à détruire, sessions
+│   ├── materiel_impression.js     - Feuilles imprimables (pointage du dépôt sur une page A4, bilan de destruction)
 │   └── materiel_core.js           - Calcul pur : tri, filtres, saisie de numéros, passages de statut (tests : `node materiel/materiel_core.test.js`)
 │
 ├── break_list/

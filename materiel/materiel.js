@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════
-//  MATÉRIEL - page Sixains, deux onglets : Liste (ce fichier), Destruction (materiel_destruction.js)
+//  MATÉRIEL - page Sixains, deux onglets : Liste (ce fichier), Destruction (materiel_destruction.js) ; feuilles imprimables : materiel_impression.js
 //  Chargée après materiel_core.js, shared/html.js, shared/supabase.js et shared/auth.js. Adresses : #liste (avec ?jeu=...&vue=...), #destruction
 //  Suivi quotidien : ouvrir un sixain (Neuf, En service), le mettre hors d'usage, préparer les destructions. Les règles (séquence des
 //  statuts, retour avec motif, numéro unique, jeu fixé) sont imposées par la base (supabase/migrations/materiel.sql) ;
@@ -40,6 +40,7 @@ async function initMateriel() {
   $('mt-marque').addEventListener('change', function () { FILTRE.marque = this.value; SEL = []; rendre(); });
   $('mt-q').addEventListener('input', function () { FILTRE.q = this.value; SEL = []; rendre(); });
   $('mt-ajouter').addEventListener('click', ouvrirAjout);
+  $('mt-pointage').addEventListener('click', imprimerPointage);
   $('mt-liste').addEventListener('click', clicListe);
   $('mt-liste').addEventListener('change', changeListe);
   $('mt-selbar').addEventListener('click', clicSelection);

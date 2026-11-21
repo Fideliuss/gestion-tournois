@@ -25,7 +25,8 @@
   <div id="vue-liste">
     <div class="mt-barre">
       <div class="fchips" id="mt-statuts" aria-label="Statut"></div>
-      <button type="button" class="btn btn-gold" id="mt-ajouter"><i class="ico ico-plus"></i> Ajouter des sixains</button>
+      <div class="mt-actions-barre"><button type="button" class="btn btn-ghost" id="mt-pointage">Imprimer le pointage</button>
+      <button type="button" class="btn btn-gold" id="mt-ajouter"><i class="ico ico-plus"></i> Ajouter des sixains</button></div>
     </div>
 
     <div class="mt-filtres">
@@ -52,6 +53,7 @@
   <div class="modal-box modal-wide mt-modal-box" id="mt-modal-box" role="dialog" aria-modal="true"></div>
 </div>
 <div class="mt-toast" id="mt-toast" role="status" aria-live="polite"></div>
+<div class="mt-print" id="mt-print" aria-hidden="true"></div>
 
 <script src="../shared/vendor/supabase_js.js"></script>
 <script src="../shared/barriere.js"></script>
@@ -61,6 +63,7 @@
 <script src="materiel_core.js"></script>
 <script src="materiel.js"></script>
 <script src="materiel_destruction.js"></script>
+<script src="materiel_impression.js"></script>
 <script>
 AUTH.guard({ loginUrl: '../login.html', panel: 'materiel' }).then(function (user) {
   if (!user) return;

@@ -138,6 +138,21 @@ test("bilan : stock initial + entrées - sorties = en dépôt, avec la répartit
 test('bilan : un jeu inconnu du référentiel apparaît quand même', () => {
   assert.strictEqual(M.bilanJeux([P('1', 'Poker', 'Neuf')], ['Blackjack']).lignes.map(l => l.jeu).join(), 'Blackjack,Poker');
 });
+test('pointage : seulement ce qui est au dépôt, par jeu, groupé par statut dans l\'ordre, numéros triés', () => {
+  const pieces = [P('12', 'Blackjack', 'En service'), P('3', 'Blackjack', 'Neuf'), P('11', 'Blackjack', 'Neuf'), P('5', 'Blackjack', 'A intégrer'), P('6', 'Blackjack', 'Détruit', { session_destruction_id: 's1' }),
+    P('9', 'Blackjack', 'A détruire'), P('20', 'Ultimate', "Hors d'usage"), P('1', 'Poker', 'Neuf')];
+  const r = M.pointage(pieces, ['Blackjack', 'Ultimate', 'Cash Game'], ['A intégrer', 'Neuf', 'En service', "Hors d'usage", 'A détruire', 'Détruit']);
+  assert.deepStrictEqual(r.blocs.map(b => b.jeu), ['Blackjack', 'Ultimate', 'Poker']);
+  assert.deepStrictEqual(r.blocs[0].groupes.map(g => g.statut + ':' + g.ids.join('/')), ['Neuf:3/11', 'En service:12', 'A détruire:9']);
+  assert.strictEqual(r.blocs[0].total, 4);
+  assert.strictEqual(r.total, 6);
+});
+test('pointage : la finition sépare les groupes seulement quand un jeu en a plusieurs', () => {
+  const pieces = [P('1', 'Ultimate', 'Neuf'), P('2', 'Ultimate', 'Neuf', { finition: 'Cartonné' }), P('3', 'Blackjack', 'Neuf')];
+  const r = M.pointage(pieces, ['Blackjack', 'Ultimate'], ['Neuf']);
+  assert.deepStrictEqual(r.blocs[0].groupes.map(g => g.finition), [null]);
+  assert.deepStrictEqual(r.blocs[1].groupes.map(g => g.finition + ':' + g.ids.join()), ['Plastifié:1', 'Cartonné:2']);
+});
 test('à détruire : groupé par jeu, trié par numéro', () => {
   const g = M.aDetruireParJeu(STOCK);
   assert.deepStrictEqual(Object.keys(g), ['Blackjack', 'Ultimate']);

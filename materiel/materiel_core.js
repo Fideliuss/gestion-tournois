@@ -175,6 +175,30 @@ const MATERIEL = (function () {
     return { lignes: lignes, total: total };
   }
 
+  // Feuille de pointage du dépôt : par jeu, ce qui est physiquement au dépôt (EN_STOCK), groupé par statut (et par finition quand un jeu en a plusieurs)
+  function pointage(pieces, jeux, statuts) {
+    const ordre = (statuts || []).filter(function (s) { return EN_STOCK.indexOf(s) >= 0; });
+    const noms = jeux.slice();
+    pieces.forEach(function (p) { if (p.jeu && noms.indexOf(p.jeu) < 0) noms.push(p.jeu); });
+    const blocs = [];
+    noms.forEach(function (jeu) {
+      const mine = pieces.filter(function (p) { return p.jeu === jeu && EN_STOCK.indexOf(p.statut) >= 0; });
+      if (!mine.length) return;
+      const finitions = ['Plastifié', 'Cartonné'].filter(function (f) { return mine.some(function (p) { return p.finition === f; }); });
+      mine.forEach(function (p) { if (p.finition && finitions.indexOf(p.finition) < 0) finitions.push(p.finition); });
+      const plusieurs = finitions.length > 1;
+      const groupes = [];
+      (plusieurs ? finitions : [null]).forEach(function (f) {
+        ordre.forEach(function (st) {
+          const fiches = trier(mine.filter(function (p) { return p.statut === st && (f === null || p.finition === f); }));
+          if (fiches.length) groupes.push({ statut: st, finition: f, ids: fiches.map(function (p) { return p.identifiant; }) });
+        });
+      });
+      blocs.push({ jeu: jeu, finitions: finitions, total: mine.length, groupes: groupes });
+    });
+    return { blocs: blocs, total: blocs.reduce(function (n, b) { return n + b.total; }, 0) };
+  }
+
   // Les fiches « A détruire », groupées par jeu et triées : { jeu: [fiches] }
   function aDetruireParJeu(pieces) {
     const out = {};
@@ -211,7 +235,7 @@ const MATERIEL = (function () {
     return x.getFullYear() + '-' + p(x.getMonth() + 1) + '-' + p(x.getDate());
   }
 
-  const API = { EN_STOCK: EN_STOCK, bilanJeux: bilanJeux, aDetruireParJeu: aDetruireParJeu, sessionsResume: sessionsResume, texteListe: texteListe, dateFr: dateFr, aujourdhui: aujourdhui,
+  const API = { EN_STOCK: EN_STOCK, bilanJeux: bilanJeux, pointage: pointage, aDetruireParJeu: aDetruireParJeu, sessionsResume: sessionsResume, texteListe: texteListe, dateFr: dateFr, aujourdhui: aujourdhui,
     actionVers: actionVers, classe: classe, passages: passages, statuts: statuts, cleNaturelle: cleNaturelle, trier: trier, filtrer: filtrer,
     compter: compter, analyserSaisie: analyserSaisie, analyserSerie: analyserSerie, selectionCommune: selectionCommune, traduireErreur: traduireErreur, jeuxPourSelect: jeuxPourSelect, dateHeure: dateHeure };
   return API;

@@ -39,7 +39,8 @@ function rendreDestruction() {
     '<th class="mt-nbc" title="Neuf + En service + Hors d\'usage + A détruire">Stock initial</th><th class="mt-nbc" title="Sixains « A intégrer »">Entrées</th>' +
     '<th class="mt-nbc" title="Sixains « A détruire »">Sorties</th><th class="mt-nbc" title="Stock initial + entrées - sorties">En dépôt</th><th class="mt-sep"></th>' +
     '<th class="mt-nbc">Neuf</th><th class="mt-nbc">En service</th><th class="mt-nbc">Hors d\'usage</th><th class="mt-nbc">Total</th></tr></thead><tbody>' +
-    bilan.lignes.map(function (l) { return ligneBilan(l, false); }).join('') + ligneBilan(bilan.total, true) + '</tbody></table></div></div>';
+    bilan.lignes.map(function (l) { return ligneBilan(l, false); }).join('') + ligneBilan(bilan.total, true) + '</tbody></table></div>' +
+    '<div class="mt-actions"><button type="button" class="btn btn-ghost btn-sm" data-d-imprimer>Imprimer le bilan</button></div></div>';
 
   let carteChoix;
   if (!ordre.length) {
@@ -112,6 +113,7 @@ function groupesChoisis(ids) {
 
 function clicDestruction(e) {
   if (e.target.closest('#mt-d-ok')) return confirmerDestruction();
+  if (e.target.closest('[data-d-imprimer]')) return imprimerBilan();
   if (e.target.closest('[data-d-copier]')) {
     const ids = SEL_D.length ? SEL_D : PIECES.filter(function (p) { return p.statut === 'A détruire'; }).map(function (p) { return p.id; });
     return copier(MATERIEL.texteListe(groupesChoisis(ids)));
