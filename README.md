@@ -4,7 +4,7 @@ Outils internes du casino, regroupés dans une seule application web déployée 
 
 **URL de production :** https://fideliuss.github.io/gestion-tournois/
 
-L'application est organisée en espaces (Tournois, Training, Break list), chacun filtrable par rôle :
+L'application est organisée en espaces (Tournois, Training, Break list, Matériel), chacun filtrable par rôle :
 
 | Espace | Description |
 |---------|-------------|

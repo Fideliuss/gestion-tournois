@@ -39,6 +39,11 @@ getBreakListPlanning:async function(k){return k==='2026-10'?JSON.parse(JSON.stri
 saveBreakListPlanning:async function(){},deleteBreakListPlanning:async function(){},getBreakListConfig:async function(){return null},saveBreakListConfig:async function(){}};})();</script>`;
 
 // Base simulée de l'espace Tournois : administrateur, tournois, saison complète, extras ; rien n'est écrit
+// Réglages enregistrés en base (table parametres, voir shared/reglages.js) : les courriers par défaut de l'application n'ont plus de nom de signataire, on met un modèle fictif ; émargement fictif des extras
+const REGLAGES_FICTIFS = {
+  courriers_modeles: TPL,
+  extras_emargement_2026_42: { x1: { lun: true, mer: true, ven: true }, x2: { lun: true, mar: true, jeu: true }, x3: { mer: true, ven: true, sam: true, dim: true, _hours: { dim: '17:30' } }, x4: { mar: true, mer: true }, x5: { ven: true, sam: true, dim: true }, x6: { lun: true, jeu: true, ven: true }, x7: { mer: true, jeu: true }, _dayHours: { sam: '21:30' } },
+};
 const BASE_TN = `<script>(function(){var R=${JSON.stringify(SAISON.results)},S=${JSON.stringify(SAISON.sessions)},T=${JSON.stringify(TOURNOIS)},X=${JSON.stringify(EXTRAS)},ST=${JSON.stringify(STAFF)},PM=${JSON.stringify(REGLAGES_FICTIFS)};
 var cp=function(o){return JSON.parse(JSON.stringify(o))},nop=async function(){};
 window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
@@ -46,11 +51,6 @@ getResults:async function(){return cp(R)},getResultsByMonth:async function(m){re
 insertResults:async function(a){return a},insertSession:nop,updateResult:nop,deleteResult:nop,deleteResultsBySession:nop,updateSession:nop,deleteSession:nop,closeSeason:nop,reopenSeason:nop,
 getTournaments:async function(){return cp(T)},upsertTournament:nop,deleteTournament:nop,getExtras:async function(){return cp(X)},insertExtra:nop,updateExtra:nop,deleteExtra:nop,getParametre:async function(k){return k==='declaration_encadrement'?cp(ST):null},saveParametre:nop,
 getParametres:async function(p){return Object.keys(PM).filter(function(k){return k.indexOf(p)===0}).map(function(k){return{cle:k,valeur:cp(PM[k])}})}};})();</script>`;
-// Réglages enregistrés en base (table parametres, voir shared/reglages.js) : les courriers par défaut de l'application n'ont plus de nom de signataire, on met un modèle fictif ; émargement fictif des extras
-const REGLAGES_FICTIFS = {
-  courriers_modeles: TPL,
-  extras_emargement_2026_42: { x1: { lun: true, mer: true, ven: true }, x2: { lun: true, mar: true, jeu: true }, x3: { mer: true, ven: true, sam: true, dim: true, _hours: { dim: '17:30' } }, x4: { mar: true, mer: true }, x5: { ven: true, sam: true, dim: true }, x6: { lun: true, jeu: true, ven: true }, x7: { mer: true, jeu: true }, _dayHours: { sam: '21:30' } },
-};
 
 // Espace Training : croupiers fictifs et leurs sessions ; les fonctions de suivi de la base sont recalculées ici à partir des sessions
 const TR = data.entrainement();
@@ -81,6 +81,16 @@ const isTda = function (c) { return c.page.indexOf('tda/') === 0; };
 const BASE_TDA = `<script>(function(){var D=${JSON.stringify(data.tda())};var nop=async function(){};
 window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
 getTdaActive:async function(){return JSON.parse(JSON.stringify({edition:D.edition,blocs:D.blocs}))}};})();</script>`;
+// Matériel : sixains fictifs (aucun vrai numéro), administrateur ; rien n'est écrit
+const isMt = function (c) { return c.page.indexOf('materiel/') === 0; };
+const MT = data.materiel();
+const BASE_MT = `<script>(function(){var D=${JSON.stringify(MT)};var nop=async function(){};var ORD=D.statuts;
+function cp(x){return JSON.parse(JSON.stringify(x))}
+window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'}}}},getRoles:async function(){return[]},signOut:nop,
+getMaterielRef:async function(){return{jeux:D.jeux.map(function(n,i){return{nom:n,ordre:i+1}}),statuts:ORD.map(function(s,i){return{famille:'sixain',statut:s,ordre:i+1,creation:i<2,exige_session:s==='Détruit'}}),
+ transitions:ORD.slice(0,-1).map(function(s,i){return{famille:'sixain',de:s,vers:ORD[i+1],retour:false}}).concat(ORD.slice(1).map(function(s,i){return{famille:'sixain',de:s,vers:ORD[i],retour:true}})),marques:cp(D.marques),destructions:cp(D.destructions)}},
+listMaterielPieces:async function(){return cp(D.pieces)},
+getMaterielHistorique:async function(id){var p=D.pieces.filter(function(x){return x.id===id})[0];return cp(D.historique[id]||(p?[{id:1,piece_id:id,at:'2026-09-01T09:00:00Z',de_statut:null,vers_statut:p.statut,retour:false,motif:'Création',par_nom:'Démo Fictif'}]:[]))}};})();</script>`;
 // Tirage aléatoire fixé (graine propre à chaque capture) : les questions affichées sont toujours les mêmes
 const SEED = function (n) { return `<script>(function(){var a=${n};Math.random=function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}})();</script>`; };
 
@@ -213,11 +223,29 @@ const CAPTURES_TDA = [
 ];
 CAPTURES.push.apply(CAPTURES, CAPTURES_TDA);
 
+// ── Espace Matériel (sixains fictifs) ──
+const REGLER = "var s=function(id,v){var e=document.getElementById(id);e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}))};";
+// feuilles imprimables affichées à l'écran, comme sur le papier (fond sombre autour de la page blanche)
+const FEUILLE_MT = '.app,header.nav,.nav,.modal-overlay,.mt-toast{display:none!important} body{background:#222!important} .mt-print{display:block!important;width:194mm;margin:14px auto;padding:8mm;background:#fff;box-sizing:content-box} *{transition:none!important}';
+const IMPRIMER_MT = function (fn) { return "location.hash='#destruction';window.print=function(){};window.lancerImpression=function(h){document.getElementById('mt-print').innerHTML=h;ajusterPage();document.body.classList.add('mt-imprime');};setTimeout(function(){" + fn + "()},300);"; };
+const CAPTURES_MT = [
+  { nom: 'mt_liste', page: 'materiel/materiel.html', w: 1180, h: 860, actions: '', css: NU },
+  { nom: 'mt_selection', page: 'materiel/materiel.html', w: 1180, h: 640, actions: "var c=document.querySelectorAll('#mt-liste [data-sel]');[0,1,2].forEach(function(i){c[i].click()});", css: NU },
+  { nom: 'mt_ajout', page: 'materiel/materiel.html', w: 1180, h: 780, actions: "document.getElementById('mt-ajouter').click();setTimeout(function(){" + REGLER + "s('mt-a-jeu','Ultimate');s('mt-a-fin','Plastifié');s('mt-a-de','100109');s('mt-a-a','100118')},300);", css: NU },
+  { nom: 'mt_fiche', page: 'materiel/materiel.html', w: 1180, h: 900, actions: "document.querySelector('[data-id=\"p100005\"] [data-fiche]').click();", css: NU },
+  { nom: 'mt_retour', page: 'materiel/materiel.html', w: 1180, h: 960, actions: "document.querySelector('[data-id=\"p100006\"] [data-fiche]').click();setTimeout(function(){document.querySelector('[data-f-retour]').click();var m=document.getElementById('mt-f-motif');m.value=\"Mise hors d'usage faite par erreur\";},500);", css: NU },
+  { nom: 'mt_destruction', page: 'materiel/materiel.html', w: 1180, h: 960, actions: "location.hash='#destruction';", css: NU },
+  { nom: 'mt_sessions', page: 'materiel/materiel.html', w: 1180, h: 520, actions: "location.hash='#destruction';setTimeout(function(){document.querySelector('.mt-session').open=true},300);", css: NU + ' #vue-destruction > .card:nth-child(-n+2){display:none!important} #vue-destruction{width:800px!important;max-width:100%} .hdr,#mt-onglets{display:none!important}' },
+  { nom: 'mt_bilan_papier', page: 'materiel/materiel.html', w: 860, h: 420, actions: IMPRIMER_MT('imprimerBilan'), css: FEUILLE_MT },
+  { nom: 'mt_pointage', page: 'materiel/materiel.html', w: 860, h: 720, actions: IMPRIMER_MT('imprimerPointage'), css: FEUILLE_MT },
+];
+CAPTURES.push.apply(CAPTURES, CAPTURES_MT);
+
 function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
   h = h.replace(/<script src="(?:\.\.\/)*shared\/vendor\/supabase_js\.js"><\/script>\s*/, '')
-    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : BASE_TN; })
-    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 || isTda(c) ? '' : isTr(c) ? SEED(c.seed || 7) : ''))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
+    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : isMt(c) ? BASE_MT : BASE_TN; })
+    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 || isTda(c) || isMt(c) ? '' : isTr(c) ? SEED(c.seed || 7) : ''))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')
     .replace('</body>', '<script>window.addEventListener("load",function(){setTimeout(function(){' + c.actions + '},900)});</script></body>');
   const file = path.join(path.dirname(path.join(ROOT, c.page)), '_qa_aide_' + c.nom + '.html');

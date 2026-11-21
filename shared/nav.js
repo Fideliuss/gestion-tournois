@@ -132,6 +132,7 @@ const NAV = (function () {
     'break-list': 'break-list-pour-commencer',
     'break_list/planning.html': 'break-list-planning',
     'break_list/parametres.html': 'break-list-parametres',
+    'materiel': 'materiel-pour-commencer',
   };
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
