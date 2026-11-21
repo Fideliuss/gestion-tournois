@@ -55,3 +55,19 @@ function imprimerPointage() {
     '<div class="pt-sign"><span>Pointé par : </span><span>Date : </span></div></div></section>';
   lancerImpression(html, 'Pointage des sixains - ' + date.replace(/\//g, '-'));
 }
+
+// ── Bilan de destruction (feuille à transmettre au directeur des jeux) ───
+// Seulement le bilan par jeu, tel qu'il est affiché dans l'onglet Destruction.
+function imprimerBilan() {
+  const bilan = MATERIEL.bilanJeux(PIECES, MATERIEL.jeuxPourSelect(REF));
+  const date = MATERIEL.dateFr(MATERIEL.aujourdhui());
+  const ligne = function (l, total) {
+    return '<tr' + (total ? ' class="bd-total"' : '') + '><th scope="row">' + esc(l.jeu) + '</th><td>' + l.stock + '</td><td>' + l.entrees + '</td><td>' + l.sorties + '</td><td class="bd-fort">' + l.depot + '</td>' +
+      '<td class="bd-g">' + l.neuf + '</td><td>' + l.enService + '</td><td>' + l.horsUsage + '</td><td class="bd-fort">' + l.total + '</td></tr>';
+  };
+  const html = '<section class="pt-page bd-page">' +
+    '<div class="pt-tete"><div class="pt-titre">Destruction des sixains</div><div class="pt-meta">Le ' + esc(date) + '</div></div>' +
+    '<table class="bd-tab"><thead><tr><th>Jeux</th><th>Stock initial</th><th>Entrées</th><th>Sorties</th><th>En dépôt</th><th class="bd-g">Neuf</th><th>En service</th><th>Hors d\'usage</th><th>Total</th></tr></thead><tbody>' +
+    bilan.lignes.map(function (l) { return ligne(l, false); }).join('') + ligne(bilan.total, true) + '</tbody></table></section>';
+  lancerImpression(html, 'Destruction des sixains - ' + date.replace(/\//g, '-'));
+}
