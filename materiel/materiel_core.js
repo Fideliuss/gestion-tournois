@@ -93,6 +93,35 @@ const MATERIEL = (function () {
     return { ids: ids, doublonsSaisie: doublonsSaisie, existe: existe, invalides: invalides };
   }
 
+  // Série bornée : du numéro « debut » au numéro « fin » (les deux finissent par des chiffres, avec le même préfixe éventuel : D25820 à D25830).
+  // « fin » vide = un seul numéro. Les zéros de tête de la première borne sont conservés. Les numéros déjà enregistrés sont signalés et ignorés.
+  const SERIE_MAX = 1000;                                  // garde-fou : une série plus longue est sans doute une faute de frappe
+  function analyserSerie(debut, fin, existants) {
+    const vide = function (erreur) { return { ids: [], existe: [], total: 0, erreur: erreur }; };
+    const d = String(debut || '').trim(), f = String(fin || '').trim();
+    if (!d) return vide('');
+    const cut = function (s) { const m = /^(.*?)(\d+)$/.exec(s); return m ? { pre: m[1], chiffres: m[2] } : null; };
+    const a = cut(d), b = f ? cut(f) : null;
+    if (!a || !FORME_ID.test(d)) return vide('Le premier numéro doit finir par des chiffres');
+    if (f && (!b || !FORME_ID.test(f))) return vide('Le dernier numéro doit finir par des chiffres');
+    if (a.chiffres.length > 15 || (b && b.chiffres.length > 15)) return vide('Numéro trop long pour une série');
+    if (b && a.pre.toUpperCase() !== b.pre.toUpperCase()) return vide('Les deux numéros doivent commencer pareil (' + (a.pre || 'chiffres seuls') + ')');
+    const n0 = parseInt(a.chiffres, 10), n1 = b ? parseInt(b.chiffres, 10) : n0;
+    if (n1 < n0) return vide('Le dernier numéro doit être après le premier');
+    if (n1 - n0 + 1 > SERIE_MAX) return vide('Une série compte ' + SERIE_MAX + ' numéros au maximum');
+    const larg = a.chiffres.charAt(0) === '0' ? a.chiffres.length : 0;
+    const dejaLa = {};
+    (existants || []).forEach(function (i) { dejaLa[String(i).toUpperCase()] = true; });
+    const ids = [], existe = [];
+    for (let n = n0; n <= n1; n++) {
+      let s = String(n);
+      while (s.length < larg) s = '0' + s;
+      const id = a.pre + s;
+      (dejaLa[id.toUpperCase()] ? existe : ids).push(id);
+    }
+    return { ids: ids, existe: existe, total: n1 - n0 + 1, erreur: '' };
+  }
+
   // Une sélection peut avancer ou revenir ensemble si toutes les fiches ont le même statut
   function selectionCommune(pieces, ids, ref) {
     const choisies = pieces.filter(function (p) { return ids.indexOf(p.id) >= 0; });
@@ -124,8 +153,67 @@ const MATERIEL = (function () {
     return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' à ' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
 
-  const API = { actionVers: actionVers, classe: classe, passages: passages, statuts: statuts, cleNaturelle: cleNaturelle, trier: trier, filtrer: filtrer,
-    compter: compter, analyserSaisie: analyserSaisie, selectionCommune: selectionCommune, traduireErreur: traduireErreur, jeuxPourSelect: jeuxPourSelect, dateHeure: dateHeure };
+  // ── Destruction (reprend la feuille « Destruction » du Google Sheet d'origine) ──
+  // Stock suivi : ce qui est entré dans le registre officiel et n'en est pas encore sorti (hors « A intégrer » et « Détruit »)
+  const EN_STOCK = ['Neuf', 'En service', "Hors d'usage", 'A détruire'];
+
+  // Bilan par jeu, mêmes colonnes que la feuille : stock initial (EN_STOCK), entrées (A intégrer), sorties (A détruire),
+  // en dépôt = stock initial + entrées - sorties, puis la répartition de ce qui reste : Neuf, En service, Hors d'usage et leur total
+  function bilanJeux(pieces, jeux) {
+    const noms = jeux.slice();
+    pieces.forEach(function (p) { if (p.jeu && noms.indexOf(p.jeu) < 0) noms.push(p.jeu); });
+    const lignes = noms.map(function (jeu) {
+      const mine = pieces.filter(function (p) { return p.jeu === jeu; });
+      const nb = function (liste) { return mine.filter(function (p) { return liste.indexOf(p.statut) >= 0; }).length; };
+      const stock = nb(EN_STOCK), entrees = nb(['A intégrer']), sorties = nb(['A détruire']);
+      const neuf = nb(['Neuf']), enService = nb(['En service']), horsUsage = nb(["Hors d'usage"]);
+      return { jeu: jeu, stock: stock, entrees: entrees, sorties: sorties, depot: stock + entrees - sorties, neuf: neuf, enService: enService, horsUsage: horsUsage, total: neuf + enService + horsUsage };
+    });
+    const cles = ['stock', 'entrees', 'sorties', 'depot', 'neuf', 'enService', 'horsUsage', 'total'];
+    const total = lignes.reduce(function (t, l) { cles.forEach(function (k) { t[k] += l[k]; }); return t; },
+      { jeu: 'Total', stock: 0, entrees: 0, sorties: 0, depot: 0, neuf: 0, enService: 0, horsUsage: 0, total: 0 });
+    return { lignes: lignes, total: total };
+  }
+
+  // Les fiches « A détruire », groupées par jeu et triées : { jeu: [fiches] }
+  function aDetruireParJeu(pieces) {
+    const out = {};
+    trier(pieces.filter(function (p) { return p.statut === 'A détruire'; })).forEach(function (p) { (out[p.jeu] = out[p.jeu] || []).push(p); });
+    return out;
+  }
+
+  // Sessions de destruction avec leur contenu, la plus récente d'abord ; sans date (avant l'outil) en dernier
+  function sessionsResume(pieces, destructions) {
+    const res = destructions.map(function (s) {
+      const parJeu = {};
+      trier(pieces.filter(function (p) { return p.session_destruction_id === s.id; })).forEach(function (p) { (parJeu[p.jeu] = parJeu[p.jeu] || []).push(p.identifiant); });
+      const total = Object.keys(parJeu).reduce(function (n, j) { return n + parJeu[j].length; }, 0);
+      return { id: s.id, date: s.date_destruction || null, reference: s.reference || '', note: s.note || '', cree_le: s.cree_le || '', total: total, parJeu: parJeu };
+    });
+    return res.sort(function (a, b) {
+      if (!!a.date !== !!b.date) return a.date ? -1 : 1;
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return a.cree_le < b.cree_le ? 1 : a.cree_le > b.cree_le ? -1 : 0;
+    });
+  }
+
+  // Liste à copier : une ligne par jeu, « Blackjack (3) : 100001, 100002, 100003 »
+  function texteListe(parJeu) {
+    return Object.keys(parJeu).map(function (j) {
+      const ids = parJeu[j].map(function (x) { return typeof x === 'string' ? x : x.identifiant; });
+      return j + ' (' + ids.length + ') : ' + ids.join(', ');
+    }).join('\n');
+  }
+
+  function dateFr(iso) { return /^\d{4}-\d{2}-\d{2}/.test(iso || '') ? iso.slice(8, 10) + '/' + iso.slice(5, 7) + '/' + iso.slice(0, 4) : ''; }
+  function aujourdhui(d) {
+    const x = d || new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return x.getFullYear() + '-' + p(x.getMonth() + 1) + '-' + p(x.getDate());
+  }
+
+  const API = { EN_STOCK: EN_STOCK, bilanJeux: bilanJeux, aDetruireParJeu: aDetruireParJeu, sessionsResume: sessionsResume, texteListe: texteListe, dateFr: dateFr, aujourdhui: aujourdhui,
+    actionVers: actionVers, classe: classe, passages: passages, statuts: statuts, cleNaturelle: cleNaturelle, trier: trier, filtrer: filtrer,
+    compter: compter, analyserSaisie: analyserSaisie, analyserSerie: analyserSerie, selectionCommune: selectionCommune, traduireErreur: traduireErreur, jeuxPourSelect: jeuxPourSelect, dateHeure: dateHeure };
   return API;
 })();
 

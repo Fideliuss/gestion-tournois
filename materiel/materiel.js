@@ -1,5 +1,6 @@
 // ══════════════════════════════════════════════════════
-//  MATÉRIEL - page Sixains (chargée après materiel_core.js, shared/html.js, shared/supabase.js et shared/auth.js)
+//  MATÉRIEL - page Sixains, deux onglets : Liste (ce fichier), Destruction (materiel_destruction.js)
+//  Chargée après materiel_core.js, shared/html.js, shared/supabase.js et shared/auth.js. Adresses : #liste (avec ?jeu=...&vue=...), #destruction
 //  Suivi quotidien : ouvrir un sixain (Neuf, En service), le mettre hors d'usage, préparer les destructions. Les règles (séquence des
 //  statuts, retour avec motif, numéro unique, jeu fixé) sont imposées par la base (supabase/migrations/materiel.sql) ;
 //  l'écran propose les bons boutons et traduit les refus.
@@ -15,6 +16,7 @@ let FILTRE = { vue: 'cours', jeu: '', finition: '', marque: '', q: '' };
 let SEL = [];                                 // identifiants des fiches cochées
 let OCCUPE = false;                           // une écriture est en cours : on ignore les doubles clics
 let FOCUS_AVANT = null;
+let ONGLET = 'liste';
 
 const $ = function (id) { return document.getElementById(id); };
 const esc = escapeHtml;
@@ -30,6 +32,8 @@ async function initMateriel() {
     $('mt-liste').innerHTML = '';
     return;
   }
+  $('mt-onglets').addEventListener('click', function (e) { const b = e.target.closest('[data-onglet]'); if (b) location.hash = '#' + b.dataset.onglet; });
+  window.addEventListener('hashchange', route);
   $('mt-statuts').addEventListener('click', function (e) { const b = e.target.closest('[data-vue]'); if (b) { FILTRE.vue = b.dataset.vue; SEL = []; rendre(); } });
   $('mt-jeux').addEventListener('click', function (e) { const b = e.target.closest('[data-jeu]'); if (b) { FILTRE.jeu = b.dataset.jeu; SEL = []; rendre(); } });
   $('mt-finition').addEventListener('change', function () { FILTRE.finition = this.value; SEL = []; rendre(); });
@@ -41,7 +45,8 @@ async function initMateriel() {
   $('mt-selbar').addEventListener('click', clicSelection);
   $('mt-modal').addEventListener('mousedown', function (e) { if (e.target === this) fermerModal(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('mt-modal').classList.contains('open')) fermerModal(); });
-  rendre();
+  initDestruction();
+  route();
 }
 
 // ── Filtres et affichage ─────────────────────────────
@@ -54,7 +59,31 @@ function filtreCourant() { return { statuts: statutsVue(), jeu: FILTRE.jeu, fini
 function visibles() { return MATERIEL.trier(MATERIEL.filtrer(PIECES, filtreCourant())); }
 function marqueNom(id) { const m = REF.marques.find(function (x) { return x.id === id; }); return m ? m.nom : ''; }
 
+// L'adresse choisit l'onglet : #liste?jeu=Blackjack&vue=Neuf (les filtres viennent des nombres du bilan de la Destruction), #destruction
+function route() {
+  const brut = decodeURIComponent(location.hash.replace(/^#/, ''));
+  const i = brut.indexOf('?');
+  const nom = i >= 0 ? brut.slice(0, i) : brut;
+  const q = new URLSearchParams(i >= 0 ? brut.slice(i + 1) : '');
+  ONGLET = nom === 'destruction' ? 'destruction' : 'liste';
+  if (ONGLET === 'liste' && i >= 0) {
+    const sts = MATERIEL.statuts(REF, FAMILLE).map(function (x) { return x.statut; });
+    FILTRE = { vue: (q.get('vue') === 'tous' || sts.indexOf(q.get('vue')) >= 0) ? q.get('vue') : 'cours', jeu: MATERIEL.jeuxPourSelect(REF).indexOf(q.get('jeu')) >= 0 ? q.get('jeu') : '',
+      finition: ['Plastifié', 'Cartonné'].indexOf(q.get('finition')) >= 0 ? q.get('finition') : '', marque: '', q: '' };
+    $('mt-finition').value = FILTRE.finition; $('mt-q').value = '';
+    SEL = [];
+  }
+  document.querySelectorAll('#mt-onglets .seg-btn').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.onglet === ONGLET)); });
+  ['liste', 'destruction'].forEach(function (o) { $('vue-' + o).hidden = o !== ONGLET; });
+  window.scrollTo(0, 0);
+  rendre();
+}
+
+// Redessine l'onglet affiché (appelé après chaque écriture) et le compteur de l'onglet Destruction
 function rendre() {
+  const n = PIECES.filter(function (p) { return p.statut === 'A détruire'; }).length;
+  $('mt-nb-detruire').hidden = !n; $('mt-nb-detruire').textContent = n;
+  if (ONGLET === 'destruction') return rendreDestruction();
   rendreStatuts(); rendreJeux(); rendreMarques(); rendreListe(); rendreSelection();
 }
 
@@ -97,7 +126,7 @@ function rendreListe() {
   }
   const lignes = liste.map(function (p) {
     const pas = MATERIEL.passages(REF, FAMILLE, p.statut);
-    const peutAvancer = pas.avance && pas.avance.vers !== 'Détruit';          // détruire se fait depuis l'onglet Destruction
+    const peutAvancer = pas.avance && pas.avance.vers !== 'Détruit';          // détruire se fait depuis l'onglet Destruction (il exige une session)
     const coche = SEL.indexOf(p.id) >= 0;
     return '<tr' + (coche ? ' class="sel"' : '') + ' data-id="' + esc(p.id) + '">' +
       '<td class="mt-c"><input type="checkbox" data-sel aria-label="Choisir ' + esc(p.identifiant) + '"' + (coche ? ' checked' : '') + ' /></td>' +
@@ -358,9 +387,10 @@ function ouvrirMarqueLot(ids) {
   box.querySelectorAll('[data-fermer]').forEach(function (b) { b.addEventListener('click', fermerModal); });
 }
 
-// ── Ajout de sixains (plusieurs numéros d'un coup) ───
+// ── Ajout de sixains : une série bornée (du numéro X au numéro Y), ou des numéros isolés ───
 function ouvrirAjout() {
   const departs = REF.statuts.filter(function (s) { return s.famille === FAMILLE && s.creation; }).sort(function (a, b) { return a.ordre - b.ordre; });
+  let mode = 'serie';                                       // 'serie' ou 'liste'
   const box = ouvrirModal('<h2>Ajouter des sixains</h2>' +
     '<div class="mt-grille">' +
       '<div class="fg"><label class="fl" for="mt-a-jeu">Jeu</label><select id="mt-a-jeu"><option value="">Choisir...</option>' + MATERIEL.jeuxPourSelect(REF).map(function (j) { return '<option>' + esc(j) + '</option>'; }).join('') + '</select></div>' +
@@ -368,28 +398,50 @@ function ouvrirAjout() {
       '<div class="fg"><label class="fl" for="mt-a-statut">Statut de départ</label><select id="mt-a-statut">' + departs.map(function (s) { return '<option>' + esc(s.statut) + '</option>'; }).join('') + '</select></div>' +
       '<div class="fg"><label class="fl" for="mt-a-marque">Marque</label>' + htmlMarque('mt-a-marque', null) + '</div>' +
     '</div>' +
-    '<div class="fg" style="margin-top:6px"><label class="fl" for="mt-a-ids">Numéros</label><textarea id="mt-a-ids" rows="6" placeholder="Un numéro par ligne, ou séparés par des espaces" autocomplete="off" spellcheck="false"></textarea></div>' +
+    '<div id="mt-a-serie"><div class="mt-grille" style="margin-top:6px">' +
+      '<div class="fg"><label class="fl" for="mt-a-de">Du numéro</label><input type="text" id="mt-a-de" maxlength="40" autocomplete="off" spellcheck="false" /></div>' +
+      '<div class="fg"><label class="fl" for="mt-a-a">Au numéro (facultatif)</label><input type="text" id="mt-a-a" maxlength="40" autocomplete="off" spellcheck="false" /></div>' +
+    '</div></div>' +
+    '<div id="mt-a-liste" hidden><div class="fg" style="margin-top:6px"><label class="fl" for="mt-a-ids">Numéros</label><textarea id="mt-a-ids" rows="6" placeholder="Un numéro par ligne, ou séparés par des espaces" autocomplete="off" spellcheck="false"></textarea></div></div>' +
     '<div id="mt-a-bilan" class="mt-info" role="status"></div><div class="mt-err-zone"></div>' +
-    '<div class="mt-actions"><button type="button" class="btn btn-gold" id="mt-a-ok" disabled>Ajouter</button><button type="button" class="btn btn-ghost" data-fermer>Annuler</button></div>');
+    '<div class="mt-actions"><button type="button" class="btn btn-gold" id="mt-a-ok" disabled>Ajouter</button><button type="button" class="btn btn-ghost" data-fermer>Annuler</button>' +
+    '<button type="button" class="btn btn-ghost btn-sm" id="mt-a-mode">Ajouter des numéros isolés</button></div>');
   brancherMarque('mt-a-marque');
   box.querySelectorAll('[data-fermer]').forEach(function (b) { b.addEventListener('click', fermerModal); });
 
   const existants = function () { return PIECES.map(function (p) { return p.identifiant; }); };
-  const analyse = function () { return MATERIEL.analyserSaisie($('mt-a-ids').value, existants()); };
+  // Même forme de résultat pour les deux modes : ids à créer, déjà présents, doublons de saisie, invalides, erreur de série
+  const analyse = function () {
+    if (mode === 'serie') {
+      const r = MATERIEL.analyserSerie($('mt-a-de').value, $('mt-a-a').value, existants());
+      return { ids: r.ids, existe: r.existe, doublonsSaisie: [], invalides: [], erreur: r.erreur, serie: true };
+    }
+    const r = MATERIEL.analyserSaisie($('mt-a-ids').value, existants());
+    return { ids: r.ids, existe: r.existe, doublonsSaisie: r.doublonsSaisie, invalides: r.invalides, erreur: '', serie: false };
+  };
+  const abrege = function (l) { return l.length > 6 ? l.slice(0, 5).join(', ') + ' et ' + (l.length - 5) + ' autres' : l.join(', '); };
   const maj = function () {
     const a = analyse();
     const msg = [];
-    if (a.ids.length) msg.push(a.ids.length + (a.ids.length > 1 ? ' sixains à ajouter' : ' sixain à ajouter'));
-    if (a.existe.length) msg.push('déjà enregistré' + (a.existe.length > 1 ? 's' : '') + ' (ignoré' + (a.existe.length > 1 ? 's' : '') + ') : ' + a.existe.join(', '));
-    if (a.doublonsSaisie.length) msg.push('en double dans la saisie (compté une fois) : ' + a.doublonsSaisie.join(', '));
-    if (a.invalides.length) msg.push('numéro non valide : ' + a.invalides.join(', '));
+    if (a.erreur) msg.push(a.erreur);
+    if (a.ids.length) msg.push(a.ids.length + (a.ids.length > 1 ? ' sixains à ajouter' : ' sixain à ajouter') + (a.serie && a.ids.length > 1 ? ' (' + a.ids[0] + ' à ' + a.ids[a.ids.length - 1] + ')' : ''));
+    if (a.existe.length) msg.push('déjà enregistré' + (a.existe.length > 1 ? 's' : '') + ' (ignoré' + (a.existe.length > 1 ? 's' : '') + ') : ' + abrege(a.existe));
+    if (a.doublonsSaisie.length) msg.push('en double dans la saisie (compté une fois) : ' + abrege(a.doublonsSaisie));
+    if (a.invalides.length) msg.push('numéro non valide : ' + abrege(a.invalides));
     const bilan = $('mt-a-bilan');
     bilan.textContent = msg.join(' · ');
-    bilan.classList.toggle('attention', a.invalides.length > 0 || a.existe.length > 0 || a.doublonsSaisie.length > 0);
-    $('mt-a-ok').disabled = !($('mt-a-jeu').value && $('mt-a-fin').value && a.ids.length && !a.invalides.length && a.ids.length <= MAX_LOT);
+    bilan.classList.toggle('attention', !!a.erreur || a.invalides.length > 0 || a.existe.length > 0 || a.doublonsSaisie.length > 0);
+    $('mt-a-ok').disabled = !($('mt-a-jeu').value && $('mt-a-fin').value && a.ids.length && !a.invalides.length && !a.erreur && a.ids.length <= MAX_LOT);
     if (a.ids.length > MAX_LOT) bilan.textContent += ' · ' + MAX_LOT + ' sixains au maximum à la fois';
   };
-  ['mt-a-ids', 'mt-a-jeu', 'mt-a-fin'].forEach(function (id) { $(id).addEventListener('input', maj); $(id).addEventListener('change', maj); });
+  ['mt-a-de', 'mt-a-a', 'mt-a-ids', 'mt-a-jeu', 'mt-a-fin'].forEach(function (id) { $(id).addEventListener('input', maj); $(id).addEventListener('change', maj); });
+  $('mt-a-mode').addEventListener('click', function () {
+    mode = mode === 'serie' ? 'liste' : 'serie';
+    $('mt-a-serie').hidden = mode !== 'serie'; $('mt-a-liste').hidden = mode !== 'liste';
+    this.textContent = mode === 'serie' ? 'Ajouter des numéros isolés' : 'Ajouter une série';
+    maj();
+    $(mode === 'serie' ? 'mt-a-de' : 'mt-a-ids').focus();
+  });
 
   $('mt-a-ok').addEventListener('click', async function () {
     if (OCCUPE) return;
@@ -409,4 +461,3 @@ function ouvrirAjout() {
   });
 }
 
-// L'écran n'a pas de bouton de destruction : « A détruire » devient « Détruit » avec une session (onglet Destruction, étape suivante)
