@@ -12,6 +12,7 @@ var AIDE_ESPACES = {
   'tournois': 'Tournois',
   'training': 'Training',
   'break-list': 'Break list',
+  'materiel': 'Matériel',
 };
 
 var AIDE_GUIDES = [
@@ -1040,6 +1041,226 @@ var AIDE_GUIDES = [
       {
         title: "Un espace ou un guide n'apparaît pas",
         text: "<p>Chacun ne voit que les espaces et les guides auxquels il a droit. S'il en manque un, demandez l'accès à l'administrateur.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  // ══ Matériel ══
+
+  {
+    id: 'materiel-pour-commencer', space: 'materiel', panel: 'materiel',
+    title: 'Pour commencer',
+    intro: "L'espace Matériel suit les sixains de cartes au quotidien : lesquels sont au dépôt, lesquels sont en service, lesquels sont usés ou à détruire. Il ne remplace pas les registres officiels, qui restent la référence pour les entrées et les sorties.",
+    steps: [
+      {
+        title: "La page Sixains",
+        text: "<p>La page a deux onglets : <b>Liste</b>, qui est la page de tous les jours, et <b>Destruction</b>, qui sert à préparer une destruction. Un nombre sur l'onglet Destruction indique combien de sixains sont prêts à être détruits.</p>"
+          + "<p>Dans la Liste, chaque ligne est un sixain : son numéro, son jeu, sa finition, sa marque et son statut. Pour retrouver un sixain, combinez les filtres :</p><ul>"
+          + "<li>les <b>pastilles de statut</b>, avec le nombre de sixains pour chacune. <b>En cours</b> réunit tous les sixains sauf ceux qui sont détruits ;</li>"
+          + "<li>les <b>pastilles de jeu</b> (Blackjack, Ultimate, Cash Game, Tournois) ;</li>"
+          + "<li>la <b>finition</b> (plastifié ou cartonné), la <b>marque</b> (ou « Sans marque ») et la <b>recherche par numéro</b>.</li></ul>",
+        imgs: [{ src: 'captures/mt_liste.png', alt: "La page Sixains : onglets, pastilles de statut et de jeu, filtres et liste" }],
+      },
+      {
+        title: "Les statuts : la vie d'un sixain",
+        text: "<p>Un sixain passe par six statuts, toujours dans cet ordre :</p><ol>"
+          + "<li><b>A intégrer</b> : le sixain est reçu et attend d'être intégré au stock ;</li>"
+          + "<li><b>Neuf</b> : au dépôt, pas encore ouvert ;</li>"
+          + "<li><b>En service</b> : ouvert et utilisé en salle ;</li>"
+          + "<li><b>Hors d'usage</b> : il ne sert plus ;</li>"
+          + "<li><b>A détruire</b> : prêt pour la prochaine destruction ;</li>"
+          + "<li><b>Détruit</b> : détruit, rattaché à une session de destruction.</li></ol>"
+          + "<p>On avance d'une étape à la fois, sans en sauter. Un retour en arrière est possible, mais il demande un motif (voir « Suivre la vie d'un sixain »).</p>",
+        imgs: [],
+      },
+      {
+        title: "Tout est conservé",
+        text: "<p>Chaque changement de statut est enregistré avec la date, la personne qui l'a fait et, pour un retour en arrière, le motif. L'historique d'un sixain se lit dans sa fiche et ne peut pas être effacé.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'materiel-ajouter', space: 'materiel', panel: 'materiel',
+    title: 'Ajouter des sixains',
+    intro: "Les sixains arrivent en séries de numéros qui se suivent. Il suffit d'indiquer le premier et le dernier numéro : l'application crée toutes les fiches d'un coup.",
+    steps: [
+      {
+        title: "Choisir le jeu et la finition",
+        text: "<p>Dans la Liste, cliquez sur <b>Ajouter des sixains</b>. Indiquez :</p><ul>"
+          + "<li>le <b>jeu</b> et la <b>finition</b> : un sixain reste attaché à son jeu et à sa finition, ils ne se modifient plus ensuite ;</li>"
+          + "<li>le <b>statut de départ</b> : <b>A intégrer</b> pour un sixain qui vient d'arriver, <b>Neuf</b> pour un sixain déjà intégré ;</li>"
+          + "<li>la <b>marque</b>, facultative : choisissez-la dans la liste ou créez-la avec <b>+ Nouvelle marque...</b>. Elle peut aussi se renseigner plus tard.</li></ul>",
+        imgs: [{ src: 'captures/mt_ajout.png', alt: "La fenêtre d'ajout avec une série de dix sixains" }],
+      },
+      {
+        title: "Saisir la série",
+        text: "<p>Dans <b>Du numéro</b>, tapez le premier numéro de la série, et dans <b>Au numéro</b> le dernier. Une ligne sous les champs annonce ce qui va être créé, par exemple « 10 sixains à ajouter (100109 à 100118) ». Si vous laissez <b>Au numéro</b> vide, un seul sixain est ajouté.</p>"
+          + "<ul><li>Les numéros doivent finir par des chiffres. Les lettres du début sont conservées : de D25001 à D25010, les numéros créés sont D25001, D25002, etc.</li>"
+          + "<li>Les deux numéros doivent commencer pareil, et le dernier doit venir après le premier.</li>"
+          + "<li>Un numéro déjà enregistré dans la série est ignoré et signalé, sans bloquer les autres.</li>"
+          + "<li>On ajoute 100 sixains au plus à la fois.</li></ul>"
+          + "<p>Quand la ligne d'annonce est juste, cliquez sur <b>Ajouter</b>.</p>",
+        imgs: [],
+      },
+      {
+        title: "Des numéros qui ne se suivent pas",
+        text: "<p>Pour quelques numéros isolés, cliquez sur <b>Ajouter des numéros isolés</b> : une zone de texte remplace les deux champs. Tapez un numéro par ligne, ou séparez-les par des espaces ou des virgules. <b>Ajouter une série</b> revient à la saisie par série.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'materiel-suivi', space: 'materiel', panel: 'materiel',
+    title: "Suivre la vie d'un sixain",
+    intro: "Au quotidien, on ouvre un sixain neuf, on le met hors d'usage quand il est usé, puis on le prépare pour la destruction. Chaque étape se fait en un clic.",
+    steps: [
+      {
+        title: "Faire avancer un sixain",
+        text: "<p>Sur chaque ligne de la Liste, le bouton de droite propose l'étape suivante : <b>Intégrer</b>, <b>Mettre en service</b>, <b>Mettre hors d'usage</b> ou <b>Marquer à détruire</b>. Un clic suffit, le statut change aussitôt et un message le confirme.</p>"
+          + "<p>Le dernier pas, <b>Détruit</b>, ne se fait pas ici : il passe par l'onglet Destruction, qui garde la trace de la session (voir « Préparer une destruction »).</p>",
+        imgs: [],
+      },
+      {
+        title: "Faire avancer plusieurs sixains à la fois",
+        text: "<p>Cochez les sixains concernés : une barre apparaît au-dessus de la liste avec leur nombre et le bouton de l'étape suivante, par exemple <b>Mettre en service (3)</b>. La case en haut du tableau coche toute la liste affichée.</p>"
+          + "<ul><li>Les sixains choisis doivent avoir le <b>même statut</b> ; sinon la barre l'explique et ne propose rien.</li>"
+          + "<li>On modifie 100 sixains au plus à la fois.</li>"
+          + "<li><b>Marque...</b> donne la même marque à toute la sélection, et <b>Effacer la sélection</b> décoche tout.</li></ul>",
+        imgs: [{ src: 'captures/mt_selection.png', alt: "Trois sixains cochés et la barre de sélection" }],
+      },
+      {
+        title: "La fiche d'un sixain",
+        text: "<p>Cliquez sur le numéro d'un sixain pour ouvrir sa fiche. Elle donne son statut, son jeu et sa finition, les boutons d'avance et de retour, la <b>marque</b> et une <b>note</b> (cliquez sur <b>Enregistrer</b> pour les conserver), puis l'<b>historique</b> : chaque changement avec sa date, la personne qui l'a fait et le motif d'un éventuel retour.</p>",
+        imgs: [{ src: 'captures/mt_fiche.png', alt: "La fiche d'un sixain en service avec son historique" }],
+      },
+      {
+        title: "Revenir en arrière",
+        text: "<p>Une erreur arrive : un sixain mis hors d'usage par erreur, par exemple. Dans la fiche, le bouton <b>Revenir à « ... »</b> ramène le sixain d'une étape. Il demande un <b>motif</b> (trois caractères au moins), puis <b>Confirmer le retour</b>. Le retour apparaît dans l'historique avec la mention <i>retour</i> et son motif.</p>"
+          + "<p>Pour plusieurs sixains, cochez-les puis utilisez <b>Revenir à « ... »</b> dans la barre de sélection.</p>",
+        imgs: [{ src: 'captures/mt_retour.png', alt: "Un retour en arrière avec son motif, et l'historique du sixain" }],
+      },
+      {
+        title: "Supprimer une fiche créée par erreur",
+        text: "<p>Une fiche qui n'a pas encore servi (statut de départ, aucun changement) peut être supprimée : ouvrez-la, cliquez sur <b>Supprimer cette fiche</b>, puis confirmez. Dès qu'un sixain a changé de statut, il ne se supprime plus.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'materiel-destruction', space: 'materiel', panel: 'materiel',
+    title: 'Préparer une destruction',
+    intro: "L'onglet Destruction réunit le bilan par jeu, le choix des sixains à détruire et la liste des destructions passées. Chaque destruction forme une session, qui permet de retrouver ce qui est sorti du dépôt.",
+    steps: [
+      {
+        title: "Le bilan par jeu",
+        text: "<p>Le premier bloc reprend le tableau de suivi des destructions, jeu par jeu :</p><ul>"
+          + "<li><b>Stock initial</b> : les sixains Neuf, En service, Hors d'usage et A détruire ;</li>"
+          + "<li><b>Entrées</b> : les sixains A intégrer ;</li>"
+          + "<li><b>Sorties</b> : les sixains A détruire, qui vont sortir ;</li>"
+          + "<li><b>En dépôt</b> : stock initial + entrées - sorties ;</li>"
+          + "<li><b>Neuf</b>, <b>En service</b>, <b>Hors d'usage</b> et <b>Total</b> : ce qui reste, sans les sixains à détruire.</li></ul>"
+          + "<p>Les nombres des colonnes Entrées, Sorties, Neuf, En service et Hors d'usage ouvrent la liste correspondante.</p>",
+        imgs: [{ src: 'captures/mt_destruction.png', alt: "L'onglet Destruction : le bilan par jeu et le choix des sixains à détruire" }],
+      },
+      {
+        title: "Choisir les sixains à détruire",
+        text: "<p>Le bloc <b>Sixains à détruire</b> liste les sixains au statut A détruire, par jeu. Cochez la case d'un jeu pour les prendre tous, ou cochez les numéros un par un. Indiquez ensuite :</p><ul>"
+          + "<li>la <b>date</b> de la destruction (aujourd'hui par défaut) ;</li>"
+          + "<li>une <b>référence</b> et une <b>note</b>, facultatives.</li></ul>"
+          + "<p>Cliquez sur <b>Détruire la sélection</b> : une fenêtre récapitule la liste. Après <b>Confirmer la destruction</b>, les sixains passent à Détruit, rattachés à la session créée. On détruit 100 sixains au plus par session. <b>Copier la liste</b> copie les numéros pour les coller ailleurs.</p>",
+        imgs: [],
+      },
+      {
+        title: "Les sessions de destruction",
+        text: "<p>Le dernier bloc liste les sessions, la plus récente d'abord. Cliquez sur une session pour voir son contenu, jeu par jeu, et copier la liste. Les destructions faites avant l'outil sont regroupées dans une session <b>Avant l'outil</b>, sans date.</p>",
+        imgs: [{ src: 'captures/mt_sessions.png', alt: "Les sessions de destruction, avec le contenu d'une session" }],
+      },
+      {
+        title: "Imprimer le bilan",
+        text: "<p>Le bouton <b>Imprimer le bilan</b> prépare une page A4 avec le tableau du bilan par jeu et la date du jour, à transmettre au directeur des jeux pour le registre. Dans la fenêtre d'impression, choisissez une imprimante ou <b>Enregistrer en PDF</b>.</p>"
+          + "<p>Le bilan reflète l'état au moment où vous l'imprimez : les sorties sont les sixains marqués A détruire à cet instant. Imprimez-le avant de confirmer la destruction.</p>",
+        imgs: [{ src: 'captures/mt_bilan_papier.png', alt: "La feuille imprimée du bilan de destruction" }],
+      },
+      {
+        title: "En cas d'erreur",
+        text: "<p>Un sixain détruit à tort peut être remis en circulation : dans la Liste, ouvrez la vue <b>Détruit</b>, cliquez sur le numéro puis sur <b>Revenir à « A détruire »</b>, avec un motif. Il sort alors de sa session.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'materiel-pointage', space: 'materiel', panel: 'materiel',
+    title: 'Pointer le dépôt',
+    intro: "Le pointage est une feuille à imprimer pour vérifier, sixain par sixain, que le dépôt correspond à l'application.",
+    steps: [
+      {
+        title: "Imprimer la feuille",
+        text: "<p>Dans la Liste, cliquez sur <b>Imprimer le pointage</b>. L'application prépare une seule page A4 avec tous les sixains qui sont au dépôt : Neuf, En service, Hors d'usage et A détruire. Les sixains A intégrer et ceux qui sont détruits n'y figurent pas.</p>"
+          + "<p>Les sixains sont rangés par jeu, puis par statut, avec une case à cocher devant chaque numéro. Quand il y en a beaucoup, le texte se resserre pour que tout tienne sur la page. Dans la fenêtre d'impression, choisissez une imprimante ou <b>Enregistrer en PDF</b>.</p>",
+        imgs: [{ src: 'captures/mt_pointage.png', alt: "La feuille de pointage du dépôt" }],
+      },
+      {
+        title: "Pointer sur place",
+        text: "<p>Dans le dépôt, cochez chaque numéro que vous avez sous la main. Notez dans le cadre <b>Écarts constatés</b> tout ce qui ne correspond pas : un numéro absent, un sixain en trop, un mauvais statut. Terminez par votre nom et la date.</p>",
+        imgs: [],
+      },
+      {
+        title: "Corriger les écarts",
+        text: "<p>De retour devant l'application, corrigez ce qui doit l'être : changez le statut d'un sixain, ou ajoutez un sixain manquant dans la Liste. L'historique garde la trace de chaque correction.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'materiel-depannage', space: 'materiel', panel: 'materiel',
+    title: 'Résolution des problèmes courants',
+    intro: "Les messages et les cas les plus fréquents, avec ce qu'il faut faire.",
+    steps: [
+      {
+        title: "Je ne vois pas l'espace Matériel",
+        text: "<p>Chacun ne voit que les espaces auxquels il a droit. Demandez à l'administrateur de cocher <b>Matériel</b> pour votre compte, dans Gestion des comptes.</p>",
+        imgs: [],
+      },
+      {
+        title: "Le bouton Ajouter reste grisé",
+        text: "<p>Il faut un <b>jeu</b>, une <b>finition</b> et au moins un numéro valide. Lisez la ligne sous les champs : elle indique ce qui bloque (numéros qui ne finissent pas par des chiffres, premier et dernier numéro qui ne commencent pas pareil, dernier numéro avant le premier, plus de 100 sixains).</p>",
+        imgs: [],
+      },
+      {
+        title: "« Déjà enregistré (ignoré) »",
+        text: "<p>Un numéro de votre série existe déjà. Il n'est pas recréé et les autres sont ajoutés normalement. Pour le retrouver, choisissez la pastille <b>Tous</b> et cherchez son numéro : il est peut-être déjà détruit.</p>",
+        imgs: [],
+      },
+      {
+        title: "Je ne peux pas changer le statut",
+        text: "<p>On avance d'une étape à la fois et l'on ne saute pas d'étape. Pour plusieurs sixains, ils doivent avoir le même statut ; la barre de sélection indique quand ce n'est pas le cas. Pour revenir en arrière, un motif d'au moins trois caractères est obligatoire.</p>",
+        imgs: [],
+      },
+      {
+        title: "Je me suis trompé de jeu ou de finition",
+        text: "<p>Ils ne se modifient plus une fois la fiche créée. Si la fiche n'a pas servi, supprimez-la et recréez-la. Sinon, prévenez l'administrateur, qui peut corriger l'erreur.</p>",
+        imgs: [],
+      },
+      {
+        title: "« Copie impossible »",
+        text: "<p>Le navigateur a refusé l'accès au presse-papiers. Sélectionnez la liste affichée à la main et copiez-la avec le clavier.</p>",
+        imgs: [],
+      },
+      {
+        title: "La feuille imprimée est coupée ou sur deux pages",
+        text: "<p>Dans la fenêtre d'impression, vérifiez que le format est <b>A4</b>, l'orientation <b>Portrait</b> et l'échelle <b>100 %</b>. La feuille est déjà ajustée pour tenir sur une page.</p>",
+        imgs: [],
+      },
+      {
+        title: "« Enregistrement impossible » ou « Impossible de charger le matériel »",
+        text: "<p>La connexion avec le serveur a échoué. Vérifiez votre connexion, rechargez la page et recommencez. Si le message revient, prévenez l'administrateur.</p>",
         imgs: [],
       },
     ],

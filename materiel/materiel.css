@@ -104,3 +104,95 @@ body.light .st-detruit { color: #666; }
   .mt-modal-box { padding: 24px 18px 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .mt-toast { transition: none; } }
+
+/* ── Onglets et destruction ── */
+.mt-onglets { margin-bottom: 18px; }
+.mt-bloc { margin-bottom: 16px; }
+.mt-defile { overflow-x: auto; }
+.mt-matrice { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mt-matrice th { padding: 8px 10px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--gold-bd); text-align: left; white-space: nowrap; }
+.mt-matrice td { padding: 8px 10px; border-bottom: 1px solid rgba(195,120,20,.1); }
+.mt-matrice .mt-nbc { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-num); }
+.mt-matrice th.mt-nbc { text-align: right; }
+.mt-matrice tr.mt-total td { border-top: 1px solid var(--gold); border-bottom: 0; font-weight: 600; color: var(--cream); }
+.mt-matrice .mt-tot { font-weight: 600; color: var(--cream); }
+.mt-matrice .mt-sep, .mt-matrice tr.mt-total td.mt-sep { width: 14px; padding: 0; border: 0; }
+.mt-nb { color: var(--gold); font-weight: 600; text-decoration: none; padding: 2px 6px; border-radius: 8px; }
+.mt-nb:hover { background: var(--gold-bg); text-decoration: underline; }
+.mt-nb:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+.mt-zero { color: var(--text-muted); }
+
+.mt-groupe { margin-bottom: 16px; }
+.mt-groupe-t { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--cream); cursor: pointer; margin-bottom: 8px; }
+.mt-groupe-t input, .mt-pastille input { width: 18px; height: 18px; padding: 0; accent-color: var(--gold-solid); cursor: pointer; }
+.mt-compte { font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--gold); padding: 1px 8px; border: 1px solid var(--gold-bd); border-radius: 999px; }
+.mt-pastilles { display: flex; flex-wrap: wrap; gap: 8px; }
+.mt-pastille { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; min-height: 36px; border: 1px solid var(--gold-bd); border-radius: 999px; font-family: var(--f-num); font-size: 13px; cursor: pointer; }
+.mt-pastille:has(input:checked) { border-color: var(--gold); background: var(--gold-bg); color: var(--cream); }
+.mt-form { display: grid; grid-template-columns: 180px 1fr 1fr; gap: 0 14px; margin-top: 6px; }
+.mt-form .fg { min-width: 0; }
+.mt-form input { width: 100%; box-sizing: border-box; }
+
+.mt-session { border-bottom: 1px solid rgba(195,120,20,.12); }
+.mt-session:last-child { border-bottom: 0; }
+.mt-session summary { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 4px; cursor: pointer; font-size: 13px; list-style: none; }
+.mt-session summary::-webkit-details-marker { display: none; }
+.mt-session summary::before { content: '\25B8'; color: var(--gold); transition: transform .15s; }
+.mt-session[open] summary::before { transform: rotate(90deg); }
+.mt-sdate { font-weight: 600; color: var(--cream); font-variant-numeric: tabular-nums; }
+.mt-sref { color: var(--text-dim); }
+.mt-sbody { padding: 0 4px 14px 22px; }
+.mt-liste-texte { margin: 6px 0 12px; padding: 12px 14px; max-width: 100%; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-family: var(--f-num); font-size: 12px; line-height: 1.6; color: var(--text); background: var(--gold-bg); border: 1px solid var(--gold-bd); border-radius: 12px; }
+
+@media (max-width: 760px) {
+  .mt-form { grid-template-columns: 1fr; }
+  .mt-pastille { min-height: 44px; }
+  .mt-matrice th, .mt-matrice td { padding: 8px 8px; }
+}
+
+/* Les cartes ne s'élargissent pas avec leur contenu : un tableau trop large défile à l'intérieur (.mt-defile) au lieu d'élargir la page */
+#vue-liste, #vue-destruction, .mt-bloc, .mt-carte { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.mt-defile { max-width: 100%; }
+
+.mt-actions-barre { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Feuilles imprimables (contenu posé dans #mt-print, affiché seul à l'impression) ──
+   Les règles .pt-* ne sont pas dans @media print : la page les mesure hors écran pour faire tenir la feuille sur une seule page A4 (ajusterPage). */
+.mt-print { display: none; }
+.pt-page { font-size: var(--pt-fs, 12px); line-height: 1.25; color: #000; background: #fff; font-family: var(--f-ui); }
+.pt-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 10mm; border-bottom: 0.5mm solid #000; padding-bottom: 2mm; margin-bottom: 3mm; }
+.pt-titre { font-size: 17px; font-weight: 700; letter-spacing: .02em; }
+.pt-meta { font-size: 12px; color: #333; white-space: nowrap; }
+.pt-jeu { margin-bottom: 3mm; break-inside: avoid; }
+.pt-jeu-t { display: flex; align-items: baseline; gap: 4mm; background: #e9e9e9; padding: 0.8mm 2mm; margin-bottom: 1mm; font-size: 14px; }
+.pt-jeu-t .pt-n { margin-left: auto; font-size: 12px; }
+.pt-fin { font-weight: 400; font-size: .85em; color: #444; }
+.pt-ligne { display: flex; align-items: flex-start; gap: 3mm; padding: 0.6mm 0; border-bottom: 0.2mm solid #bbb; }
+.pt-lib { flex: 0 0 31mm; font-weight: 600; font-size: .92em; }
+.pt-lib i { font-style: normal; font-weight: 400; color: #444; margin-left: 1mm; }
+.pt-lib .pt-fin { display: block; font-weight: 400; }
+.pt-cells { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(20mm, 1fr)); gap: 0.8mm 0; }
+.pt-c { display: inline-flex; align-items: center; gap: 1.6mm; font-family: var(--f-num); white-space: nowrap; }
+.pt-case { display: inline-block; width: 3.4mm; height: 3.4mm; border: 0.3mm solid #000; box-sizing: border-box; flex: 0 0 auto; }
+.pt-pied { margin-top: 4mm; break-inside: avoid; }
+.pt-ecarts { border: 0.3mm solid #000; height: 20mm; padding: 1.5mm 2mm; font-size: 11px; }
+.pt-sign { display: flex; gap: 10mm; margin-top: 4mm; font-size: 12px; }
+.pt-sign span { flex: 1; border-bottom: 0.3mm solid #000; padding-bottom: 4mm; }
+
+.bd-tab { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 2mm; }
+.bd-tab th, .bd-tab td { border: 0.3mm solid #000; padding: 3.2mm 2.5mm; text-align: right; font-variant-numeric: tabular-nums; }
+.bd-tab thead th { background: #e9e9e9; font-size: 12px; font-weight: 700; }
+.bd-tab tbody th, .bd-tab thead th:first-child { text-align: left; }
+.bd-tab tbody th { font-weight: 600; }
+.bd-tab td { font-family: var(--f-num); font-size: 15px; }
+.bd-tab .bd-fort { font-weight: 700; }
+.bd-tab .bd-g { border-left-width: 0.8mm; }
+.bd-tab tr.bd-total th, .bd-tab tr.bd-total td { font-weight: 700; background: #f3f3f3; border-top-width: 0.6mm; }
+
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html { background: #fff !important; }
+  body.mt-imprime { background: #fff !important; color: #000 !important; }
+  body.mt-imprime .nav, body.mt-imprime header.nav, body.mt-imprime .app, body.mt-imprime .modal-overlay, body.mt-imprime .mt-toast, body.mt-imprime #auth-overlay { display: none !important; }
+  body.mt-imprime .mt-print { display: block !important; }
+}
