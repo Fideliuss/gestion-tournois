@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Déclarations - Barrière Casino Bordeaux</title>
+  <link rel="stylesheet" href="../../../shared/barriere.css"/>
+  <link rel="stylesheet" href="declaration.css"/>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <span class="hdr-logo">Barrière Casino · Bordeaux</span>
+    <div class="hdr-title">Déclarations <em>mensuelles</em></div>
+
+  </div>
+
+  <!-- Période commune aux deux déclarations ; Réglages (tournois) et impression dans le même encadré -->
+  <div class="card" id="period-card" style="max-width:1100px">
+    <div class="sec">Période</div>
+    <div class="period-row">
+      <div class="fg pf-month">
+        <label class="fl">Mois</label>
+        <select id="sel-month" onchange="onPeriodChange()"></select>
+      </div>
+      <div class="fg pf-year">
+        <label class="fl">Année</label>
+        <input type="number" id="inp-year" min="2020" max="2099" onchange="onPeriodChange()"/>
+      </div>
+      <div class="period-actions">
+        <button class="btn btn-ghost" id="btn-adhoc" onclick="openView('adhoc')"><i class="ico ico-plus"></i> <span>Ajout/Modifications</span></button>
+        <button class="btn btn-ghost" id="btn-reglages" onclick="openView('cfg')"><i class="ico ico-cog"></i> <span>Réglages</span></button>
+        <button class="btn btn-ghost" id="btn-print" onclick="printDeclaration()"><i class="ico ico-print"></i> Imprimer / PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="seg" id="decl-main-tabs" role="tablist" aria-label="Déclaration">
+    <button class="seg-btn active" role="tab" data-decl="tournois" aria-selected="true"  onclick="showDeclaration('tournois')">Tournois</button>
+    <button class="seg-btn"        role="tab" data-decl="extras"   aria-selected="false" onclick="showDeclaration('extras')">Extras</button>
+  </div>
+
+  <!-- ══ Déclaration Tournois : tableau et annexes ══ -->
+  <section class="decl-view" id="view-tournois">
+
+  <div class="decl-wrap">
+    <div id="decl-output"></div>
+  </div>
+
+  <div class="sec" id="annexes-label" style="width:100%;margin-bottom:16px">
+    Annexes - Prize Pool
+  </div>
+  <div class="annexes-grid" id="annexes-output"></div>
+
+  </section>
+
+  <!-- ══ Déclaration Extras ══ -->
+  <section class="decl-view" id="view-extras" hidden>
+    <div class="decl-wrap">
+      <div id="extras-output"></div>
+    </div>
+  </section>
+
+  <!-- ══ Vue Réglages : tournois, encadrement, annexes ══ -->
+  <section class="decl-view" id="view-cfg" hidden>
+
+  <div class="decl-tabs seg sm" id="decl-tabs">
+    <button class="decl-tab seg-btn active" onclick="showDeclTab('tournois')">Tournois</button>
+    <button class="decl-tab seg-btn" onclick="showDeclTab('encadrement')">Encadrement</button>
+    <button class="decl-tab seg-btn" onclick="showDeclTab('annexes')">Annexes</button>
+  </div>
+
+  <!-- ── Onglet : Tournois ── -->
+  <div class="decl-tab-panel" id="dtab-tournois" style="max-width:1100px;width:100%">
+    <div class="card" id="config-card">
+      <div class="sec">Configuration des tournois</div>
+      <div style="overflow-x:auto">
+        <table class="cfg-tbl" id="cfg-table"></table>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-ghost" onclick="resetConfig()">Réinitialiser</button>
+        <button class="btn btn-gold" onclick="saveAndRender()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Onglet : Encadrement ── -->
+  <div class="decl-tab-panel" id="dtab-encadrement" style="max-width:1100px;width:100%;display:none">
+    <div class="card" id="staff-card">
+      <div class="sec">Encadrement</div>
+      <div class="alert-warn" id="staff-msg" style="display:none"></div>
+      <div class="staff-grid" id="staff-grid"></div>
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-gold" onclick="saveStaffAndRender()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Onglet : Annexes ── -->
+  <div class="decl-tab-panel" id="dtab-annexes" style="max-width:1100px;width:100%;display:none">
+    <div class="card" id="annexes-editor-card">
+      <div class="sec">Annexes Prize Pool</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:18px">
+        Configurez les annexes référencées dans le tableau de déclaration.
+        Chaque annexe a ses propres paramètres de joueurs, cave et répartition.
+      </p>
+      <div class="annexe-editor-list" id="annexes-editor-list"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
+        <button class="btn-ghost" onclick="addAnnexe()">+ Nouvelle annexe</button>
+        <button class="btn btn-gold" onclick="saveAnnexesAndRender()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  </section>
+
+  <!-- ══ Ajout / Modifications : tournoi ad-hoc, modification ou annulation ponctuelle ══ -->
+  <section class="decl-view" id="view-adhoc" hidden>
+  <div class="decl-tab-panel" id="dtab-ponctuel" style="max-width:1100px;width:100%">
+
+    <div class="card" id="adhoc-card">
+      <div class="sec">Tournoi Ad-hoc</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:18px">
+        Ajoutez un tournoi exceptionnel (événement, festival…) pour le mois sélectionné.
+        Il apparaîtra dans le tableau de déclaration, trié chronologiquement.
+      </p>
+      <div class="adhoc-form">
+        <div class="fg">
+          <label class="fl">Date</label>
+          <input type="date" id="adhoc-date"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Heure</label>
+          <input type="text" id="adhoc-heure" value="21:00" placeholder="21:00" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Cave (€)</label>
+          <input type="number" id="adhoc-cave" placeholder="ex: 200" min="0" style="width:90px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Joueurs max</label>
+          <input type="number" id="adhoc-joueurs" value="150" min="1" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Rachats</label>
+          <div style="display:flex;align-items:center;gap:8px;height:38px">
+            <input type="checkbox" id="adhoc-rachats" checked style="width:16px;height:16px;accent-color:var(--gold)"/>
+            <label for="adhoc-rachats" style="font-size:12px;color:var(--text)">OUI</label>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Bounty (€)</label>
+          <input type="number" id="adhoc-bounty" placeholder="0" min="0" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">N° d'annexe</label>
+          <input type="number" id="adhoc-annexe" placeholder="ex : 4" min="1" style="width:90px"/>
+        </div>
+        <div class="fg" style="justify-content:flex-end">
+          <label class="fl">&nbsp;</label>
+          <button class="btn btn-gold" onclick="addAdhoc()">+ Ajouter</button>
+        </div>
+      </div>
+      <div class="sec" style="margin-top:4px;margin-bottom:12px">Ce mois</div>
+      <div class="adhoc-list" id="adhoc-list">
+        <div class="adhoc-empty">Aucun tournoi ad-hoc ce mois.</div>
+      </div>
+    </div>
+
+    <div class="card" id="exc-card" style="margin-top:16px">
+      <div class="sec">Modifier ou annuler un tournoi</div>
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:18px">
+        Annulez ou modifiez ponctuellement un tournoi pour ce mois uniquement. Restaurable à tout moment.
+      </p>
+      <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
+        <div class="fg">
+          <label class="fl">Date</label>
+          <input type="date" id="exc-date" onchange="onExcDateChange()"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Action</label>
+          <div style="display:flex;gap:16px;align-items:center;height:38px">
+            <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text);cursor:pointer">
+              <input type="radio" name="exc-type" value="cancelled" checked onchange="onExcTypeChange()" style="width:14px;height:14px;accent-color:var(--gold)"/> Annuler
+            </label>
+            <label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text);cursor:pointer">
+              <input type="radio" name="exc-type" value="modified" onchange="onExcTypeChange()" style="width:14px;height:14px;accent-color:var(--gold)"/> Modifier
+            </label>
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="applyException()">Appliquer</button>
+      </div>
+      <div class="adhoc-form" id="exc-modify-form" style="display:none;margin-bottom:16px">
+        <div class="fg">
+          <label class="fl">Heure</label>
+          <input type="text" id="exc-heure" value="21:00" placeholder="21:00" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Cave (€)</label>
+          <input type="number" id="exc-cave" placeholder="ex: 200" min="0" style="width:90px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Joueurs max</label>
+          <input type="number" id="exc-joueurs" value="150" min="1" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Rachats</label>
+          <div style="display:flex;align-items:center;gap:8px;height:38px">
+            <input type="checkbox" id="exc-rachats" checked style="width:16px;height:16px;accent-color:var(--gold)"/>
+            <label for="exc-rachats" style="font-size:12px;color:var(--text)">OUI</label>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Bounty (€)</label>
+          <input type="number" id="exc-bounty" placeholder="0" min="0" style="width:80px"/>
+        </div>
+        <div class="fg">
+          <label class="fl">N° d'annexe</label>
+          <input type="number" id="exc-annexe" placeholder="ex : 4" min="1" style="width:90px"/>
+        </div>
+      </div>
+      <div class="sec" style="margin-top:4px;margin-bottom:12px">Exceptions ce mois</div>
+      <div id="exc-list"><div class="adhoc-empty">Aucune exception ce mois.</div></div>
+    </div>
+
+  </div>
+  </section>
+
+</div>
+
+<script src="../../../shared/vendor/supabase_js.js"></script>
+<script src="../../../shared/barriere.js"></script>
+<script src="../../../shared/html.js"></script>
+<script src="../../../shared/supabase.js"></script>
+<script src="../../../shared/reglages.js"></script>
+<script src="../../../shared/auth.js"></script>
+<script src="donnees.js"></script>
+<script src="declaration.js"></script>
+<script>AUTH.guard({ loginUrl: '../../../login.html', panel: 'admin-tournois' });</script>
+</body>
+</html>

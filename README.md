@@ -132,7 +132,6 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 
 ```
 ├── index.html                     - Hub principal (guard auth, filtrage panneaux par rôle)
-├── tournois.html           - Sous-hub Tournois
 ├── login.html                     - Page de connexion (e-mail + mot de passe)
 │
 ├── shared/
@@ -153,84 +152,80 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │   ├── logos/                     - Logos (écran + impression)
 │   └── favicon/                   - Favicon et icônes PWA
 │
-├── prize_pool/
-│   ├── prize_pool.html            - Prize Pool Builder
-│   ├── prize_pool.css
-│   └── prize_pool.js              - Logique du Prize Pool Builder
+├── espaces/                       - Un dossier par espace de la barre (le service d'un espace ne se voit que dans les droits et dans nav.js)
+│   ├── tournois/
+│   │   ├── tournois.html          - Page de l'espace Tournois
+│   │   ├── prize_pool/            - Prize Pool Builder (prize_pool.html / .css / .js)
+│   │   ├── leaderboard/           - Challenge Saisonnier (leaderboard.html / .css / .js)
+│   │   ├── tda/
+│   │   │   ├── tda.html / .js / .css  - Règlement TDA : règles, procédures, glossaire, recherche (panel tda)
+│   │   │   ├── tda_rendu.js           - Mise en forme du texte : renvois, termes du glossaire, exemples
+│   │   │   ├── tda_recherche.js       - Moteur de recherche (accents, synonymes, fautes, accès par numéro)
+│   │   │   ├── *.test.js              - Tests Node (`node espaces/tournois/tda/tda_recherche.test.js`)
+│   │   │   └── outils/                - extraire_tda.js : extraction d'une édition du PDF (le texte n'est jamais commité)
+│   │   ├── declaration/
+│   │   │   ├── declaration.html       - Déclarations mensuelles (Tournois + Extras)
+│   │   │   ├── declaration.css / .js
+│   │   │   └── donnees.js             - Valeurs par défaut, clés des réglages en base et lectures, communes à Déclarations et Courriers
+│   │   ├── extras/                - Gestion des Extras & Émargement (extras.html / .css / .js)
+│   │   └── calendrier/            - Calendrier & barèmes : CRUD tournois + semainier + barème de points (calendrier.html)
+│   │
+│   ├── training/
+│   │   ├── training.html          - Training : tous les modules, groupés par jeu
+│   │   ├── training.css           - Styles partagés training
+│   │   ├── suivi/
+│   │   │   ├── suivi_croupier.html / .js  - Mes résultats
+│   │   │   ├── suivi_manager.html / .js   - Suivi équipe (panel training-suivi)
+│   │   │   ├── suivi_common.js            - Modules suivis, calculs et blocs d'affichage partagés
+│   │   │   └── suivi.css                  - Styles des pages de suivi
+│   │   ├── uth/
+│   │   │   ├── uth_main.html / .js        - Meilleure main
+│   │   │   ├── uth_gagnant.html / .js     - Qui gagne ?
+│   │   │   ├── uth_gains.html / .js       - Calcul des gains
+│   │   │   ├── uth_engine.js              - Moteur (cartes, mains, règlement des mises) + tests Node
+│   │   │   └── uth_ui.js / uth.css        - Affichage partagé des cartes
+│   │   ├── blackjack/
+│   │   │   ├── blackjack.html / .js       - BJ Paiement
+│   │   │   └── blackjack_score.html / .js - BJ Score
+│   │   └── roulette/
+│   │       ├── roulette.css               - Styles partagés roulette (tapis, chips, badges)
+│   │       ├── roulette_tapis.js          - Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
+│   │       ├── roulette_paiement.html / .js    - Calcul Paiement
+│   │       ├── roulette_conversion.html / .js  - Conversion Pièces
+│   │       ├── roulette_pointage.html / .js    - Pointage Numéro
+│   │       ├── roulette_couleur.html / .js     - Couleur Numéro
+│   │       └── roulette_tables.html / .js      - Tables de multiplication
+│   │
+│   ├── break_list/
+│   │   ├── break_list.html / .js  - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
+│   │   ├── break_list_core.js     - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
+│   │   ├── break_list_common.js   - Paramètres, messages et dates communs aux pages
+│   │   ├── planning.html / .js    - Import du planning mensuel (CSV), consultation, correction d'une case
+│   │   ├── parametres.html / .js  - Grades, horaires, absences, postes, break list imprimable, rapprochements
+│   │   └── break_list.css
+│   │
+│   └── materiel/
+│       ├── materiel.html / .css / .js - Sixains : onglets Liste (filtres, avance de statut, fiche et historique, ajout par série de numéros), Destruction (panel materiel)
+│       ├── materiel_destruction.js    - Onglet Destruction : bilan par jeu (stock, entrées, sorties, répartition), choix des sixains à détruire, sessions
+│       ├── materiel_impression.js     - Feuilles imprimables (pointage du dépôt sur une page A4, bilan de destruction)
+│       └── materiel_core.js           - Calcul pur : tri, filtres, saisie de numéros, passages de statut (tests : `node espaces/materiel/materiel_core.test.js`)
 │
-├── leaderboard/
-│   ├── leaderboard.html           - Challenge Saisonnier
-│   ├── leaderboard.css
-│   └── leaderboard.js
+├── outils/                        - Modules utilisables par plusieurs services
+│   └── courrier/
+│       ├── courriers.html         - Générateur de courrier (menu Administration tournois ; lit encore espaces/tournois/declaration/donnees.js)
+│       └── courriers.css / .js
 │
-├── admin/
-│   ├── config_tournois.html       - CRUD tournois + semainier + barème de points
+├── admin/                         - Administration de l'application
 │   ├── comptes.html / .css / .js  - Gestion des comptes : liste filtrable + matrice des accès par rôle
 │   ├── journal.html / .css / .js  - Journal d'audit : qui a fait quoi, filtres, recherche, export CSV (lecture seule, admin)
 │   ├── journal_texte.js / .test.js - Texte lisible de chaque ligne du journal (testé sous Node)
-│   ├── config_training.html / .js / .css - Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
-│   ├── declaration/
-│   │   ├── declaration.html       - Déclarations mensuelles (Tournois + Extras)
-│   │   ├── declaration.css / .js
-│   │   ├── donnees.js             - Valeurs par défaut, clés des réglages en base et lectures, communes à Déclarations et Courriers
-│   │   ├── courriers.html         - Générateur de courrier (menu Administration tournois)
-│   │   └── courriers.css / .js
-│   └── extras/
-│       ├── extras.html            - Gestion des Extras & Émargement
-│       └── extras.css / .js
-│
-├── training/
-│   ├── training.html              - Training : tous les modules, groupés par jeu
-│   ├── training.css               - Styles partagés training
-│   ├── suivi/
-│   │   ├── suivi_croupier.html / .js  - Mes résultats
-│   │   ├── suivi_manager.html / .js   - Suivi équipe (panel training-suivi)
-│   │   ├── suivi_common.js            - Modules suivis, calculs et blocs d'affichage partagés
-│   │   └── suivi.css                  - Styles des pages de suivi
-│   ├── uth/
-│   │   ├── uth_main.html / .js        - Meilleure main
-│   │   ├── uth_gagnant.html / .js     - Qui gagne ?
-│   │   ├── uth_gains.html / .js       - Calcul des gains
-│   │   ├── uth_engine.js              - Moteur (cartes, mains, règlement des mises) + tests Node
-│   │   └── uth_ui.js / uth.css        - Affichage partagé des cartes
-│   ├── blackjack/
-│   │   ├── blackjack.html / .js       - BJ Paiement
-│   │   └── blackjack_score.html / .js - BJ Score
-│   └── roulette/
-│       ├── roulette.css               - Styles partagés roulette (tapis, chips, badges)
-│       ├── roulette_tapis.js          - Composant tapis partagé (rendu grille, positionnement chips DOM, génération de mises)
-│       ├── roulette_paiement.html / .js    - Calcul Paiement
-│       ├── roulette_conversion.html / .js  - Conversion Pièces
-│       ├── roulette_pointage.html / .js    - Pointage Numéro
-│       ├── roulette_couleur.html / .js     - Couleur Numéro
-│       └── roulette_tables.html / .js      - Tables de multiplication
+│   └── config_training.html / .js / .css - Configuration des modules : réglages de tous les modules de training (un onglet par jeu)
 │
 ├── aide/
 │   ├── aide.html / .js / .css     - Page Aide : liste des guides (selon les droits), guide affiché, impression
 │   ├── aide_guides.js             - Contenu des guides (texte et captures)
 │   ├── captures/                  - Captures des guides (données fictives)
 │   └── outils/                    - captures.js (génération des captures avec Chrome) et donnees_fictives.js
-│
-├── tda/
-│   ├── tda.html / .js / .css      - Règlement TDA : règles, procédures, glossaire, recherche (panel tda)
-│   ├── tda_rendu.js               - Mise en forme du texte : renvois, termes du glossaire, exemples
-│   ├── tda_recherche.js           - Moteur de recherche (accents, synonymes, fautes, accès par numéro)
-│   ├── *.test.js                  - Tests Node (`node tda/tda_recherche.test.js`)
-│   └── outils/                    - extraire_tda.js : extraction d'une édition du PDF (le texte n'est jamais commité)
-│
-├── materiel/
-│   ├── materiel.html / .css / .js - Sixains : onglets Liste (filtres, avance de statut, fiche et historique, ajout par série de numéros), Destruction (panel materiel)
-│   ├── materiel_destruction.js    - Onglet Destruction : bilan par jeu (stock, entrées, sorties, répartition), choix des sixains à détruire, sessions
-│   ├── materiel_impression.js     - Feuilles imprimables (pointage du dépôt sur une page A4, bilan de destruction)
-│   └── materiel_core.js           - Calcul pur : tri, filtres, saisie de numéros, passages de statut (tests : `node materiel/materiel_core.test.js`)
-│
-├── break_list/
-│   ├── break_list.html / .js      - Aujourd'hui : présents, extraction Octime, répartition, break list imprimable (panel break-list)
-│   ├── break_list_core.js         - Calcul pur : planning CSV, extraction Octime, rapprochement des noms, répartition
-│   ├── break_list_common.js       - Paramètres, messages et dates communs aux pages
-│   ├── planning.html / .js        - Import du planning mensuel (CSV), consultation, correction d'une case
-│   ├── parametres.html / .js      - Grades, horaires, absences, postes, break list imprimable, rapprochements
-│   └── break_list.css
 │
 └── supabase/
     ├── functions/
