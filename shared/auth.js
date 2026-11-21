@@ -105,7 +105,7 @@ const AUTH = {
     try {
       const cached = _rolePanelsCache[userRole] || {};
       navOk = (await _loadNav()) && NAV.mount({
-        root, loginUrl, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
+        root, loginUrl, userId: session.user.id, email: session.user.email, name: AUTH.fullName(session.user), role: userRole, isAdmin,
         panels: cached.panels || [], color: cached.color || null,
       });
     } catch (e) { navOk = false; }

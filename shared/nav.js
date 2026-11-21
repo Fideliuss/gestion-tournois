@@ -17,10 +17,18 @@
 
 const NAV = (function () {
 
-  // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
+  // Services : un service regroupe des espaces. Un compte voit les services dont il a au moins un espace ; s'il en a plusieurs,
+  // il choisit le sien sur l'accueil (choix retenu sur le poste pour ce compte, modifiable par « Changer de service »).
+  const JT = 'jeux_traditionnels', MAS = 'machines_a_sous';
+  const SERVICES = [
+    { id: JT,  label: 'Jeux traditionnels', icon: 'card_spade', color: '' },
+    { id: MAS, label: 'Machines à sous',    icon: 'chip',       color: 'c-teal' },
+  ];
+
+  // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent). `service` : service de l'espace.
   const T = 'espaces/training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'espaces/break_list/';
   const SPACES = [
-    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, règlement TDA, administration', href: 'espaces/tournois/tournois.html', panel: 'tournois', items: [
+    { id: 'tournois', service: JT, label: 'Tournois', note: 'Prize pool, classement, règlement TDA, administration', href: 'espaces/tournois/tournois.html', panel: 'tournois', items: [
       { label: 'Prize Pool',  href: 'espaces/tournois/prize_pool/prize_pool.html',   panel: 'prize-pool' },
       { label: 'Leaderboard', href: 'espaces/tournois/leaderboard/leaderboard.html', panel: 'leaderboard' },
       { label: 'Règlement TDA', href: 'espaces/tournois/tda/tda.html', panel: 'tda' },
@@ -31,7 +39,7 @@ const NAV = (function () {
         { label: 'Calendrier & barèmes',  href: 'espaces/tournois/calendrier/calendrier.html' },
       ] },
     ] },
-    { id: 'training', label: 'Training', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
+    { id: 'training', service: JT, label: 'Training', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
       { label: 'Black Jack', id: 'blackjack', menu: [
         { label: 'BJ Paiement', href: BJ + 'blackjack.html' },
         { label: 'BJ Score',    href: BJ + 'blackjack_score.html' },
@@ -50,12 +58,12 @@ const NAV = (function () {
       ] },
       { label: 'Mes résultats', href: T + 'suivi/suivi_croupier.html' },
     ] },
-    { id: 'break-list', label: 'Break list', note: 'Break list, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
+    { id: 'break-list', service: JT, label: 'Break list', note: 'Break list, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
       { label: 'Aujourd\'hui', href: BL + 'break_list.html' },
       { label: 'Planning',     href: BL + 'planning.html' },
       { label: 'Paramètres',   href: BL + 'parametres.html' },
     ] },
-    { id: 'materiel', label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'espaces/materiel/materiel.html', panel: 'materiel', items: [
+    { id: 'materiel', service: JT, label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'espaces/materiel/materiel.html', panel: 'materiel', items: [
       { label: 'Sixains', href: 'espaces/materiel/materiel.html' },
     ] },
   ];
@@ -67,7 +75,7 @@ const NAV = (function () {
       { label: 'Gestion des comptes',       href: 'admin/comptes.html',            role: 'admin' },
       { label: 'Journal d\'audit',          href: 'admin/journal.html',            role: 'admin' },
     ] },
-    { title: 'Training', items: [
+    { title: 'Training', service: JT, items: [
       { label: 'Suivi équipe',              href: T + 'suivi/suivi_manager.html', panel: 'training-suivi' },
       { label: 'Configuration des modules', href: 'admin/config_training.html',   role: 'admin' },
     ] },
@@ -189,6 +197,23 @@ const NAV = (function () {
     return space.parent ? space.href : (space.items[0] && itemHref(space.items[0])) || space.href;
   }
 
+  // ── Services ──
+  // Services dont l'utilisateur voit au moins un espace
+  function servicesVisibles(spaces) {
+    return SERVICES.filter(function (sv) { return spaces.some(function (s) { return s.service === sv.id; }); });
+  }
+  // Service courant : celui de la page ouverte, sinon le choix retenu, sinon le seul service accessible ; null s'il faut choisir
+  function serviceCourant(visibles, memorise, pageService) {
+    const ok = function (id) { return id && visibles.some(function (sv) { return sv.id === id; }); };
+    if (ok(pageService)) return pageService;
+    if (ok(memorise)) return memorise;
+    return visibles.length === 1 ? visibles[0].id : null;
+  }
+  // Choix retenu sur le poste, par compte (un poste partagé ne transmet pas le choix d'un collègue)
+  function cleService(userId) { return 'pm_service_' + (userId || 'anonyme'); }
+  function lireService(userId) { try { return localStorage.getItem(cleService(userId)); } catch (e) { return null; } }
+  function ecrireService(userId, id) { try { if (id) localStorage.setItem(cleService(userId), id); else localStorage.removeItem(cleService(userId)); } catch (e) { /* stockage indisponible : on redemandera */ } }
+
   // Sur la page Aide, l'espace affiché dans la barre est celui du guide lu : on le lit dans l'adresse (#<espace> ou #<espace>-<guide>)
   function spaceFromHash() {
     const h = decodeURIComponent(location.hash.replace(/^#/, ''));
@@ -196,15 +221,27 @@ const NAV = (function () {
     return sp ? sp.id : null;
   }
 
-  let lastOpts = null, shownSpace = null, offDoc = null;
+  let lastOpts = null, shownSpace = null, offDoc = null, etat = { services: [], service: null };
 
-  // opts : { root, loginUrl, email, role, isAdmin, panels, color } ; opts.space force l'espace affiché (page Aide)
+  // opts : { root, loginUrl, userId, email, role, isAdmin, panels, color } ; opts.space force l'espace affiché (page Aide)
   // Renvoie true si la barre est en place (ou si l'on est redirigé), false pour retomber sur l'ancienne interface
   function mount(opts) {
     lastOpts = opts;
     const root = opts.root, key = pageKey(), page = (key && PAGES[key]) || {};
-    const spaces = visibleSpaces(opts);
     const href = function (p) { return root + p; };
+
+    // ── Service courant : la barre ne montre que les espaces de ce service ──
+    const tous = visibleSpaces(opts);
+    const services = servicesVisibles(tous);
+    const spaceOf = function (id) { return SPACES.find(function (s) { return s.id === id; }); };
+    const pageSpace = opts.space || (key === 'aide/aide.html' ? spaceFromHash() : null) || page.s;
+    const pageService = pageSpace && spaceOf(pageSpace) ? spaceOf(pageSpace).service : null;
+    const memorise = lireService(opts.userId);
+    const service = serviceCourant(services, memorise, pageService);
+    if (service && services.length > 1 && service !== memorise) ecrireService(opts.userId, service);   // page d'un autre service : on bascule
+    const serviceInfo = SERVICES.find(function (sv) { return sv.id === service; }) || null;
+    etat = { services: services, service: service };
+    const spaces = tous.filter(function (s) { return s.service === service; });
 
     // ── Redirections d'entrée ──
     if (key === 'index.html' && spaces.length === 1) { location.replace(href(entryOf(spaces[0]))); return true; }
@@ -213,7 +250,7 @@ const NAV = (function () {
       if (sp && sp.items.length === 1 && itemHref(sp.items[0]) !== key) { location.replace(href(itemHref(sp.items[0]))); return true; }
     }
 
-    const spaceId = opts.space || (key === 'aide/aide.html' ? spaceFromHash() : null) || page.s;
+    const spaceId = pageSpace;
     const current = spaces.find(function (s) { return s.id === spaceId; }) || null;
     shownSpace = current ? current.id : null;
 
@@ -251,11 +288,11 @@ const NAV = (function () {
 
     // ── Marque ──
     const logo = function (file, cls) { return el('img', { src: href('shared/logos/' + file), alt: '', class: cls }); };
-    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels - Accueil' }, [
+    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux' + (serviceInfo ? ', Service ' + serviceInfo.label : '') + ' - Accueil' }, [
       logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark'),
       el('i', { class: 'ico ico-star nav-star', 'aria-hidden': 'true' }),
       el('span', { class: 'nav-city', text: 'Bordeaux' }),
-      el('span', { class: 'nav-service' }, [el('span', { text: 'Service' }), el('span', { text: 'Jeux traditionnels' })]),
+      serviceInfo ? el('span', { class: 'nav-service' }, [el('span', { text: 'Service' }), el('span', { text: serviceInfo.label })]) : null,
     ]);
 
     // ── Espace courant : lanceur (plusieurs espaces) ou simple titre (un seul) ──
@@ -285,6 +322,7 @@ const NAV = (function () {
     // ── Outils à droite : Gestion, thème, utilisateur ──
     const tools = [];
     const gestion = GESTION.groups.map(function (g) {
+      if (g.service && g.service !== service) return { items: [] };
       return { title: g.title, items: g.items.filter(function (it) { return opts.isAdmin || (!it.role && (opts.panels || []).indexOf(it.panel) >= 0); }) };
     }).filter(function (g) { return g.items.length; });
     if (gestion.length) {
@@ -315,9 +353,13 @@ const NAV = (function () {
     const userBtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('user'), el('span', { class: 'nav-btn-label nav-user-name', text: opts.name || opts.email.split('@')[0] })]);
     tools.push(dropdown(userBtn, [
       el('div', { class: 'nav-id' }, [el('b', { text: opts.name || opts.email }), opts.name ? el('small', { text: opts.email }) : null, chip]),
+      services.length > 1 ? el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: changerService } }, [el('span', { text: 'Changer de service' })]) : null,
       el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { closeAll(); AUTH._openChangePwd(); } } }, [el('span', { text: 'Changer le mot de passe' })]),
       el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }, [el('span', { text: 'Déconnexion' })]),
     ], true));
+
+    // Retour à l'accueil, qui propose le choix du service
+    function changerService() { ecrireService(opts.userId, null); location.href = href('index.html'); }
 
     // ── Menu replié (téléphone, tablette) : toute l'arborescence ──
     const burger = el('button', { class: 'nav-btn nav-burger', type: 'button', 'aria-label': 'Menu', 'aria-expanded': 'false', 'aria-controls': 'nav-panel' }, [icon('menu')]);
@@ -338,6 +380,7 @@ const NAV = (function () {
       el('div', { class: 'who', text: (opts.name ? opts.name + ' · ' : '') + opts.email + ' · ' + roleLabel(opts.role) }),
       key !== 'index.html' ? plink('Aide', helpTarget, page.help) : null,
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),
+      services.length > 1 ? el('button', { type: 'button', text: 'Changer de service', on: { click: changerService } }) : null,
       el('button', { type: 'button', text: 'Changer le mot de passe', on: { click: function () { AUTH._openChangePwd(); } } }),
       el('button', { type: 'button', text: 'Déconnexion', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }),
     ])]));
@@ -363,5 +406,14 @@ const NAV = (function () {
     mount(Object.assign({}, lastOpts, { space: id }));
   }
 
-  return { setSpace: setSpace, mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf };
+  // Accueil : choix d'un service (retenu pour ce compte), puis rechargement de l'accueil
+  function choisirService(id) { if (lastOpts) ecrireService(lastOpts.userId, id); location.reload(); }
+
+  return {
+    setSpace: setSpace, mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf,
+    SERVICES: SERVICES, servicesVisibles: servicesVisibles, serviceCourant: serviceCourant, choisirService: choisirService,
+    etat: function () { return etat; },
+  };
 })();
+
+if (typeof module !== 'undefined') module.exports = NAV;   // tests Node (nav.test.js)
