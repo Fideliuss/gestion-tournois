@@ -153,3 +153,36 @@ body.light .st-detruit { color: #666; }
 /* Les cartes ne s'élargissent pas avec leur contenu : un tableau trop large défile à l'intérieur (.mt-defile) au lieu d'élargir la page */
 #vue-liste, #vue-destruction, .mt-bloc, .mt-carte { min-width: 0; max-width: 100%; box-sizing: border-box; }
 .mt-defile { max-width: 100%; }
+
+.mt-actions-barre { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Feuilles imprimables (contenu posé dans #mt-print, affiché seul à l'impression) ──
+   Les règles .pt-* ne sont pas dans @media print : la page les mesure hors écran pour faire tenir la feuille sur une seule page A4 (ajusterPage). */
+.mt-print { display: none; }
+.pt-page { font-size: var(--pt-fs, 12px); line-height: 1.25; color: #000; background: #fff; font-family: var(--f-ui); }
+.pt-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 10mm; border-bottom: 0.5mm solid #000; padding-bottom: 2mm; margin-bottom: 3mm; }
+.pt-titre { font-size: 17px; font-weight: 700; letter-spacing: .02em; }
+.pt-meta { font-size: 12px; color: #333; white-space: nowrap; }
+.pt-jeu { margin-bottom: 3mm; break-inside: avoid; }
+.pt-jeu-t { display: flex; align-items: baseline; gap: 4mm; background: #e9e9e9; padding: 0.8mm 2mm; margin-bottom: 1mm; font-size: 14px; }
+.pt-jeu-t .pt-n { margin-left: auto; font-size: 12px; }
+.pt-fin { font-weight: 400; font-size: .85em; color: #444; }
+.pt-ligne { display: flex; align-items: flex-start; gap: 3mm; padding: 0.6mm 0; border-bottom: 0.2mm solid #bbb; }
+.pt-lib { flex: 0 0 31mm; font-weight: 600; font-size: .92em; }
+.pt-lib i { font-style: normal; font-weight: 400; color: #444; margin-left: 1mm; }
+.pt-lib .pt-fin { display: block; font-weight: 400; }
+.pt-cells { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(20mm, 1fr)); gap: 0.8mm 0; }
+.pt-c { display: inline-flex; align-items: center; gap: 1.6mm; font-family: var(--f-num); white-space: nowrap; }
+.pt-case { display: inline-block; width: 3.4mm; height: 3.4mm; border: 0.3mm solid #000; box-sizing: border-box; flex: 0 0 auto; }
+.pt-pied { margin-top: 4mm; break-inside: avoid; }
+.pt-ecarts { border: 0.3mm solid #000; height: 20mm; padding: 1.5mm 2mm; font-size: 11px; }
+.pt-sign { display: flex; gap: 10mm; margin-top: 4mm; font-size: 12px; }
+.pt-sign span { flex: 1; border-bottom: 0.3mm solid #000; padding-bottom: 4mm; }
+
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html { background: #fff !important; }
+  body.mt-imprime { background: #fff !important; color: #000 !important; }
+  body.mt-imprime .nav, body.mt-imprime header.nav, body.mt-imprime .app, body.mt-imprime .modal-overlay, body.mt-imprime .mt-toast, body.mt-imprime #auth-overlay { display: none !important; }
+  body.mt-imprime .mt-print { display: block !important; }
+}
