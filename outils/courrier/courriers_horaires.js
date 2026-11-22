@@ -49,9 +49,10 @@ function lendemain(iso) { const d = dateDe(iso); return d ? isoDe(new Date(d.a, 
 
 /* ── Initialisation (appelée par courriers.js une fois les réglages chargés) ── */
 function initHoraires(now) {
-  // Exercice du 1er novembre N au 31 octobre N+1 (liste « N - N+1 ») ; la note part en octobre pour l'exercice qui commence le mois suivant
-  const propose = now.getMonth() <= 9 ? now.getFullYear() : now.getFullYear() + 1;
-  hEl('per-annee').innerHTML = [-2, -1, 0, 1, 2].map(k => propose + k).map(n => `<option value="${n}">${n} - ${n + 1}</option>`).join('');
+  // Exercice du 1er novembre N au 31 octobre N+1, choisi par son année de fin (N+1) ; la note part en octobre pour
+  // l'exercice qui commence le mois suivant : en octobre 2026 (ou avant), on propose 2027 ; à partir de novembre 2026, 2028
+  const propose = (now.getMonth() <= 9 ? now.getFullYear() : now.getFullYear() + 1) + 1;
+  hEl('per-annee').innerHTML = [-2, -1, 0, 1, 2].map(k => propose + k).map(a => `<option value="${a}">${a}</option>`).join('');
   hEl('per-annee').value = String(propose);
   initDateCourrier('per-date', now);
   horaires = REGLAGES.lire(CLE_HORAIRES, HORAIRES_DEFAUT);
@@ -96,13 +97,15 @@ async function enregistrerHoraires() {
 }
 
 /* Exercice N : du 1er novembre N au 31 octobre N+1 */
+/* Année choisie = N+1 (fin de l'exercice) */
 function exercice() {
-  const n = +hEl('per-annee').value || new Date().getFullYear();
+  const n = (+hEl('per-annee').value || new Date().getFullYear() + 1) - 1;
   return { n, debut: `${n}-11-01`, fin: `${n + 1}-10-31` };
 }
 
 function renderPeriode() {
   const tpl = templates.ministre, ex = exercice();
+  hEl('per-exercice').textContent = `Du ${dateLongue(ex.debut)} au ${dateLongue(ex.fin)}`;
   const lignesHoraires = horaires.filter(h => h.categorie || h.horaires).map(h => `
       <div class="hor-cat-lettre">${esc(h.categorie)}&nbsp;:</div>
       <div class="hor-ligne"><span>${esc(h.jours)}</span><span>${esc(h.horaires)}</span></div>`).join('');
