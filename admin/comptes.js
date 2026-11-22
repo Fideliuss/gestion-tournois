@@ -30,6 +30,7 @@ const PANELS = [
   ]},
   { id: 'break-list', label: 'Break list', children: [] },
   { id: 'materiel', label: 'Matériel', children: [] },
+  { id: 'courrier', label: 'Courrier (Machines à sous)', children: [] },
 ];
 
 const ROLE_COLORS = [

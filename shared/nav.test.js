@@ -44,4 +44,27 @@ t('aucun service', function () {
   assert.strictEqual(NAV.serviceCourant([], JT, JT), null);
 });
 
+// Le générateur de courrier appartient à deux espaces : Administration tournois (Jeux traditionnels) et Courrier (Machines à sous)
+const COURRIER = 'outils/courrier/courriers.html';
+const place = function (opts, memorise) {
+  const c = NAV.contexteDe(NAV.CONTEXTES[COURRIER], NAV.visibleSpaces(opts), memorise);
+  return c && c.s;
+};
+t('le courrier a une place dans chaque service', function () {
+  assert.deepStrictEqual(NAV.CONTEXTES[COURRIER].map(function (c) { return c.s; }).sort(), ['courrier', 'tournois']);
+});
+t('admin : la place suit le service retenu', function () {
+  assert.strictEqual(place({ isAdmin: true }, MAS), 'courrier');
+  assert.strictEqual(place({ isAdmin: true }, JT), 'tournois');
+});
+t('droit courrier seul : espace Courrier', function () {
+  assert.strictEqual(place({ panels: ['courrier'] }, JT), 'courrier');
+});
+t('Administration tournois seule : espace Tournois', function () {
+  assert.strictEqual(place({ panels: ['admin-tournois'] }, MAS), 'tournois');
+});
+t('aucun des deux droits : aucune place', function () {
+  assert.strictEqual(place({ panels: ['training'] }, null), null);
+});
+
 console.log(ok + ' contrôles réussis.');

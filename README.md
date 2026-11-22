@@ -212,7 +212,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 │
 ├── outils/                        - Modules utilisables par plusieurs services
 │   └── courrier/
-│       ├── courriers.html         - Générateur de courrier (menu Administration tournois ; lit encore espaces/tournois/declaration/donnees.js)
+│       ├── courriers.html         - Générateur de courrier (menu Administration tournois et espace Courrier des Machines à sous ; lit encore espaces/tournois/declaration/donnees.js)
 │       └── courriers.css / .js
 │
 ├── admin/                         - Administration de l'application

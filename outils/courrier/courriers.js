@@ -130,6 +130,12 @@ const TEMPLATES_DEFAULT = {
    Les noms sont enregistrés en base depuis Réglages, jamais dans le code (dépôt public). */
 const SIGNATAIRES_DEFAUT = [{ nom: '', titre: 'Directeur Responsable' }];
 
+/* Types de courrier proposés par service (le service courant vient de la barre) ; le premier est ouvert d'office */
+const TYPES_PAR_SERVICE = {
+  jeux_traditionnels: ['mensuel', 'annulation', 'libre'],
+  machines_a_sous:    ['libre'],
+};
+
 /* ── État ── */
 let currentTab    = 'ministre';
 let currentTplTab = 'ministre';
@@ -350,7 +356,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAnnulDateList();
   initLibre(now);
   onPeriodChange(); // auto-remplit date courrier + hint + renderAll
+  pageInitialisee = true;
+  if (serviceEnAttente) appliquerService();
 });
+
+/* ── Service courant : types de courrier affichés ──
+   Appelé une fois l'accès validé (la barre connaît alors le service) ; si la page n'est pas encore prête, on attend. */
+let pageInitialisee = false, serviceEnAttente = false;
+function initService() {
+  if (pageInitialisee) appliquerService(); else serviceEnAttente = true;
+}
+function appliquerService() {
+  const etat = (typeof NAV !== 'undefined' && NAV.etat) ? NAV.etat() : null;
+  const types = TYPES_PAR_SERVICE[etat && etat.service] || TYPES_PAR_SERVICE.jeux_traditionnels;
+  ['mensuel', 'annulation', 'libre'].forEach(t => {
+    document.getElementById(`dtype-${t}`).style.display = types.includes(t) ? '' : 'none';
+  });
+  document.querySelector('.doc-type-bar').style.display = types.length > 1 ? '' : 'none';   // un seul type : pas d'onglets
+  if (!types.includes(docType)) selectDocType(types[0]);
+}
 
 function fillMonthSelect(select) {
   MOIS_LETTRE.forEach((m, i) => {
