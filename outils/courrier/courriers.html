@@ -23,7 +23,7 @@
     <div class="doc-type-bar seg">
       <button class="doc-type-btn seg-btn active" id="dtype-mensuel" onclick="selectDocType('mensuel')">Déclaration des tournois</button>
       <button class="doc-type-btn seg-btn" id="dtype-annulation" onclick="selectDocType('annulation')">Annulation de tournoi</button>
-      <button class="doc-type-btn seg-btn" id="dtype-periode" onclick="selectDocType('periode')">Période d'exploitation</button>
+      <button class="doc-type-btn seg-btn" id="dtype-periode" onclick="selectDocType('periode')">Horaires annuels</button>
       <button class="doc-type-btn seg-btn" id="dtype-derogation" onclick="selectDocType('derogation')">Dérogation d'horaire</button>
       <button class="doc-type-btn seg-btn" id="dtype-libre" onclick="selectDocType('libre')">Courrier libre</button>
     </div>
@@ -151,15 +151,14 @@
   </div><!-- /#section-annulation -->
 
   <!-- ══════════════════════════════
-       SECTION - PÉRIODE D'EXPLOITATION (Machines à sous, art. 19)
+       SECTION - HORAIRES ANNUELS : période d'exploitation (Machines à sous, art. 19)
   ══════════════════════════════ -->
   <div id="section-periode" style="display:none">
     <div class="card" style="max-width:1000px;width:100%">
-      <div class="sec">Période d'exploitation</div>
+      <div class="sec">Horaires annuels</div>
       <div class="period-row">
-        <div class="fg pf-year"><label class="fl">Exercice (année de début)</label><input type="number" id="per-annee" min="2020" max="2099" onchange="renderPeriode()"/></div>
+        <div class="fg pf-exercice"><label class="fl">Exercice</label><select id="per-annee" onchange="renderPeriode()"></select></div>
       </div>
-      <div class="deadline-hint" id="per-exercice"></div>
       <div class="div"></div>
       <div class="sec">Horaires de fonctionnement</div>
       <div id="per-horaires"></div>
@@ -170,7 +169,16 @@
       </div>
       <div class="div"></div>
       <div class="sec">Date du courrier</div>
-      <div class="fg" style="max-width:220px"><label class="fl">Date</label><input type="date" id="per-date" onchange="renderPeriode()"/></div>
+      <div class="period-row">
+        <div class="fg fg-date">
+          <label class="fl">Date</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="per-date-d" min="1" max="31" style="width:60px;flex-shrink:0" onchange="renderPeriode()"/>
+            <select id="per-date-m" onchange="renderPeriode()" style="flex:1"></select>
+            <input type="number" id="per-date-y" min="2020" max="2099" style="width:88px;flex-shrink:0" onchange="renderPeriode()"/>
+          </div>
+        </div>
+      </div>
       <div class="div"></div>
       <div class="sec">Signataire</div>
       <div class="fg" style="max-width:420px">
@@ -204,7 +212,7 @@
         <div class="fg"><label class="fl" id="der-jour-lbl">Jour</label><input type="date" id="der-jour" onchange="onDerJourChange()"/></div>
         <div class="fg"><label class="fl" id="der-heure-lbl">Heure</label><input type="time" id="der-heure" onchange="renderDerogation()"/></div>
       </div>
-      <div class="period-row" id="der-reouv" style="display:none">
+      <div class="period-row der-reouv" id="der-reouv" style="display:none">
         <div class="fg"><label class="fl">Réouverture le</label><input type="date" id="der-reouv-jour" onchange="renderDerogation()"/></div>
         <div class="fg"><label class="fl">à</label><input type="time" id="der-reouv-heure" onchange="renderDerogation()"/></div>
       </div>
@@ -230,7 +238,16 @@
       </div>
       <div class="div"></div>
       <div class="sec">Date du courrier</div>
-      <div class="fg" style="max-width:220px"><label class="fl">Date</label><input type="date" id="der-date" onchange="renderDerogation()"/></div>
+      <div class="period-row">
+        <div class="fg fg-date">
+          <label class="fl">Date</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="der-date-d" min="1" max="31" style="width:60px;flex-shrink:0" onchange="renderDerogation()"/>
+            <select id="der-date-m" onchange="renderDerogation()" style="flex:1"></select>
+            <input type="number" id="der-date-y" min="2020" max="2099" style="width:88px;flex-shrink:0" onchange="renderDerogation()"/>
+          </div>
+        </div>
+      </div>
       <div class="div"></div>
       <div class="sec">Signataire</div>
       <div class="fg" style="max-width:420px">

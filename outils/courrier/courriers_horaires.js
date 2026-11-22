@@ -23,20 +23,37 @@ function dateDe(iso) {
   const [a, m, j] = iso.split('-').map(Number);
   return { j, m, a, jour: JOURS_LETTRE[new Date(a, m - 1, j).getDay()] };
 }
+/* Dates et heures insécables (espaces fines) : une date ne se coupe jamais en fin de ligne */
+const INSEC = '\u00a0';
 function dateLongue(iso, avecJour) {
   const d = dateDe(iso);
   if (!d) return '…';
-  return `${avecJour ? d.jour.toLowerCase() + ' ' : ''}${d.j === 1 ? '1er' : d.j} ${MOIS_LETTRE[d.m - 1].toLowerCase()} ${d.a}`;
+  return [avecJour ? d.jour.toLowerCase() : null, d.j === 1 ? '1er' : String(d.j), MOIS_LETTRE[d.m - 1].toLowerCase(), String(d.a)].filter(Boolean).join(INSEC);
 }
 function heureDe(hhmm) { return hhmm ? hhmm.replace(':', 'h') : '…'; }
+function aHeure(hhmm) { return `à${INSEC}${heureDe(hhmm)}`; }
+
+/* Date du courrier (jour, mois, année, comme les autres courriers) */
+function initDateCourrier(prefix, now) {
+  fillMonthSelect(hEl(`${prefix}-m`));
+  hEl(`${prefix}-d`).value = now.getDate();
+  hEl(`${prefix}-m`).value = now.getMonth() + 1;
+  hEl(`${prefix}-y`).value = now.getFullYear();
+}
+function dateCourrier(prefix) {
+  const d = +hEl(`${prefix}-d`).value, m = +hEl(`${prefix}-m`).value, y = +hEl(`${prefix}-y`).value;
+  return d && m && y ? `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}` : '';
+}
 function isoDe(dt) { return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`; }
 function lendemain(iso) { const d = dateDe(iso); return d ? isoDe(new Date(d.a, d.m - 1, d.j + 1)) : ''; }
 
 /* ── Initialisation (appelée par courriers.js une fois les réglages chargés) ── */
 function initHoraires(now) {
-  // Exercice du 1er novembre N au 31 octobre N+1 ; la note part en octobre pour l'exercice qui commence le mois suivant
-  hEl('per-annee').value = now.getMonth() <= 9 ? now.getFullYear() : now.getFullYear() + 1;
-  hEl('per-date').value  = isoDe(now);
+  // Exercice du 1er novembre N au 31 octobre N+1 (liste « N - N+1 ») ; la note part en octobre pour l'exercice qui commence le mois suivant
+  const propose = now.getMonth() <= 9 ? now.getFullYear() : now.getFullYear() + 1;
+  hEl('per-annee').innerHTML = [-2, -1, 0, 1, 2].map(k => propose + k).map(n => `<option value="${n}">${n} - ${n + 1}</option>`).join('');
+  hEl('per-annee').value = String(propose);
+  initDateCourrier('per-date', now);
   horaires = REGLAGES.lire(CLE_HORAIRES, HORAIRES_DEFAUT);
   if (!Array.isArray(horaires) || !horaires.length) horaires = deepClone(HORAIRES_DEFAUT);
   renderHorairesEditor();
@@ -47,18 +64,20 @@ function initHoraires(now) {
   const demain = isoDe(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
   hEl('der-jour').value = demain;
   hEl('der-reouv-jour').value = lendemain(demain);
-  hEl('der-date').value = isoDe(now);
+  initDateCourrier('der-date', now);
   onDerDestChange();
   onDerVarianteChange();
 }
 
 /* ═══ Période d'exploitation ═══ */
 function renderHorairesEditor() {
-  hEl('per-horaires').innerHTML = horaires.map((h, i) => `
+  hEl('per-horaires').innerHTML = `
+    <div class="hor-row hor-tete"><span class="fl">Catégorie de jeux</span><span class="fl">Jours</span><span class="fl">Horaires</span><span></span></div>`
+    + horaires.map((h, i) => `
     <div class="hor-row">
-      <div class="fg"><label class="fl">Catégorie de jeux</label><input type="text" class="hor-cat" value="${esc(h.categorie)}" oninput="lireHoraires();renderPeriode()"/></div>
-      <div class="fg"><label class="fl">Jours</label><input type="text" class="hor-jours" value="${esc(h.jours)}" oninput="lireHoraires();renderPeriode()"/></div>
-      <div class="fg"><label class="fl">Horaires</label><input type="text" class="hor-heures" value="${esc(h.horaires)}" oninput="lireHoraires();renderPeriode()"/></div>
+      <textarea class="hor-cat" rows="2" aria-label="Catégorie de jeux" oninput="lireHoraires();renderPeriode()">${esc(h.categorie)}</textarea>
+      <textarea class="hor-jours" rows="2" aria-label="Jours" oninput="lireHoraires();renderPeriode()">${esc(h.jours)}</textarea>
+      <input type="text" class="hor-heures" aria-label="Horaires" value="${esc(h.horaires)}" oninput="lireHoraires();renderPeriode()"/>
       <button class="btn btn-ghost" type="button" data-i="${i}" onclick="retirerHoraire(+this.dataset.i)" ${horaires.length < 2 ? 'disabled' : ''}>Retirer</button>
     </div>`).join('');
 }
@@ -84,15 +103,12 @@ function exercice() {
 
 function renderPeriode() {
   const tpl = templates.ministre, ex = exercice();
-  const periode = `du ${dateLongue(ex.debut)} au ${dateLongue(ex.fin)}`;
-  hEl('per-exercice').textContent = `Exercice ${ex.n} - ${ex.n + 1} : ${periode}`;
   const lignesHoraires = horaires.filter(h => h.categorie || h.horaires).map(h => `
       <div class="hor-cat-lettre">${esc(h.categorie)}&nbsp;:</div>
       <div class="hor-ligne"><span>${esc(h.jours)}</span><span>${esc(h.horaires)}</span></div>`).join('');
   document.getElementById('letter-output').innerHTML = `
 <div class="letter">
-  ${letterHeaderHtml(tpl.recipient, dateLongue(hEl('per-date').value))}
-  <div class="letter-objet"><span class="letter-objet-lbl">Objet&nbsp;:</span> Période d'exploitation et horaires de fonctionnement des jeux ${esc(periode)}.</div>
+  ${letterHeaderHtml(tpl.recipient, dateLongue(dateCourrier('per-date')))}
   ${tpl.salutation ? `<div class="letter-salut">${esc(tpl.salutation)}</div>` : ''}
   <div class="letter-body">
     <p>Conformément aux dispositions réglementaires en vigueur, j'ai l'honneur de vous faire connaître que, dans les limites fixées par l'arrêté d'autorisation, j'ai fixé comme suit la période d'exploitation et les horaires de fonctionnement des jeux&nbsp;:</p>
@@ -108,22 +124,22 @@ function renderPeriode() {
 }
 function titrePeriode() {
   const ex = exercice();
-  return `Période d'exploitation ${ex.n} - ${ex.n + 1}`;
+  return `Horaires annuels ${ex.n} - ${ex.n + 1}`;
 }
 
 /* ═══ Dérogation d'horaire (art. 31) ═══ */
 const DER_TEXTES = {
   ouverture: {
-    objet: () => `Ouverture exceptionnelle de la salle des jeux le ${dateLongue(hEl('der-jour').value)} à ${heureDe(hEl('der-heure').value)}.`,
-    corps: () => `Conformément aux dispositions légales en vigueur, notamment l'article 31 de l'arrêté du 14 mai 2007 modifié, et dans les limites prévues par notre arrêté d'autorisation, j'ai l'honneur de vous adresser notre souhait de fixer exceptionnellement l'heure d'ouverture de la salle des jeux le ${dateLongue(hEl('der-jour').value, true)} à ${heureDe(hEl('der-heure').value)}.`,
+    objet: () => `Ouverture exceptionnelle de la salle des jeux le ${dateLongue(hEl('der-jour').value)} ${aHeure(hEl('der-heure').value)}.`,
+    corps: () => `Conformément aux dispositions légales en vigueur, notamment l'article 31 de l'arrêté du 14 mai 2007 modifié, et dans les limites prévues par notre arrêté d'autorisation, j'ai l'honneur de vous adresser notre souhait de fixer exceptionnellement l'heure d'ouverture de la salle des jeux le ${dateLongue(hEl('der-jour').value, true)} ${aHeure(hEl('der-heure').value)}.`,
   },
   anticipee: {
     objet: () => `Fermeture anticipée de l'établissement, séance du ${dateLongue(hEl('der-jour').value)}.`,
-    corps: () => `Conformément aux dispositions légales en vigueur, notamment l'article 31 de l'arrêté du 14 mai 2007 modifié, et dans le cadre de notre arrêté d'autorisation, j'ai l'honneur de vous informer que nous anticiperons la fermeture de notre établissement lors de la séance du ${dateLongue(hEl('der-jour').value, true)} à ${heureDe(hEl('der-heure').value)}, et que nous rouvrirons le ${dateLongue(hEl('der-reouv-jour').value, true)} à ${heureDe(hEl('der-reouv-heure').value)}.`,
+    corps: () => `Conformément aux dispositions légales en vigueur, notamment l'article 31 de l'arrêté du 14 mai 2007 modifié, et dans le cadre de notre arrêté d'autorisation, j'ai l'honneur de vous informer que nous anticiperons la fermeture de notre établissement lors de la séance du ${dateLongue(hEl('der-jour').value, true)} ${aHeure(hEl('der-heure').value)}, et que nous rouvrirons le ${dateLongue(hEl('der-reouv-jour').value, true)} ${aHeure(hEl('der-reouv-heure').value)}.`,
   },
   prolongee: {
     objet: () => `Heure de fermeture du ${dateLongue(hEl('der-jour').value)}.`,
-    corps: () => `Conformément aux dispositions légales en vigueur, notamment l'article 31 de l'arrêté du 14 mai 2007 modifié, j'ai l'honneur de solliciter, à titre exceptionnel, l'autorisation de fermer les salles de jeux de notre casino, à l'issue de la soirée du ${dateLongue(hEl('der-jour').value, true)}, à ${heureDe(hEl('der-heure').value)} le lendemain.`,
+    corps: () => `Conformément aux dispositions légales en vigueur, notamment l'article 31 de l'arrêté du 14 mai 2007 modifié, j'ai l'honneur de solliciter, à titre exceptionnel, l'autorisation de fermer les salles de jeux de notre casino, à l'issue de la soirée du ${dateLongue(hEl('der-jour').value, true)}, ${aHeure(hEl('der-heure').value)} le lendemain.`,
   },
 };
 const DER_LIBELLES = {
@@ -159,7 +175,7 @@ function renderDerogation() {
   const appel = hEl('der-appel').value.trim(), formule = hEl('der-formule').value.trim();
   document.getElementById('letter-output').innerHTML = `
 <div class="letter">
-  ${letterHeaderHtml(lignes(hEl('der-adresse').value), dateLongue(hEl('der-date').value))}
+  ${letterHeaderHtml(lignes(hEl('der-adresse').value), dateLongue(dateCourrier('der-date')))}
   <div class="letter-objet"><span class="letter-objet-lbl">Objet&nbsp;:</span> ${esc(t.objet())}</div>
   ${appel ? `<div class="letter-salut">${esc(appel)}</div>` : ''}
   <div class="letter-body">
