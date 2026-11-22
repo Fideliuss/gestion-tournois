@@ -13,6 +13,7 @@ var AIDE_ESPACES = {
   'training': 'Training',
   'break-list': 'Break list',
   'materiel': 'Matériel',
+  'courrier': 'Courrier',
 };
 
 var AIDE_GUIDES = [
@@ -1263,6 +1264,87 @@ var AIDE_GUIDES = [
         title: "« Enregistrement impossible » ou « Impossible de charger le matériel »",
         text: "<p>La connexion avec le serveur a échoué. Vérifiez votre connexion, rechargez la page et recommencez. Si le message revient, prévenez l'administrateur.</p>",
         imgs: [],
+      },
+    ],
+  },
+
+  // ══ Courrier (service Machines à sous) ══
+
+  {
+    id: 'courrier-pour-commencer', space: 'courrier', panel: 'courrier',
+    title: 'Pour commencer',
+    intro: "L'espace Courrier du service Machines à sous prépare les courriers aux autorités : la note annuelle des horaires, les dérogations d'horaire et les courriers libres. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
+    steps: [
+      {
+        title: "Choisir le service",
+        text: "<p>Si votre compte a accès à plusieurs services, l'accueil propose une tuile par service : choisissez <b>Machines à sous</b>. Le choix est retenu sur ce poste pour votre compte ; la barre affiche le service à côté du logo.</p>"
+          + "<p>Pour passer à un autre service, ouvrez le menu de votre compte, en haut à droite, puis <b>Changer de service</b>.</p>",
+        imgs: [{ src: 'captures/mas_choix.png', alt: "L'accueil : une tuile par service" }],
+      },
+      {
+        title: "Les types de courrier",
+        text: "<p>La page propose trois onglets :</p><ul>"
+          + "<li><b>Horaires annuels</b> : la note de la période d'exploitation et des horaires, envoyée chaque année au Ministre de l'Intérieur ;</li>"
+          + "<li><b>Dérogation d'horaire</b> : une ouverture exceptionnelle, une fermeture anticipée ou une fermeture prolongée ;</li>"
+          + "<li><b>Courrier libre</b> : pour une situation qui n'a pas de courrier prévu (voir le guide des courriers de l'espace Tournois).</li></ul>",
+        imgs: [],
+      },
+      {
+        title: "Destinataires et signataires",
+        text: "<p>Le bouton <b>Réglages</b>, à droite des onglets, ouvre l'éditeur des destinataires (adresse, appel, formule de politesse) et des <b>signataires</b> (un nom et un titre par ligne). Ces réglages sont communs à tous les courriers et aux deux services.</p>"
+          + "<p>Chaque courrier a une liste <b>Signé par</b> : le premier signataire est proposé, choisissez-en un autre si besoin.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'courrier-horaires-annuels', space: 'courrier', panel: 'courrier',
+    title: 'Déclarer les horaires annuels',
+    intro: "La note des horaires annuels déclare la période d'exploitation et les horaires de fonctionnement des jeux pour un exercice, du 1er novembre au 31 octobre de l'année suivante. Elle part en octobre pour l'exercice qui commence le mois suivant.",
+    steps: [
+      {
+        title: "Choisir l'exercice",
+        text: "<p>Dans l'onglet <b>Horaires annuels</b>, saisissez l'<b>année</b> de fin de l'exercice : 2027 pour l'exercice du 1er novembre 2026 au 31 octobre 2027. La période correspondante s'affiche en gris en dessous. L'exercice qui suit est proposé.</p>",
+        imgs: [{ src: 'captures/mas_horaires.png', alt: "L'année de l'exercice, les horaires par catégorie de jeux et la date du courrier" }],
+      },
+      {
+        title: "Les horaires",
+        text: "<p>Une ligne par catégorie de jeux : la catégorie, les jours et les horaires. <b>+ Ajouter une catégorie</b> ajoute une ligne, <b>Retirer</b> en enlève une.</p>"
+          + "<p><b>Enregistrer les horaires</b> garde les lignes pour les prochaines fois : elles sont enregistrées dans l'application et communes à tous les postes. Sans enregistrement, vos changements servent seulement au courrier en cours.</p>",
+        imgs: [],
+      },
+      {
+        title: "Dater, signer et imprimer",
+        text: "<p>Réglez la <b>date du courrier</b> et le signataire, puis vérifiez le courrier sous le formulaire.</p>"
+          + "<p><b>Imprimer / Exporter PDF</b> ouvre la boîte d'impression. Choisissez <b>Enregistrer en PDF</b> et vérifiez que les marges sont sur <b>Aucune</b>.</p>",
+        imgs: [{ src: 'captures/mas_horaires_lettre.png', alt: "La note des horaires annuels" }],
+      },
+    ],
+  },
+
+  {
+    id: 'courrier-derogation', space: 'courrier', panel: 'courrier',
+    title: "Demander une dérogation d'horaire",
+    intro: "Le courrier de dérogation d'horaire (article 31 de l'arrêté du 14 mai 2007) informe les autorités d'un changement ponctuel des horaires. L'objet et la phrase principale s'écrivent seuls à partir des dates et des heures.",
+    steps: [
+      {
+        title: "Choisir le type de dérogation",
+        text: "<p>Dans l'onglet <b>Dérogation d'horaire</b>, choisissez le <b>type</b> :</p><ul>"
+          + "<li><b>Ouverture exceptionnelle</b> : le jour et l'heure d'ouverture ;</li>"
+          + "<li><b>Fermeture anticipée et réouverture</b> : la séance, l'heure de fermeture, puis le jour et l'heure de réouverture (le lendemain est proposé) ;</li>"
+          + "<li><b>Fermeture prolongée</b> : la soirée et l'heure de fermeture, le lendemain (le réveillon, par exemple).</li></ul>",
+        imgs: [{ src: 'captures/mas_derogation.png', alt: "Le type de dérogation, les dates et heures, le destinataire" }],
+      },
+      {
+        title: "Le destinataire",
+        text: "<p>Choisissez le <b>destinataire</b> : l'adresse, l'appel et la formule de politesse se remplissent, et vous pouvez les modifier. <b>Autre destinataire</b> part d'une adresse vide.</p>",
+        imgs: [],
+      },
+      {
+        title: "Dater, signer et imprimer",
+        text: "<p>Réglez la <b>date du courrier</b> et le signataire, vérifiez le courrier, puis imprimez comme pour les horaires annuels. La dérogation n'est pas enregistrée : imprimez-la ou enregistrez-la en PDF avant de quitter la page.</p>",
+        imgs: [{ src: 'captures/mas_derogation_lettre.png', alt: "Un courrier de fermeture prolongée" }],
       },
     ],
   },
