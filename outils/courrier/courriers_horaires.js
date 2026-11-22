@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════
    courriers_horaires.js - Courriers d'horaires (service Machines à sous)
    · Période d'exploitation (art. 19 de l'arrêté du 14 mai 2007) : note annuelle au Ministre de l'Intérieur,
-     période du 1er novembre au 31 octobre et horaires par catégorie de jeux (horaires enregistrés en base, clé courriers_horaires).
+     par exercice (1er novembre N au 31 octobre N+1) et horaires par catégorie de jeux (horaires enregistrés en base, clé courriers_horaires).
    · Dérogation d'horaire (art. 31) : ouverture exceptionnelle, fermeture anticipée avec réouverture, fermeture prolongée.
    Chargé après courriers.js (en-tête, signature, pied de page, destinataires, signataires).
 ═══════════════════════════════════════ */
@@ -34,10 +34,8 @@ function lendemain(iso) { const d = dateDe(iso); return d ? isoDe(new Date(d.a, 
 
 /* ── Initialisation (appelée par courriers.js une fois les réglages chargés) ── */
 function initHoraires(now) {
-  // Période : du 1er novembre au 31 octobre ; la note part en octobre pour la période qui commence le mois suivant
-  const debut = now.getMonth() <= 9 ? now.getFullYear() : now.getFullYear() + 1;
-  hEl('per-debut').value = `${debut}-11-01`;
-  hEl('per-fin').value   = `${debut + 1}-10-31`;
+  // Exercice du 1er novembre N au 31 octobre N+1 ; la note part en octobre pour l'exercice qui commence le mois suivant
+  hEl('per-annee').value = now.getMonth() <= 9 ? now.getFullYear() : now.getFullYear() + 1;
   hEl('per-date').value  = isoDe(now);
   horaires = REGLAGES.lire(CLE_HORAIRES, HORAIRES_DEFAUT);
   if (!Array.isArray(horaires) || !horaires.length) horaires = deepClone(HORAIRES_DEFAUT);
@@ -78,19 +76,28 @@ async function enregistrerHoraires() {
   if (ok) setTimeout(() => { msg.textContent = ''; }, 2500);
 }
 
+/* Exercice N : du 1er novembre N au 31 octobre N+1 */
+function exercice() {
+  const n = +hEl('per-annee').value || new Date().getFullYear();
+  return { n, debut: `${n}-11-01`, fin: `${n + 1}-10-31` };
+}
+
 function renderPeriode() {
-  const tpl = templates.ministre;
+  const tpl = templates.ministre, ex = exercice();
+  const periode = `du ${dateLongue(ex.debut)} au ${dateLongue(ex.fin)}`;
+  hEl('per-exercice').textContent = `Exercice ${ex.n} - ${ex.n + 1} : ${periode}`;
   const lignesHoraires = horaires.filter(h => h.categorie || h.horaires).map(h => `
       <div class="hor-cat-lettre">${esc(h.categorie)}&nbsp;:</div>
       <div class="hor-ligne"><span>${esc(h.jours)}</span><span>${esc(h.horaires)}</span></div>`).join('');
   document.getElementById('letter-output').innerHTML = `
 <div class="letter">
   ${letterHeaderHtml(tpl.recipient, dateLongue(hEl('per-date').value))}
+  <div class="letter-objet"><span class="letter-objet-lbl">Objet&nbsp;:</span> Période d'exploitation et horaires de fonctionnement des jeux ${esc(periode)}.</div>
   ${tpl.salutation ? `<div class="letter-salut">${esc(tpl.salutation)}</div>` : ''}
   <div class="letter-body">
     <p>Conformément aux dispositions réglementaires en vigueur, j'ai l'honneur de vous faire connaître que, dans les limites fixées par l'arrêté d'autorisation, j'ai fixé comme suit la période d'exploitation et les horaires de fonctionnement des jeux&nbsp;:</p>
     <div class="per-titre">I) Période d'exploitation</div>
-    <div class="per-valeur">${esc(dateLongue(hEl('per-debut').value))} &ndash; ${esc(dateLongue(hEl('per-fin').value))}</div>
+    <div class="per-valeur">${esc(dateLongue(ex.debut))} &ndash; ${esc(dateLongue(ex.fin))}</div>
     <div class="per-titre">II) Horaires de fonctionnement</div>
     ${lignesHoraires}
     <p class="per-formule">Je vous prie de croire, Monsieur le Ministre, en l'expression de ma très haute considération.</p>
@@ -100,8 +107,8 @@ function renderPeriode() {
 </div>`;
 }
 function titrePeriode() {
-  const d = dateDe(hEl('per-debut').value), f = dateDe(hEl('per-fin').value);
-  return `Période d'exploitation ${d ? d.a : ''} - ${f ? f.a : ''}`;
+  const ex = exercice();
+  return `Période d'exploitation ${ex.n} - ${ex.n + 1}`;
 }
 
 /* ═══ Dérogation d'horaire (art. 31) ═══ */
@@ -122,7 +129,7 @@ const DER_TEXTES = {
 const DER_LIBELLES = {
   ouverture: { jour: 'Jour', heure: "Heure d'ouverture", defaut: '13:00' },
   anticipee: { jour: 'Séance du', heure: 'Heure de fermeture', defaut: '03:00' },
-  prolongee: { jour: 'Soirée du', heure: 'Heure de fermeture (le lendemain)', defaut: '05:00' },
+  prolongee: { jour: 'Soirée du', heure: 'Heure de fermeture', defaut: '05:00' },
 };
 
 function onDerVarianteChange() {

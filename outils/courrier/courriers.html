@@ -157,9 +157,9 @@
     <div class="card" style="max-width:1000px;width:100%">
       <div class="sec">Période d'exploitation</div>
       <div class="period-row">
-        <div class="fg"><label class="fl">Du</label><input type="date" id="per-debut" onchange="renderPeriode()"/></div>
-        <div class="fg"><label class="fl">Au</label><input type="date" id="per-fin" onchange="renderPeriode()"/></div>
+        <div class="fg pf-year"><label class="fl">Exercice (année de début)</label><input type="number" id="per-annee" min="2020" max="2099" onchange="renderPeriode()"/></div>
       </div>
+      <div class="deadline-hint" id="per-exercice"></div>
       <div class="div"></div>
       <div class="sec">Horaires de fonctionnement</div>
       <div id="per-horaires"></div>
@@ -197,7 +197,7 @@
         <select id="der-variante" onchange="onDerVarianteChange()">
           <option value="ouverture">Ouverture exceptionnelle</option>
           <option value="anticipee">Fermeture anticipée et réouverture</option>
-          <option value="prolongee">Fermeture prolongée (heure du lendemain)</option>
+          <option value="prolongee">Fermeture prolongée</option>
         </select>
       </div>
       <div class="period-row" style="margin-top:12px">
