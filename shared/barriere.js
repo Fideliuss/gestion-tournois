@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════
    barriere.js - Scripts communs
-   Barrière Casino Bordeaux · Tournois
+   Pit Manager
 ═══════════════════════════════════════════════ */
 
 /* Injection favicon - chemin déduit depuis l'URL du script lui-même */
