@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Service Jeux Traditionnels - Barrière Casino Bordeaux</title>
+  <title>Pit Manager</title>
   <link rel="stylesheet" href="shared/barriere.css" />
   <style>
     .app { padding: 64px 20px 80px; }
@@ -47,32 +47,38 @@
     <div class="hdr-title" id="hello">Bonjour</div>
   </div>
 
-  <div class="grid">
+  <div class="grid" id="services" style="display:none"></div>
+  <div class="grid" id="espaces">
 
-    <a href="tournois.html" class="tool-card" data-panel="tournois">
+    <a href="espaces/tournois/tournois.html" class="tool-card" data-panel="tournois" data-service="jeux_traditionnels">
       <div class="tool-badge picto" data-icon="tickets"></div>
       <div class="tool-name">Tournois</div>
     </a>
 
-    <a href="training/training.html" class="tool-card c-jean" data-panel="training">
+    <a href="espaces/training/training.html" class="tool-card c-jean" data-panel="training" data-service="jeux_traditionnels">
       <div class="tool-badge picto" data-icon="chip"></div>
       <div class="tool-name">Training</div>
     </a>
 
-    <a href="break_list/break_list.html" class="tool-card c-cognac" data-panel="break-list">
+    <a href="espaces/break_list/break_list.html" class="tool-card c-cognac" data-panel="break-list" data-service="jeux_traditionnels">
       <div class="tool-badge picto" data-icon="checklist"></div>
       <div class="tool-name">Break list</div>
     </a>
 
-    <a href="materiel/materiel.html" class="tool-card c-teal" data-panel="materiel">
+    <a href="espaces/materiel/materiel.html" class="tool-card c-teal" data-panel="materiel" data-service="jeux_traditionnels">
       <div class="tool-badge picto" data-icon="card_spade"></div>
       <div class="tool-name">Matériel</div>
+    </a>
+
+    <a href="outils/courrier/courriers.html" class="tool-card c-teal" data-panel="courrier" data-service="machines_a_sous">
+      <div class="tool-badge picto" data-icon="pen"></div>
+      <div class="tool-name">Courrier</div>
     </a>
 
   </div>
 
   <div class="footer">
-    Barrière Casino Bordeaux · Service Jeux Traditionnels
+    Pit Manager · Barrière Casino Bordeaux
     <br><span class="footer-version" id="app-version"></span>
     <br><span style="opacity:.35;font-size:9px;letter-spacing:.08em">Conçu &amp; développé par B. Cuvelier · 2025–2026</span>
     <br>
@@ -106,6 +112,29 @@ AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
     });
   }
 
+  // Service : plusieurs services sans choix retenu → on propose le choix ; sinon, seuls les espaces du service courant
+  const etat = (typeof NAV !== 'undefined' && NAV.etat) ? NAV.etat() : null;
+  if (etat && !etat.service && etat.services.length > 1) {
+    document.getElementById('espaces').style.display = 'none';
+    const box = document.getElementById('services');
+    etat.services.forEach(function (sv) {
+      const a = document.createElement('a');
+      a.href = '#'; a.className = 'tool-card' + (sv.color ? ' ' + sv.color : '');
+      a.innerHTML = '<div class="tool-badge picto"></div><div class="tool-name"></div>';
+      a.querySelector('.tool-badge').setAttribute('data-icon', sv.icon);
+      a.querySelector('.tool-name').textContent = sv.label;
+      a.addEventListener('click', function (e) { e.preventDefault(); NAV.choisirService(sv.id); });
+      box.appendChild(a);
+    });
+    box.style.display = '';
+    return;
+  }
+  if (etat && etat.service) {
+    document.querySelectorAll('[data-service]').forEach(function (el) {
+      if (el.getAttribute('data-service') !== etat.service) el.style.display = 'none';
+    });
+  }
+
   const panelCards = document.querySelectorAll('[data-panel]');
   if (panelCards.length && !isAdmin) {
     try {
@@ -128,7 +157,7 @@ AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
   if (!list) return;
   list.innerHTML = CHANGELOG.map(function (e) {
     return '<div>'
-      + '<div class="cl-version">' + e.version + ' &mdash; ' + e.date + '</div>'
+      + '<div class="cl-version">' + e.version + ' · ' + e.date + '</div>'
       + '<ul class="cl-entries"><li>' + e.message + '</li></ul>'
       + '</div>';
   }).join('');

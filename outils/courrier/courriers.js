@@ -1,0 +1,793 @@
+/* ═══════════════════════════════════════════════════════
+   courriers.js - Générateur de courriers PN
+   Pit Manager
+═══════════════════════════════════════════════════════ */
+
+/* ── Constantes ── */
+const JOURS_LETTRE = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const MOIS_LETTRE  = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+/* Élision "de" → "d'" devant un mois commençant par une voyelle (Avril, Août, Octobre) */
+function deMois(month) {
+  return /^[aeiouyàâéèêëîïôöùûü]/i.test(MOIS_LETTRE[month - 1]) ? 'd\'' : 'de ';
+}
+
+/* Valeurs par défaut, clés et lectures des réglages (loadCfg, loadAdhoc, loadExc) : donnees.js */
+
+/* ── Calendrier (même logique que declaration.js) ── */
+function buildRows(month, year) {
+  const cfg     = loadCfg();
+  const exc     = loadExc(month, year);
+  const numDays = new Date(year, month, 0).getDate();
+  const rows    = [];
+
+  for (let d = 1; d <= numDays; d++) {
+    const dow = new Date(year, month - 1, d).getDay();
+    const c   = cfg[dow];
+    if (!c.actif) continue;
+    const override = exc[d];
+    if (override?.type === 'cancelled') continue;
+    const vals = override?.type === 'modified' ? { ...c, ...override } : c;
+    rows.push({ d, dow, adhoc: false, cave: vals.cave, joueurs: vals.joueurs, rachats: vals.rachats, bounty: vals.bounty, annexe: vals.annexe });
+  }
+
+  loadAdhoc(month, year).forEach(t => rows.push({ ...t, adhoc: true }));
+  rows.sort((a, b) => a.d - b.d || (a.adhoc ? 1 : -1));
+  return rows;
+}
+
+/* ── Regroupement des jours par jour de semaine ── */
+function buildDayLines(rows, month) {
+  const groups = {};
+  rows.forEach(r => {
+    if (!groups[r.dow]) groups[r.dow] = new Set();
+    groups[r.dow].add(r.d);
+  });
+
+  const monthName  = MOIS_LETTRE[month - 1];
+  const DOW_ORDER  = [1, 2, 3, 4, 5, 6, 0]; // Lundi → Dimanche
+
+  return DOW_ORDER
+    .filter(dow => groups[dow])
+    .map(dow => {
+      const days   = [...groups[dow]].sort((a, b) => a - b);
+      const last   = days[days.length - 1];
+      const others = days.slice(0, -1);
+      const nums   = others.length ? others.join(', ') + ' et ' + last : String(last);
+      return `${JOURS_LETTRE[dow]} ${nums} ${monthName}`;
+    });
+}
+
+/* ═══════════════════════════════════════
+   TEMPLATES DES 3 COURRIERS
+═══════════════════════════════════════ */
+const TEMPLATES_DEFAULT = {
+
+  ministre: {
+    id:    'ministre',
+    label: 'Ministre de l\'Intérieur',
+    recipient: [
+      'Monsieur le Ministre de l\'Intérieur',
+      'S/C de Monsieur Le Directeur Central',
+      'de la Police Judiciaire',
+      'Service Central des Courses et Jeux',
+      '11, Rue des Saussaies',
+      '75008 PARIS',
+    ],
+    salutation: 'Monsieur le Ministre,',
+    closingParagraph: 'À cet effet, vous trouverez ci-joints les conditions d\'organisation, conformément à l\'Article 57-5 et suivants de l\'Arrêté du 14 mai 2007, tenant compte des modifications introduites par l\'Arrêté rectificatif du 24 décembre 2008, ainsi que du décret n°2009-937 du 29 juillet 2009, ainsi que le règlement de chaque tournoi.',
+    closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Ministre, à l\'assurance de ma haute considération.',
+    autresItems: [
+      'SIPJ 33 / Section des Courses & Jeux',
+      'Préfecture de la Gironde',
+    ],
+  },
+
+  sipj: {
+    id:    'sipj',
+    label: 'Police Judiciaire (SIPJ 33)',
+    recipient: [
+      'Mr Jean René PERSONNIC',
+      'Commissaire divisionnaire de police',
+      'Chef du service interdépartemental de la',
+      'police judiciaire de la Gironde',
+      'SIPJ 33 / Section des Courses & Jeux',
+      '23, rue François de Sourdis',
+      'BP 933',
+      '33062 BORDEAUX CEDEX',
+    ],
+    salutation: null,
+    closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
+    closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Commissaire Divisionnaire, à l\'assurance de ma haute considération.',
+    autresItems: [
+      'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
+      'Préfecture de la Gironde',
+    ],
+  },
+
+  prefecture: {
+    id:    'prefecture',
+    label: 'Préfecture de la Gironde',
+    recipient: [
+      'Préfecture de la Gironde',
+      'A l\'attention du service de',
+      'Mme BESSELERE-LAMOTHE',
+      'Esplanade Charles de Gaulle',
+      '33037 BORDEAUX',
+    ],
+    salutation: null,
+    closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
+    closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Madame, à l\'assurance de ma haute considération.',
+    autresItems: [
+      'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
+      'SIPJ 33 / Section des Courses & Jeux',
+    ],
+  },
+
+};
+
+/* Signataires : communs à tous les courriers, choisis pour chaque courrier (le premier par défaut).
+   Les noms sont enregistrés en base depuis Réglages, jamais dans le code (dépôt public). */
+const SIGNATAIRES_DEFAUT = [{ nom: '', titre: 'Directeur Responsable' }];
+
+/* Types de courrier proposés par service (le service courant vient de la barre) ; le premier est ouvert d'office */
+const TYPES_COURRIER = ['mensuel', 'annulation', 'periode', 'derogation', 'libre'];
+const TYPES_PAR_SERVICE = {
+  jeux_traditionnels: ['mensuel', 'annulation', 'libre'],
+  machines_a_sous:    ['periode', 'derogation', 'libre'],
+};
+
+/* ── État ── */
+let currentTab    = 'ministre';
+let currentTplTab = 'ministre';
+let templates;
+let signataires;
+let docType    = 'mensuel';
+let annulDates = [];
+
+/* ── Persistance des templates ── */
+function loadTemplates() {
+  const overrides = REGLAGES.lire('courriers_modeles', {});
+  templates = deepClone(TEMPLATES_DEFAULT);
+  ['ministre', 'sipj', 'prefecture'].forEach(id => {
+    if (overrides[id]) Object.assign(templates[id], overrides[id]);
+    delete templates[id].sigName;
+  });
+  signataires = signatairesDe(overrides);
+}
+
+/* Liste enregistrée ; sinon reprise de l'ancien nom par destinataire (un seul signataire, Directeur Responsable) */
+function signatairesDe(overrides) {
+  const liste = Array.isArray(overrides.signataires)
+    ? overrides.signataires.filter(s => s && typeof s === 'object').map(s => ({ nom: String(s.nom || ''), titre: String(s.titre || '') }))
+    : [];
+  if (liste.length) return liste;
+  const ancien = ['ministre', 'sipj', 'prefecture'].map(id => overrides[id] && overrides[id].sigName).find(Boolean);
+  return [{ nom: ancien || '', titre: SIGNATAIRES_DEFAUT[0].titre }];
+}
+
+/* Signataire choisi dans la liste déroulante d'un type de courrier (le premier si la liste a changé) */
+function signataireChoisi(type) {
+  const sel = document.getElementById(`sig-${type}`);
+  return signataires[sel ? +sel.value : 0] || signataires[0];
+}
+
+function remplirSignataires() {
+  TYPES_COURRIER.forEach(type => {
+    const sel = document.getElementById(`sig-${type}`);
+    if (!sel) return;
+    const avant = +sel.value || 0;
+    sel.innerHTML = signataires.map((s, i) => `<option value="${i}">${esc([s.nom, s.titre].filter(Boolean).join(', ') || 'Signataire sans nom')}</option>`).join('');
+    sel.value = String(avant < signataires.length ? avant : 0);
+  });
+}
+
+function saveTemplates() {
+  const data = {};
+  ['ministre', 'sipj', 'prefecture'].forEach(id => {
+    const t = templates[id];
+    data[id] = {
+      recipient:      t.recipient,
+      salutation:     t.salutation,
+      closingFormula: t.closingFormula,
+      autresItems:    t.autresItems,
+    };
+  });
+  data.signataires = signataires;
+  REGLAGES.ecrire('courriers_modeles', data);
+}
+
+/* ── Éditeur de templates ── */
+function showTplTab(tplId) {
+  currentTplTab = tplId;
+  document.querySelectorAll('.tpl-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.tpl === tplId)
+  );
+  renderTplEditor(tplId);
+}
+
+function renderTplEditor(tplId) {
+  const t = templates[tplId];
+  document.getElementById('tpl-editor').innerHTML = `
+    <div class="tpl-form">
+      <div class="fg">
+        <label class="fl">Destinataire (1 ligne par entrée)</label>
+        <textarea id="tpl-recipient" rows="7">${esc(t.recipient.join('\n'))}</textarea>
+      </div>
+      <div class="tpl-col-right">
+        <div class="fg">
+          <label class="fl">Appel (laisser vide si aucun)</label>
+          <input type="text" id="tpl-salutation" value="${esc(t.salutation || '')}"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Formule de politesse</label>
+          <textarea id="tpl-formula" rows="3">${esc(t.closingFormula)}</textarea>
+        </div>
+        <div class="fg">
+          <label class="fl">Autres destinataires (1 par ligne)</label>
+          <textarea id="tpl-autres" rows="3">${esc(t.autresItems.join('\n'))}</textarea>
+        </div>
+      </div>
+    </div>`;
+}
+
+function saveTplAndRender() {
+  const t = templates[currentTplTab];
+  const recipientEl  = document.getElementById('tpl-recipient');
+  const salutationEl = document.getElementById('tpl-salutation');
+  const formulaEl    = document.getElementById('tpl-formula');
+  const autresEl     = document.getElementById('tpl-autres');
+  if (recipientEl)  t.recipient      = recipientEl.value.split('\n').filter(l => l.trim());
+  if (salutationEl) t.salutation     = salutationEl.value.trim() || null;
+  if (formulaEl)    t.closingFormula = formulaEl.value.trim();
+  if (autresEl)     t.autresItems    = autresEl.value.split('\n').filter(l => l.trim());
+  lireSignatairesSaisis();
+  saveTemplates();
+  remplirSignataires();
+  renderSignatairesEditor();
+  renderAll();
+}
+
+/* ── Éditeur des signataires (Réglages) ── */
+function renderSignatairesEditor() {
+  document.getElementById('sig-editor').innerHTML = signataires.map((s, i) => `
+    <div class="sig-row">
+      <div class="fg"><label class="fl">Nom</label><input type="text" class="sig-nom" value="${esc(s.nom)}" placeholder="Prénom NOM"/></div>
+      <div class="fg"><label class="fl">Titre</label><input type="text" class="sig-titre" value="${esc(s.titre)}" placeholder="Directeur Responsable"/></div>
+      <button class="btn btn-ghost sig-suppr" type="button" data-i="${i}" onclick="supprimerSignataire(+this.dataset.i)" ${signataires.length < 2 ? 'disabled' : ''}>Retirer</button>
+    </div>`).join('');
+}
+
+function lireSignatairesSaisis() {
+  const noms = document.querySelectorAll('#sig-editor .sig-nom'), titres = document.querySelectorAll('#sig-editor .sig-titre');
+  if (!noms.length) return;
+  signataires = Array.from(noms).map((n, i) => ({ nom: n.value.trim(), titre: titres[i].value.trim() }));
+}
+
+function ajouterSignataire() {
+  lireSignatairesSaisis();
+  signataires.push({ nom: '', titre: '' });
+  renderSignatairesEditor();
+}
+
+function supprimerSignataire(i) {
+  lireSignatairesSaisis();
+  if (signataires.length < 2) return;
+  signataires.splice(i, 1);
+  renderSignatairesEditor();
+}
+
+/* Réglages (destinataires et signataires, communs à tous les courriers) : le panneau remplace le courrier tant qu'il est ouvert */
+function toggleTplPanel() {
+  const panel = document.getElementById('tpl-panel');
+  const open = panel.hidden;                                  // état à venir
+  if (open) { renderTplEditor(currentTplTab); renderSignatairesEditor(); }
+  panel.hidden = !open;
+  document.getElementById(`section-${docType}`).style.display = open ? 'none' : '';
+  document.querySelector('.letter-preview-wrap').style.display = open ? 'none' : '';
+  const btn = document.getElementById('btn-tpl');
+  btn.querySelector('span').textContent = open ? 'Retour au courrier' : 'Réglages';
+  btn.querySelector('i').className = 'ico ' + (open ? 'ico-chev-l' : 'ico-cog');
+  window.scrollTo(0, 0);
+}
+
+function resetTemplates() {
+  if (!confirm('Réinitialiser les destinataires par défaut ? Les signataires sont conservés.')) return;
+  REGLAGES.ecrire('courriers_modeles', { signataires: signataires });
+  loadTemplates();
+  renderTplEditor(currentTplTab);
+  renderAll();
+}
+
+/* ── Helpers UI ── */
+function getMonth() { return +document.getElementById('sel-month').value; }
+function getYear()  { return +document.getElementById('inp-year').value; }
+
+function computeDeadline(month, year) {
+  const d = new Date(year, month - 1, 1 - 21);
+  return { d: d.getDate(), m: d.getMonth() + 1, y: d.getFullYear() };
+}
+
+function onPeriodChange() {
+  const month = getMonth();
+  const year  = getYear();
+  if (!month || !year) return;
+  const dl = computeDeadline(month, year);
+  document.getElementById('inp-date-d').value = dl.d;
+  document.getElementById('inp-date-m').value = dl.m;
+  document.getElementById('inp-date-y').value = dl.y;
+  const label = `${String(dl.d).padStart(2, '0')} ${MOIS_LETTRE[dl.m - 1]} ${dl.y}`;
+  const hint = document.getElementById('deadline-hint');
+  if (hint) hint.textContent = `Date limite de déclaration · ${label}`;
+  renderAll();
+}
+
+function formatLetterDate() {
+  const d = +document.getElementById('inp-date-d').value;
+  const m = +document.getElementById('inp-date-m').value;
+  const y = +document.getElementById('inp-date-y').value;
+  return `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ── Initialisation ── */
+document.addEventListener('DOMContentLoaded', async () => {
+  // Réglages de la base : sans réponse, bandeau et rien ne s'enregistre
+  await Promise.all([REGLAGES.charger(DECL_PREFIXE, DECL_ADOPTIONS), REGLAGES.charger(COURRIERS_PREFIXE, COURRIERS_ADOPTIONS)]);
+  const now      = new Date();
+  initPeriodPicker(document.getElementById('sel-month'), document.getElementById('inp-year'), MOIS_LETTRE);   // mois suivant par défaut
+
+  // Peuple les selects mois des dates de courrier (mensuels, annulation)
+  fillMonthSelect(document.getElementById('inp-date-m'));
+  fillMonthSelect(document.getElementById('annul-date-m'));
+  document.getElementById('annul-date-d').value = now.getDate();
+  document.getElementById('annul-date-m').value = now.getMonth() + 1;
+  document.getElementById('annul-date-y').value = now.getFullYear();
+
+  loadTemplates();
+  remplirSignataires();
+  renderTplEditor('ministre');
+  renderAnnulDateList();
+  initLibre(now);
+  initHoraires(now);
+  onPeriodChange(); // auto-remplit date courrier + hint + renderAll
+  pageInitialisee = true;
+  if (serviceEnAttente) appliquerService();
+});
+
+/* ── Service courant : types de courrier affichés ──
+   Appelé une fois l'accès validé (la barre connaît alors le service) ; si la page n'est pas encore prête, on attend. */
+let pageInitialisee = false, serviceEnAttente = false;
+function initService() {
+  if (pageInitialisee) appliquerService(); else serviceEnAttente = true;
+}
+function appliquerService() {
+  const etat = (typeof NAV !== 'undefined' && NAV.etat) ? NAV.etat() : null;
+  const types = TYPES_PAR_SERVICE[etat && etat.service] || TYPES_PAR_SERVICE.jeux_traditionnels;
+  TYPES_COURRIER.forEach(t => {
+    document.getElementById(`dtype-${t}`).style.display = types.includes(t) ? '' : 'none';
+  });
+  document.querySelector('.doc-type-bar').style.display = types.length > 1 ? '' : 'none';   // un seul type : pas d'onglets
+  if (!types.includes(docType)) selectDocType(types[0]);
+}
+
+function fillMonthSelect(select) {
+  MOIS_LETTRE.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1;
+    o.textContent = m;
+    select.appendChild(o);
+  });
+}
+
+/* ── Gestion des onglets ── */
+function selectTab(tabId) {
+  currentTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+  renderAll();
+}
+
+/* ── Rendu principal ── */
+function renderAll() {
+  if (docType === 'annulation') { renderAnnulation(); return; }
+  if (docType === 'libre')      { renderLibre();      return; }
+  if (docType === 'periode')    { renderPeriode();    return; }
+  if (docType === 'derogation') { renderDerogation(); return; }
+  const month = getMonth();
+  const year  = getYear();
+  const rows  = buildRows(month, year);
+  document.getElementById('letter-output').innerHTML =
+    generateLetterHtml(templates[currentTab], rows, month, year);
+}
+
+/* ── Blocs communs à tous les courriers : en-tête, signature, pied de page ── */
+function letterHeaderHtml(recipientLines, dateStr) {
+  return `
+  <div class="letter-header">
+    <div class="letter-header-left">
+      <img class="letter-logo-img" src="../../shared/logos/logo.png" alt="Barrière Casino Bordeaux">
+    </div>
+    <div class="letter-header-right">
+      <div class="letter-recipient">${recipientLines.map(esc).join('<br>')}</div>
+      <div class="letter-date">Bordeaux, le ${esc(dateStr)}</div>
+    </div>
+  </div>`;
+}
+
+function letterSignatureHtml(sig) {
+  return `
+  <!-- Espace signature manuscrite + nom et titre du signataire choisi -->
+  <div class="letter-signature-space"></div>
+  <div class="letter-signature">
+    <div class="letter-signature-inner">
+      ${[sig.nom, sig.titre].filter(Boolean).map(esc).join('<br>')}
+    </div>
+  </div>`;
+}
+
+function letterFooterHtml() {
+  return `
+  <div class="letter-spacer"></div>
+
+  <!-- Pied de page -->
+  <div class="letter-footer">
+    Rue Cardinal Richaud &ndash; T&nbsp;05&nbsp;56&nbsp;69&nbsp;49&nbsp;00 &ndash; 33300 BORDEAUX<br>
+    Barrière Casino Bordeaux &ndash; STABL au capital de 6&nbsp;000&nbsp;000 euros &ndash;<br>
+    Identification entreprise B&nbsp;841&nbsp;461&nbsp;650 R.C.S. BORDEAUX &ndash; Identification TVA&nbsp;: FR&nbsp;23&nbsp;841&nbsp;461&nbsp;650
+  </div>`;
+}
+
+/* ── Génération HTML de la lettre ── */
+function generateLetterHtml(tpl, rows, month, year) {
+  const moisStr  = MOIS_LETTRE[month - 1] + ' ' + year;
+  const dateStr  = formatLetterDate();
+  const dayLines = buildDayLines(rows, month);
+
+  const daysHtml = dayLines.length
+    ? dayLines.map(line => `<li>${esc(line)}</li>`).join('')
+    : '<li><em>Aucun tournoi actif pour ce mois.</em></li>';
+
+  const salutHtml = tpl.salutation
+    ? `<div class="letter-salut">${esc(tpl.salutation)}</div>`
+    : '';
+
+  return `
+<div class="letter">
+
+  <!-- En-tête -->
+  ${letterHeaderHtml(tpl.recipient, dateStr)}
+
+  <!-- Objet -->
+  <div class="letter-objet">
+    <span class="letter-objet-lbl">Objet&nbsp;:</span> Tournois de Texas Holdem Poker du mois ${deMois(month)}${esc(moisStr)}.
+  </div>
+
+  ${salutHtml}
+
+  <!-- Corps -->
+  <div class="letter-body">
+    <p>J'ai l'honneur de vous informer que le Barrière Casino Bordeaux organisera des Tournois Multi-tables de Texas Hold'em Poker au cours du mois ${deMois(month)}${esc(moisStr)}, comme suit&nbsp;:</p>
+
+    <ul class="letter-days">${daysHtml}</ul>
+
+    <p>${esc(tpl.closingParagraph)}</p>
+
+    <p>${esc(tpl.closingFormula)}</p>
+  </div>
+
+  ${letterSignatureHtml(signataireChoisi('mensuel'))}
+
+  ${lettreAutresHtml(tpl.autresItems)}
+
+  ${letterFooterHtml()}
+
+</div>`;
+}
+
+/* Bloc « Autres destinataires » (mensuels et courrier libre) */
+function lettreAutresHtml(items) {
+  if (!items.length) return '';
+  return `
+  <!-- Autres destinataires -->
+  <div class="letter-autres">
+    <div class="letter-autres-title">Autres Destinataires&nbsp;:</div>
+    <ul>${items.map(item => `<li>${esc(item)}</li>`).join('')}</ul>
+  </div>`;
+}
+
+/* ── Impression ── */
+const DEST_COURT = { ministre: 'Ministre de l\'Intérieur', sipj: 'SIPJ 33', prefecture: 'Préfecture de la Gironde' };
+function printCurrent() {
+  const dest = DEST_COURT[currentTab] || '';
+  if (docType === 'libre') {
+    const destLibre = DEST_COURT[libreEl('dest').value] || lignes(libreEl('adresse').value)[0] || '';
+    printWithTitle(`Courrier - ${destLibre} - ${formatLibreDate()}`.replace(/[\\/:*?"<>|]/g, ' '));
+  } else if (docType === 'periode') {
+    printWithTitle(titrePeriode());
+  } else if (docType === 'derogation') {
+    printWithTitle(titreDerogation());
+  } else if (docType === 'annulation') {
+    // titre = destinataire + date du courrier d'annulation
+    printWithTitle(`Annulation de tournoi - ${dest} - ${formatAnnulLetterDate()}`);
+  } else {
+    printWithTitle(`Courrier ${dest} - Déclaration Tournois ${MOIS_LETTRE[getMonth() - 1]} ${getYear()}`);
+  }
+}
+function formatAnnulLetterDate() {
+  const d = +document.getElementById('annul-date-d').value, m = +document.getElementById('annul-date-m').value, y = +document.getElementById('annul-date-y').value;
+  return m ? `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}` : '';
+}
+
+/* ── Sélecteur de type de document ── */
+function selectDocType(type) {
+  if (!document.getElementById('tpl-panel').hidden) toggleTplPanel();   // on referme les réglages avant de changer de courrier
+  docType = type;
+  TYPES_COURRIER.forEach(t => {
+    document.getElementById(`section-${t}`).style.display = t === type ? '' : 'none';
+    document.getElementById(`dtype-${t}`).classList.toggle('active', t === type);
+  });
+  renderAll();
+}
+
+/* ── Annulation : gestion multi-dates ── */
+function addAnnulDate() {
+  const input = document.getElementById('annul-date-input');
+  const val   = input.value;
+  if (!val) return;
+  if (annulDates.includes(val)) { input.value = ''; return; }
+  annulDates.push(val);
+  annulDates.sort();
+  input.value = '';
+  renderAnnulDateList();
+  renderAnnulation();
+}
+
+function removeAnnulDate(idx) {
+  annulDates.splice(idx, 1);
+  renderAnnulDateList();
+  renderAnnulation();
+}
+
+function renderAnnulDateList() {
+  const container = document.getElementById('annul-date-list');
+  const objetEl   = document.getElementById('annul-objet-preview');
+  if (!annulDates.length) {
+    container.innerHTML = '<div class="annul-empty-hint">Aucune date ajoutée.</div>';
+    if (objetEl) objetEl.textContent = '-';
+    return;
+  }
+  container.innerHTML = annulDates.map((d, i) => {
+    const [y, m, day] = d.split('-').map(Number);
+    const dow   = new Date(y, m - 1, day).getDay();
+    const label = `${JOURS_LETTRE[dow]} ${String(day).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
+    return `<div class="annul-date-chip">${esc(label)}<button class="chip-remove" onclick="removeAnnulDate(${i})" title="Supprimer">✕</button></div>`;
+  }).join('');
+  if (objetEl) objetEl.textContent = formatAnnulObjet(annulDates);
+}
+
+/* ── Formatage des dates d'annulation ── */
+function _buildDateStr(dates) {
+  const sorted = [...dates].sort();
+  const parsed = sorted.map(d => {
+    const [y, m, day] = d.split('-').map(Number);
+    return { y, m, day };
+  });
+
+  if (parsed.length === 1) {
+    const { day, m, y } = parsed[0];
+    return { core: `${String(day).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`, range: false };
+  }
+
+  if (parsed.length >= 3) {
+    const isConsecutive = parsed.every((d, i) => {
+      if (i === 0) return true;
+      const prev = parsed[i - 1];
+      return (new Date(d.y, d.m - 1, d.day) - new Date(prev.y, prev.m - 1, prev.day)) === 86400000;
+    });
+    if (isConsecutive) {
+      const first = parsed[0];
+      const last  = parsed[parsed.length - 1];
+      if (first.m === last.m && first.y === last.y) {
+        return { core: `${String(first.day).padStart(2, '0')} au ${String(last.day).padStart(2, '0')} ${MOIS_LETTRE[first.m - 1]} ${first.y} inclus`, range: true };
+      }
+      return { core: `${String(first.day).padStart(2, '0')} ${MOIS_LETTRE[first.m - 1]} au ${String(last.day).padStart(2, '0')} ${MOIS_LETTRE[last.m - 1]} ${last.y} inclus`, range: true };
+    }
+  }
+
+  const allSameMonth = parsed.every(d => d.m === parsed[0].m && d.y === parsed[0].y);
+  if (allSameMonth) {
+    const { m, y } = parsed[0];
+    const days   = parsed.map(d => String(d.day).padStart(2, '0'));
+    const last   = days[days.length - 1];
+    const others = days.slice(0, -1);
+    return { core: `${others.join(', ')} et ${last} ${MOIS_LETTRE[m - 1]} ${y}`, range: false };
+  }
+
+  const full   = parsed.map(({ day, m, y }) => `${String(day).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`);
+  const last   = full[full.length - 1];
+  const others = full.slice(0, -1);
+  return { core: `${others.join(', ')} et ${last}`, range: false };
+}
+
+function formatAnnulDatesObjet(dates) {
+  if (!dates.length) return null;
+  const { core } = _buildDateStr(dates);
+  return `du ${core}`;
+}
+
+function formatAnnulDatesBody(dates) {
+  if (!dates.length) return null;
+  const { core, range } = _buildDateStr(dates);
+  return range ? `du ${core}` : `le ${core}`;
+}
+
+function formatAnnulObjet(dates) {
+  const dateStr = formatAnnulDatesObjet(dates);
+  if (!dateStr) return '-';
+  const plural = dates.length > 1;
+  return `Annulation ${plural ? 'des tournois' : 'du tournoi'} de Texas Hold'em Poker ${dateStr}.`;
+}
+
+/* ── Annulation de tournoi ── */
+function formatAnnulLetterDate() {
+  const d = +document.getElementById('annul-date-d').value || 0;
+  const m = +document.getElementById('annul-date-m').value || 0;
+  const y = +document.getElementById('annul-date-y').value || 0;
+  if (!d || !m || !y) return '-';
+  return `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}`;
+}
+
+function renderAnnulation() {
+  const dateStr = formatAnnulLetterDate();
+  const motif   = document.getElementById('annul-motif')?.value || '';
+  document.getElementById('letter-output').innerHTML =
+    generateAnnulationHtml(templates.sipj, annulDates, motif, dateStr);
+}
+
+function generateAnnulationHtml(tpl, dates, motif, dateStr) {
+  const plural        = dates.length > 1;
+  const objetStr      = formatAnnulObjet(dates);
+  const bodyDatesStr  = formatAnnulDatesBody(dates) || '-';
+
+  const motifPara = motif.trim()
+    ? `<p>Cette annulation est rendue nécessaire en raison ${esc(motif.trim())}.</p>`
+    : '';
+
+  const closingFormula = 'Je vous prie d\'agréer, Monsieur le Commissaire Divisionnaire, l\'expression de ma très haute considération.';
+
+  return `
+<div class="letter">
+
+  ${letterHeaderHtml(tpl.recipient, dateStr)}
+
+  <div class="letter-objet">
+    <span class="letter-objet-lbl">Objet&nbsp;:</span> ${esc(objetStr)}
+  </div>
+
+  <div class="letter-salut">Monsieur le Commissaire Divisionnaire,</div>
+
+  <div class="letter-body">
+    <p>Conform&eacute;ment &agrave; l&rsquo;article 57-8 de l&rsquo;arr&ecirc;t&eacute; du 14 mai 2007, j&rsquo;ai l&rsquo;honneur de vous informer de l&rsquo;annulation ${plural ? 'des tournois' : 'du tournoi'} de Texas Hold&rsquo;em Poker ${plural ? 'qui devaient se tenir' : 'qui devait se tenir'} ${esc(bodyDatesStr)}.</p>
+    ${motifPara}
+    <p>Nous vous prions de bien vouloir prendre acte de cette information.</p>
+    <p>${esc(closingFormula)}</p>
+  </div>
+
+  ${letterSignatureHtml(signataireChoisi('annulation'))}
+
+  ${letterFooterHtml()}
+
+</div>`;
+}
+
+/* ═══════════════════════════════════════
+   COURRIER LIBRE
+   En-tête, signature et pied de page des autres courriers ; destinataire, objet et texte saisis à la main.
+   Rien n'est enregistré : le courrier n'existe que le temps de la page.
+═══════════════════════════════════════ */
+const LIBRE_AUTRE = 'autre';
+
+/* Titre de politesse de chaque destinataire connu (appel et formule) */
+const LIBRE_TITRES = {
+  ministre:   'Monsieur le Ministre',
+  sipj:       'Monsieur le Commissaire Divisionnaire',
+  prefecture: 'Madame',
+  [LIBRE_AUTRE]: 'Madame, Monsieur',
+};
+
+function libreEl(id) { return document.getElementById(`libre-${id}`); }
+
+function libreFormule(destId) {
+  return destId === LIBRE_AUTRE
+    ? 'Je vous prie d\'agréer, Madame, Monsieur, l\'expression de mes salutations distinguées.'
+    : `Je vous prie d'agréer, ${LIBRE_TITRES[destId]}, l'expression de ma haute considération.`;
+}
+
+/* Choisir un destinataire pré-remplit adresse, appel et formule (modifiables ensuite) */
+function onLibreDestChange() {
+  const destId = libreEl('dest').value;
+  libreEl('adresse').value = destId === LIBRE_AUTRE ? '' : templates[destId].recipient.join('\n');
+  libreEl('appel').value   = LIBRE_TITRES[destId] + ',';
+  libreEl('formule').value = libreFormule(destId);
+  renderLibre();
+}
+
+function initLibre(now) {
+  const select = libreEl('dest');
+  select.innerHTML = ['ministre', 'sipj', 'prefecture'].map(id => `<option value="${id}">${esc(templates[id].label)}</option>`).join('')
+    + `<option value="${LIBRE_AUTRE}">Autre destinataire</option>`;
+  fillMonthSelect(libreEl('date-m'));
+  libreEl('date-d').value = now.getDate();
+  libreEl('date-m').value = now.getMonth() + 1;
+  libreEl('date-y').value = now.getFullYear();
+  onLibreDestChange();
+}
+
+function formatLibreDate() {
+  const d = +libreEl('date-d').value, m = +libreEl('date-m').value, y = +libreEl('date-y').value;
+  return d && m && y ? `${String(d).padStart(2, '0')} ${MOIS_LETTRE[m - 1]} ${y}` : '';
+}
+
+/* Texte libre → paragraphes (ligne vide) et retours à la ligne */
+function paragraphesHtml(text) {
+  return text.split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`)
+    .join('\n    ');
+}
+
+function lignes(text) { return text.split('\n').map(l => l.trim()).filter(Boolean); }
+
+function renderLibre() {
+  document.getElementById('letter-output').innerHTML = generateLibreHtml({
+    adresse: lignes(libreEl('adresse').value),
+    dateStr: formatLibreDate(),
+    objet:   libreEl('objet').value.trim(),
+    appel:   libreEl('appel').value.trim(),
+    corps:   libreEl('corps').value,
+    formule: libreEl('formule').value.trim(),
+    autres:  lignes(libreEl('autres').value),
+    sig:     signataireChoisi('libre'),
+  });
+  const letter = document.querySelector('#letter-output .letter');
+  document.getElementById('libre-overflow').hidden = !(letter && letter.scrollHeight > letter.clientHeight + 1);
+}
+
+function generateLibreHtml(c) {
+  const objetHtml = c.objet
+    ? `<div class="letter-objet"><span class="letter-objet-lbl">Objet&nbsp;:</span> ${esc(c.objet)}</div>`
+    : '';
+  const salutHtml = c.appel ? `<div class="letter-salut">${esc(c.appel)}</div>` : '';
+  const formuleHtml = c.formule ? `<p>${esc(c.formule)}</p>` : '';
+
+  return `
+<div class="letter">
+
+  ${letterHeaderHtml(c.adresse, c.dateStr)}
+
+  ${objetHtml}
+
+  ${salutHtml}
+
+  <div class="letter-body">
+    ${paragraphesHtml(c.corps)}
+    ${formuleHtml}
+  </div>
+
+  ${letterSignatureHtml(c.sig)}
+
+  ${lettreAutresHtml(c.autres)}
+
+  ${letterFooterHtml()}
+
+</div>`;
+}

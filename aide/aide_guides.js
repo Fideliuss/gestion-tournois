@@ -13,6 +13,7 @@ var AIDE_ESPACES = {
   'training': 'Training',
   'break-list': 'Break list',
   'materiel': 'Matériel',
+  'courrier': 'Courrier',
 };
 
 var AIDE_GUIDES = [
@@ -325,11 +326,11 @@ var AIDE_GUIDES = [
   {
     id: 'tournois-courriers', space: 'tournois', panel: 'admin-tournois',
     title: 'Générer les courriers',
-    intro: "Le Générateur de courrier prépare les courriers mensuels de déclaration, le courrier d'annulation quand un tournoi est annulé, et un courrier libre pour les autres situations. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
+    intro: "Le Générateur de courrier prépare la déclaration des tournois (courriers mensuels), le courrier d'annulation quand un tournoi est annulé, et un courrier libre pour les autres situations. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
     steps: [
       {
-        title: "Les courriers mensuels",
-        text: "<p>Dans <b>Administration tournois</b>, ouvrez <b>Générateur de courrier</b>. L'onglet <b>Courriers mensuels</b> est ouvert.</p>"
+        title: "La déclaration des tournois",
+        text: "<p>Dans <b>Administration tournois</b>, ouvrez <b>Générateur de courrier</b>. L'onglet <b>Déclaration des tournois</b> est ouvert.</p>"
           + "<p>Choisissez le <b>mois déclaré</b> (le mois suivant est proposé). La <b>date du courrier</b> se met à la date limite de déclaration, 21 jours avant le premier du mois déclaré ; vous pouvez la changer.</p>"
           + "<p>Les jours de tournoi du courrier viennent des mêmes réglages que la page Déclarations : rien à saisir en plus.</p>",
         imgs: [{ src: 'captures/ad_courrier.png', alt: 'Le mois déclaré, la date du courrier et le choix du courrier' }],
@@ -341,15 +342,16 @@ var AIDE_GUIDES = [
         imgs: [],
       },
       {
-        title: "Modifier les destinataires et les signatures",
-        text: "<p>Le bouton <b>Réglages</b> remplace le courrier par l'éditeur des destinataires. Pour chacun des trois courriers : le destinataire (une ligne par entrée), l'appel, la formule de politesse, le nom du signataire et la liste des autres destinataires mis en copie.</p>"
-          + "<p><b>Enregistrer</b> garde vos changements ; <b>Réinitialiser</b> revient aux valeurs d'origine ; <b>Retour au courrier</b> ferme l'éditeur. Ces réglages sont enregistrés dans l'application et communs à tous les postes. Le nom du signataire se saisit ici, une seule fois.</p>",
-        imgs: [{ src: 'captures/ad_courrier_reglages.png', alt: "L'éditeur des destinataires et signatures" }],
+        title: "Modifier les destinataires et les signataires",
+        text: "<p>Le bouton <b>Réglages</b>, à droite des onglets, remplace le courrier par l'éditeur des destinataires et des signataires. Il est commun à tous les courriers. Pour chacun des trois destinataires : l'adresse (une ligne par entrée), l'appel, la formule de politesse et la liste des autres destinataires mis en copie. En dessous, la liste des <b>signataires</b> : un nom et un titre par ligne (Directeur Responsable, par exemple) ; <b>+ Ajouter un signataire</b> en ajoute un.</p>"
+          + "<p><b>Enregistrer</b> garde vos changements ; <b>Réinitialiser</b> revient aux valeurs d'origine ; <b>Retour au courrier</b> ferme l'éditeur. Ces réglages sont enregistrés dans l'application et communs à tous les postes.</p>"
+          + "<p>Chaque courrier a une liste <b>Signé par</b> : le premier signataire est proposé, choisissez-en un autre si besoin.</p>",
+        imgs: [{ src: 'captures/ad_courrier_reglages.png', alt: "L'éditeur des destinataires et des signataires" }],
       },
       {
         title: "Annuler un tournoi",
         text: "<p>L'onglet <b>Annulation de tournoi</b> prépare le courrier d'annulation. Ajoutez la ou les <b>dates annulées</b> : l'objet du courrier est écrit automatiquement. Un <b>motif</b> facultatif complète la phrase d'explication ; laissez-le vide si vous n'en donnez pas.</p>"
-          + "<p>Réglez la date du courrier, puis imprimez comme pour les courriers mensuels.</p>",
+          + "<p>Réglez la date du courrier, puis imprimez comme pour la déclaration des tournois.</p>",
         imgs: [{ src: 'captures/ad_courrier_annul.png', alt: "La préparation d'un courrier d'annulation" }],
       },
       {
@@ -1262,6 +1264,87 @@ var AIDE_GUIDES = [
         title: "« Enregistrement impossible » ou « Impossible de charger le matériel »",
         text: "<p>La connexion avec le serveur a échoué. Vérifiez votre connexion, rechargez la page et recommencez. Si le message revient, prévenez l'administrateur.</p>",
         imgs: [],
+      },
+    ],
+  },
+
+  // ══ Courrier (service Machines à sous) ══
+
+  {
+    id: 'courrier-pour-commencer', space: 'courrier', panel: 'courrier',
+    title: 'Pour commencer',
+    intro: "L'espace Courrier du service Machines à sous prépare les courriers aux autorités : la note annuelle des horaires, les dérogations d'horaire et les courriers libres. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
+    steps: [
+      {
+        title: "Choisir le service",
+        text: "<p>Si votre compte a accès à plusieurs services, l'accueil propose une tuile par service : choisissez <b>Machines à sous</b>. Le choix est retenu sur ce poste pour votre compte ; la barre affiche le service à côté du logo.</p>"
+          + "<p>Pour passer à un autre service, ouvrez le menu de votre compte, en haut à droite, puis <b>Changer de service</b>.</p>",
+        imgs: [{ src: 'captures/mas_choix.png', alt: "L'accueil : une tuile par service" }],
+      },
+      {
+        title: "Les types de courrier",
+        text: "<p>La page propose trois onglets :</p><ul>"
+          + "<li><b>Horaires annuels</b> : la note de la période d'exploitation et des horaires, envoyée chaque année au Ministre de l'Intérieur ;</li>"
+          + "<li><b>Dérogation d'horaire</b> : une ouverture exceptionnelle, une fermeture anticipée ou une fermeture prolongée ;</li>"
+          + "<li><b>Courrier libre</b> : pour une situation qui n'a pas de courrier prévu (voir le guide des courriers de l'espace Tournois).</li></ul>",
+        imgs: [],
+      },
+      {
+        title: "Destinataires et signataires",
+        text: "<p>Le bouton <b>Réglages</b>, à droite des onglets, ouvre l'éditeur des destinataires (adresse, appel, formule de politesse) et des <b>signataires</b> (un nom et un titre par ligne). Ces réglages sont communs à tous les courriers et aux deux services.</p>"
+          + "<p>Chaque courrier a une liste <b>Signé par</b> : le premier signataire est proposé, choisissez-en un autre si besoin.</p>",
+        imgs: [],
+      },
+    ],
+  },
+
+  {
+    id: 'courrier-horaires-annuels', space: 'courrier', panel: 'courrier',
+    title: 'Déclarer les horaires annuels',
+    intro: "La note des horaires annuels déclare la période d'exploitation et les horaires de fonctionnement des jeux pour un exercice, du 1er novembre au 31 octobre de l'année suivante. Elle part en octobre pour l'exercice qui commence le mois suivant.",
+    steps: [
+      {
+        title: "Choisir l'exercice",
+        text: "<p>Dans l'onglet <b>Horaires annuels</b>, saisissez l'<b>année</b> de fin de l'exercice : 2027 pour l'exercice du 1er novembre 2026 au 31 octobre 2027. La période correspondante s'affiche en gris en dessous. L'exercice qui suit est proposé.</p>",
+        imgs: [{ src: 'captures/mas_horaires.png', alt: "L'année de l'exercice, les horaires par catégorie de jeux et la date du courrier" }],
+      },
+      {
+        title: "Les horaires",
+        text: "<p>Une ligne par catégorie de jeux : la catégorie, les jours et les horaires. <b>+ Ajouter une catégorie</b> ajoute une ligne, <b>Retirer</b> en enlève une.</p>"
+          + "<p><b>Enregistrer les horaires</b> garde les lignes pour les prochaines fois : elles sont enregistrées dans l'application et communes à tous les postes. Sans enregistrement, vos changements servent seulement au courrier en cours.</p>",
+        imgs: [],
+      },
+      {
+        title: "Dater, signer et imprimer",
+        text: "<p>Réglez la <b>date du courrier</b> et le signataire, puis vérifiez le courrier sous le formulaire.</p>"
+          + "<p><b>Imprimer / Exporter PDF</b> ouvre la boîte d'impression. Choisissez <b>Enregistrer en PDF</b> et vérifiez que les marges sont sur <b>Aucune</b>.</p>",
+        imgs: [{ src: 'captures/mas_horaires_lettre.png', alt: "La note des horaires annuels" }],
+      },
+    ],
+  },
+
+  {
+    id: 'courrier-derogation', space: 'courrier', panel: 'courrier',
+    title: "Demander une dérogation d'horaire",
+    intro: "Le courrier de dérogation d'horaire (article 31 de l'arrêté du 14 mai 2007) informe les autorités d'un changement ponctuel des horaires. L'objet et la phrase principale s'écrivent seuls à partir des dates et des heures.",
+    steps: [
+      {
+        title: "Choisir le type de dérogation",
+        text: "<p>Dans l'onglet <b>Dérogation d'horaire</b>, choisissez le <b>type</b> :</p><ul>"
+          + "<li><b>Ouverture exceptionnelle</b> : le jour et l'heure d'ouverture ;</li>"
+          + "<li><b>Fermeture anticipée et réouverture</b> : la séance, l'heure de fermeture, puis le jour et l'heure de réouverture (le lendemain est proposé) ;</li>"
+          + "<li><b>Fermeture prolongée</b> : la soirée et l'heure de fermeture, le lendemain (le réveillon, par exemple).</li></ul>",
+        imgs: [{ src: 'captures/mas_derogation.png', alt: "Le type de dérogation, les dates et heures, le destinataire" }],
+      },
+      {
+        title: "Le destinataire",
+        text: "<p>Choisissez le <b>destinataire</b> : l'adresse, l'appel et la formule de politesse se remplissent, et vous pouvez les modifier. <b>Autre destinataire</b> part d'une adresse vide.</p>",
+        imgs: [],
+      },
+      {
+        title: "Dater, signer et imprimer",
+        text: "<p>Réglez la <b>date du courrier</b> et le signataire, vérifiez le courrier, puis imprimez comme pour les horaires annuels. La dérogation n'est pas enregistrée : imprimez-la ou enregistrez-la en PDF avant de quitter la page.</p>",
+        imgs: [{ src: 'captures/mas_derogation_lettre.png', alt: "Un courrier de fermeture prolongée" }],
       },
     ],
   },

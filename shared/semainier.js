@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    semainier.js - Sélecteur de tournoi par jour
-   Barrière Casino Bordeaux · Tournois
+   Pit Manager
    Utilisé par : leaderboard/leaderboard.html · prize_pool/prize_pool.html
 ═══════════════════════════════════════════════════════ */
 

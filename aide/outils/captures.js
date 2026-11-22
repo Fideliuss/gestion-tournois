@@ -54,7 +54,7 @@ getParametres:async function(p){return Object.keys(PM).filter(function(k){return
 
 // Espace Training : croupiers fictifs et leurs sessions ; les fonctions de suivi de la base sont recalculées ici à partir des sessions
 const TR = data.entrainement();
-const isTr = function (c) { return c.page.indexOf('training/') === 0 || c.page === 'admin/config_training.html'; };
+const isTr = function (c) { return c.page.indexOf('espaces/training/') === 0 || c.page === 'admin/config_training.html'; };
 const BASE_TR = `<script>(function(){var S=${JSON.stringify(TR.sessions)},U=${JSON.stringify(TR.croupiers)},ME=U[0].id,NOW=new Date(2026,9,14,20,0,0).getTime();
 var cp=function(o){return JSON.parse(JSON.stringify(o))},nop=async function(){};
 var pct=function(s){return s.total?Math.round(100*s.correct/s.total):0},avg=function(l){return l.length?Math.round(l.reduce(function(a,s){return a+pct(s)},0)/l.length):0};
@@ -77,12 +77,12 @@ getTrainingTablesBest:async function(r){return U.map(function(c){var l=of(c.id,'
  return{user_id:c.id,user_label:c.label,best_ms:ok.length?Math.min.apply(null,ok.map(function(s){return s.meta.elapsedMs})):null,perfect_runs:ok.length,sessions:l.length,last_at:l[0].started_at}}).filter(Boolean).sort(function(a,b){return (a.best_ms===null)-(b.best_ms===null)||a.best_ms-b.best_ms})},
 getTrainingWeakPoints:async function(g,u){return(WEAK[g]||[]).map(function(r){return{facet:r[0],value:r[1],attempts:r[2],errors:r[3]}})}};})();</script>`;
 // Règlement TDA : édition fictive (aucun texte du vrai règlement dans le dépôt public), administrateur ; rien n'est écrit
-const isTda = function (c) { return c.page.indexOf('tda/') === 0; };
+const isTda = function (c) { return c.page.indexOf('espaces/tournois/tda/') === 0; };
 const BASE_TDA = `<script>(function(){var D=${JSON.stringify(data.tda())};var nop=async function(){};
 window.SB={getSession:async function(){return{user:{id:'u',email:'demo@example.com',app_metadata:{role:'admin'},user_metadata:{role:'admin',first_name:'Démo',last_name:'Fictif'},app_metadata:{role:'admin'}}}},getRoles:async function(){return[]},signOut:nop,
 getTdaActive:async function(){return JSON.parse(JSON.stringify({edition:D.edition,blocs:D.blocs}))}};})();</script>`;
 // Matériel : sixains fictifs (aucun vrai numéro), administrateur ; rien n'est écrit
-const isMt = function (c) { return c.page.indexOf('materiel/') === 0; };
+const isMt = function (c) { return c.page.indexOf('espaces/materiel/') === 0; };
 const MT = data.materiel();
 const BASE_MT = `<script>(function(){var D=${JSON.stringify(MT)};var nop=async function(){};var ORD=D.statuts;
 function cp(x){return JSON.parse(JSON.stringify(x))}
@@ -106,27 +106,27 @@ const FEUILLE = '.bl-toast{display:none!important} .app{padding:12px!important;b
 
 // nom, page, taille de la fenêtre, actions (exécutées après le chargement), CSS ajouté
 const CAPTURES = [
-  { nom: 'bl_barre', page: 'break_list/break_list.html', w: 1400, h: 235, actions: '', css: '' },
-  { nom: 'bl_seance', page: 'break_list/break_list.html', w: 1180, h: 1010, actions: '', css: MASQUER_BARRE },
-  { nom: 'bl_recto', page: 'break_list/break_list.html', w: 1140, h: 745, actions: "document.getElementById('bl-print').hidden=false;", css: FEUILLE + ' #bl-print{max-width:none!important} #bl-print .bl-page:nth-child(2){display:none!important}' },
-  { nom: 'bl_verso', page: 'break_list/break_list.html', w: 1140, h: 762, actions: "document.getElementById('bl-print').hidden=false;", css: FEUILLE + ' #bl-print{max-width:none!important} #bl-print .bl-page:nth-child(1){display:none!important}' },
-  { nom: 'bl_departs', page: 'break_list/break_list.html', w: 1180, h: 900, actions: COLLER + "setTimeout(function(){showPart('departs')},600);", css: MASQUER_BARRE },
-  { nom: 'bl_feuille_departs', page: 'break_list/break_list.html', w: 860, h: 500, actions: COLLER, css: FEUILLE + ' #dep-print{display:block!important;max-width:794px;margin:0 auto}' },
+  { nom: 'bl_barre', page: 'espaces/break_list/break_list.html', w: 1400, h: 235, actions: '', css: '' },
+  { nom: 'bl_seance', page: 'espaces/break_list/break_list.html', w: 1180, h: 1010, actions: '', css: MASQUER_BARRE },
+  { nom: 'bl_recto', page: 'espaces/break_list/break_list.html', w: 1140, h: 745, actions: "document.getElementById('bl-print').hidden=false;", css: FEUILLE + ' #bl-print{max-width:none!important} #bl-print .bl-page:nth-child(2){display:none!important}' },
+  { nom: 'bl_verso', page: 'espaces/break_list/break_list.html', w: 1140, h: 762, actions: "document.getElementById('bl-print').hidden=false;", css: FEUILLE + ' #bl-print{max-width:none!important} #bl-print .bl-page:nth-child(1){display:none!important}' },
+  { nom: 'bl_departs', page: 'espaces/break_list/break_list.html', w: 1180, h: 900, actions: COLLER + "setTimeout(function(){showPart('departs')},600);", css: MASQUER_BARRE },
+  { nom: 'bl_feuille_departs', page: 'espaces/break_list/break_list.html', w: 860, h: 500, actions: COLLER, css: FEUILLE + ' #dep-print{display:block!important;max-width:794px;margin:0 auto}' },
   // Planning
-  { nom: 'bl_planning', page: 'break_list/planning.html', w: 1280, h: 760, actions: '', css: MASQUER_BARRE },
-  { nom: 'bl_planning_import', page: 'break_list/planning.html', w: 1280, h: 670, actions: IMPORT, css: MASQUER_BARRE + SEULE_CARTE('#plan-card') },
+  { nom: 'bl_planning', page: 'espaces/break_list/planning.html', w: 1280, h: 760, actions: '', css: MASQUER_BARRE },
+  { nom: 'bl_planning_import', page: 'espaces/break_list/planning.html', w: 1280, h: 670, actions: IMPORT, css: MASQUER_BARRE + SEULE_CARTE('#plan-card') },
   // Présents et absents de la séance
-  { nom: 'bl_ajout', page: 'break_list/break_list.html', w: 1180, h: 760, actions: '', css: MASQUER_BARRE + SEULE_CARTE('#part-breaklist > .card:first-child') + SEULE_CARTE('#abs-box') + ' .hdr{display:none!important}' },
-  { nom: 'bl_absents', page: 'break_list/break_list.html', w: 1180, h: 390, actions: "document.getElementById('abs-box').open=true;", css: MASQUER_BARRE + SEULE_CARTE('#part-breaklist > .card:not(.bl-abs)') + ' .hdr{display:none!important}' },
+  { nom: 'bl_ajout', page: 'espaces/break_list/break_list.html', w: 1180, h: 760, actions: '', css: MASQUER_BARRE + SEULE_CARTE('#part-breaklist > .card:first-child') + SEULE_CARTE('#abs-box') + ' .hdr{display:none!important}' },
+  { nom: 'bl_absents', page: 'espaces/break_list/break_list.html', w: 1180, h: 390, actions: "document.getElementById('abs-box').open=true;", css: MASQUER_BARRE + SEULE_CARTE('#part-breaklist > .card:not(.bl-abs)') + ' .hdr{display:none!important}' },
   // Départs
-  { nom: 'bl_extraction', page: 'break_list/break_list.html', w: 1180, h: 430, actions: COLLER_ANOMALIES + "setTimeout(function(){showPart('departs')},600);", css: MASQUER_BARRE + SEULE_CARTE('#part-departs > .card:nth-child(2)') + ' .hdr{display:none!important}' },
-  { nom: 'bl_departs_main', page: 'break_list/break_list.html', w: 1180, h: 480, actions: COLLER + "setTimeout(function(){showPart('departs');var q=function(i){document.querySelectorAll('#rep-out li')[i].click()};setTimeout(function(){q(0);setTimeout(function(){q(8);setTimeout(function(){q(3)},250)},250)},300)},600);", css: MASQUER_BARRE + SEULE_CARTE('#part-departs > .card:first-child') + ' .hdr{display:none!important}' },
+  { nom: 'bl_extraction', page: 'espaces/break_list/break_list.html', w: 1180, h: 430, actions: COLLER_ANOMALIES + "setTimeout(function(){showPart('departs')},600);", css: MASQUER_BARRE + SEULE_CARTE('#part-departs > .card:nth-child(2)') + ' .hdr{display:none!important}' },
+  { nom: 'bl_departs_main', page: 'espaces/break_list/break_list.html', w: 1180, h: 480, actions: COLLER + "setTimeout(function(){showPart('departs');var q=function(i){document.querySelectorAll('#rep-out li')[i].click()};setTimeout(function(){q(0);setTimeout(function(){q(8);setTimeout(function(){q(3)},250)},250)},300)},600);", css: MASQUER_BARRE + SEULE_CARTE('#part-departs > .card:first-child') + ' .hdr{display:none!important}' },
   // Paramètres
-  { nom: 'bl_param_equipe', page: 'break_list/parametres.html', w: 1180, h: 1075, actions: '', css: MASQUER_BARRE },
-  { nom: 'bl_param_absences', page: 'break_list/parametres.html', w: 1180, h: 580, actions: '', css: MASQUER_BARRE + SEULE_CARTE('#pm-equipe > .card:nth-child(-n+2)') + SEULE_CARTE('#pm-tabs') + SEULE_CARTE('.hdr') },
-  { nom: 'bl_param_barre', page: 'break_list/parametres.html', w: 1180, h: 420, actions: "showTab('soiree');var i=document.getElementById('cf-stackers');i.value=6;i.dispatchEvent(new Event('input',{bubbles:true}));", css: MASQUER_BARRE + SEULE_CARTE('.hdr') + SEULE_CARTE('#pm-tabs') + SEULE_CARTE('.pm-foot') + SEULE_CARTE('#pm-soiree > .card:nth-child(n+2)') },
-  { nom: 'bl_param_seance', page: 'break_list/parametres.html', w: 1180, h: 1260, actions: "showTab('soiree');", css: MASQUER_BARRE },
-  { nom: 'bl_param_feuilles', page: 'break_list/parametres.html', w: 1180, h: 1500, actions: "showTab('feuilles');", css: MASQUER_BARRE },
+  { nom: 'bl_param_equipe', page: 'espaces/break_list/parametres.html', w: 1180, h: 1075, actions: '', css: MASQUER_BARRE },
+  { nom: 'bl_param_absences', page: 'espaces/break_list/parametres.html', w: 1180, h: 580, actions: '', css: MASQUER_BARRE + SEULE_CARTE('#pm-equipe > .card:nth-child(-n+2)') + SEULE_CARTE('#pm-tabs') + SEULE_CARTE('.hdr') },
+  { nom: 'bl_param_barre', page: 'espaces/break_list/parametres.html', w: 1180, h: 420, actions: "showTab('soiree');var i=document.getElementById('cf-stackers');i.value=6;i.dispatchEvent(new Event('input',{bubbles:true}));", css: MASQUER_BARRE + SEULE_CARTE('.hdr') + SEULE_CARTE('#pm-tabs') + SEULE_CARTE('.pm-foot') + SEULE_CARTE('#pm-soiree > .card:nth-child(n+2)') },
+  { nom: 'bl_param_seance', page: 'espaces/break_list/parametres.html', w: 1180, h: 1260, actions: "showTab('soiree');", css: MASQUER_BARRE },
+  { nom: 'bl_param_feuilles', page: 'espaces/break_list/parametres.html', w: 1180, h: 1500, actions: "showTab('feuilles');", css: MASQUER_BARRE },
 ];
 
 // ── Espace Tournois ──
@@ -134,37 +134,37 @@ const NU = 'header.nav{display:none!important} *{transition:none!important} .dec
 const PP = "applyPreset('friday-highstack');";
 const SAISIR = "showTab('saisir');setTimeout(function(){onDateChange();setTimeout(function(){var n=['ARNAUD ADRIEN','BERTRAND CLEMENT','CHEVALIER DAMIEN','DELMAS EMILIE','ESTEVE FABIEN'];n.forEach(function(v,i){document.getElementById('player-'+(i+1)).value=v});document.getElementById('inp-entrees').value=64;updateCagnotte();},500)},400);";
 const CAPTURES_TN = [
-  { nom: 'tn_accueil', page: 'tournois.html', w: 1400, h: 330, actions: '', css: '*{transition:none!important}' },
-  { nom: 'tn_menu_admin', page: 'prize_pool/prize_pool.html', w: 1400, h: 440, actions: "Array.prototype.find.call(document.querySelectorAll('nav.nav-items button'),function(b){return /Administration/.test(b.textContent)}).click();", css: '*{transition:none!important}' },
+  { nom: 'tn_accueil', page: 'espaces/tournois/tournois.html', w: 1400, h: 330, actions: '', css: '*{transition:none!important}' },
+  { nom: 'tn_menu_admin', page: 'espaces/tournois/prize_pool/prize_pool.html', w: 1400, h: 440, actions: "Array.prototype.find.call(document.querySelectorAll('nav.nav-items button'),function(b){return /Administration/.test(b.textContent)}).click();", css: '*{transition:none!important}' },
   // Prize Pool
-  { nom: 'pp_choix', page: 'prize_pool/prize_pool.html', w: 1180, h: 640, actions: PP, css: NU + SEULE_CARTE('.card-print') },
-  { nom: 'pp_tournoi', page: 'prize_pool/prize_pool.html', w: 1180, h: 1080, actions: PP + "suggest();", css: NU + SEULE_CARTE('.pp-presets-card') + SEULE_CARTE('.app > .card:not(.card-print):not(.pp-presets-card)') },
-  { nom: 'pp_restant', page: 'prize_pool/prize_pool.html', w: 1180, h: 820, actions: PP + "clearAmounts();[1500,1100,850,650,500,400,300,250].forEach(function(v,i){document.getElementById('amt-'+(i+1)).value=v;onAmountChange(i+1,v)});", css: NU + SEULE_CARTE('.pp-presets-card') + SEULE_CARTE('.app > .card:not(.card-print):not(.pp-presets-card)') + SEULE_CARTE('.card-print .igrid-2') + SEULE_CARTE('.tog-row') + SEULE_CARTE('.suggest-row') },
+  { nom: 'pp_choix', page: 'espaces/tournois/prize_pool/prize_pool.html', w: 1180, h: 640, actions: PP, css: NU + SEULE_CARTE('.card-print') },
+  { nom: 'pp_tournoi', page: 'espaces/tournois/prize_pool/prize_pool.html', w: 1180, h: 1080, actions: PP + "suggest();", css: NU + SEULE_CARTE('.pp-presets-card') + SEULE_CARTE('.app > .card:not(.card-print):not(.pp-presets-card)') },
+  { nom: 'pp_restant', page: 'espaces/tournois/prize_pool/prize_pool.html', w: 1180, h: 820, actions: PP + "clearAmounts();[1500,1100,850,650,500,400,300,250].forEach(function(v,i){document.getElementById('amt-'+(i+1)).value=v;onAmountChange(i+1,v)});", css: NU + SEULE_CARTE('.pp-presets-card') + SEULE_CARTE('.app > .card:not(.card-print):not(.pp-presets-card)') + SEULE_CARTE('.card-print .igrid-2') + SEULE_CARTE('.tog-row') + SEULE_CARTE('.suggest-row') },
   // Challenge saisonnier
-  { nom: 'lb_classement', page: 'leaderboard/leaderboard.html', w: 1180, h: 1100, actions: '', css: NU },
-  { nom: 'lb_saisir', page: 'leaderboard/leaderboard.html', w: 1180, h: 1120, actions: SAISIR, css: NU },
-  { nom: 'lb_doublon', page: 'leaderboard/leaderboard.html', w: 1180, h: 560, actions: "showTab('saisir');setTimeout(function(){document.getElementById('inp-date').value='2026-10-09';onDateChange();setTimeout(function(){window.scrollTo(0,0)},800)},400);", css: NU + SEULE_CARTE('.hdr') },
-  { nom: 'lb_historique', page: 'leaderboard/leaderboard.html', w: 1180, h: 1250, actions: "showTab('historique');setTimeout(function(){toggleCalSession(" + SESSION_VENDREDI.id + ")},700);", css: NU },
-  { nom: 'lb_ranking', page: 'leaderboard/leaderboard.html', w: 1400, h: 820, actions: "showTab('ranking');", css: NU },
-  { nom: 'lb_joueur', page: 'leaderboard/leaderboard.html', w: 1180, h: 760, actions: "openPlayerModal(" + JSON.stringify(PREMIER) + ");", css: NU },
-  { nom: 'lb_saison', page: 'leaderboard/leaderboard.html', w: 1180, h: 820, actions: "setTimeout(function(){openCloseSeason()},600);", css: NU },
+  { nom: 'lb_classement', page: 'espaces/tournois/leaderboard/leaderboard.html', w: 1180, h: 1100, actions: '', css: NU },
+  { nom: 'lb_saisir', page: 'espaces/tournois/leaderboard/leaderboard.html', w: 1180, h: 1120, actions: SAISIR, css: NU },
+  { nom: 'lb_doublon', page: 'espaces/tournois/leaderboard/leaderboard.html', w: 1180, h: 560, actions: "showTab('saisir');setTimeout(function(){document.getElementById('inp-date').value='2026-10-09';onDateChange();setTimeout(function(){window.scrollTo(0,0)},800)},400);", css: NU + SEULE_CARTE('.hdr') },
+  { nom: 'lb_historique', page: 'espaces/tournois/leaderboard/leaderboard.html', w: 1180, h: 1250, actions: "showTab('historique');setTimeout(function(){toggleCalSession(" + SESSION_VENDREDI.id + ")},700);", css: NU },
+  { nom: 'lb_ranking', page: 'espaces/tournois/leaderboard/leaderboard.html', w: 1400, h: 820, actions: "showTab('ranking');", css: NU },
+  { nom: 'lb_joueur', page: 'espaces/tournois/leaderboard/leaderboard.html', w: 1180, h: 760, actions: "openPlayerModal(" + JSON.stringify(PREMIER) + ");", css: NU },
+  { nom: 'lb_saison', page: 'espaces/tournois/leaderboard/leaderboard.html', w: 1180, h: 820, actions: "setTimeout(function(){openCloseSeason()},600);", css: NU },
   // Administration : déclarations
-  { nom: 'ad_declaration', page: 'admin/declaration/declaration.html', w: 1280, h: 900, actions: '', css: NU },
-  { nom: 'ad_decl_extras', page: 'admin/declaration/declaration.html', w: 1280, h: 760, actions: "showDeclaration('extras');", css: NU },
-  { nom: 'ad_decl_reglages', page: 'admin/declaration/declaration.html', w: 1280, h: 640, actions: "openView('cfg');", css: NU },
-  { nom: 'ad_decl_encadrement', page: 'admin/declaration/declaration.html', w: 1280, h: 780, actions: "openView('cfg');showDeclTab('encadrement');", css: NU },
-  { nom: 'ad_decl_annexes', page: 'admin/declaration/declaration.html', w: 1280, h: 900, actions: "openView('cfg');showDeclTab('annexes');", css: NU },
-  { nom: 'ad_decl_adhoc', page: 'admin/declaration/declaration.html', w: 1280, h: 1060, actions: "openView('adhoc');document.getElementById('adhoc-date').value='2026-11-14';document.getElementById('adhoc-cave').value=200;document.getElementById('adhoc-annexe').value=4;addAdhoc();document.getElementById('exc-date').value='2026-11-20';onExcDateChange();applyException();", css: NU },
+  { nom: 'ad_declaration', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 900, actions: '', css: NU },
+  { nom: 'ad_decl_extras', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 760, actions: "showDeclaration('extras');", css: NU },
+  { nom: 'ad_decl_reglages', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 640, actions: "openView('cfg');", css: NU },
+  { nom: 'ad_decl_encadrement', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 780, actions: "openView('cfg');showDeclTab('encadrement');", css: NU },
+  { nom: 'ad_decl_annexes', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 900, actions: "openView('cfg');showDeclTab('annexes');", css: NU },
+  { nom: 'ad_decl_adhoc', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 1060, actions: "openView('adhoc');document.getElementById('adhoc-date').value='2026-11-14';document.getElementById('adhoc-cave').value=200;document.getElementById('adhoc-annexe').value=4;addAdhoc();document.getElementById('exc-date').value='2026-11-20';onExcDateChange();applyException();", css: NU },
   // Administration : courriers
-  { nom: 'ad_courrier', page: 'admin/declaration/courriers.html', w: 1180, h: 560, actions: '', css: NU + '.letter-preview-wrap{display:none!important}' },
-  { nom: 'ad_courrier_reglages', page: 'admin/declaration/courriers.html', w: 1180, h: 1010, actions: "toggleTplPanel();", css: NU + '.letter-preview-wrap{display:none!important}' },
-  { nom: 'ad_courrier_annul', page: 'admin/declaration/courriers.html', w: 1180, h: 900, actions: "selectDocType('annulation');['2026-11-17','2026-11-24'].forEach(function(d){document.getElementById('annul-date-input').value=d;addAnnulDate()});document.getElementById('annul-motif').value='de travaux prévus dans la salle de poker';renderAnnulation();", css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier', service: 'jeux_traditionnels', page: 'outils/courrier/courriers.html', w: 1180, h: 560, actions: '', css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier_reglages', service: 'jeux_traditionnels', page: 'outils/courrier/courriers.html', w: 1180, h: 1010, actions: "toggleTplPanel();", css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier_annul', service: 'jeux_traditionnels', page: 'outils/courrier/courriers.html', w: 1180, h: 900, actions: "selectDocType('annulation');['2026-11-17','2026-11-24'].forEach(function(d){document.getElementById('annul-date-input').value=d;addAnnulDate()});document.getElementById('annul-motif').value='de travaux prévus dans la salle de poker';renderAnnulation();", css: NU + '.letter-preview-wrap{display:none!important}' },
   // Administration : extras
-  { nom: 'ad_extras_liste', page: 'admin/extras/extras.html', w: 1180, h: 800, actions: '', css: NU },
-  { nom: 'ad_extras_emarg', page: 'admin/extras/extras.html', w: 1180, h: 900, actions: "showTab('emargement');", css: NU + '#emarg-output{display:none!important}' },
+  { nom: 'ad_extras_liste', page: 'espaces/tournois/extras/extras.html', w: 1180, h: 800, actions: '', css: NU },
+  { nom: 'ad_extras_emarg', page: 'espaces/tournois/extras/extras.html', w: 1180, h: 900, actions: "showTab('emargement');", css: NU + '#emarg-output{display:none!important}' },
   // Administration : calendrier et barèmes
-  { nom: 'ad_calendrier', page: 'admin/config_tournois.html', w: 1280, h: 820, actions: '', css: NU },
-  { nom: 'ad_calendrier_form', page: 'admin/config_tournois.html', w: 1180, h: 760, actions: "editTournament('friday-highstack');", css: NU },
+  { nom: 'ad_calendrier', page: 'espaces/tournois/calendrier/calendrier.html', w: 1280, h: 820, actions: '', css: NU },
+  { nom: 'ad_calendrier_form', page: 'espaces/tournois/calendrier/calendrier.html', w: 1180, h: 760, actions: "editTournament('friday-highstack');", css: NU },
 ];
 CAPTURES.push.apply(CAPTURES, CAPTURES_TN);
 
@@ -172,38 +172,38 @@ CAPTURES.push.apply(CAPTURES, CAPTURES_TN);
 // Questions : pas d'enchaînement automatique après une réponse, chronomètres figés à leur valeur de départ
 const FIGER = "var _st=window.setTimeout;window.setTimeout=function(f,t){return(t===700||t===800||t===900||t===1000||t===1400||t===1700||t===1800)?0:_st(f,t)};window.setInterval=function(){return 0};";
 const CAPTURES_TR = [
-  { nom: 'tr_accueil', page: 'training/training.html', w: 1400, h: 900, actions: '', css: '*{transition:none!important}' },
+  { nom: 'tr_accueil', page: 'espaces/training/training.html', w: 1400, h: 900, actions: '', css: '*{transition:none!important}' },
   // Black Jack
-  { nom: 'tr_bj_paiement', page: 'training/blackjack/blackjack.html', w: 900, h: 660, actions: "document.getElementById('answer-input').value='225';", css: NU },
-  { nom: 'tr_bj_faux', page: 'training/blackjack/blackjack.html', w: 900, h: 660, actions: FIGER + "document.getElementById('answer-input').value='10';submitAnswer();", css: NU },
-  { nom: 'tr_bj_bilan', page: 'training/blackjack/blackjack.html', w: 900, h: 460, actions: "_correct=8;_qIndex=10;showSummary();", css: NU },
-  { nom: 'tr_bjs_niveaux', page: 'training/blackjack/blackjack_score.html', w: 900, h: 460, actions: '', css: NU },
-  { nom: 'tr_bjs_question', page: 'training/blackjack/blackjack_score.html', w: 900, h: 520, actions: FIGER + "startWithLevel('medium');setTimeout(function(){document.getElementById('answer-input').value='18'},500);", css: NU },
+  { nom: 'tr_bj_paiement', page: 'espaces/training/blackjack/blackjack.html', w: 900, h: 660, actions: "document.getElementById('answer-input').value='225';", css: NU },
+  { nom: 'tr_bj_faux', page: 'espaces/training/blackjack/blackjack.html', w: 900, h: 660, actions: FIGER + "document.getElementById('answer-input').value='10';submitAnswer();", css: NU },
+  { nom: 'tr_bj_bilan', page: 'espaces/training/blackjack/blackjack.html', w: 900, h: 460, actions: "_correct=8;_qIndex=10;showSummary();", css: NU },
+  { nom: 'tr_bjs_niveaux', page: 'espaces/training/blackjack/blackjack_score.html', w: 900, h: 460, actions: '', css: NU },
+  { nom: 'tr_bjs_question', page: 'espaces/training/blackjack/blackjack_score.html', w: 900, h: 520, actions: FIGER + "startWithLevel('medium');setTimeout(function(){document.getElementById('answer-input').value='18'},500);", css: NU },
   // Roulette : calculs
-  { nom: 'tr_rp_niveaux', page: 'training/roulette/roulette_paiement.html', w: 900, h: 340, actions: '', css: NU },
-  { nom: 'tr_rp_question', page: 'training/roulette/roulette_paiement.html', w: 900, h: 980, actions: FIGER + "startPaiementLevel('medium');", css: NU, seed: 11 },
-  { nom: 'tr_rp_faux', page: 'training/roulette/roulette_paiement.html', w: 900, h: 1060, actions: FIGER + "startPaiementLevel('medium');setTimeout(function(){document.getElementById('rp-answer-input').value='3';submitPaiement()},500);", css: NU, seed: 11 },
-  { nom: 'tr_rc_valeur', page: 'training/roulette/roulette_conversion.html', w: 900, h: 460, actions: '', css: NU },
-  { nom: 'tr_rc_question', page: 'training/roulette/roulette_conversion.html', w: 900, h: 700, actions: FIGER + "selectChipValue(5);setTimeout(function(){startConversionLevel('medium');setTimeout(function(){document.getElementById('cv-answer-input').value='60'},500)},500);", css: NU },
-  { nom: 'tr_rt_choix', page: 'training/roulette/roulette_tables.html', w: 900, h: 460, actions: '', css: NU },
-  { nom: 'tr_rt_carte', page: 'training/roulette/roulette_tables.html', w: 900, h: 560, actions: FIGER + "selectTable(35);setTimeout(function(){var q=document.getElementById('tb-question').textContent.split(String.fromCharCode(215));document.getElementById('tb-answer-input').value=parseInt(q[0])*parseInt(q[1]);},500);", css: NU },
-  { nom: 'tr_rt_reponse', page: 'training/roulette/roulette_tables.html', w: 900, h: 560, actions: FIGER + "selectTable(35);setTimeout(function(){var q=document.getElementById('tb-question').textContent.split(String.fromCharCode(215));document.getElementById('tb-answer-input').value=parseInt(q[0])*parseInt(q[1]);submitTables()},500);", css: NU },
+  { nom: 'tr_rp_niveaux', page: 'espaces/training/roulette/roulette_paiement.html', w: 900, h: 340, actions: '', css: NU },
+  { nom: 'tr_rp_question', page: 'espaces/training/roulette/roulette_paiement.html', w: 900, h: 980, actions: FIGER + "startPaiementLevel('medium');", css: NU, seed: 11 },
+  { nom: 'tr_rp_faux', page: 'espaces/training/roulette/roulette_paiement.html', w: 900, h: 1060, actions: FIGER + "startPaiementLevel('medium');setTimeout(function(){document.getElementById('rp-answer-input').value='3';submitPaiement()},500);", css: NU, seed: 11 },
+  { nom: 'tr_rc_valeur', page: 'espaces/training/roulette/roulette_conversion.html', w: 900, h: 460, actions: '', css: NU },
+  { nom: 'tr_rc_question', page: 'espaces/training/roulette/roulette_conversion.html', w: 900, h: 700, actions: FIGER + "selectChipValue(5);setTimeout(function(){startConversionLevel('medium');setTimeout(function(){document.getElementById('cv-answer-input').value='60'},500)},500);", css: NU },
+  { nom: 'tr_rt_choix', page: 'espaces/training/roulette/roulette_tables.html', w: 900, h: 460, actions: '', css: NU },
+  { nom: 'tr_rt_carte', page: 'espaces/training/roulette/roulette_tables.html', w: 900, h: 560, actions: FIGER + "selectTable(35);setTimeout(function(){var q=document.getElementById('tb-question').textContent.split(String.fromCharCode(215));document.getElementById('tb-answer-input').value=parseInt(q[0])*parseInt(q[1]);},500);", css: NU },
+  { nom: 'tr_rt_reponse', page: 'espaces/training/roulette/roulette_tables.html', w: 900, h: 560, actions: FIGER + "selectTable(35);setTimeout(function(){var q=document.getElementById('tb-question').textContent.split(String.fromCharCode(215));document.getElementById('tb-answer-input').value=parseInt(q[0])*parseInt(q[1]);submitTables()},500);", css: NU },
   // Roulette : le tapis
-  { nom: 'tr_rpt_question', page: 'training/roulette/roulette_pointage.html', w: 900, h: 640, actions: FIGER + "startPointageLevel('medium');", css: NU, seed: 5 },
-  { nom: 'tr_rcol_question', page: 'training/roulette/roulette_couleur.html', w: 900, h: 560, actions: FIGER + "startCouleurLevel('medium');", css: NU, seed: 12 },
+  { nom: 'tr_rpt_question', page: 'espaces/training/roulette/roulette_pointage.html', w: 900, h: 640, actions: FIGER + "startPointageLevel('medium');", css: NU, seed: 5 },
+  { nom: 'tr_rcol_question', page: 'espaces/training/roulette/roulette_couleur.html', w: 900, h: 560, actions: FIGER + "startCouleurLevel('medium');", css: NU, seed: 12 },
   // Ultimate Texas Hold'em
-  { nom: 'tr_uth_main', page: 'training/uth/uth_main.html', w: 900, h: 940, actions: '', css: NU, seed: 3 },
-  { nom: 'tr_uth_main_reponse', page: 'training/uth/uth_main.html', w: 900, h: 1080, actions: FIGER + "setTimeout(function(){umAnswer(2)},500);", css: NU, seed: 3 },
-  { nom: 'tr_uth_gagnant', page: 'training/uth/uth_gagnant.html', w: 900, h: 920, actions: FIGER + "setTimeout(function(){ugPickQualified(true)},500);", css: NU, seed: 9 },
-  { nom: 'tr_uth_gains', page: 'training/uth/uth_gains.html', w: 900, h: 940, actions: '', css: NU, seed: 4 },
-  { nom: 'tr_uth_gains_mise', page: 'training/uth/uth_gains.html', w: 900, h: 940, actions: "setTimeout(function(){ucOpen(ucBets()[0].bet)},500);", css: NU, seed: 4 },
+  { nom: 'tr_uth_main', page: 'espaces/training/uth/uth_main.html', w: 900, h: 940, actions: '', css: NU, seed: 3 },
+  { nom: 'tr_uth_main_reponse', page: 'espaces/training/uth/uth_main.html', w: 900, h: 1080, actions: FIGER + "setTimeout(function(){umAnswer(2)},500);", css: NU, seed: 3 },
+  { nom: 'tr_uth_gagnant', page: 'espaces/training/uth/uth_gagnant.html', w: 900, h: 920, actions: FIGER + "setTimeout(function(){ugPickQualified(true)},500);", css: NU, seed: 9 },
+  { nom: 'tr_uth_gains', page: 'espaces/training/uth/uth_gains.html', w: 900, h: 940, actions: '', css: NU, seed: 4 },
+  { nom: 'tr_uth_gains_mise', page: 'espaces/training/uth/uth_gains.html', w: 900, h: 940, actions: "setTimeout(function(){ucOpen(ucBets()[0].bet)},500);", css: NU, seed: 4 },
   // Suivi
-  { nom: 'tr_resultats', page: 'training/suivi/suivi_croupier.html', w: 1180, h: 960, actions: '', css: NU },
-  { nom: 'tr_resultats_module', page: 'training/suivi/suivi_croupier.html', w: 1180, h: 1100, actions: "location.hash='#roulette/roulette-tables';", css: NU },
-  { nom: 'tr_equipe_classement', page: 'training/suivi/suivi_manager.html', w: 1180, h: 760, actions: '', css: NU },
-  { nom: 'tr_equipe_progression', page: 'training/suivi/suivi_manager.html', w: 1180, h: 1000, actions: "svmGo('progression');", css: NU },
-  { nom: 'tr_equipe_faibles', page: 'training/suivi/suivi_manager.html', w: 1180, h: 760, actions: "svmGo('faibles');", css: NU },
-  { nom: 'tr_equipe_activite', page: 'training/suivi/suivi_manager.html', w: 1180, h: 960, actions: "svmGo('activite');", css: NU },
+  { nom: 'tr_resultats', page: 'espaces/training/suivi/suivi_croupier.html', w: 1180, h: 960, actions: '', css: NU },
+  { nom: 'tr_resultats_module', page: 'espaces/training/suivi/suivi_croupier.html', w: 1180, h: 1100, actions: "location.hash='#roulette/roulette-tables';", css: NU },
+  { nom: 'tr_equipe_classement', page: 'espaces/training/suivi/suivi_manager.html', w: 1180, h: 760, actions: '', css: NU },
+  { nom: 'tr_equipe_progression', page: 'espaces/training/suivi/suivi_manager.html', w: 1180, h: 1000, actions: "svmGo('progression');", css: NU },
+  { nom: 'tr_equipe_faibles', page: 'espaces/training/suivi/suivi_manager.html', w: 1180, h: 760, actions: "svmGo('faibles');", css: NU },
+  { nom: 'tr_equipe_activite', page: 'espaces/training/suivi/suivi_manager.html', w: 1180, h: 960, actions: "svmGo('activite');", css: NU },
   // Configuration des modules
   { nom: 'tr_config_bj', page: 'admin/config_training.html', w: 1180, h: 950, actions: '', css: NU },
   { nom: 'tr_config_roulette', page: 'admin/config_training.html', w: 1180, h: 1080, actions: "location.hash='#roulette';", css: NU },
@@ -213,13 +213,13 @@ CAPTURES.push.apply(CAPTURES, CAPTURES_TR);
 
 // ── Règlement TDA (texte fictif) ──
 const CAPTURES_TDA = [
-  { nom: 'tda_sommaire', page: 'tda/tda.html', w: 1180, h: 760, actions: '', css: '*{transition:none!important}' },
-  { nom: 'tda_regle', page: 'tda/tda.html', w: 1180, h: 800, actions: "location.hash='#r3';", css: NU },
-  { nom: 'tda_terme', page: 'tda/tda.html', w: 1180, h: 470, actions: "location.hash='#r2';setTimeout(function(){document.querySelector('.td-terme').click()},500);", css: NU },
-  { nom: 'tda_renvoi', page: 'tda/tda.html', w: 1180, h: 470, actions: "location.hash='#r4';setTimeout(function(){document.querySelector('.td-verif').click()},500);", css: NU },
-  { nom: 'tda_recherche', page: 'tda/tda.html', w: 1180, h: 760, actions: "location.hash='#q=exemple';var q=document.getElementById('td-q');q.value='exemple';", css: NU },
-  { nom: 'tda_glossaire', page: 'tda/tda.html', w: 1180, h: 560, actions: "location.hash='#glossaire';", css: NU },
-  { nom: 'tda_mobile', page: 'tda/tda.html', w: 390, h: 820, actions: "location.hash='#r3';", css: NU },
+  { nom: 'tda_sommaire', page: 'espaces/tournois/tda/tda.html', w: 1180, h: 760, actions: '', css: '*{transition:none!important}' },
+  { nom: 'tda_regle', page: 'espaces/tournois/tda/tda.html', w: 1180, h: 800, actions: "location.hash='#r3';", css: NU },
+  { nom: 'tda_terme', page: 'espaces/tournois/tda/tda.html', w: 1180, h: 470, actions: "location.hash='#r2';setTimeout(function(){document.querySelector('.td-terme').click()},500);", css: NU },
+  { nom: 'tda_renvoi', page: 'espaces/tournois/tda/tda.html', w: 1180, h: 470, actions: "location.hash='#r4';setTimeout(function(){document.querySelector('.td-verif').click()},500);", css: NU },
+  { nom: 'tda_recherche', page: 'espaces/tournois/tda/tda.html', w: 1180, h: 760, actions: "location.hash='#q=exemple';var q=document.getElementById('td-q');q.value='exemple';", css: NU },
+  { nom: 'tda_glossaire', page: 'espaces/tournois/tda/tda.html', w: 1180, h: 560, actions: "location.hash='#glossaire';", css: NU },
+  { nom: 'tda_mobile', page: 'espaces/tournois/tda/tda.html', w: 390, h: 820, actions: "location.hash='#r3';", css: NU },
 ];
 CAPTURES.push.apply(CAPTURES, CAPTURES_TDA);
 
@@ -229,23 +229,43 @@ const REGLER = "var s=function(id,v){var e=document.getElementById(id);e.value=v
 const FEUILLE_MT = '.app,header.nav,.nav,.modal-overlay,.mt-toast{display:none!important} body{background:#222!important} .mt-print{display:block!important;width:194mm;margin:14px auto;padding:8mm;background:#fff;box-sizing:content-box} *{transition:none!important}';
 const IMPRIMER_MT = function (fn) { return "location.hash='#destruction';window.print=function(){};window.lancerImpression=function(h){document.getElementById('mt-print').innerHTML=h;ajusterPage();document.body.classList.add('mt-imprime');};setTimeout(function(){" + fn + "()},300);"; };
 const CAPTURES_MT = [
-  { nom: 'mt_liste', page: 'materiel/materiel.html', w: 1180, h: 860, actions: '', css: NU },
-  { nom: 'mt_selection', page: 'materiel/materiel.html', w: 1180, h: 640, actions: "var c=document.querySelectorAll('#mt-liste [data-sel]');[0,1,2].forEach(function(i){c[i].click()});", css: NU },
-  { nom: 'mt_ajout', page: 'materiel/materiel.html', w: 1180, h: 780, actions: "document.getElementById('mt-ajouter').click();setTimeout(function(){" + REGLER + "s('mt-a-jeu','Ultimate');s('mt-a-fin','Plastifié');s('mt-a-de','100109');s('mt-a-a','100118')},300);", css: NU },
-  { nom: 'mt_fiche', page: 'materiel/materiel.html', w: 1180, h: 900, actions: "document.querySelector('[data-id=\"p100005\"] [data-fiche]').click();", css: NU },
-  { nom: 'mt_retour', page: 'materiel/materiel.html', w: 1180, h: 960, actions: "document.querySelector('[data-id=\"p100006\"] [data-fiche]').click();setTimeout(function(){document.querySelector('[data-f-retour]').click();var m=document.getElementById('mt-f-motif');m.value=\"Mise hors d'usage faite par erreur\";},500);", css: NU },
-  { nom: 'mt_destruction', page: 'materiel/materiel.html', w: 1180, h: 960, actions: "location.hash='#destruction';", css: NU },
-  { nom: 'mt_sessions', page: 'materiel/materiel.html', w: 1180, h: 520, actions: "location.hash='#destruction';setTimeout(function(){document.querySelector('.mt-session').open=true},300);", css: NU + ' #vue-destruction > .card:nth-child(-n+2){display:none!important} #vue-destruction{width:800px!important;max-width:100%} .hdr,#mt-onglets{display:none!important}' },
-  { nom: 'mt_bilan_papier', page: 'materiel/materiel.html', w: 860, h: 420, actions: IMPRIMER_MT('imprimerBilan'), css: FEUILLE_MT },
-  { nom: 'mt_pointage', page: 'materiel/materiel.html', w: 860, h: 720, actions: IMPRIMER_MT('imprimerPointage'), css: FEUILLE_MT },
+  { nom: 'mt_liste', page: 'espaces/materiel/materiel.html', w: 1180, h: 860, actions: '', css: NU },
+  { nom: 'mt_selection', page: 'espaces/materiel/materiel.html', w: 1180, h: 640, actions: "var c=document.querySelectorAll('#mt-liste [data-sel]');[0,1,2].forEach(function(i){c[i].click()});", css: NU },
+  { nom: 'mt_ajout', page: 'espaces/materiel/materiel.html', w: 1180, h: 780, actions: "document.getElementById('mt-ajouter').click();setTimeout(function(){" + REGLER + "s('mt-a-jeu','Ultimate');s('mt-a-fin','Plastifié');s('mt-a-de','100109');s('mt-a-a','100118')},300);", css: NU },
+  { nom: 'mt_fiche', page: 'espaces/materiel/materiel.html', w: 1180, h: 900, actions: "document.querySelector('[data-id=\"p100005\"] [data-fiche]').click();", css: NU },
+  { nom: 'mt_retour', page: 'espaces/materiel/materiel.html', w: 1180, h: 960, actions: "document.querySelector('[data-id=\"p100006\"] [data-fiche]').click();setTimeout(function(){document.querySelector('[data-f-retour]').click();var m=document.getElementById('mt-f-motif');m.value=\"Mise hors d'usage faite par erreur\";},500);", css: NU },
+  { nom: 'mt_destruction', page: 'espaces/materiel/materiel.html', w: 1180, h: 960, actions: "location.hash='#destruction';", css: NU },
+  { nom: 'mt_sessions', page: 'espaces/materiel/materiel.html', w: 1180, h: 520, actions: "location.hash='#destruction';setTimeout(function(){document.querySelector('.mt-session').open=true},300);", css: NU + ' #vue-destruction > .card:nth-child(-n+2){display:none!important} #vue-destruction{width:800px!important;max-width:100%} .hdr,#mt-onglets{display:none!important}' },
+  { nom: 'mt_bilan_papier', page: 'espaces/materiel/materiel.html', w: 860, h: 420, actions: IMPRIMER_MT('imprimerBilan'), css: FEUILLE_MT },
+  { nom: 'mt_pointage', page: 'espaces/materiel/materiel.html', w: 860, h: 720, actions: IMPRIMER_MT('imprimerPointage'), css: FEUILLE_MT },
 ];
 CAPTURES.push.apply(CAPTURES, CAPTURES_MT);
+
+// Service Machines à sous : choix du service à l'accueil, horaires annuels, dérogation d'horaire (réglages fictifs de l'espace Tournois)
+const MAS = 'machines_a_sous';
+const SANS_LETTRE = NU + ' .letter-preview-wrap{display:none!important}';
+const LETTRE_SEULE = NU + ' .app{display:none!important} .letter-preview-wrap{padding:16px 0!important}';
+const DEROGATION = "selectDocType('derogation');var v=document.getElementById('der-variante');v.value='prolongee';onDerVarianteChange();document.getElementById('der-jour').value='2026-12-31';onDerJourChange();var d=document.getElementById('der-dest');d.value='prefecture';onDerDestChange();";
+const CAPTURES_MAS = [
+  { nom: 'mas_choix', service: '', page: 'index.html', w: 1180, h: 420, actions: '', css: '*{transition:none!important} .footer{display:none!important}' },
+  { nom: 'mas_horaires', service: MAS, page: 'outils/courrier/courriers.html', w: 1180, h: 1000, actions: '', css: SANS_LETTRE },
+  { nom: 'mas_horaires_lettre', service: MAS, page: 'outils/courrier/courriers.html', w: 900, h: 860, actions: '', css: LETTRE_SEULE },
+  { nom: 'mas_derogation', service: MAS, page: 'outils/courrier/courriers.html', w: 1180, h: 1150, actions: DEROGATION, css: SANS_LETTRE },
+  { nom: 'mas_derogation_lettre', service: MAS, page: 'outils/courrier/courriers.html', w: 900, h: 760, actions: DEROGATION, css: LETTRE_SEULE },
+];
+CAPTURES.push.apply(CAPTURES, CAPTURES_MAS);
+
+// Service retenu sur le poste pour le compte fictif (id 'u') : c.service = id du service, '' pour aucun (choix à l'accueil)
+function SERVICE(c) {
+  if (c.service === undefined) return '';
+  return '<script>try{' + (c.service ? 'localStorage.setItem("pm_service_u","' + c.service + '")' : 'localStorage.removeItem("pm_service_u")') + '}catch(e){}</script>';
+}
 
 function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
   h = h.replace(/<script src="(?:\.\.\/)*shared\/vendor\/supabase_js\.js"><\/script>\s*/, '')
-    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : isMt(c) ? BASE_MT : BASE_TN; })
-    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('break_list/') === 0 || isTda(c) || isMt(c) ? '' : isTr(c) ? SEED(c.seed || 7) : ''))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
+    .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('espaces/break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : isMt(c) ? BASE_MT : BASE_TN; })
+    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + SERVICE(c) + (c.page.indexOf('espaces/break_list/') === 0 || isTda(c) || isMt(c) ? '' : isTr(c) ? SEED(c.seed || 7) : ''))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')
     .replace('</body>', '<script>window.addEventListener("load",function(){setTimeout(function(){' + c.actions + '},900)});</script></body>');
   const file = path.join(path.dirname(path.join(ROOT, c.page)), '_qa_aide_' + c.nom + '.html');

@@ -17,21 +17,29 @@
 
 const NAV = (function () {
 
-  // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent).
-  const T = 'training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'break_list/';
+  // Services : un service regroupe des espaces. Un compte voit les services dont il a au moins un espace ; s'il en a plusieurs,
+  // il choisit le sien sur l'accueil (choix retenu sur le poste pour ce compte, modifiable par « Changer de service »).
+  const JT = 'jeux_traditionnels', MAS = 'machines_a_sous';
+  const SERVICES = [
+    { id: JT,  label: 'Jeux traditionnels', icon: 'card_spade', color: '' },
+    { id: MAS, label: 'Machines à sous',    icon: 'chip',       color: 'c-teal' },
+  ];
+
+  // Chemins relatifs à la racine du site. `panel` : droit requis (hérité de l'espace si absent). `service` : service de l'espace.
+  const T = 'espaces/training/', BJ = T + 'blackjack/', RO = T + 'roulette/', UTH = T + 'uth/', BL = 'espaces/break_list/';
   const SPACES = [
-    { id: 'tournois', label: 'Tournois', note: 'Prize pool, classement, règlement TDA, administration', href: 'tournois.html', panel: 'tournois', items: [
-      { label: 'Prize Pool',  href: 'prize_pool/prize_pool.html',   panel: 'prize-pool' },
-      { label: 'Leaderboard', href: 'leaderboard/leaderboard.html', panel: 'leaderboard' },
-      { label: 'Règlement TDA', href: 'tda/tda.html', panel: 'tda' },
+    { id: 'tournois', service: JT, label: 'Tournois', note: 'Prize pool, classement, règlement TDA, administration', href: 'espaces/tournois/tournois.html', panel: 'tournois', items: [
+      { label: 'Prize Pool',  href: 'espaces/tournois/prize_pool/prize_pool.html',   panel: 'prize-pool' },
+      { label: 'Leaderboard', href: 'espaces/tournois/leaderboard/leaderboard.html', panel: 'leaderboard' },
+      { label: 'Règlement TDA', href: 'espaces/tournois/tda/tda.html', panel: 'tda' },
       { label: 'Administration tournois', id: 'admin-tournois', panel: 'admin-tournois', menu: [
-        { label: 'Déclarations',          href: 'admin/declaration/declaration.html' },
-        { label: 'Générateur de courrier', href: 'admin/declaration/courriers.html' },
-        { label: 'Gestion des Extras',    href: 'admin/extras/extras.html' },
-        { label: 'Calendrier & barèmes',  href: 'admin/config_tournois.html' },
+        { label: 'Déclarations',          href: 'espaces/tournois/declaration/declaration.html' },
+        { label: 'Générateur de courrier', href: 'outils/courrier/courriers.html' },
+        { label: 'Gestion des Extras',    href: 'espaces/tournois/extras/extras.html' },
+        { label: 'Calendrier & barèmes',  href: 'espaces/tournois/calendrier/calendrier.html' },
       ] },
     ] },
-    { id: 'training', label: 'Training', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
+    { id: 'training', service: JT, label: 'Training', note: 'Black Jack, roulette, Ultimate Texas Hold\'em', href: T + 'training.html', panel: 'training', items: [
       { label: 'Black Jack', id: 'blackjack', menu: [
         { label: 'BJ Paiement', href: BJ + 'blackjack.html' },
         { label: 'BJ Score',    href: BJ + 'blackjack_score.html' },
@@ -50,13 +58,18 @@ const NAV = (function () {
       ] },
       { label: 'Mes résultats', href: T + 'suivi/suivi_croupier.html' },
     ] },
-    { id: 'break-list', label: 'Break list', note: 'Break list, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
+    { id: 'break-list', service: JT, label: 'Break list', note: 'Break list, départs, planning', href: BL + 'break_list.html', panel: 'break-list', items: [
       { label: 'Aujourd\'hui', href: BL + 'break_list.html' },
       { label: 'Planning',     href: BL + 'planning.html' },
       { label: 'Paramètres',   href: BL + 'parametres.html' },
     ] },
-    { id: 'materiel', label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'materiel/materiel.html', panel: 'materiel', items: [
-      { label: 'Sixains', href: 'materiel/materiel.html' },
+    // Service Machines à sous. Le générateur de courrier sert aussi aux Jeux traditionnels (menu Administration tournois) :
+    // une même page peut appartenir à deux espaces, la barre prend celui du service courant
+    { id: 'courrier', service: MAS, label: 'Courrier', note: 'Courriers aux autorités', href: 'outils/courrier/courriers.html', panel: 'courrier', items: [
+      { label: 'Courrier', href: 'outils/courrier/courriers.html' },
+    ] },
+    { id: 'materiel', service: JT, label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'espaces/materiel/materiel.html', panel: 'materiel', items: [
+      { label: 'Sixains', href: 'espaces/materiel/materiel.html' },
     ] },
   ];
 
@@ -67,7 +80,7 @@ const NAV = (function () {
       { label: 'Gestion des comptes',       href: 'admin/comptes.html',            role: 'admin' },
       { label: 'Journal d\'audit',          href: 'admin/journal.html',            role: 'admin' },
     ] },
-    { title: 'Training', items: [
+    { title: 'Training', service: JT, items: [
       { label: 'Suivi équipe',              href: T + 'suivi/suivi_manager.html', panel: 'training-suivi' },
       { label: 'Configuration des modules', href: 'admin/config_training.html',   role: 'admin' },
     ] },
@@ -108,45 +121,54 @@ const NAV = (function () {
   // Guide ouvert par le bouton « Aide » (id d'un guide de aide/aide_guides.js) : celui de la page si elle en a un, sinon celui de l'espace courant ; sans entrée : la page Aide
   const HELP = {
     'tournois': 'tournois-pour-commencer',
-    'prize_pool/prize_pool.html': 'tournois-prize-pool',
-    'leaderboard/leaderboard.html': 'tournois-classement',
-    'tda/tda.html': 'tournois-tda',
-    'admin/declaration/declaration.html': 'tournois-declaration',
-    'admin/declaration/courriers.html': 'tournois-courriers',
-    'admin/extras/extras.html': 'tournois-extras',
-    'admin/config_tournois.html': 'tournois-calendrier',
+    'espaces/tournois/prize_pool/prize_pool.html': 'tournois-prize-pool',
+    'espaces/tournois/leaderboard/leaderboard.html': 'tournois-classement',
+    'espaces/tournois/tda/tda.html': 'tournois-tda',
+    'espaces/tournois/declaration/declaration.html': 'tournois-declaration',
+    'outils/courrier/courriers.html': 'tournois-courriers',
+    'espaces/tournois/extras/extras.html': 'tournois-extras',
+    'espaces/tournois/calendrier/calendrier.html': 'tournois-calendrier',
     'training': 'training-pour-commencer',
-    'training/blackjack/blackjack.html': 'training-blackjack',
-    'training/blackjack/blackjack_score.html': 'training-blackjack',
-    'training/roulette/roulette_paiement.html': 'training-roulette-calculs',
-    'training/roulette/roulette_conversion.html': 'training-roulette-calculs',
-    'training/roulette/roulette_tables.html': 'training-roulette-calculs',
-    'training/roulette/roulette_pointage.html': 'training-roulette-tapis',
-    'training/roulette/roulette_couleur.html': 'training-roulette-tapis',
-    'training/uth/uth_main.html': 'training-uth',
-    'training/uth/uth_gagnant.html': 'training-uth',
-    'training/uth/uth_gains.html': 'training-uth',
-    'training/suivi/suivi_croupier.html': 'training-mes-resultats',
-    'training/suivi/suivi_manager.html': 'training-suivi-equipe',
+    'espaces/training/blackjack/blackjack.html': 'training-blackjack',
+    'espaces/training/blackjack/blackjack_score.html': 'training-blackjack',
+    'espaces/training/roulette/roulette_paiement.html': 'training-roulette-calculs',
+    'espaces/training/roulette/roulette_conversion.html': 'training-roulette-calculs',
+    'espaces/training/roulette/roulette_tables.html': 'training-roulette-calculs',
+    'espaces/training/roulette/roulette_pointage.html': 'training-roulette-tapis',
+    'espaces/training/roulette/roulette_couleur.html': 'training-roulette-tapis',
+    'espaces/training/uth/uth_main.html': 'training-uth',
+    'espaces/training/uth/uth_gagnant.html': 'training-uth',
+    'espaces/training/uth/uth_gains.html': 'training-uth',
+    'espaces/training/suivi/suivi_croupier.html': 'training-mes-resultats',
+    'espaces/training/suivi/suivi_manager.html': 'training-suivi-equipe',
     'admin/config_training.html': 'training-configuration',
     'break-list': 'break-list-pour-commencer',
-    'break_list/planning.html': 'break-list-planning',
-    'break_list/parametres.html': 'break-list-parametres',
+    'espaces/break_list/planning.html': 'break-list-planning',
+    'espaces/break_list/parametres.html': 'break-list-parametres',
     'materiel': 'materiel-pour-commencer',
+    'courrier': 'courrier-pour-commencer',
   };
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
+  // CONTEXTES : chemin → toutes ses places (une par espace) quand une page appartient à plusieurs espaces
   const PAGES = { 'index.html': {}, 'aide/aide.html': { help: true } };
+  const CONTEXTES = {};
+  const placer = function (href, ctx) {
+    PAGES[href] = ctx;
+    const l = CONTEXTES[href] || (CONTEXTES[href] = []);
+    const i = l.findIndex(function (c) { return c.s === ctx.s; });
+    if (i >= 0) l[i] = ctx; else l.push(ctx);
+  };
   GESTION.groups.forEach(function (g) { g.items.forEach(function (it) { PAGES[it.href] = { admin: true }; }); });
   // Suivi équipe et Configuration des modules restent dans le contexte Training : la barre de l'espace est affichée, « Gestion » surligné
   PAGES[T + 'suivi/suivi_manager.html'].s = 'training';
   PAGES['admin/config_training.html'].s = 'training';
   SPACES.forEach(function (s) {
-    PAGES[s.href] = { s: s.id };
+    placer(s.href, { s: s.id });
     s.items.forEach(function (it) {
       const id = it.id || it.href;                      // entrée de la barre : un lien (href) ou un menu de pages (id + menu)
-      if (it.href) PAGES[it.href] = { s: s.id, i: id };
-      (it.menu || []).forEach(function (m) { PAGES[m.href] = { s: s.id, i: id }; });
+      if (it.href) placer(it.href, { s: s.id, i: id });
+      (it.menu || []).forEach(function (m) { placer(m.href, { s: s.id, i: id }); });
     });
   });
 
@@ -189,6 +211,37 @@ const NAV = (function () {
     return space.parent ? space.href : (space.items[0] && itemHref(space.items[0])) || space.href;
   }
 
+  // ── Services ──
+  // Services dont l'utilisateur voit au moins un espace
+  function servicesVisibles(spaces) {
+    return SERVICES.filter(function (sv) { return spaces.some(function (s) { return s.service === sv.id; }); });
+  }
+  // Service courant : celui de la page ouverte, sinon le choix retenu, sinon le seul service accessible ; null s'il faut choisir
+  function serviceCourant(visibles, memorise, pageService) {
+    const ok = function (id) { return id && visibles.some(function (sv) { return sv.id === id; }); };
+    if (ok(pageService)) return pageService;
+    if (ok(memorise)) return memorise;
+    return visibles.length === 1 ? visibles[0].id : null;
+  }
+  // Choix retenu sur le poste, par compte (un poste partagé ne transmet pas le choix d'un collègue)
+  function cleService(userId) { return 'pm_service_' + (userId || 'anonyme'); }
+  function lireService(userId) { try { return localStorage.getItem(cleService(userId)); } catch (e) { return null; } }
+  function ecrireService(userId, id) { try { if (id) localStorage.setItem(cleService(userId), id); else localStorage.removeItem(cleService(userId)); } catch (e) { /* stockage indisponible : on redemandera */ } }
+
+  // Place d'une page qui appartient à plusieurs espaces : parmi ceux que l'utilisateur voit (l'entrée de la barre comprise),
+  // celle du service retenu, sinon la première ; null si aucune n'est visible
+  function contexteDe(contextes, tous, memorise) {
+    const visibles = contextes.filter(function (c) {
+      const sp = tous.find(function (s) { return s.id === c.s; });
+      return sp && (!c.i || sp.items.some(function (it) { return (it.id || it.href) === c.i; }));
+    });
+    const prefere = visibles.find(function (c) {
+      const sp = SPACES.find(function (s) { return s.id === c.s; });
+      return sp && sp.service === memorise;
+    });
+    return prefere || visibles[0] || null;
+  }
+
   // Sur la page Aide, l'espace affiché dans la barre est celui du guide lu : on le lit dans l'adresse (#<espace> ou #<espace>-<guide>)
   function spaceFromHash() {
     const h = decodeURIComponent(location.hash.replace(/^#/, ''));
@@ -196,15 +249,29 @@ const NAV = (function () {
     return sp ? sp.id : null;
   }
 
-  let lastOpts = null, shownSpace = null, offDoc = null;
+  let lastOpts = null, shownSpace = null, offDoc = null, etat = { services: [], service: null };
 
-  // opts : { root, loginUrl, email, role, isAdmin, panels, color } ; opts.space force l'espace affiché (page Aide)
+  // opts : { root, loginUrl, userId, email, role, isAdmin, panels, color } ; opts.space force l'espace affiché (page Aide)
   // Renvoie true si la barre est en place (ou si l'on est redirigé), false pour retomber sur l'ancienne interface
   function mount(opts) {
     lastOpts = opts;
-    const root = opts.root, key = pageKey(), page = (key && PAGES[key]) || {};
-    const spaces = visibleSpaces(opts);
+    const root = opts.root, key = pageKey();
     const href = function (p) { return root + p; };
+
+    // ── Service courant : la barre ne montre que les espaces de ce service ──
+    const tous = visibleSpaces(opts);
+    const services = servicesVisibles(tous);
+    const memorise = lireService(opts.userId);
+    const multiple = key && CONTEXTES[key] && CONTEXTES[key].length > 1;
+    const page = (multiple ? contexteDe(CONTEXTES[key], tous, memorise) : null) || (key && PAGES[key]) || {};
+    const spaceOf = function (id) { return SPACES.find(function (s) { return s.id === id; }); };
+    const pageSpace = opts.space || (key === 'aide/aide.html' ? spaceFromHash() : null) || page.s;
+    const pageService = pageSpace && spaceOf(pageSpace) ? spaceOf(pageSpace).service : null;
+    const service = serviceCourant(services, memorise, pageService);
+    if (service && services.length > 1 && service !== memorise) ecrireService(opts.userId, service);   // page d'un autre service : on bascule
+    const serviceInfo = SERVICES.find(function (sv) { return sv.id === service; }) || null;
+    etat = { services: services, service: service };
+    const spaces = tous.filter(function (s) { return s.service === service; });
 
     // ── Redirections d'entrée ──
     if (key === 'index.html' && spaces.length === 1) { location.replace(href(entryOf(spaces[0]))); return true; }
@@ -213,7 +280,7 @@ const NAV = (function () {
       if (sp && sp.items.length === 1 && itemHref(sp.items[0]) !== key) { location.replace(href(itemHref(sp.items[0]))); return true; }
     }
 
-    const spaceId = opts.space || (key === 'aide/aide.html' ? spaceFromHash() : null) || page.s;
+    const spaceId = pageSpace;
     const current = spaces.find(function (s) { return s.id === spaceId; }) || null;
     shownSpace = current ? current.id : null;
 
@@ -251,11 +318,11 @@ const NAV = (function () {
 
     // ── Marque ──
     const logo = function (file, cls) { return el('img', { src: href('shared/logos/' + file), alt: '', class: cls }); };
-    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux, Service Jeux traditionnels - Accueil' }, [
+    const brand = el('a', { class: 'nav-brand', href: href('index.html'), 'aria-label': 'Barrière Casino Bordeaux' + (serviceInfo ? ', Service ' + serviceInfo.label : '') + ' - Accueil' }, [
       logo('barriere_casino-logo.svg', 'logo-light'), logo('barriere_casino-logo-black.svg', 'logo-dark'),
       el('i', { class: 'ico ico-star nav-star', 'aria-hidden': 'true' }),
       el('span', { class: 'nav-city', text: 'Bordeaux' }),
-      el('span', { class: 'nav-service' }, [el('span', { text: 'Service' }), el('span', { text: 'Jeux traditionnels' })]),
+      serviceInfo ? el('span', { class: 'nav-service' }, [el('span', { text: 'Service' }), el('span', { text: serviceInfo.label })]) : null,
     ]);
 
     // ── Espace courant : lanceur (plusieurs espaces) ou simple titre (un seul) ──
@@ -285,6 +352,7 @@ const NAV = (function () {
     // ── Outils à droite : Gestion, thème, utilisateur ──
     const tools = [];
     const gestion = GESTION.groups.map(function (g) {
+      if (g.service && g.service !== service) return { items: [] };
       return { title: g.title, items: g.items.filter(function (it) { return opts.isAdmin || (!it.role && (opts.panels || []).indexOf(it.panel) >= 0); }) };
     }).filter(function (g) { return g.items.length; });
     if (gestion.length) {
@@ -298,7 +366,9 @@ const NAV = (function () {
       tools.push(dropdown(abtn, entries, true));
     }
     // Aide : le guide de l'espace courant (ou la page Aide)
-    const helpId = HELP[key] || HELP[page.s];
+    // Le guide d'une page vaut pour l'espace auquel il appartient (les id de guides commencent par l'id de leur espace)
+    const helpPage = HELP[key] && (!page.s || HELP[key].indexOf(page.s + '-') === 0) ? HELP[key] : null;
+    const helpId = helpPage || HELP[page.s];
     const helpTarget = 'aide/aide.html' + (helpId ? '#' + helpId : '');
     const helpBtn = el('a', { class: 'nav-btn', href: href(helpTarget), title: 'Aide', 'aria-label': 'Aide' }, [icon('help'), el('span', { class: 'nav-btn-label', text: 'Aide' })]);
     if (page.help) helpBtn.setAttribute('aria-current', 'page');
@@ -315,9 +385,13 @@ const NAV = (function () {
     const userBtn = el('button', { class: 'nav-btn', type: 'button' }, [icon('user'), el('span', { class: 'nav-btn-label nav-user-name', text: opts.name || opts.email.split('@')[0] })]);
     tools.push(dropdown(userBtn, [
       el('div', { class: 'nav-id' }, [el('b', { text: opts.name || opts.email }), opts.name ? el('small', { text: opts.email }) : null, chip]),
+      services.length > 1 ? el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: changerService } }, [el('span', { text: 'Changer de service' })]) : null,
       el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { closeAll(); AUTH._openChangePwd(); } } }, [el('span', { text: 'Changer le mot de passe' })]),
       el('button', { class: 'nav-row', type: 'button', role: 'menuitem', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }, [el('span', { text: 'Déconnexion' })]),
     ], true));
+
+    // Retour à l'accueil, qui propose le choix du service
+    function changerService() { ecrireService(opts.userId, null); location.href = href('index.html'); }
 
     // ── Menu replié (téléphone, tablette) : toute l'arborescence ──
     const burger = el('button', { class: 'nav-btn nav-burger', type: 'button', 'aria-label': 'Menu', 'aria-expanded': 'false', 'aria-controls': 'nav-panel' }, [icon('menu')]);
@@ -338,6 +412,7 @@ const NAV = (function () {
       el('div', { class: 'who', text: (opts.name ? opts.name + ' · ' : '') + opts.email + ' · ' + roleLabel(opts.role) }),
       key !== 'index.html' ? plink('Aide', helpTarget, page.help) : null,
       el('button', { type: 'button', text: 'Changer de thème', on: { click: function () { toggleTheme(); } } }),
+      services.length > 1 ? el('button', { type: 'button', text: 'Changer de service', on: { click: changerService } }) : null,
       el('button', { type: 'button', text: 'Changer le mot de passe', on: { click: function () { AUTH._openChangePwd(); } } }),
       el('button', { type: 'button', text: 'Déconnexion', on: { click: function () { AUTH.signOut(opts.loginUrl); } } }),
     ])]));
@@ -363,5 +438,15 @@ const NAV = (function () {
     mount(Object.assign({}, lastOpts, { space: id }));
   }
 
-  return { setSpace: setSpace, mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf };
+  // Accueil : choix d'un service (retenu pour ce compte), puis rechargement de l'accueil
+  function choisirService(id) { if (lastOpts) ecrireService(lastOpts.userId, id); location.reload(); }
+
+  return {
+    setSpace: setSpace, mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf,
+    SERVICES: SERVICES, servicesVisibles: servicesVisibles, serviceCourant: serviceCourant, choisirService: choisirService,
+    CONTEXTES: CONTEXTES, contexteDe: contexteDe,
+    etat: function () { return etat; },
+  };
 })();
+
+if (typeof module !== 'undefined') module.exports = NAV;   // tests Node (nav.test.js)
