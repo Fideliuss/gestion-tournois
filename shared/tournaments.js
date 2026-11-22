@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    tournaments.js - Référentiel tournois partagé
-   Barrière Casino Bordeaux · Tournois
+   Pit Manager
    Charger après barriere.js dans chaque module.
 ═══════════════════════════════════════════════════════ */
 

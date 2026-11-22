@@ -1,4 +1,4 @@
-# Service Jeux Traditionnels - Barrière Casino Bordeaux
+# Pit Manager - Barrière Casino Bordeaux
 
 Outils internes du casino, regroupés dans une seule application web déployée sur **GitHub Pages**, sécurisée par authentification e-mail + mot de passe (Supabase Auth), sans serveur, sans installation - s'ouvre directement dans le navigateur.
 
@@ -307,4 +307,4 @@ Du 1er novembre au 31 octobre. Saison en cours : **2025 / 2026** (clôture à pr
 
 ---
 
-*Barrière Casino Bordeaux - Outil interne*
+*Pit Manager - Barrière Casino Bordeaux - Outil interne*

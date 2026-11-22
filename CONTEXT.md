@@ -1,4 +1,4 @@
-# Contexte projet - Service Jeux Traditionnels, Barrière Casino Bordeaux
+# Contexte projet - Pit Manager, Barrière Casino Bordeaux
 
 > Fichier à lire en début de session pour assurer la continuité.
 > À mettre à jour avant de clore chaque session de travail (et avant toute PR).
@@ -14,7 +14,7 @@ Conçue pour être **extensible au-delà des tournois** - architecture de pannea
 **Repo GitHub :** https://github.com/Fideliuss/gestion-tournois (**public** : GitHub Pages gratuit l'exige ; ne jamais y mettre de donnée personnelle, de secret ni de texte sous droits)
 **Développeur :** B. Cuvelier (Fideliuss)
 **Convention de nommage :** underscore `_` pour tous les fichiers et dossiers (`prize_pool`, `admin_tournois`, `roulette_paiement`), jamais de tiret.
-**Nom :** l'application est renommée **Pit Manager** (décision du 2026-10-14). Le dépôt, l'adresse et les titres de page changeront à la bascule d'hébergement (Netlify), le dépôt devant ensuite passer en privé.
+**Nom :** l'application s'appelle **Pit Manager** (décision du 2026-10-14, renommage de l'interface en novembre 2026 : titres de page « <page> - Pit Manager », manifeste, accueil, connexion). La marque Barrière reste sur ce qui sort du casino (logos, courriers, impressions) et dans la barre (logo, Bordeaux, service). Le dépôt (`gestion-tournois`), l'adresse du site et le lien de réinitialisation du mot de passe (`shared/supabase.js`) changeront à la bascule d'hébergement (Netlify), le dépôt devant ensuite passer en privé.
 
 **Charte graphique :** charte officielle Barrière Casino (redesign 2026-08). Palette de marque (Ambre/Châtaigne en accent principal, Cognac/Sauterne/Jean/Teal/Cobalt en accents d'accompagnement - voir `:root`/`body.light` dans `shared/barriere.css`), police Jost auto-hébergée (`shared/fonts/`, gras italique pour les titres, normal pour le reste, IBM Plex Mono conservé pour les données chiffrées), pictogrammes vectoriels de la charte extraits dans `shared/icons/` (masque CSS recolorable via `.tool-badge.picto` + `--icon`, remplace les emoji de badge).
 

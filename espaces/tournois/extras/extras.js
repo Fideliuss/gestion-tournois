@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    extras.js - Gestion des Extras : liste et émargement hebdomadaire
-   Barrière Casino Bordeaux · Tournois
+   Pit Manager · Tournois
 ═══════════════════════════════════════════════════════ */
 
 const DAY_KEYS   = ['lun','mar','mer','jeu','ven','sam','dim'];

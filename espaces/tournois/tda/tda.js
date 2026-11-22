@@ -112,7 +112,7 @@ function afficherVue(vue, courant, sous, exemple) {
   if (vue === 'glossaire') afficherGlossaire(courant);
   else if (courant) afficherBloc(vue, courant, sous, exemple);
   else afficherAccueil(vue);
-  document.title = (courant ? (courant.numero ? courant.numero + ' - ' : '') + courant.titre + ' - ' : '') + 'Règlement TDA - Barrière Casino Bordeaux';
+  document.title = (courant ? (courant.numero ? courant.numero + ' - ' : '') + courant.titre + ' - ' : '') + 'Règlement TDA - Pit Manager';
 }
 
 // ── Sommaire ─────────────────────────────────────────
@@ -286,7 +286,7 @@ function afficherRecherche(q) {
   $('td-wrap').className = 'td-wrap vue-recherche';
   $('td-side').hidden = true;
   if ($('td-q').value !== q && document.activeElement !== $('td-q')) $('td-q').value = q;
-  document.title = 'Recherche - Règlement TDA - Barrière Casino Bordeaux';
+  document.title = 'Recherche - Règlement TDA - Pit Manager';
   const r = TDA_RECHERCHE.chercher(indexRecherche, q);
   window.__tdaTermes = r.termes;
   let html = '<div class="td-res-liste">';

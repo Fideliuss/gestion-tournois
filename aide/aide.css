@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    aide.css - Page Aide : liste de guides et guide affiché
-   Barrière Casino Bordeaux
+   Pit Manager
 ═══════════════════════════════════════════════════════ */
 
 .aide-wrap { width: 100%; max-width: 1180px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }

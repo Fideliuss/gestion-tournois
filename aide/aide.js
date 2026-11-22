@@ -133,7 +133,7 @@ function show() {
     + (mates[i + 1] ? '<a href="#' + esc(mates[i + 1].id) + '">' + esc(mates[i + 1].title) + ' →</a>' : '') + '</div>';
   window.scrollTo(0, 0);
   spy();
-  document.title = 'Aide - ' + g.title + ' - Barrière Casino Bordeaux';
+  document.title = 'Aide - ' + g.title + ' - Pit Manager';
 }
 
 function printGuide() {

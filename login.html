@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connexion - Barrière Casino Bordeaux</title>
+  <title>Connexion - Pit Manager</title>
   <link rel="stylesheet" href="shared/barriere.css" />
   <style>
     body {
@@ -127,7 +127,7 @@
   <div class="login-eyebrow">Barrière Casino · Bordeaux</div>
   <div class="login-hr-gold"></div>
   <div class="login-title" id="login-title">Connexion</div>
-  <div class="login-sub" id="login-sub">Barrière Casino Bordeaux</div>
+  <div class="login-sub" id="login-sub">Pit Manager</div>
 
   <!-- ── État 1 : formulaire login ── -->
   <div id="state-login">
@@ -195,7 +195,7 @@
   </div>
 
   <div class="login-footer">
-    <span class="login-footer-brand">Service Jeux Traditionnels</span>
+    <span class="login-footer-brand">Pit Manager</span>
     <span class="login-version" id="login-version"></span>
   </div>
 </div>
@@ -248,7 +248,7 @@ function _showState(id) {
 }
 
 function showLogin() {
-  _setTitle('Connexion', 'Barrière Casino Bordeaux');
+  _setTitle('Connexion', 'Pit Manager');
   _showState('state-login');
   document.getElementById('login-msg').textContent = '';
 }
