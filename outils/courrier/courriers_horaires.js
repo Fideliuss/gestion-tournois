@@ -52,8 +52,7 @@ function initHoraires(now) {
   // Exercice du 1er novembre N au 31 octobre N+1, choisi par son année de fin (N+1) ; la note part en octobre pour
   // l'exercice qui commence le mois suivant : en octobre 2026 (ou avant), on propose 2027 ; à partir de novembre 2026, 2028
   const propose = (now.getMonth() <= 9 ? now.getFullYear() : now.getFullYear() + 1) + 1;
-  hEl('per-annee').innerHTML = [-2, -1, 0, 1, 2].map(k => propose + k).map(a => `<option value="${a}">${a}</option>`).join('');
-  hEl('per-annee').value = String(propose);
+  hEl('per-annee').value = propose;
   initDateCourrier('per-date', now);
   horaires = REGLAGES.lire(CLE_HORAIRES, HORAIRES_DEFAUT);
   if (!Array.isArray(horaires) || !horaires.length) horaires = deepClone(HORAIRES_DEFAUT);

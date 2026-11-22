@@ -157,7 +157,7 @@
     <div class="card" style="max-width:1000px;width:100%">
       <div class="sec">Horaires annuels</div>
       <div class="period-row">
-        <div class="fg pf-year"><label class="fl">Année</label><select id="per-annee" onchange="renderPeriode()"></select></div>
+        <div class="fg pf-year"><label class="fl">Année</label><input type="number" id="per-annee" min="2020" max="2099" onchange="renderPeriode()" oninput="renderPeriode()"/></div>
       </div>
       <div class="deadline-hint" id="per-exercice"></div>
       <div class="div"></div>
