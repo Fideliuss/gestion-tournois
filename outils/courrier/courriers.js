@@ -131,9 +131,10 @@ const TEMPLATES_DEFAULT = {
 const SIGNATAIRES_DEFAUT = [{ nom: '', titre: 'Directeur Responsable' }];
 
 /* Types de courrier proposés par service (le service courant vient de la barre) ; le premier est ouvert d'office */
+const TYPES_COURRIER = ['mensuel', 'annulation', 'periode', 'derogation', 'libre'];
 const TYPES_PAR_SERVICE = {
   jeux_traditionnels: ['mensuel', 'annulation', 'libre'],
-  machines_a_sous:    ['libre'],
+  machines_a_sous:    ['periode', 'derogation', 'libre'],
 };
 
 /* ── État ── */
@@ -172,7 +173,7 @@ function signataireChoisi(type) {
 }
 
 function remplirSignataires() {
-  ['mensuel', 'annulation', 'libre'].forEach(type => {
+  TYPES_COURRIER.forEach(type => {
     const sel = document.getElementById(`sig-${type}`);
     if (!sel) return;
     const avant = +sel.value || 0;
@@ -355,6 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderTplEditor('ministre');
   renderAnnulDateList();
   initLibre(now);
+  initHoraires(now);
   onPeriodChange(); // auto-remplit date courrier + hint + renderAll
   pageInitialisee = true;
   if (serviceEnAttente) appliquerService();
@@ -369,7 +371,7 @@ function initService() {
 function appliquerService() {
   const etat = (typeof NAV !== 'undefined' && NAV.etat) ? NAV.etat() : null;
   const types = TYPES_PAR_SERVICE[etat && etat.service] || TYPES_PAR_SERVICE.jeux_traditionnels;
-  ['mensuel', 'annulation', 'libre'].forEach(t => {
+  TYPES_COURRIER.forEach(t => {
     document.getElementById(`dtype-${t}`).style.display = types.includes(t) ? '' : 'none';
   });
   document.querySelector('.doc-type-bar').style.display = types.length > 1 ? '' : 'none';   // un seul type : pas d'onglets
@@ -397,6 +399,8 @@ function selectTab(tabId) {
 function renderAll() {
   if (docType === 'annulation') { renderAnnulation(); return; }
   if (docType === 'libre')      { renderLibre();      return; }
+  if (docType === 'periode')    { renderPeriode();    return; }
+  if (docType === 'derogation') { renderDerogation(); return; }
   const month = getMonth();
   const year  = getYear();
   const rows  = buildRows(month, year);
@@ -506,6 +510,10 @@ function printCurrent() {
   if (docType === 'libre') {
     const destLibre = DEST_COURT[libreEl('dest').value] || lignes(libreEl('adresse').value)[0] || '';
     printWithTitle(`Courrier - ${destLibre} - ${formatLibreDate()}`.replace(/[\\/:*?"<>|]/g, ' '));
+  } else if (docType === 'periode') {
+    printWithTitle(titrePeriode());
+  } else if (docType === 'derogation') {
+    printWithTitle(titreDerogation());
   } else if (docType === 'annulation') {
     // titre = destinataire + date du courrier d'annulation
     printWithTitle(`Annulation de tournoi - ${dest} - ${formatAnnulLetterDate()}`);
@@ -522,7 +530,7 @@ function formatAnnulLetterDate() {
 function selectDocType(type) {
   if (!document.getElementById('tpl-panel').hidden) toggleTplPanel();   // on referme les réglages avant de changer de courrier
   docType = type;
-  ['mensuel', 'annulation', 'libre'].forEach(t => {
+  TYPES_COURRIER.forEach(t => {
     document.getElementById(`section-${t}`).style.display = t === type ? '' : 'none';
     document.getElementById(`dtype-${t}`).classList.toggle('active', t === type);
   });
