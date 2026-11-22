@@ -213,7 +213,8 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
 ├── outils/                        - Modules utilisables par plusieurs services
 │   └── courrier/
 │       ├── courriers.html         - Générateur de courrier (menu Administration tournois et espace Courrier des Machines à sous ; lit encore espaces/tournois/declaration/donnees.js)
-│       └── courriers.css / .js
+│       ├── courriers.css / .js
+│       └── courriers_horaires.js  - Courriers Machines à sous : période d'exploitation (art. 19) et dérogation d'horaire (art. 31)
 │
 ├── admin/                         - Administration de l'application
 │   ├── comptes.html / .css / .js  - Gestion des comptes : liste filtrable + matrice des accès par rôle

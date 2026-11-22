@@ -23,6 +23,8 @@
     <div class="doc-type-bar seg">
       <button class="doc-type-btn seg-btn active" id="dtype-mensuel" onclick="selectDocType('mensuel')">Déclaration des tournois</button>
       <button class="doc-type-btn seg-btn" id="dtype-annulation" onclick="selectDocType('annulation')">Annulation de tournoi</button>
+      <button class="doc-type-btn seg-btn" id="dtype-periode" onclick="selectDocType('periode')">Période d'exploitation</button>
+      <button class="doc-type-btn seg-btn" id="dtype-derogation" onclick="selectDocType('derogation')">Dérogation d'horaire</button>
       <button class="doc-type-btn seg-btn" id="dtype-libre" onclick="selectDocType('libre')">Courrier libre</button>
     </div>
     <button class="btn btn-ghost" id="btn-tpl" onclick="toggleTplPanel()"><i class="ico ico-cog"></i> <span>Réglages</span></button>
@@ -149,6 +151,102 @@
   </div><!-- /#section-annulation -->
 
   <!-- ══════════════════════════════
+       SECTION - PÉRIODE D'EXPLOITATION (Machines à sous, art. 19)
+  ══════════════════════════════ -->
+  <div id="section-periode" style="display:none">
+    <div class="card" style="max-width:1000px;width:100%">
+      <div class="sec">Période d'exploitation</div>
+      <div class="period-row">
+        <div class="fg"><label class="fl">Du</label><input type="date" id="per-debut" onchange="renderPeriode()"/></div>
+        <div class="fg"><label class="fl">Au</label><input type="date" id="per-fin" onchange="renderPeriode()"/></div>
+      </div>
+      <div class="div"></div>
+      <div class="sec">Horaires de fonctionnement</div>
+      <div id="per-horaires"></div>
+      <div class="hor-actions">
+        <button class="btn btn-ghost" type="button" onclick="ajouterHoraire()">+ Ajouter une catégorie</button>
+        <span class="hor-ok" id="per-enregistre" role="status"></span>
+        <button class="btn btn-gold" type="button" onclick="enregistrerHoraires()">Enregistrer les horaires</button>
+      </div>
+      <div class="div"></div>
+      <div class="sec">Date du courrier</div>
+      <div class="fg" style="max-width:220px"><label class="fl">Date</label><input type="date" id="per-date" onchange="renderPeriode()"/></div>
+      <div class="div"></div>
+      <div class="sec">Signataire</div>
+      <div class="fg" style="max-width:420px">
+        <label class="fl">Signé par</label>
+        <select id="sig-periode" onchange="renderPeriode()"></select>
+      </div>
+    </div>
+    <div style="max-width:1000px;width:100%;margin-top:12px">
+      <div class="print-bar">
+        <button class="btn btn-gold" onclick="printCurrent()"><i class="ico ico-print"></i> Imprimer / Exporter PDF</button>
+        <span class="print-hint">Dans la boîte de dialogue, choisissez « Enregistrer en PDF » et vérifiez que les marges sont sur « Aucune ».</span>
+      </div>
+    </div>
+  </div><!-- /#section-periode -->
+
+  <!-- ══════════════════════════════
+       SECTION - DÉROGATION D'HORAIRE (Machines à sous, art. 31)
+  ══════════════════════════════ -->
+  <div id="section-derogation" style="display:none">
+    <div class="card" style="max-width:1000px;width:100%">
+      <div class="sec">Dérogation</div>
+      <div class="fg" style="max-width:420px">
+        <label class="fl">Type</label>
+        <select id="der-variante" onchange="onDerVarianteChange()">
+          <option value="ouverture">Ouverture exceptionnelle</option>
+          <option value="anticipee">Fermeture anticipée et réouverture</option>
+          <option value="prolongee">Fermeture prolongée (heure du lendemain)</option>
+        </select>
+      </div>
+      <div class="period-row" style="margin-top:12px">
+        <div class="fg"><label class="fl" id="der-jour-lbl">Jour</label><input type="date" id="der-jour" onchange="onDerJourChange()"/></div>
+        <div class="fg"><label class="fl" id="der-heure-lbl">Heure</label><input type="time" id="der-heure" onchange="renderDerogation()"/></div>
+      </div>
+      <div class="period-row" id="der-reouv" style="display:none">
+        <div class="fg"><label class="fl">Réouverture le</label><input type="date" id="der-reouv-jour" onchange="renderDerogation()"/></div>
+        <div class="fg"><label class="fl">à</label><input type="time" id="der-reouv-heure" onchange="renderDerogation()"/></div>
+      </div>
+      <div class="div"></div>
+      <div class="sec">Destinataire</div>
+      <div class="libre-row">
+        <div class="fg">
+          <label class="fl">Destinataire</label>
+          <select id="der-dest" onchange="onDerDestChange()"></select>
+        </div>
+        <div class="fg">
+          <label class="fl">Adresse (1 ligne par entrée)</label>
+          <textarea id="der-adresse" rows="6" oninput="renderDerogation()"></textarea>
+        </div>
+      </div>
+      <div class="fg" style="margin-top:12px">
+        <label class="fl">Appel</label>
+        <input type="text" id="der-appel" oninput="renderDerogation()"/>
+      </div>
+      <div class="fg" style="margin-top:12px">
+        <label class="fl">Formule de politesse</label>
+        <textarea id="der-formule" rows="2" oninput="renderDerogation()"></textarea>
+      </div>
+      <div class="div"></div>
+      <div class="sec">Date du courrier</div>
+      <div class="fg" style="max-width:220px"><label class="fl">Date</label><input type="date" id="der-date" onchange="renderDerogation()"/></div>
+      <div class="div"></div>
+      <div class="sec">Signataire</div>
+      <div class="fg" style="max-width:420px">
+        <label class="fl">Signé par</label>
+        <select id="sig-derogation" onchange="renderDerogation()"></select>
+      </div>
+    </div>
+    <div style="max-width:1000px;width:100%;margin-top:12px">
+      <div class="print-bar">
+        <button class="btn btn-gold" onclick="printCurrent()"><i class="ico ico-print"></i> Imprimer / Exporter PDF</button>
+        <span class="print-hint">Dans la boîte de dialogue, choisissez « Enregistrer en PDF » et vérifiez que les marges sont sur « Aucune ».</span>
+      </div>
+    </div>
+  </div><!-- /#section-derogation -->
+
+  <!-- ══════════════════════════════
        SECTION - COURRIER LIBRE
   ══════════════════════════════ -->
   <div id="section-libre" style="display:none">
@@ -260,6 +358,7 @@
 <script src="../../shared/auth.js"></script>
 <script src="../../espaces/tournois/declaration/donnees.js"></script>
 <script src="courriers.js"></script>
+<script src="courriers_horaires.js"></script>
 <script>AUTH.guard({ loginUrl: '../../login.html', panel: ['admin-tournois', 'courrier'] }).then(function (user) { if (user) initService(); });</script>
 </body>
 </html>
