@@ -235,6 +235,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
     │   ├── securite_fonctions.test.sql - tests des droits d'exécution et du search_path des fonctions
     │   ├── journal_audit.test.sql  - tests du journal d'audit (écriture par déclencheurs, lecture admin, purge)
     │   ├── parametres.test.sql     - tests des droits sur la table parametres (réglages, émargement des extras)
+│   ├── parametres_courrier.test.sql - tests du droit courrier (clés courrier* seulement, jamais les extras)
     │   ├── purge_emargement.test.sql - tests de la purge de l'émargement des extras (12 mois)
     │   ├── saisons_fin_variable.test.sql - tests de la fin de saison variable (calendrier, fin anticipée ou tardive, verrou, réouverture, clôture)
     │   └── materiel.test.sql       - tests du matériel de jeu (accès, séquence des statuts, retours avec motif, sessions de destruction, billes)
@@ -255,6 +256,7 @@ Toutes les données (tournois, leaderboard, extras, comptes, rôles, training) s
         ├── journal_audit_cron.sql           - purge planifiée du journal (12 mois), à appliquer après journal_audit.sql
         ├── purge_emargement.sql             - purge planifiée de l'émargement des extras (12 mois), à appliquer après journal_audit_cron.sql
         ├── parametres.sql                   - paramètres partagés entre les postes (clé / valeur JSON), accès par le panel admin-tournois
+        ├── parametres_courrier.sql          - panel courrier : lecture et écriture des seules clés courrier* (générateur de courrier), à appliquer après parametres.sql
         ├── materiel.sql                     - matériel de jeu : sixains, billes, historique, sessions de destruction (accès par panel materiel)
         └── tda.sql                          - règlement TDA : éditions et blocs de texte (lecture par panel tda)
 ```
