@@ -325,11 +325,11 @@ var AIDE_GUIDES = [
   {
     id: 'tournois-courriers', space: 'tournois', panel: 'admin-tournois',
     title: 'Générer les courriers',
-    intro: "Le Générateur de courrier prépare les courriers mensuels de déclaration, le courrier d'annulation quand un tournoi est annulé, et un courrier libre pour les autres situations. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
+    intro: "Le Générateur de courrier prépare la déclaration des tournois (courriers mensuels), le courrier d'annulation quand un tournoi est annulé, et un courrier libre pour les autres situations. Les courriers se lisent à l'écran puis s'impriment ou s'enregistrent en PDF.",
     steps: [
       {
-        title: "Les courriers mensuels",
-        text: "<p>Dans <b>Administration tournois</b>, ouvrez <b>Générateur de courrier</b>. L'onglet <b>Courriers mensuels</b> est ouvert.</p>"
+        title: "La déclaration des tournois",
+        text: "<p>Dans <b>Administration tournois</b>, ouvrez <b>Générateur de courrier</b>. L'onglet <b>Déclaration des tournois</b> est ouvert.</p>"
           + "<p>Choisissez le <b>mois déclaré</b> (le mois suivant est proposé). La <b>date du courrier</b> se met à la date limite de déclaration, 21 jours avant le premier du mois déclaré ; vous pouvez la changer.</p>"
           + "<p>Les jours de tournoi du courrier viennent des mêmes réglages que la page Déclarations : rien à saisir en plus.</p>",
         imgs: [{ src: 'captures/ad_courrier.png', alt: 'Le mois déclaré, la date du courrier et le choix du courrier' }],
@@ -341,15 +341,16 @@ var AIDE_GUIDES = [
         imgs: [],
       },
       {
-        title: "Modifier les destinataires et les signatures",
-        text: "<p>Le bouton <b>Réglages</b> remplace le courrier par l'éditeur des destinataires. Pour chacun des trois courriers : le destinataire (une ligne par entrée), l'appel, la formule de politesse, le nom du signataire et la liste des autres destinataires mis en copie.</p>"
-          + "<p><b>Enregistrer</b> garde vos changements ; <b>Réinitialiser</b> revient aux valeurs d'origine ; <b>Retour au courrier</b> ferme l'éditeur. Ces réglages sont enregistrés dans l'application et communs à tous les postes. Le nom du signataire se saisit ici, une seule fois.</p>",
-        imgs: [{ src: 'captures/ad_courrier_reglages.png', alt: "L'éditeur des destinataires et signatures" }],
+        title: "Modifier les destinataires et les signataires",
+        text: "<p>Le bouton <b>Réglages</b>, à droite des onglets, remplace le courrier par l'éditeur des destinataires et des signataires. Il est commun à tous les courriers. Pour chacun des trois destinataires : l'adresse (une ligne par entrée), l'appel, la formule de politesse et la liste des autres destinataires mis en copie. En dessous, la liste des <b>signataires</b> : un nom et un titre par ligne (Directeur Responsable, par exemple) ; <b>+ Ajouter un signataire</b> en ajoute un.</p>"
+          + "<p><b>Enregistrer</b> garde vos changements ; <b>Réinitialiser</b> revient aux valeurs d'origine ; <b>Retour au courrier</b> ferme l'éditeur. Ces réglages sont enregistrés dans l'application et communs à tous les postes.</p>"
+          + "<p>Chaque courrier a une liste <b>Signé par</b> : le premier signataire est proposé, choisissez-en un autre si besoin.</p>",
+        imgs: [{ src: 'captures/ad_courrier_reglages.png', alt: "L'éditeur des destinataires et des signataires" }],
       },
       {
         title: "Annuler un tournoi",
         text: "<p>L'onglet <b>Annulation de tournoi</b> prépare le courrier d'annulation. Ajoutez la ou les <b>dates annulées</b> : l'objet du courrier est écrit automatiquement. Un <b>motif</b> facultatif complète la phrase d'explication ; laissez-le vide si vous n'en donnez pas.</p>"
-          + "<p>Réglez la date du courrier, puis imprimez comme pour les courriers mensuels.</p>",
+          + "<p>Réglez la date du courrier, puis imprimez comme pour la déclaration des tournois.</p>",
         imgs: [{ src: 'captures/ad_courrier_annul.png', alt: "La préparation d'un courrier d'annulation" }],
       },
       {

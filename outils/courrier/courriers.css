@@ -309,14 +309,8 @@
   }
 }
 
-/* Réglages : posé dans le coin bas droit de l'encadré, sans ajouter de ligne */
-.card-corner { position: absolute; right: 32px; bottom: 30px; min-height: 42px; }
-@media (max-width: 520px) {
-  .card-corner { position: static; margin-top: 14px; width: 100%; }
-}
-
 /* Largeur fixe des blocs : les encadrés gardent la même largeur quelle que soit la vue (courrier ou réglages) */
-#section-mensuel, #section-annulation, #section-libre { width: 100%; max-width: 860px; }
+#section-mensuel, #section-annulation, #section-libre, #tpl-panel, .doc-type-row { width: 100%; max-width: 860px !important; }
 #section-mensuel > *, #section-annulation > *, #section-libre > * { max-width: 100% !important; }
 
 /* ── Courrier libre ── */
@@ -324,3 +318,10 @@
 .libre-row textarea, #section-libre textarea { width: 100%; resize: vertical; font-size: 12px; line-height: 1.6; font-family: var(--f-ui); }
 .alert-warn[hidden] { display: none; }
 @media (max-width: 680px) { .libre-row { grid-template-columns: 1fr; } }
+
+/* Barre des types de courrier + bouton Réglages (communs à tous les courriers) */
+.doc-type-row { max-width: 1000px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.doc-type-row .doc-type-bar { margin-bottom: 0; }
+/* Réglages : une ligne par signataire */
+.sig-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 10px; }
+@media (max-width: 700px) { .sig-row { grid-template-columns: 1fr; } }

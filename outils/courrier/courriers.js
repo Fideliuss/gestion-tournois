@@ -77,7 +77,6 @@ const TEMPLATES_DEFAULT = {
     salutation: 'Monsieur le Ministre,',
     closingParagraph: 'À cet effet, vous trouverez ci-joints les conditions d\'organisation, conformément à l\'Article 57-5 et suivants de l\'Arrêté du 14 mai 2007, tenant compte des modifications introduites par l\'Arrêté rectificatif du 24 décembre 2008, ainsi que du décret n°2009-937 du 29 juillet 2009, ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Ministre, à l\'assurance de ma haute considération.',
-    sigName:          '',                 // nom du signataire : enregistré en base depuis Réglages, jamais dans le code (dépôt public)
     autresItems: [
       'SIPJ 33 / Section des Courses & Jeux',
       'Préfecture de la Gironde',
@@ -100,7 +99,6 @@ const TEMPLATES_DEFAULT = {
     salutation: null,
     closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Monsieur le Commissaire Divisionnaire, à l\'assurance de ma haute considération.',
-    sigName:          '',                 // nom du signataire : enregistré en base depuis Réglages, jamais dans le code (dépôt public)
     autresItems: [
       'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
       'Préfecture de la Gironde',
@@ -120,7 +118,6 @@ const TEMPLATES_DEFAULT = {
     salutation: null,
     closingParagraph: 'A cet effet, vous trouverez, ci-joints, les conditions d\'organisation ainsi que le règlement de chaque tournoi.',
     closingFormula:   'Vous en souhaitant bonne réception, je vous prie de croire, Madame, à l\'assurance de ma haute considération.',
-    sigName:          '',                 // nom du signataire : enregistré en base depuis Réglages, jamais dans le code (dépôt public)
     autresItems: [
       'Ministre de l\'Intérieur – S/C de Monsieur Le Directeur Central de la Police Judiciaire',
       'SIPJ 33 / Section des Courses & Jeux',
@@ -129,10 +126,15 @@ const TEMPLATES_DEFAULT = {
 
 };
 
+/* Signataires : communs à tous les courriers, choisis pour chaque courrier (le premier par défaut).
+   Les noms sont enregistrés en base depuis Réglages, jamais dans le code (dépôt public). */
+const SIGNATAIRES_DEFAUT = [{ nom: '', titre: 'Directeur Responsable' }];
+
 /* ── État ── */
 let currentTab    = 'ministre';
 let currentTplTab = 'ministre';
 let templates;
+let signataires;
 let docType    = 'mensuel';
 let annulDates = [];
 
@@ -142,6 +144,34 @@ function loadTemplates() {
   templates = deepClone(TEMPLATES_DEFAULT);
   ['ministre', 'sipj', 'prefecture'].forEach(id => {
     if (overrides[id]) Object.assign(templates[id], overrides[id]);
+    delete templates[id].sigName;
+  });
+  signataires = signatairesDe(overrides);
+}
+
+/* Liste enregistrée ; sinon reprise de l'ancien nom par destinataire (un seul signataire, Directeur Responsable) */
+function signatairesDe(overrides) {
+  const liste = Array.isArray(overrides.signataires)
+    ? overrides.signataires.filter(s => s && typeof s === 'object').map(s => ({ nom: String(s.nom || ''), titre: String(s.titre || '') }))
+    : [];
+  if (liste.length) return liste;
+  const ancien = ['ministre', 'sipj', 'prefecture'].map(id => overrides[id] && overrides[id].sigName).find(Boolean);
+  return [{ nom: ancien || '', titre: SIGNATAIRES_DEFAUT[0].titre }];
+}
+
+/* Signataire choisi dans la liste déroulante d'un type de courrier (le premier si la liste a changé) */
+function signataireChoisi(type) {
+  const sel = document.getElementById(`sig-${type}`);
+  return signataires[sel ? +sel.value : 0] || signataires[0];
+}
+
+function remplirSignataires() {
+  ['mensuel', 'annulation', 'libre'].forEach(type => {
+    const sel = document.getElementById(`sig-${type}`);
+    if (!sel) return;
+    const avant = +sel.value || 0;
+    sel.innerHTML = signataires.map((s, i) => `<option value="${i}">${esc([s.nom, s.titre].filter(Boolean).join(', ') || 'Signataire sans nom')}</option>`).join('');
+    sel.value = String(avant < signataires.length ? avant : 0);
   });
 }
 
@@ -153,10 +183,10 @@ function saveTemplates() {
       recipient:      t.recipient,
       salutation:     t.salutation,
       closingFormula: t.closingFormula,
-      sigName:        t.sigName,
       autresItems:    t.autresItems,
     };
   });
+  data.signataires = signataires;
   REGLAGES.ecrire('courriers_modeles', data);
 }
 
@@ -187,10 +217,6 @@ function renderTplEditor(tplId) {
           <textarea id="tpl-formula" rows="3">${esc(t.closingFormula)}</textarea>
         </div>
         <div class="fg">
-          <label class="fl">Nom du signataire</label>
-          <input type="text" id="tpl-signame" value="${esc(t.sigName)}" placeholder="Nom du signataire"/>
-        </div>
-        <div class="fg">
           <label class="fl">Autres destinataires (1 par ligne)</label>
           <textarea id="tpl-autres" rows="3">${esc(t.autresItems.join('\n'))}</textarea>
         </div>
@@ -203,23 +229,54 @@ function saveTplAndRender() {
   const recipientEl  = document.getElementById('tpl-recipient');
   const salutationEl = document.getElementById('tpl-salutation');
   const formulaEl    = document.getElementById('tpl-formula');
-  const signameEl    = document.getElementById('tpl-signame');
   const autresEl     = document.getElementById('tpl-autres');
   if (recipientEl)  t.recipient      = recipientEl.value.split('\n').filter(l => l.trim());
   if (salutationEl) t.salutation     = salutationEl.value.trim() || null;
   if (formulaEl)    t.closingFormula = formulaEl.value.trim();
-  if (signameEl)    t.sigName        = signameEl.value.trim();
   if (autresEl)     t.autresItems    = autresEl.value.split('\n').filter(l => l.trim());
+  lireSignatairesSaisis();
   saveTemplates();
+  remplirSignataires();
+  renderSignatairesEditor();
   renderAll();
 }
 
-/* Réglages (destinataires et signatures) : le panneau remplace le courrier tant qu'il est ouvert */
+/* ── Éditeur des signataires (Réglages) ── */
+function renderSignatairesEditor() {
+  document.getElementById('sig-editor').innerHTML = signataires.map((s, i) => `
+    <div class="sig-row">
+      <div class="fg"><label class="fl">Nom</label><input type="text" class="sig-nom" value="${esc(s.nom)}" placeholder="Prénom NOM"/></div>
+      <div class="fg"><label class="fl">Titre</label><input type="text" class="sig-titre" value="${esc(s.titre)}" placeholder="Directeur Responsable"/></div>
+      <button class="btn btn-ghost sig-suppr" type="button" data-i="${i}" onclick="supprimerSignataire(+this.dataset.i)" ${signataires.length < 2 ? 'disabled' : ''}>Retirer</button>
+    </div>`).join('');
+}
+
+function lireSignatairesSaisis() {
+  const noms = document.querySelectorAll('#sig-editor .sig-nom'), titres = document.querySelectorAll('#sig-editor .sig-titre');
+  if (!noms.length) return;
+  signataires = Array.from(noms).map((n, i) => ({ nom: n.value.trim(), titre: titres[i].value.trim() }));
+}
+
+function ajouterSignataire() {
+  lireSignatairesSaisis();
+  signataires.push({ nom: '', titre: '' });
+  renderSignatairesEditor();
+}
+
+function supprimerSignataire(i) {
+  lireSignatairesSaisis();
+  if (signataires.length < 2) return;
+  signataires.splice(i, 1);
+  renderSignatairesEditor();
+}
+
+/* Réglages (destinataires et signataires, communs à tous les courriers) : le panneau remplace le courrier tant qu'il est ouvert */
 function toggleTplPanel() {
   const panel = document.getElementById('tpl-panel');
   const open = panel.hidden;                                  // état à venir
+  if (open) { renderTplEditor(currentTplTab); renderSignatairesEditor(); }
   panel.hidden = !open;
-  document.getElementById('letter-controls').style.display = open ? 'none' : '';
+  document.getElementById(`section-${docType}`).style.display = open ? 'none' : '';
   document.querySelector('.letter-preview-wrap').style.display = open ? 'none' : '';
   const btn = document.getElementById('btn-tpl');
   btn.querySelector('span').textContent = open ? 'Retour au courrier' : 'Réglages';
@@ -228,10 +285,8 @@ function toggleTplPanel() {
 }
 
 function resetTemplates() {
-  if (!confirm('Réinitialiser les destinataires par défaut ? Le nom du signataire est conservé.')) return;
-  const signataires = {};
-  ['ministre', 'sipj', 'prefecture'].forEach(id => { signataires[id] = { sigName: templates[id].sigName }; });
-  REGLAGES.ecrire('courriers_modeles', signataires);
+  if (!confirm('Réinitialiser les destinataires par défaut ? Les signataires sont conservés.')) return;
+  REGLAGES.ecrire('courriers_modeles', { signataires: signataires });
   loadTemplates();
   renderTplEditor(currentTplTab);
   renderAll();
@@ -290,6 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('annul-date-y').value = now.getFullYear();
 
   loadTemplates();
+  remplirSignataires();
   renderTplEditor('ministre');
   renderAnnulDateList();
   initLibre(now);
@@ -338,14 +394,13 @@ function letterHeaderHtml(recipientLines, dateStr) {
   </div>`;
 }
 
-function letterSignatureHtml(sigName) {
+function letterSignatureHtml(sig) {
   return `
-  <!-- Espace signature manuscrite + nom -->
+  <!-- Espace signature manuscrite + nom et titre du signataire choisi -->
   <div class="letter-signature-space"></div>
   <div class="letter-signature">
     <div class="letter-signature-inner">
-      ${esc(sigName)}<br>
-      Directeur Responsable
+      ${[sig.nom, sig.titre].filter(Boolean).map(esc).join('<br>')}
     </div>
   </div>`;
 }
@@ -400,7 +455,7 @@ function generateLetterHtml(tpl, rows, month, year) {
     <p>${esc(tpl.closingFormula)}</p>
   </div>
 
-  ${letterSignatureHtml(tpl.sigName)}
+  ${letterSignatureHtml(signataireChoisi('mensuel'))}
 
   ${lettreAutresHtml(tpl.autresItems)}
 
@@ -441,7 +496,7 @@ function formatAnnulLetterDate() {
 
 /* ── Sélecteur de type de document ── */
 function selectDocType(type) {
-  if (!document.getElementById('tpl-panel').hidden) toggleTplPanel();   // les réglages ne concernent que les courriers mensuels
+  if (!document.getElementById('tpl-panel').hidden) toggleTplPanel();   // on referme les réglages avant de changer de courrier
   docType = type;
   ['mensuel', 'annulation', 'libre'].forEach(t => {
     document.getElementById(`section-${t}`).style.display = t === type ? '' : 'none';
@@ -594,7 +649,7 @@ function generateAnnulationHtml(tpl, dates, motif, dateStr) {
     <p>${esc(closingFormula)}</p>
   </div>
 
-  ${letterSignatureHtml(tpl.sigName)}
+  ${letterSignatureHtml(signataireChoisi('annulation'))}
 
   ${letterFooterHtml()}
 
@@ -661,8 +716,6 @@ function paragraphesHtml(text) {
 function lignes(text) { return text.split('\n').map(l => l.trim()).filter(Boolean); }
 
 function renderLibre() {
-  const destId = libreEl('dest').value;
-  const sigName = (templates[destId] || templates.sipj).sigName;   // les trois modèles ont le même signataire
   document.getElementById('letter-output').innerHTML = generateLibreHtml({
     adresse: lignes(libreEl('adresse').value),
     dateStr: formatLibreDate(),
@@ -671,7 +724,7 @@ function renderLibre() {
     corps:   libreEl('corps').value,
     formule: libreEl('formule').value.trim(),
     autres:  lignes(libreEl('autres').value),
-    sigName,
+    sig:     signataireChoisi('libre'),
   });
   const letter = document.querySelector('#letter-output .letter');
   document.getElementById('libre-overflow').hidden = !(letter && letter.scrollHeight > letter.clientHeight + 1);
@@ -698,7 +751,7 @@ function generateLibreHtml(c) {
     ${formuleHtml}
   </div>
 
-  ${letterSignatureHtml(c.sigName)}
+  ${letterSignatureHtml(c.sig)}
 
   ${lettreAutresHtml(c.autres)}
 
