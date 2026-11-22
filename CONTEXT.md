@@ -182,14 +182,15 @@ Pages regroupées dans le menu **Administration tournois** de la barre (panel `a
 - **Titres d'impression** (`printWithTitle(titre)` dans `barriere.js`) : le titre de la page devient le nom du PDF proposé. Format avec tiret simple, jamais de tiret cadratique : « Déclaration Tournois - Novembre 2026 », « Courrier SIPJ 33 - Déclaration Tournois Novembre 2026 », « Annulation de tournoi - <destinataire> - <date> », « Déclaration extras - Novembre 2026 », « Émargement extras - Semaine 41 (5 au 11 octobre 2026) ».
 
 **Générateur de courrier** (courriers mensuels)
-- **Réglages** : bouton dans l'encadré « Mois déclaré », posé dans le coin bas droit sans ajouter de ligne (`.card-corner`) ; il remplace le courrier par l'éditeur des destinataires et signatures et devient « Retour au courrier » (`toggleTplPanel()`). Remplace l'ancien lien discret « Modifier les destinataires & signatures ».
+- **Réglages** (novembre 2026) : bouton à droite de la barre des types de courrier, commun à tous les types ; il remplace le courrier par l'éditeur des destinataires et des signataires et devient « Retour au courrier » (`toggleTplPanel()`).
+- **Signataires** (novembre 2026) : une liste nom + titre, commune à tous les courriers (`signataires` dans la clé `courriers_modeles`, enregistrée en base ; jamais de nom dans le code). Chaque type de courrier a une liste « Signé par » (le premier signataire par défaut). Reprise : sans liste enregistrée, l'ancien nom par destinataire (`sigName`) devient le premier signataire, titre « Directeur Responsable ». « Réinitialiser » rétablit les destinataires et conserve les signataires.
 - Génération des 3 courriers officiels : Ministre de l'Intérieur, SIPJ 33, Préfecture de la Gironde
 - Lit les mêmes réglages que les Déclarations (en base) - aucune saisie supplémentaire
 - Mise en page A4 portrait stricte (1 page), style administratif français
 - Date courrier auto-calculée à J-21 du début du mois déclaré
 - Triangle des destinataires : chaque courrier liste les 2 autres destinataires
 - Accessible uniquement par le menu « Administration tournois » de la barre
-- **Trois types de document** (barre `doc-type-bar`) : Courriers mensuels, Annulation de tournoi, **Courrier libre** (octobre 2026). En-tête, signature et pied de page sont communs aux trois (`letterHeaderHtml`, `letterSignatureHtml`, `letterFooterHtml` dans `courriers.js`), ainsi que le bloc « Autres destinataires » (`lettreAutresHtml`, masqué s'il est vide).
+- **Trois types de document** (barre `doc-type-bar`) : Déclaration des tournois (les courriers mensuels), Annulation de tournoi, **Courrier libre** (octobre 2026). En-tête, signature et pied de page sont communs aux trois (`letterHeaderHtml`, `letterSignatureHtml`, `letterFooterHtml` dans `courriers.js`), ainsi que le bloc « Autres destinataires » (`lettreAutresHtml`, masqué s'il est vide).
 - **Courrier libre** : pour une situation hors cadre. Destinataire au choix (les 3 modèles, ou « Autre destinataire »), qui pré-remplit adresse, appel et formule de politesse, tous modifiables ; objet, texte (une ligne vide sépare deux paragraphes), copies facultatives, date. Le signataire vient du modèle choisi (Réglages). **Rien n'est enregistré** (ni en base, ni en local) : le courrier n'existe que le temps de la page. Une alerte s'affiche si le texte dépasse la page A4 (même mise en page figée, 1 page). Titre du PDF : « Courrier - <destinataire> - <date> ».
 
 **Gestion des Extras**
