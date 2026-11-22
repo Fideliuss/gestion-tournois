@@ -157,7 +157,7 @@ AUTH.guard({ loginUrl: 'login.html' }).then(async function(user) {
   if (!list) return;
   list.innerHTML = CHANGELOG.map(function (e) {
     return '<div>'
-      + '<div class="cl-version">' + e.version + ' &mdash; ' + e.date + '</div>'
+      + '<div class="cl-version">' + e.version + ' · ' + e.date + '</div>'
       + '<ul class="cl-entries"><li>' + e.message + '</li></ul>'
       + '</div>';
   }).join('');

@@ -156,9 +156,9 @@ const CAPTURES_TN = [
   { nom: 'ad_decl_annexes', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 900, actions: "openView('cfg');showDeclTab('annexes');", css: NU },
   { nom: 'ad_decl_adhoc', page: 'espaces/tournois/declaration/declaration.html', w: 1280, h: 1060, actions: "openView('adhoc');document.getElementById('adhoc-date').value='2026-11-14';document.getElementById('adhoc-cave').value=200;document.getElementById('adhoc-annexe').value=4;addAdhoc();document.getElementById('exc-date').value='2026-11-20';onExcDateChange();applyException();", css: NU },
   // Administration : courriers
-  { nom: 'ad_courrier', page: 'outils/courrier/courriers.html', w: 1180, h: 560, actions: '', css: NU + '.letter-preview-wrap{display:none!important}' },
-  { nom: 'ad_courrier_reglages', page: 'outils/courrier/courriers.html', w: 1180, h: 1010, actions: "toggleTplPanel();", css: NU + '.letter-preview-wrap{display:none!important}' },
-  { nom: 'ad_courrier_annul', page: 'outils/courrier/courriers.html', w: 1180, h: 900, actions: "selectDocType('annulation');['2026-11-17','2026-11-24'].forEach(function(d){document.getElementById('annul-date-input').value=d;addAnnulDate()});document.getElementById('annul-motif').value='de travaux prévus dans la salle de poker';renderAnnulation();", css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier', service: 'jeux_traditionnels', page: 'outils/courrier/courriers.html', w: 1180, h: 560, actions: '', css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier_reglages', service: 'jeux_traditionnels', page: 'outils/courrier/courriers.html', w: 1180, h: 1010, actions: "toggleTplPanel();", css: NU + '.letter-preview-wrap{display:none!important}' },
+  { nom: 'ad_courrier_annul', service: 'jeux_traditionnels', page: 'outils/courrier/courriers.html', w: 1180, h: 900, actions: "selectDocType('annulation');['2026-11-17','2026-11-24'].forEach(function(d){document.getElementById('annul-date-input').value=d;addAnnulDate()});document.getElementById('annul-motif').value='de travaux prévus dans la salle de poker';renderAnnulation();", css: NU + '.letter-preview-wrap{display:none!important}' },
   // Administration : extras
   { nom: 'ad_extras_liste', page: 'espaces/tournois/extras/extras.html', w: 1180, h: 800, actions: '', css: NU },
   { nom: 'ad_extras_emarg', page: 'espaces/tournois/extras/extras.html', w: 1180, h: 900, actions: "showTab('emargement');", css: NU + '#emarg-output{display:none!important}' },
@@ -241,11 +241,31 @@ const CAPTURES_MT = [
 ];
 CAPTURES.push.apply(CAPTURES, CAPTURES_MT);
 
+// Service Machines à sous : choix du service à l'accueil, horaires annuels, dérogation d'horaire (réglages fictifs de l'espace Tournois)
+const MAS = 'machines_a_sous';
+const SANS_LETTRE = NU + ' .letter-preview-wrap{display:none!important}';
+const LETTRE_SEULE = NU + ' .app{display:none!important} .letter-preview-wrap{padding:16px 0!important}';
+const DEROGATION = "selectDocType('derogation');var v=document.getElementById('der-variante');v.value='prolongee';onDerVarianteChange();document.getElementById('der-jour').value='2026-12-31';onDerJourChange();var d=document.getElementById('der-dest');d.value='prefecture';onDerDestChange();";
+const CAPTURES_MAS = [
+  { nom: 'mas_choix', service: '', page: 'index.html', w: 1180, h: 420, actions: '', css: '*{transition:none!important} .footer{display:none!important}' },
+  { nom: 'mas_horaires', service: MAS, page: 'outils/courrier/courriers.html', w: 1180, h: 1000, actions: '', css: SANS_LETTRE },
+  { nom: 'mas_horaires_lettre', service: MAS, page: 'outils/courrier/courriers.html', w: 900, h: 860, actions: '', css: LETTRE_SEULE },
+  { nom: 'mas_derogation', service: MAS, page: 'outils/courrier/courriers.html', w: 1180, h: 1150, actions: DEROGATION, css: SANS_LETTRE },
+  { nom: 'mas_derogation_lettre', service: MAS, page: 'outils/courrier/courriers.html', w: 900, h: 760, actions: DEROGATION, css: LETTRE_SEULE },
+];
+CAPTURES.push.apply(CAPTURES, CAPTURES_MAS);
+
+// Service retenu sur le poste pour le compte fictif (id 'u') : c.service = id du service, '' pour aucun (choix à l'accueil)
+function SERVICE(c) {
+  if (c.service === undefined) return '';
+  return '<script>try{' + (c.service ? 'localStorage.setItem("pm_service_u","' + c.service + '")' : 'localStorage.removeItem("pm_service_u")') + '}catch(e){}</script>';
+}
+
 function buildPage(c) {
   let h = fs.readFileSync(path.join(ROOT, c.page), 'utf8');
   h = h.replace(/<script src="(?:\.\.\/)*shared\/vendor\/supabase_js\.js"><\/script>\s*/, '')
     .replace(/<script src="[^"]*supabase\.js"><\/script>/, function () { return c.page.indexOf('espaces/break_list/') === 0 ? BASE : isTr(c) ? BASE_TR : isTda(c) ? BASE_TDA : isMt(c) ? BASE_MT : BASE_TN; })
-    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + (c.page.indexOf('espaces/break_list/') === 0 || isTda(c) || isMt(c) ? '' : isTr(c) ? SEED(c.seed || 7) : ''))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
+    .replace('<head>', '<head><script>history.replaceState(null,"","/' + c.page + '");</script>' + FIGE + SERVICE(c) + (c.page.indexOf('espaces/break_list/') === 0 || isTda(c) || isMt(c) ? '' : isTr(c) ? SEED(c.seed || 7) : ''))   // l'adresse reprend le vrai nom de la page : la barre reconnaît l'espace courant
     .replace('</head>', '<style>' + c.css + '</style></head>')
     .replace('</body>', '<script>window.addEventListener("load",function(){setTimeout(function(){' + c.actions + '},900)});</script></body>');
   const file = path.join(path.dirname(path.join(ROOT, c.page)), '_qa_aide_' + c.nom + '.html');

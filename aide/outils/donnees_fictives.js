@@ -130,9 +130,9 @@ function encadrement() {
 
 /** Destinataires et signataires fictifs des courriers (à la place des vrais, par défaut dans l'application) */
 function courriersGabarits() {
-  const sig = 'Camille EXEMPLE';
-  const base = function (recipient, salutation, formule) { return { recipient: recipient, salutation: salutation, closingFormula: formule, sigName: sig, autresItems: ['Premier destinataire en copie', 'Second destinataire en copie'] }; };
+  const base = function (recipient, salutation, formule) { return { recipient: recipient, salutation: salutation, closingFormula: formule, autresItems: ['Premier destinataire en copie', 'Second destinataire en copie'] }; };
   return {
+    signataires: [{ nom: 'Camille EXEMPLE', titre: 'Directeur Responsable' }, { nom: 'Dominique EXEMPLE', titre: 'Directeur Machines à sous' }],
     ministre: base(['Destinataire numéro 1', 'Service des jeux', '1, rue de l\'Exemple', '75000 PARIS'], 'Madame, Monsieur,', 'Vous en souhaitant bonne réception, je vous prie de croire à l\'assurance de ma haute considération.'),
     sipj: base(['Destinataire numéro 2', 'Section des jeux', '2, rue de l\'Exemple', '33000 BORDEAUX'], null, 'Vous en souhaitant bonne réception, je vous prie de croire à l\'assurance de ma haute considération.'),
     prefecture: base(['Destinataire numéro 3', 'À l\'attention du service concerné', '3, rue de l\'Exemple', '33000 BORDEAUX'], null, 'Vous en souhaitant bonne réception, je vous prie de croire à l\'assurance de ma haute considération.'),
