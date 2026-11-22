@@ -63,6 +63,11 @@ const NAV = (function () {
       { label: 'Planning',     href: BL + 'planning.html' },
       { label: 'Paramètres',   href: BL + 'parametres.html' },
     ] },
+    // Service Machines à sous. Le générateur de courrier sert aussi aux Jeux traditionnels (menu Administration tournois) :
+    // une même page peut appartenir à deux espaces, la barre prend celui du service courant
+    { id: 'courrier', service: MAS, label: 'Courrier', note: 'Courriers aux autorités', href: 'outils/courrier/courriers.html', panel: 'courrier', items: [
+      { label: 'Courrier', href: 'outils/courrier/courriers.html' },
+    ] },
     { id: 'materiel', service: JT, label: 'Matériel', note: 'Sixains de cartes, billes, mélangeurs, cylindres', href: 'espaces/materiel/materiel.html', panel: 'materiel', items: [
       { label: 'Sixains', href: 'espaces/materiel/materiel.html' },
     ] },
@@ -144,17 +149,25 @@ const NAV = (function () {
   };
 
   // Index des pages : chemin → { s: espace, i: entrée de la barre à souligner }
+  // CONTEXTES : chemin → toutes ses places (une par espace) quand une page appartient à plusieurs espaces
   const PAGES = { 'index.html': {}, 'aide/aide.html': { help: true } };
+  const CONTEXTES = {};
+  const placer = function (href, ctx) {
+    PAGES[href] = ctx;
+    const l = CONTEXTES[href] || (CONTEXTES[href] = []);
+    const i = l.findIndex(function (c) { return c.s === ctx.s; });
+    if (i >= 0) l[i] = ctx; else l.push(ctx);
+  };
   GESTION.groups.forEach(function (g) { g.items.forEach(function (it) { PAGES[it.href] = { admin: true }; }); });
   // Suivi équipe et Configuration des modules restent dans le contexte Training : la barre de l'espace est affichée, « Gestion » surligné
   PAGES[T + 'suivi/suivi_manager.html'].s = 'training';
   PAGES['admin/config_training.html'].s = 'training';
   SPACES.forEach(function (s) {
-    PAGES[s.href] = { s: s.id };
+    placer(s.href, { s: s.id });
     s.items.forEach(function (it) {
       const id = it.id || it.href;                      // entrée de la barre : un lien (href) ou un menu de pages (id + menu)
-      if (it.href) PAGES[it.href] = { s: s.id, i: id };
-      (it.menu || []).forEach(function (m) { PAGES[m.href] = { s: s.id, i: id }; });
+      if (it.href) placer(it.href, { s: s.id, i: id });
+      (it.menu || []).forEach(function (m) { placer(m.href, { s: s.id, i: id }); });
     });
   });
 
@@ -214,6 +227,20 @@ const NAV = (function () {
   function lireService(userId) { try { return localStorage.getItem(cleService(userId)); } catch (e) { return null; } }
   function ecrireService(userId, id) { try { if (id) localStorage.setItem(cleService(userId), id); else localStorage.removeItem(cleService(userId)); } catch (e) { /* stockage indisponible : on redemandera */ } }
 
+  // Place d'une page qui appartient à plusieurs espaces : parmi ceux que l'utilisateur voit (l'entrée de la barre comprise),
+  // celle du service retenu, sinon la première ; null si aucune n'est visible
+  function contexteDe(contextes, tous, memorise) {
+    const visibles = contextes.filter(function (c) {
+      const sp = tous.find(function (s) { return s.id === c.s; });
+      return sp && (!c.i || sp.items.some(function (it) { return (it.id || it.href) === c.i; }));
+    });
+    const prefere = visibles.find(function (c) {
+      const sp = SPACES.find(function (s) { return s.id === c.s; });
+      return sp && sp.service === memorise;
+    });
+    return prefere || visibles[0] || null;
+  }
+
   // Sur la page Aide, l'espace affiché dans la barre est celui du guide lu : on le lit dans l'adresse (#<espace> ou #<espace>-<guide>)
   function spaceFromHash() {
     const h = decodeURIComponent(location.hash.replace(/^#/, ''));
@@ -227,16 +254,18 @@ const NAV = (function () {
   // Renvoie true si la barre est en place (ou si l'on est redirigé), false pour retomber sur l'ancienne interface
   function mount(opts) {
     lastOpts = opts;
-    const root = opts.root, key = pageKey(), page = (key && PAGES[key]) || {};
+    const root = opts.root, key = pageKey();
     const href = function (p) { return root + p; };
 
     // ── Service courant : la barre ne montre que les espaces de ce service ──
     const tous = visibleSpaces(opts);
     const services = servicesVisibles(tous);
+    const memorise = lireService(opts.userId);
+    const multiple = key && CONTEXTES[key] && CONTEXTES[key].length > 1;
+    const page = (multiple ? contexteDe(CONTEXTES[key], tous, memorise) : null) || (key && PAGES[key]) || {};
     const spaceOf = function (id) { return SPACES.find(function (s) { return s.id === id; }); };
     const pageSpace = opts.space || (key === 'aide/aide.html' ? spaceFromHash() : null) || page.s;
     const pageService = pageSpace && spaceOf(pageSpace) ? spaceOf(pageSpace).service : null;
-    const memorise = lireService(opts.userId);
     const service = serviceCourant(services, memorise, pageService);
     if (service && services.length > 1 && service !== memorise) ecrireService(opts.userId, service);   // page d'un autre service : on bascule
     const serviceInfo = SERVICES.find(function (sv) { return sv.id === service; }) || null;
@@ -336,7 +365,9 @@ const NAV = (function () {
       tools.push(dropdown(abtn, entries, true));
     }
     // Aide : le guide de l'espace courant (ou la page Aide)
-    const helpId = HELP[key] || HELP[page.s];
+    // Le guide d'une page vaut pour l'espace auquel il appartient (les id de guides commencent par l'id de leur espace)
+    const helpPage = HELP[key] && (!page.s || HELP[key].indexOf(page.s + '-') === 0) ? HELP[key] : null;
+    const helpId = helpPage || HELP[page.s];
     const helpTarget = 'aide/aide.html' + (helpId ? '#' + helpId : '');
     const helpBtn = el('a', { class: 'nav-btn', href: href(helpTarget), title: 'Aide', 'aria-label': 'Aide' }, [icon('help'), el('span', { class: 'nav-btn-label', text: 'Aide' })]);
     if (page.help) helpBtn.setAttribute('aria-current', 'page');
@@ -412,6 +443,7 @@ const NAV = (function () {
   return {
     setSpace: setSpace, mount: mount, pageKey: pageKey, SPACES: SPACES, visibleSpaces: visibleSpaces, entryOf: entryOf,
     SERVICES: SERVICES, servicesVisibles: servicesVisibles, serviceCourant: serviceCourant, choisirService: choisirService,
+    CONTEXTES: CONTEXTES, contexteDe: contexteDe,
     etat: function () { return etat; },
   };
 })();

@@ -322,6 +322,7 @@
 /* Barre des types de courrier + bouton Réglages (communs à tous les courriers) */
 .doc-type-row { max-width: 1000px; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .doc-type-row .doc-type-bar { margin-bottom: 0; }
+.doc-type-row #btn-tpl { margin-left: auto; }
 /* Réglages : une ligne par signataire */
 .sig-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 10px; }
 @media (max-width: 700px) { .sig-row { grid-template-columns: 1fr; } }
